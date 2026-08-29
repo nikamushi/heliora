@@ -1,26 +1,72 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Neutral */
+  --neutral-0: #FFFFFF;
+  --neutral-50: #F7F9F8;
+  --neutral-200: #DEE5E1;
+  --neutral-700: #3A423D;
+  --neutral-900: #14201A;
+
+  /* Primary (Green) */
+  --primary-50: #F0FDF6;
+  --primary-100: #DCFCE9;
+  --primary-300: #86E8B0;
+  --primary-500: #22B573;
+  --primary-700: #0F7A4E;
+  --primary-800: #0D5F3F;
+
+  /* Semantic - Amber */
+  --amber-100: #FEF3D6;
+  --amber-800: #92400E;
+
+  /* Semantic - Red */
+  --red-100: #FBE3E0;
+  --red-600: #B8392E;
+  --red-700: #9A2E24;
+
+  /* Base */
+  --background: var(--neutral-0);
+  --foreground: var(--neutral-900);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  
+  --color-neutral-0: var(--neutral-0);
+  --color-neutral-50: var(--neutral-50);
+  --color-neutral-200: var(--neutral-200);
+  --color-neutral-700: var(--neutral-700);
+  --color-neutral-900: var(--neutral-900);
+  
+  --color-primary-50: var(--primary-50);
+  --color-primary-100: var(--primary-100);
+  --color-primary-300: var(--primary-300);
+  --color-primary-500: var(--primary-500);
+  --color-primary-700: var(--primary-700);
+  --color-primary-800: var(--primary-800);
+  
+  --color-amber-100: var(--amber-100);
+  --color-amber-800: var(--amber-800);
+  
+  --color-red-100: var(--red-100);
+  --color-red-600: var(--red-600);
+  --color-red-700: var(--red-700);
+
+  --font-sans: var(--font-jakarta-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
+  /* Temporary dark mode mapping, can be updated later */
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: var(--neutral-900);
+    --foreground: var(--neutral-50);
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
 }
