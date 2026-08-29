@@ -1,0 +1,12 @@
+# AI & Agent files
+AGENTS.md
+skills/
+*.skill
+.gemini/
+brain/
+*testing*
+test_scripts/
+
+# OS files
+.DS_Store
+Thumbs.db
