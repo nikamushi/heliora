@@ -173,6 +173,7 @@ skills/
 .ai/
 .ai-context/
 .ai-cache/
+graphify-out/
 
 # -----------------------------------------------------------------------------
 # Generated / runtime files
