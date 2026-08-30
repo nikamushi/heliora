@@ -1,0 +1,101 @@
+#!/bin/sh
+# Validate commit messages against Heliora task-driven conventions.
+# Enable with: git config core.hooksPath .githooks
+
+set -eu
+
+MSG_FILE="${1:?commit-msg hook requires a message file}"
+
+if [ ! -f "$MSG_FILE" ]; then
+  echo "commit-msg: message file not found: $MSG_FILE" >&2
+  exit 1
+fi
+
+# Resolve repository root (hooks may run with cwd elsewhere).
+ROOT=$(git rev-parse --show-toplevel 2>/dev/null) || ROOT=""
+if [ -z "$ROOT" ]; then
+  echo "commit-msg: unable to resolve repository root" >&2
+  exit 1
+fi
+
+TASK_FILE="$ROOT/docs/TASK.md"
+if [ ! -f "$TASK_FILE" ]; then
+  echo "commit-msg: docs/TASK.md not found; cannot validate task IDs" >&2
+  exit 1
+fi
+
+# Strip comment lines Git may leave in the message file.
+MSG=$(grep -v '^#' "$MSG_FILE" || true)
+SUMMARY=$(printf '%s\n' "$MSG" | sed -n '1p')
+
+# Allow Git-generated merge / revert commits.
+case "$SUMMARY" in
+  Merge\ *|Revert\ *)
+    exit 0
+    ;;
+esac
+
+fail() {
+  echo "commit-msg: $1" >&2
+  exit 1
+}
+
+# Forbidden automation attribution (summary + body).
+if printf '%s\n' "$MSG" | grep -qiE \
+  'Co-authored-by:[[:space:]]*(Cursor|Claude|GPT|OpenAI)|Generated-by:[[:space:]]*(Cursor|AI)|AI-assisted|Created by Cursor|Reviewed by Cursor'; then
+  fail "forbidden automation attribution in commit message"
+fi
+
+if printf '%s\n' "$SUMMARY" | grep -qiE \
+  '\b(Cursor|Claude|GPT|OpenAI|AI-assisted|agent|assistant)\b'; then
+  fail "summary must not mention automation systems"
+fi
+
+# Summary: TASK-ID.CHILD-TASK-ID: imperative action
+# Example: SETUP-001.05: configure commit convention
+SUMMARY_RE='^[A-Z][A-Z0-9]*-[0-9]+\.[0-9]+: .+'
+if ! printf '%s\n' "$SUMMARY" | grep -Eq "$SUMMARY_RE"; then
+  fail "summary must match 'TASK-ID.CHILD-TASK-ID: <imperative action>' (got: $SUMMARY)"
+fi
+
+PARENT=$(printf '%s\n' "$SUMMARY" | sed -E 's/^([A-Z][A-Z0-9]*-[0-9]+)\.[0-9]+: .*/\1/')
+CHILD_RAW=$(printf '%s\n' "$SUMMARY" | sed -E 's/^[A-Z][A-Z0-9]*-[0-9]+\.([0-9]+): .*/\1/')
+
+# Normalize child ordinal (strip leading zeros; treat all-zero as 0).
+CHILD=$(printf '%s\n' "$CHILD_RAW" | sed 's/^0*\([0-9]\)/\1/; s/^0*$/0/')
+
+# Parent heading must exist: ### SETUP-001
+if ! grep -Eq "^### ${PARENT}( |$)" "$TASK_FILE"; then
+  fail "parent task '${PARENT}' not found in docs/TASK.md"
+fi
+
+# Count checklist items under this parent until the next ### heading.
+CHILD_COUNT=$(awk -v parent="$PARENT" '
+  BEGIN { in_section = 0; count = 0 }
+  /^### / {
+    if (in_section) { exit }
+    if ($0 ~ "^### " parent "( |$)") { in_section = 1; next }
+  }
+  in_section && /^- \[[ xX]\] / { count++ }
+  END { print count + 0 }
+' "$TASK_FILE")
+
+if [ "$CHILD_COUNT" -eq 0 ]; then
+  if [ "$CHILD" -ne 0 ]; then
+    fail "task '${PARENT}' has no checklist children; use ${PARENT}.00"
+  fi
+else
+  if [ "$CHILD" -lt 1 ] || [ "$CHILD" -gt "$CHILD_COUNT" ]; then
+    fail "child task '${PARENT}.${CHILD_RAW}' out of range (docs/TASK.md has ${CHILD_COUNT} checklist items under ${PARENT})"
+  fi
+fi
+
+# Require Why:/How: headers; do not validate prose.
+if ! printf '%s\n' "$MSG" | grep -Eq '^Why:'; then
+  fail "commit description must include a 'Why:' section"
+fi
+if ! printf '%s\n' "$MSG" | grep -Eq '^How:'; then
+  fail "commit description must include a 'How:' section"
+fi
+
+exit 0
