@@ -1,0 +1,121 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* User requested palette (Material Green scale) */
+  --brand-50: #E8F5E9;
+  --brand-200: #A5D6A7;
+  --brand-400: #66BB6A;
+  --brand-900: #1B5E20;
+
+  --background: 0 0% 100%;
+  /* Using the dark forest green as the primary foreground text color instead of black */
+  --foreground: 124 55% 15%; 
+
+  --card: 0 0% 100%;
+  --card-foreground: 124 55% 15%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 124 55% 15%;
+
+  /* Primary is the dark forest green */
+  --primary: 124 55% 24%; /* #1B5E20 */
+  --primary-foreground: 0 0% 100%;
+
+  /* Secondary is the medium green */
+  --secondary: 123 38% 57%; /* #66BB6A */
+  --secondary-foreground: 124 55% 15%;
+
+  /* Muted uses the pale green */
+  --muted: 125 46% 94%; /* #E8F5E9 */
+  --muted-foreground: 124 20% 40%;
+
+  --accent: 125 46% 94%;
+  --accent-foreground: 124 55% 24%;
+
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+
+  --border: 125 25% 85%;
+  --input: 125 25% 85%;
+  --ring: 124 55% 24%;
+
+  --radius: 1rem; /* Soft UI large radius */
+}
+
+.dark {
+  --background: 124 55% 10%;
+  --foreground: 0 0% 98%;
+
+  --card: 124 55% 12%;
+  --card-foreground: 0 0% 98%;
+
+  --popover: 124 55% 12%;
+  --popover-foreground: 0 0% 98%;
+
+  --primary: 123 38% 57%; /* #66BB6A */
+  --primary-foreground: 124 55% 10%;
+
+  --secondary: 124 55% 24%; /* #1B5E20 */
+  --secondary-foreground: 0 0% 98%;
+
+  --muted: 124 55% 20%;
+  --muted-foreground: 124 20% 70%;
+
+  --accent: 124 55% 20%;
+  --accent-foreground: 0 0% 98%;
+
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+
+  --border: 124 55% 20%;
+  --input: 124 55% 20%;
+  --ring: 123 38% 57%;
+}
+
+@theme {
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  --color-brand-50: var(--brand-50);
+  --color-brand-200: var(--brand-200);
+  --color-brand-400: var(--brand-400);
+  --color-brand-900: var(--brand-900);
+
+  --font-sans: var(--font-jakarta-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+}
