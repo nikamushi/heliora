@@ -108,3 +108,160 @@ working branch → Pull Request → main
 ```
 
 Do not bypass the Pull Request workflow for normal development.
+
+## Commit Convention
+
+Every commit must be traceable to a parent task and child task in [`docs/TASK.md`](docs/TASK.md).
+
+### Summary
+
+Format:
+
+```text
+<TASK-ID>.<CHILD-TASK-ID>: <imperative action>
+```
+
+Example:
+
+```text
+SETUP-001.05: configure commit convention
+```
+
+Rules:
+
+- Start with the exact parent Task ID and child Task ID from `docs/TASK.md`.
+- Describe one logical change.
+- Use imperative language.
+- Be concise.
+- Do not add conventional commit types such as `feat:`, `fix:`, or `chore:`.
+- Do not mention the executor.
+- Do not mention automation systems in the summary.
+
+### Child Task ID
+
+`docs/TASK.md` is the source of truth for Task IDs and child tasks.
+
+- Parent ID = the heading ID (for example `SETUP-001`).
+- Child ID = the **1-based ordinal** of the checklist item under that parent, zero-padded to 2 digits (`.01`, `.02`, …).
+- If a parent task has **no** checklist children, use `TASK-ID.00`.
+
+Do not invent, rename, or approximate Task IDs. If the correct ID is unclear, stop and inspect `docs/TASK.md`.
+
+### Description
+
+Commit descriptions must contain only two sections:
+
+```text
+Why: <why the change is needed>
+
+How: <how the change was implemented>
+```
+
+- **Why** answers: why does this change need to exist? Do not merely restate the summary.
+- **How** answers: how was the change implemented?
+
+Do not add `Who`, `When`, or `Where` to commit descriptions. Git already records author, timestamp, and file context.
+
+### Examples
+
+Good:
+
+```text
+SETUP-001.02: configure branch strategy
+
+Why: Establish a consistent branching workflow for parallel development.
+
+How: Document trunk-based flow with typed working branches merged to main through pull requests.
+```
+
+Bad:
+
+```text
+chore: configure branch strategy
+SETUP-001: did some repository setup
+SETUP-001.01: configured the branch strategy
+```
+
+## Multiple Commits and Push Workflow
+
+A branch may contain multiple commits before a Pull Request is created. Each commit should be a meaningful logical checkpoint.
+
+Expected workflow:
+
+```text
+Create branch
+    ↓
+Implement change
+    ↓
+Commit
+    ↓
+Push
+    ↓
+Continue implementation
+    ↓
+Commit
+    ↓
+Push
+    ↓
+Repeat as needed
+    ↓
+Create Pull Request when ready
+```
+
+Do not open a Pull Request merely because a commit was pushed. A Pull Request represents the complete reviewable change on the branch.
+
+## Pull Request Convention
+
+Pull Request titles use the parent Task ID:
+
+```text
+<TASK-ID>: <overall change>
+```
+
+Example:
+
+```text
+SETUP-001: Repository Setup
+```
+
+Pull Request descriptions use the full 5W1H structure and explain the complete branch change, not individual commit messages:
+
+```text
+What:
+<what was changed>
+
+Why:
+<why the change was needed>
+
+Who:
+<who is involved or affected>
+
+When:
+<when the change applies or becomes relevant>
+
+Where:
+<where the change applies>
+
+How:
+<how the change was implemented>
+```
+
+Use the repository PR template at [`.github/pull_request_template.md`](.github/pull_request_template.md).
+
+
+## Local Git Hooks
+
+This repository ships a `commit-msg` hook under [`.githooks/`](.githooks/). Enable it once per clone:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+The hook validates:
+
+- Commit summary format `TASK-ID.CHILD-TASK-ID: <imperative action>`
+- Parent and child Task IDs against [`docs/TASK.md`](docs/TASK.md)
+- Presence of `Why:` and `How:` section headers (not prose quality)
+- Absence of forbidden automation attribution
+
+Merge and revert commits created by Git are skipped.

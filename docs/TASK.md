@@ -272,7 +272,7 @@ Tasks:
 - [x] Configure branch strategy.
 - [x] Create development branch.
 - [x] Configure `.gitignore`.
-- [ ] Configure commit convention.
+- [x] Configure commit convention.
 - [ ] Create initial README.
 - [x] Define project structure.
 
