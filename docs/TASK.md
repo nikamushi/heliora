@@ -40,6 +40,8 @@ Dokumen ini digunakan sebagai:
 
 ---
 
+
+
 ## 1.2 Source of Truth
 
 Urutan sumber kebenaran proyek:
@@ -68,9 +70,14 @@ Apabila terdapat konflik:
 
 ---
 
+
+
 # 2. Team & Ownership
 
+
+
 ## 2.1 Team Structure
+
 
 | Team                   | Member         | Primary Responsibility                         |
 | ---------------------- | -------------- | ---------------------------------------------- |
@@ -78,9 +85,14 @@ Apabila terdapat konflik:
 | Backend & AI           | Gilang & Aksal | Backend, Database, AI/ML, QA & Security        |
 | Frontend & DevOps      | Pino & Tumir   | Frontend, DevOps, QA & Security                |
 
+
 ---
 
+
+
 ## 2.2 Role Ownership
+
+
 
 ### Angga
 
@@ -104,6 +116,8 @@ Responsibilities:
 - demo narrative.
 
 ---
+
+
 
 ### Gilang & Aksal
 
@@ -132,6 +146,8 @@ Responsibilities:
 
 ---
 
+
+
 ### Pino & Tumir
 
 Primary:
@@ -155,7 +171,11 @@ Responsibilities:
 
 ---
 
+
+
 # 3. Task Management
+
+
 
 ## 3.1 Task Status
 
@@ -173,6 +193,7 @@ TESTING
 DONE
 ```
 
+
 | Status        | Definition                                              |
 | ------------- | ------------------------------------------------------- |
 | `BACKLOG`     | Task sudah teridentifikasi tetapi belum siap dikerjakan |
@@ -182,9 +203,13 @@ DONE
 | `TESTING`     | Sedang dilakukan pengujian                              |
 | `DONE`        | Acceptance criteria terpenuhi                           |
 
+
 ---
 
+
+
 ## 3.2 Priority
+
 
 | Priority | Definition                                 |
 | -------- | ------------------------------------------ |
@@ -193,7 +218,10 @@ DONE
 | `P2`     | Medium, dikerjakan jika waktu memungkinkan |
 | `P3`     | Low, future/stretch goal                   |
 
+
 ---
+
+
 
 ## 3.3 Task ID Convention
 
@@ -221,9 +249,15 @@ DEMO-xxx    Demo
 
 ---
 
+
+
 # 4. Foundation Tasks
 
+
+
 ## 4.1 Repository & Development Environment
+
+
 
 ### SETUP-001 — Repository Setup
 
@@ -234,13 +268,13 @@ DEMO-xxx    Demo
 
 Tasks:
 
-- [ ] Create GitHub repository.
-- [ ] Configure branch strategy.
-- [ ] Create development branch.
-- [ ] Configure `.gitignore`.
-- [ ] Configure commit convention.
+- [x] Create GitHub repository.
+- [x] Configure branch strategy.
+- [x] Create development branch.
+- [x] Configure `.gitignore`.
+- [x] Configure commit convention.
 - [ ] Create initial README.
-- [ ] Define project structure.
+- [x] Define project structure.
 
 Acceptance Criteria:
 
@@ -250,6 +284,8 @@ Acceptance Criteria:
 - Project dapat di-clone.
 
 ---
+
+
 
 ### SETUP-002 — Frontend Environment
 
@@ -275,6 +311,8 @@ Acceptance Criteria:
 
 ---
 
+
+
 ### SETUP-003 — Backend Environment
 
 **Owner:** Gilang & Aksal  
@@ -299,6 +337,8 @@ Acceptance Criteria:
 
 ---
 
+
+
 ### SETUP-004 — Database Environment
 
 **Owner:** Gilang & Aksal  
@@ -322,7 +362,11 @@ Acceptance Criteria:
 
 ---
 
+
+
 # 5. Product & Research Tasks
+
+
 
 ## RES-001 — Problem Validation
 
@@ -346,6 +390,8 @@ Acceptance Criteria:
 - Research terdokumentasi.
 
 ---
+
+
 
 ## RES-002 — Dataset Research
 
@@ -385,6 +431,8 @@ Acceptance Criteria:
 
 ---
 
+
+
 ## PROD-001 — Product Scope Validation
 
 **Owner:** Angga  
@@ -416,7 +464,11 @@ Acceptance Criteria:
 
 ---
 
+
+
 # 6. Architecture Tasks
+
+
 
 ## ARC-001 — System Architecture Review
 
@@ -467,6 +519,8 @@ Acceptance Criteria:
 
 ---
 
+
+
 ## ARC-002 — API Contract
 
 **Owner:** Gilang & Aksal + Pino & Tumir  
@@ -490,7 +544,11 @@ Acceptance Criteria:
 
 ---
 
+
+
 # 7. Database Tasks
+
+
 
 ## DB-001 — ERD
 
@@ -531,6 +589,8 @@ Acceptance Criteria:
 
 ---
 
+
+
 ## DB-002 — Database Implementation
 
 **Owner:** Gilang & Aksal  
@@ -555,9 +615,15 @@ Acceptance Criteria:
 
 ---
 
+
+
 # 8. Backend Tasks
 
+
+
 # 8.1 Authentication
+
+
 
 ## BE-001 — Authentication Backend
 
@@ -586,7 +652,11 @@ Acceptance Criteria:
 
 ---
 
+
+
 # 8.2 Consent
+
+
 
 ## BE-002 — Consent API
 
@@ -609,7 +679,11 @@ Acceptance Criteria:
 
 ---
 
+
+
 # 8.3 Health Profile
+
+
 
 ## BE-003 — Health Profile API
 
@@ -647,7 +721,11 @@ Acceptance Criteria:
 
 ---
 
+
+
 # 8.4 Assessment
+
+
 
 ## BE-004 — Health Assessment API
 
@@ -673,9 +751,15 @@ Acceptance Criteria:
 
 ---
 
+
+
 # 9. AI / ML Tasks
 
+
+
 ## 9.1 Dataset Preparation
+
+
 
 ### AI-001 — Dataset Preprocessing
 
@@ -704,7 +788,11 @@ Acceptance Criteria:
 
 ---
 
+
+
 ## 9.2 Risk Engine
+
+
 
 ### AI-002 — Preventive Lifestyle Risk Engine
 
@@ -743,7 +831,11 @@ Acceptance Criteria:
 
 ---
 
+
+
 ## 9.3 Model Evaluation
+
+
 
 ### AI-003 — Model Evaluation
 
@@ -768,7 +860,11 @@ Acceptance Criteria:
 
 ---
 
+
+
 # 10. Health & Lifestyle Score
+
+
 
 ## AI-004 — Health Score
 
@@ -793,6 +889,8 @@ Acceptance Criteria:
 
 ---
 
+
+
 ## AI-005 — Lifestyle Score
 
 **Owner:** Gilang & Aksal  
@@ -814,7 +912,11 @@ Acceptance Criteria:
 
 ---
 
+
+
 # 11. Explainable AI
+
+
 
 ## XAI-001 — SHAP Integration
 
@@ -854,7 +956,11 @@ Acceptance Criteria:
 
 ---
 
+
+
 # 12. Future Health Simulation
+
+
 
 ## SIM-001 — Simulation Engine
 
@@ -889,6 +995,8 @@ Acceptance Criteria:
 
 ---
 
+
+
 ## SIM-002 — Future Simulation API
 
 **Owner:** Gilang & Aksal  
@@ -912,7 +1020,11 @@ Acceptance Criteria:
 
 ---
 
+
+
 # 13. What-if Simulation
+
+
 
 ## SIM-003 — What-if Engine
 
@@ -948,6 +1060,8 @@ Acceptance Criteria:
 
 ---
 
+
+
 ## SIM-004 — What-if API
 
 **Owner:** Gilang & Aksal  
@@ -976,7 +1090,11 @@ Acceptance Criteria:
 
 ---
 
+
+
 # 14. Recommendation Engine
+
+
 
 ## REC-001 — Rule Engine
 
@@ -1023,7 +1141,11 @@ Acceptance Criteria:
 
 ---
 
+
+
 # 15. Evidence Center
+
+
 
 ## EVD-001 — Evidence Collection
 
@@ -1066,6 +1188,8 @@ Acceptance Criteria:
 
 ---
 
+
+
 ## EVD-002 — Evidence API
 
 **Owner:** Gilang & Aksal  
@@ -1088,7 +1212,11 @@ Acceptance Criteria:
 
 ---
 
+
+
 # 16. RAG
+
+
 
 ## RAG-001 — Knowledge Base Pipeline
 
@@ -1113,6 +1241,8 @@ Acceptance Criteria:
 
 ---
 
+
+
 ## RAG-002 — Retrieval Pipeline
 
 **Owner:** Gilang & Aksal  
@@ -1135,7 +1265,11 @@ Acceptance Criteria:
 
 ---
 
+
+
 # 17. LLM
+
+
 
 ## LLM-001 — Explanation Pipeline
 
@@ -1188,9 +1322,15 @@ Acceptance Criteria:
 
 ---
 
+
+
 # 18. Frontend Tasks
 
+
+
 # 18.1 Design System
+
+
 
 ## FE-001 — Design System Implementation
 
@@ -1226,7 +1366,11 @@ Acceptance Criteria:
 
 ---
 
+
+
 # 18.2 Authentication UI
+
+
 
 ## FE-002 — Authentication Pages
 
@@ -1250,7 +1394,11 @@ Acceptance Criteria:
 
 ---
 
+
+
 # 18.3 Consent UI
+
+
 
 ## FE-003 — Consent Page
 
@@ -1273,7 +1421,11 @@ Acceptance Criteria:
 
 ---
 
+
+
 # 18.4 Health Profile UI
+
+
 
 ## FE-004 — Health Profile Page
 
@@ -1299,7 +1451,11 @@ Acceptance Criteria:
 
 ---
 
+
+
 # 18.5 Dashboard
+
+
 
 ## FE-005 — Health Dashboard
 
@@ -1337,7 +1493,11 @@ Acceptance Criteria:
 
 ---
 
+
+
 # 18.6 Risk Detail
+
+
 
 ## FE-006 — Risk Detail Page
 
@@ -1360,7 +1520,11 @@ Acceptance Criteria:
 
 ---
 
+
+
 # 18.7 Explainable AI UI
+
+
 
 ## FE-007 — Explainable AI View
 
@@ -1382,7 +1546,11 @@ Acceptance Criteria:
 
 ---
 
+
+
 # 18.8 Future Health Simulation UI
+
+
 
 ## FE-008 — Future Simulation Page
 
@@ -1406,7 +1574,11 @@ Acceptance Criteria:
 
 ---
 
+
+
 # 18.9 What-if Simulation UI
+
+
 
 ## FE-009 — What-if Simulation Interface
 
@@ -1444,7 +1616,11 @@ Acceptance Criteria:
 
 ---
 
+
+
 # 18.10 Recommendation UI
+
+
 
 ## FE-010 — Recommendation View
 
@@ -1467,7 +1643,11 @@ Acceptance Criteria:
 
 ---
 
+
+
 # 18.11 Evidence Center UI
+
+
 
 ## FE-011 — Evidence Center
 
@@ -1495,7 +1675,11 @@ Acceptance Criteria:
 
 ---
 
+
+
 # 19. Integration Tasks
+
+
 
 ## INT-001 — Authentication Integration
 
@@ -1511,6 +1695,8 @@ Acceptance Criteria:
 
 ---
 
+
+
 ## INT-002 — Profile Integration
 
 **Owner:** Pino & Tumir + Gilang & Aksal  
@@ -1525,6 +1711,8 @@ Acceptance Criteria:
 
 ---
 
+
+
 ## INT-003 — Assessment Integration
 
 **Owner:** Pino & Tumir + Gilang & Aksal  
@@ -1538,6 +1726,8 @@ Acceptance Criteria:
 - [ ] Handle error.
 
 ---
+
+
 
 ## INT-004 — Simulation Integration
 
@@ -1557,6 +1747,8 @@ Acceptance Criteria:
 
 ---
 
+
+
 ## INT-005 — Recommendation & Evidence Integration
 
 **Owner:** Pino & Tumir + Gilang & Aksal  
@@ -1571,7 +1763,11 @@ Acceptance Criteria:
 
 ---
 
+
+
 # 20. QA & Security Tasks
+
+
 
 ## QA-001 — Functional Testing
 
@@ -1597,6 +1793,8 @@ Test:
 
 ---
 
+
+
 ## QA-002 — Edge Case Testing
 
 **Owner:** Gilang & Aksal + Pino & Tumir  
@@ -1617,6 +1815,8 @@ Test:
 - [ ] Simulation failure.
 
 ---
+
+
 
 ## SEC-001 — Security Testing
 
@@ -1644,7 +1844,11 @@ Acceptance Criteria:
 
 ---
 
+
+
 # 21. Performance Tasks
+
+
 
 ## QA-003 — Performance Testing
 
@@ -1681,7 +1885,11 @@ Acceptance Criteria:
 
 ---
 
+
+
 # 22. DevOps Tasks
+
+
 
 ## DEV-001 — CI/CD
 
@@ -1704,6 +1912,8 @@ Acceptance Criteria:
 - Deployment workflow terdokumentasi.
 
 ---
+
+
 
 ## DEV-002 — Production Deployment
 
@@ -1732,7 +1942,11 @@ Acceptance Criteria:
 
 ---
 
+
+
 # 23. Documentation Tasks
+
+
 
 ## DOC-001 — Documentation Review
 
@@ -1759,6 +1973,8 @@ Acceptance Criteria:
 
 ---
 
+
+
 ## DOC-002 — README
 
 **Owner:** Angga + Pino & Tumir  
@@ -1784,7 +2000,11 @@ AI Disclaimer
 
 ---
 
+
+
 # 24. Presentation Tasks
+
+
 
 ## PRES-001 — Competition Presentation
 
@@ -1830,7 +2050,11 @@ Acceptance Criteria:
 
 ---
 
+
+
 # 25. Demo Tasks
+
+
 
 ## DEMO-001 — Demo Scenario
 
@@ -1879,6 +2103,8 @@ Acceptance Criteria:
 
 ---
 
+
+
 ## DEMO-002 — Demo Rehearsal
 
 **Owner:** All  
@@ -1897,7 +2123,11 @@ Tasks:
 
 ---
 
+
+
 # 26. Sprint Plan
+
+
 
 ## Sprint 1 — Foundation
 
@@ -1915,6 +2145,8 @@ Design System
 
 ---
 
+
+
 ## Sprint 2 — Authentication & Profile
 
 Focus:
@@ -1929,6 +2161,8 @@ Frontend Foundation
 
 ---
 
+
+
 ## Sprint 3 — AI Foundation
 
 Focus:
@@ -1941,6 +2175,8 @@ Baseline Model
 ```
 
 ---
+
+
 
 ## Sprint 4 — Risk & Dashboard
 
@@ -1957,6 +2193,8 @@ Dashboard
 
 ---
 
+
+
 ## Sprint 5 — Explainability & Future Simulation
 
 Focus:
@@ -1969,6 +2207,8 @@ Future Health Simulation
 ```
 
 ---
+
+
 
 ## Sprint 6 — What-if Simulation
 
@@ -1983,6 +2223,8 @@ Baseline vs Scenario
 
 ---
 
+
+
 ## Sprint 7 — Recommendation & RAG
 
 Focus:
@@ -1996,6 +2238,8 @@ RAG Pipeline
 
 ---
 
+
+
 ## Sprint 8 — LLM & Integration
 
 Focus:
@@ -2008,6 +2252,8 @@ CI/CD
 ```
 
 ---
+
+
 
 ## Sprint 9 — QA & Deployment
 
@@ -2023,6 +2269,8 @@ Production Deployment
 
 ---
 
+
+
 ## Sprint 10 — Documentation & Competition
 
 Focus:
@@ -2036,6 +2284,8 @@ Final Polish
 ```
 
 ---
+
+
 
 # 27. Critical Path
 
@@ -2081,7 +2331,11 @@ Task pada critical path harus mendapatkan prioritas tertinggi.
 
 ---
 
+
+
 # 28. Feature Dependency
+
+
 
 ## Authentication
 
@@ -2095,6 +2349,8 @@ Frontend Authentication
 Integration
 ```
 
+
+
 ## Health Assessment
 
 ```text
@@ -2106,6 +2362,8 @@ Risk API
     ↓
 Dashboard
 ```
+
+
 
 ## Explainable AI
 
@@ -2119,6 +2377,8 @@ XAI API
 XAI UI
 ```
 
+
+
 ## Future Simulation
 
 ```text
@@ -2130,6 +2390,8 @@ Simulation API
     ↓
 Simulation UI
 ```
+
+
 
 ## What-if Simulation
 
@@ -2143,6 +2405,8 @@ What-if API
 Simulation UI
 ```
 
+
+
 ## Recommendation
 
 ```text
@@ -2155,6 +2419,8 @@ Rule Engine
 Recommendation
 ```
 
+
+
 ## Evidence
 
 ```text
@@ -2166,6 +2432,8 @@ RAG
     ↓
 Recommendation / Explanation
 ```
+
+
 
 ## LLM
 
@@ -2185,6 +2453,8 @@ Human-Friendly Explanation
 
 ---
 
+
+
 # 29. MVP Gate
 
 HELIORA MVP hanya dianggap siap apabila seluruh P0 berikut selesai.
@@ -2200,6 +2470,8 @@ HELIORA MVP hanya dianggap siap apabila seluruh P0 berikut selesai.
 - [ ] Recommendation
 - [ ] Evidence Center
 
+
+
 ## AI
 
 - [ ] Preventive Lifestyle Risk Engine
@@ -2212,6 +2484,8 @@ HELIORA MVP hanya dianggap siap apabila seluruh P0 berikut selesai.
 - [ ] RAG
 - [ ] LLM Explanation
 
+
+
 ## Technical
 
 - [ ] Next.js
@@ -2221,6 +2495,8 @@ HELIORA MVP hanya dianggap siap apabila seluruh P0 berikut selesai.
 - [ ] Authentication
 - [ ] Security baseline
 - [ ] Production deployment
+
+
 
 ## Quality
 
@@ -2232,6 +2508,8 @@ HELIORA MVP hanya dianggap siap apabila seluruh P0 berikut selesai.
 - [ ] Critical bugs resolved
 
 ---
+
+
 
 # 30. Competition Priority
 
@@ -2251,6 +2529,8 @@ Prioritas utama HELIORA:
 Killer features tidak boleh dikorbankan untuk feature tambahan yang tidak termasuk MVP.
 
 ---
+
+
 
 # 31. Scope Protection
 
@@ -2281,6 +2561,8 @@ harus direview sebelum masuk backlog.
 
 ---
 
+
+
 # 32. Stretch Goals
 
 Stretch goal hanya boleh dikerjakan setelah seluruh P0 selesai.
@@ -2291,6 +2573,8 @@ Stretch goal hanya boleh dikerjakan setelah seluruh P0 selesai.
 - [ ] Longitudinal health tracking.
 - [ ] Additional simulation scenarios.
 - [ ] Improved visualization.
+
+
 
 ## P3
 
@@ -2303,7 +2587,11 @@ Stretch goals tidak boleh mengganggu critical path MVP.
 
 ---
 
+
+
 # 33. Final Release Checklist
+
+
 
 ## Product
 
@@ -2311,6 +2599,8 @@ Stretch goals tidak boleh mengganggu critical path MVP.
 - [ ] Core user journey complete.
 - [ ] Medical disclaimer visible.
 - [ ] No unsupported medical claims.
+
+
 
 ## AI
 
@@ -2324,6 +2614,8 @@ Stretch goals tidak boleh mengganggu critical path MVP.
 - [ ] LLM explanation working.
 - [ ] Fallback available.
 
+
+
 ## Frontend
 
 - [ ] All MVP pages complete.
@@ -2334,6 +2626,8 @@ Stretch goals tidak boleh mengganggu critical path MVP.
 - [ ] Responsive behavior.
 - [ ] No critical UI bugs.
 
+
+
 ## Backend
 
 - [ ] API stable.
@@ -2343,12 +2637,16 @@ Stretch goals tidak boleh mengganggu critical path MVP.
 - [ ] Error handling.
 - [ ] Database stable.
 
+
+
 ## Database
 
 - [ ] ERD finalized.
 - [ ] Migration finalized.
 - [ ] Constraints verified.
 - [ ] Indexes reviewed.
+
+
 
 ## Security
 
@@ -2360,6 +2658,8 @@ Stretch goals tidak boleh mengganggu critical path MVP.
 - [ ] No secrets in repository.
 - [ ] No sensitive data in logs.
 
+
+
 ## DevOps
 
 - [ ] CI/CD working.
@@ -2368,6 +2668,8 @@ Stretch goals tidak boleh mengganggu critical path MVP.
 - [ ] Backend deployed.
 - [ ] PostgreSQL deployed.
 - [ ] Health check working.
+
+
 
 ## Documentation
 
@@ -2380,6 +2682,8 @@ Stretch goals tidak boleh mengganggu critical path MVP.
 - [ ] Dataset documented.
 - [ ] README completed.
 
+
+
 ## Competition
 
 - [ ] Presentation complete.
@@ -2389,6 +2693,8 @@ Stretch goals tidak boleh mengganggu critical path MVP.
 - [ ] Q&A prepared.
 
 ---
+
+
 
 # 34. Definition of Task Completion
 
@@ -2411,6 +2717,8 @@ DONE
 Task tidak boleh dianggap selesai hanya karena kode telah dibuat.
 
 ---
+
+
 
 # 35. Final MVP Execution Flow
 
@@ -2445,6 +2753,8 @@ COMPETITION READY
 ```
 
 ---
+
+
 
 # 36. Document Status
 
