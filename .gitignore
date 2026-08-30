@@ -185,3 +185,7 @@ graphify-out/
 *.pid
 *.sqlite
 *.sqlite3
+
+brain/
+*testing*
+test_scripts/
