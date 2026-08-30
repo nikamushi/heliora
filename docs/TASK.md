@@ -269,9 +269,9 @@ DEMO-xxx    Demo
 Tasks:
 
 - [x] Create GitHub repository.
-- [ ] Configure branch strategy.
-- [ ] Create development branch.
-- [ ] Configure `.gitignore`.
+- [x] Configure branch strategy.
+- [x] Create development branch.
+- [x] Configure `.gitignore`.
 - [ ] Configure commit convention.
 - [ ] Create initial README.
 - [x] Define project structure.
