@@ -1,7 +1,7 @@
 """HELIORA API — Request dependencies.
 
-Provides FastAPI dependency functions for database sessions and
-authentication context (Architecture §5.3, §20.3).
+Provides FastAPI dependency functions for database sessions,
+authentication context, and privacy consent gating (Architecture §5.3, §20.3, §21.1).
 """
 
 import uuid
@@ -14,8 +14,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.security import decode_access_token
+from app.db.models.consent import Consent
 from app.db.models.user import User
 from app.db.session import async_session_factory
+from app.repositories.consent_repo import consent_repo
 from app.repositories.user_repo import user_repo
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_PREFIX}/auth/token")
@@ -58,3 +60,24 @@ async def get_current_user(
         raise credentials_exception
 
     return user
+
+
+async def require_active_consent(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> Consent:
+    """Ensure user has active consent prior to protected health actions.
+
+    Enforces Architecture §21.1 and AC-CONSENT-01.
+    """
+    active_consent = await consent_repo.get_active_by_user_id(db, current_user.id)
+    if active_consent is None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=(
+                "Active consent and medical disclaimer agreement required "
+                "before proceeding to health profile or assessment. "
+                "Please accept terms at /onboarding/consent."
+            ),
+        )
+    return active_consent
