@@ -1,24 +1,25 @@
 "use client";
 
-import React, { useState, useId } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { apiClient, ApiClientError } from "@/lib/api-client";
 import { 
   IconHeartbeat, 
   IconArrowLeft, 
   IconArrowRight, 
   IconEye, 
   IconEyeOff, 
-  IconShieldCheck, 
-  IconLock,
   IconDna,
   IconCheck
 } from "@tabler/icons-react";
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -65,11 +66,22 @@ export default function RegisterPage() {
       return;
     }
 
-    // Simulate registration
-    setTimeout(() => {
+    try {
+      await apiClient.auth.register({
+        email: email.trim(),
+        password,
+        full_name: name.trim(),
+      });
+      router.push("/onboarding/consent");
+    } catch (err: unknown) {
+      if (err instanceof ApiClientError) {
+        setError(err.message);
+      } else {
+        setError("Gagal mendaftar. Pastikan koneksi ke server backend aktif.");
+      }
+    } finally {
       setIsLoading(false);
-      window.location.href = "/onboarding/consent";
-    }, 1200);
+    }
   };
 
   return (

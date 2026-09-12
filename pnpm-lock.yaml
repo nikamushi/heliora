@@ -12,6 +12,8 @@ importers:
         specifier: ^2.10.12
         version: 2.10.12
 
+  apps/api: {}
+
   apps/web:
     dependencies:
       '@base-ui/react':
