@@ -2,10 +2,12 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { apiClient, ApiClientError } from "@/lib/api-client";
 import { 
   IconHeartbeat, 
   IconArrowLeft, 
@@ -18,6 +20,7 @@ import {
 } from "@tabler/icons-react";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -30,11 +33,32 @@ export default function LoginPage() {
     setIsLoading(true);
     setError("");
 
-    // Simulate login
-    setTimeout(() => {
+    try {
+      await apiClient.auth.login({
+        email: email.trim(),
+        password,
+      });
+
+      // Check consent status to route appropriately
+      try {
+        const consentStatus = await apiClient.consent.getStatus();
+        if (consentStatus.has_active_consent) {
+          router.push("/dashboard");
+        } else {
+          router.push("/onboarding/consent");
+        }
+      } catch {
+        router.push("/onboarding/consent");
+      }
+    } catch (err: unknown) {
+      if (err instanceof ApiClientError) {
+        setError(err.message);
+      } else {
+        setError("Gagal masuk. Pastikan email dan kata sandi Anda benar.");
+      }
+    } finally {
       setIsLoading(false);
-      window.location.href = "/dashboard";
-    }, 1200);
+    }
   };
 
   return (

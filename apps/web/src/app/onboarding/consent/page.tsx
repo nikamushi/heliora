@@ -11,9 +11,13 @@ import {
   Sparkles, 
   HeartPulse, 
   ArrowRight, 
-  Check 
+  Check,
+  Loader2,
+  AlertCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { apiClient, ApiClientError } from "@/lib/api-client";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const features = [
   {
@@ -41,10 +45,33 @@ const features = [
 export default function ConsentPage() {
   const router = useRouter();
   const [hasConsented, setHasConsented] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleContinue = () => {
-    if (hasConsented) {
+  const handleContinue = async () => {
+    if (!hasConsented || isLoading) return;
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      if (apiClient.getToken()) {
+        await apiClient.consent.record({
+          agreed: true,
+          consent_version: "1.0",
+        });
+      }
       router.push("/onboarding/health-profile");
+    } catch (err: unknown) {
+      if (err instanceof ApiClientError) {
+        if (err.status === 401) {
+          router.push("/login?redirect=/onboarding/consent");
+          return;
+        }
+        setError(err.message);
+      } else {
+        setError("Gagal mencatat persetujuan privasi. Pastikan koneksi backend aktif.");
+      }
+      setIsLoading(false);
     }
   };
 
@@ -160,6 +187,15 @@ export default function ConsentPage() {
             </div>
           </div>
 
+          {error && (
+            <Alert className="bg-red-500/10 border border-red-500/20 text-red-900 rounded-2xl py-3 px-4 flex items-center gap-3">
+              <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+              <AlertDescription className="text-xs text-red-900 font-medium">
+                {error}
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Action Footer */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 border-t border-brand-900/10">
             <Link
@@ -171,16 +207,25 @@ export default function ConsentPage() {
 
             <Button
               onClick={handleContinue}
-              disabled={!hasConsented}
+              disabled={!hasConsented || isLoading}
               size="lg"
-              className={`w-full sm:w-auto px-6 py-2.5 rounded-full font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
-                hasConsented
-                  ? "bg-brand-900 hover:bg-brand-900/90 text-white shadow-md shadow-brand-900/20 hover:scale-[1.02] active:scale-[0.98]"
+              className={`w-full sm:w-auto px-6 py-2.5 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
+                hasConsented && !isLoading
+                  ? "bg-brand-900 hover:bg-brand-900/90 text-white shadow-md shadow-brand-900/20 hover:scale-[1.01] active:scale-[0.99]"
                   : "bg-brand-900/20 text-brand-900/40 cursor-not-allowed"
               }`}
             >
-              <span>Lanjut ke Health Profile</span>
-              <ArrowRight className="w-4 h-4" />
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Menyimpan Persetujuan...</span>
+                </>
+              ) : (
+                <>
+                  <span>Lanjut ke Health Profile</span>
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
             </Button>
           </div>
         </div>

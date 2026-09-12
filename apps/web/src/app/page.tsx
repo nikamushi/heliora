@@ -8,14 +8,9 @@ import { motion } from "motion/react";
 import { 
   IconHeartbeat,
   IconArrowRight,
-  IconSparkles,
-  IconShieldCheck,
-  IconChartDots,
   IconAdjustmentsHorizontal,
   IconHistory,
-  IconLock,
-  IconAlertCircle,
-  IconCheck
+  IconAlertCircle
 } from "@tabler/icons-react";
 
 // Fluid animation variants adhering to Apple HIG motion curves

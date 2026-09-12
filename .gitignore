@@ -111,7 +111,9 @@ data/tmp/
 .env
 .env.*
 !.env.example
+!**/.env.example
 !.env.template
+!**/.env.template
 
 secret/
 secrets/
