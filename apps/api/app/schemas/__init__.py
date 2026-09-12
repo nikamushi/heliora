@@ -6,6 +6,11 @@ from app.schemas.auth import (
     UserRegisterRequest,
     UserResponse,
 )
+from app.schemas.consent import (
+    ConsentCreateRequest,
+    ConsentResponse,
+    ConsentStatusResponse,
+)
 from app.schemas.health import HealthCheckResponse
 
 __all__ = [
@@ -14,4 +19,7 @@ __all__ = [
     "UserLoginRequest",
     "UserResponse",
     "TokenResponse",
+    "ConsentCreateRequest",
+    "ConsentResponse",
+    "ConsentStatusResponse",
 ]
