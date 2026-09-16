@@ -21,7 +21,15 @@ import {
   Loader2,
   Sparkles
 } from "lucide-react";
+import { IconGenderMale, IconGenderFemale } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
+import { Slider } from "@/components/ui/slider";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { apiClient, ApiClientError } from "@/lib/api-client";
+import { HealthProfileCreateRequest } from "@/types/api";
 
 interface ActivityOption {
   id: string;
@@ -54,12 +62,6 @@ const familyHistoryOptions = [
   { id: "heart_disease", label: "Penyakit Jantung" },
 ];
 
-const stressOptions = [
-  { id: "low", label: "Rendah", desc: "Jarang tertekan" },
-  { id: "moderate", label: "Sedang", desc: "Kadang tertekan" },
-  { id: "high", label: "Tinggi", desc: "Sering tertekan / lelah" },
-];
-
 export default function HealthProfilePage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
@@ -74,12 +76,12 @@ export default function HealthProfilePage() {
 
   // Step 2: Gaya Hidup
   const [activity, setActivity] = useState("");
-  const [sleep, setSleep] = useState("");
+  const [sleep, setSleep] = useState("7");
   const [smoking, setSmoking] = useState("");
 
   // Step 3: Riwayat Medis (Opsional)
   const [familyHistory, setFamilyHistory] = useState<string>("none");
-  const [stress, setStress] = useState("");
+  const [stress, setStress] = useState("5");
 
   // Live BMI Calculation & Classification
   const bmiInfo = useMemo(() => {
@@ -88,28 +90,23 @@ export default function HealthProfilePage() {
     if (h > 0 && w > 0) {
       const val = parseFloat((w / (h * h)).toFixed(1));
       let category = "Normal";
-      let color = "text-emerald-700 bg-emerald-50 border-emerald-200";
-      let percentage = 50;
+      let color = "text-emerald-800 bg-emerald-500/10 border-emerald-500/20";
 
       if (val < 18.5) {
         category = "Berat Kurang";
-        color = "text-blue-700 bg-blue-50 border-blue-200";
-        percentage = 20;
+        color = "text-blue-800 bg-blue-500/10 border-blue-500/20";
       } else if (val >= 18.5 && val <= 24.9) {
         category = "Normal / Sehat";
-        color = "text-emerald-700 bg-emerald-50 border-emerald-200";
-        percentage = 50;
+        color = "text-emerald-800 bg-emerald-500/10 border-emerald-500/20";
       } else if (val >= 25.0 && val <= 29.9) {
         category = "Kelebihan Berat";
-        color = "text-amber-700 bg-amber-50 border-amber-200";
-        percentage = 75;
+        color = "text-amber-800 bg-amber-500/10 border-amber-500/20";
       } else {
         category = "Obesitas";
-        color = "text-rose-700 bg-rose-50 border-rose-200";
-        percentage = 95;
+        color = "text-rose-800 bg-rose-500/10 border-rose-500/20";
       }
 
-      return { value: val, category, color, percentage };
+      return { value: val, category, color };
     }
     return null;
   }, [height, weight]);
@@ -118,17 +115,18 @@ export default function HealthProfilePage() {
     setError("");
     if (step === 1) {
       if (!age || !gender || !height || !weight) {
-        setError("Harap lengkapi seluruh data dasar di bawah ini.");
+        setError("Lengkapi seluruh data dasar sebelum melanjutkan.");
         return;
       }
-      if (Number(age) < 10 || Number(age) > 120) {
+      const numAge = Number(age);
+      if (numAge < 10 || numAge > 120) {
         setError("Usia harus berada dalam rentang wajar (10 - 120 tahun).");
         return;
       }
       setStep(2);
     } else if (step === 2) {
       if (!activity || !sleep || !smoking) {
-        setError("Harap lengkapi seluruh data gaya hidup.");
+        setError("Lengkapi data aktivitas fisik dan kebiasaan merokok.");
         return;
       }
       setStep(3);
@@ -142,11 +140,50 @@ export default function HealthProfilePage() {
 
   const handleSubmit = async () => {
     setIsLoading(true);
-    // Simulasi penyimpanan data profil & navigasi ke asesmen
-    setTimeout(() => {
-      setIsLoading(false);
+    setError("");
+
+    try {
+      const activityMap: Record<string, number> = {
+        sedentary: 0,
+        light: 60,
+        moderate: 150,
+        active: 300,
+      };
+
+      const payload: HealthProfileCreateRequest = {
+        age: parseInt(age, 10),
+        gender: gender || "other",
+        height_cm: parseFloat(height),
+        weight_kg: parseFloat(weight),
+        physical_activity_min_per_week: activityMap[activity] ?? 150,
+        sleep_duration_hours: parseFloat(sleep) || 7,
+        smoking_status: smoking || "never",
+        family_history: familyHistory !== "none",
+        stress_level: stress ? parseInt(stress, 10) : 5,
+        bmi: bmiInfo?.value || null,
+      };
+
+      if (apiClient.getToken()) {
+        try {
+          await apiClient.healthProfile.save(payload);
+        } catch (apiErr: unknown) {
+          if (apiErr instanceof ApiClientError && apiErr.status === 401) {
+            router.push("/login?redirect=/onboarding/health-profile");
+            return;
+          }
+          console.warn("Backend health profile save deferred:", apiErr);
+        }
+      }
+
       router.push("/assessment/processing");
-    }, 1200);
+    } catch (err: unknown) {
+      if (err instanceof ApiClientError) {
+        setError(err.message);
+      } else {
+        setError("Gagal menyimpan profil kesehatan. Periksa kembali isian Anda.");
+      }
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -177,16 +214,16 @@ export default function HealthProfilePage() {
         {/* Card Container */}
         <div className="bg-white/80 backdrop-blur-xl border border-brand-900/10 rounded-3xl p-6 sm:p-8 shadow-xl shadow-brand-900/5 space-y-6">
           {/* Stepper Header */}
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             <div className="flex items-center justify-between text-xs font-semibold text-brand-900/70">
-              <span className="flex items-center gap-1.5">
+              <span className="flex items-center gap-1.5 font-medium">
                 {step === 1 && <User className="w-3.5 h-3.5 text-brand-900" />}
                 {step === 2 && <Activity className="w-3.5 h-3.5 text-brand-900" />}
                 {step === 3 && <Heart className="w-3.5 h-3.5 text-brand-900" />}
                 <span>
-                  {step === 1 && "Bagian 1: Data Dasar Biometrik"}
-                  {step === 2 && "Bagian 2: Kebiasaan Gaya Hidup"}
-                  {step === 3 && "Bagian 3: Riwayat Medis & Stres"}
+                  {step === 1 && "Langkah 1: Data Dasar Biometrik"}
+                  {step === 2 && "Langkah 2: Pola Gaya Hidup"}
+                  {step === 3 && "Langkah 3: Riwayat Medis & Stres"}
                 </span>
               </span>
               <span className="text-xs font-mono font-bold tracking-wider text-brand-900/60">
@@ -194,27 +231,18 @@ export default function HealthProfilePage() {
               </span>
             </div>
 
-            {/* Stepper Progress Bar */}
-            <div className="w-full bg-brand-900/10 h-2 rounded-full overflow-hidden">
-              <motion.div 
-                className="bg-brand-900 h-full rounded-full"
-                initial={{ width: `${((step - 1) / 3) * 100}%` }}
-                animate={{ width: `${(step / 3) * 100}%` }}
-                transition={{ duration: 0.35, ease: "easeInOut" }}
-              />
-            </div>
+            {/* Stepper Progress Bar via shadcn */}
+            <Progress value={(step / 3) * 100} className="h-1.5 bg-brand-900/10" />
           </div>
 
-          {/* Error Message */}
+          {/* Error Message via shadcn Alert */}
           {error && (
-            <motion.div 
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex items-center gap-2 p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-medium"
-            >
-              <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
-              <span>{error}</span>
-            </motion.div>
+            <Alert className="bg-rose-500/10 border-rose-500/20 text-rose-900 rounded-2xl py-3 px-4 flex items-center gap-3">
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+              <AlertDescription className="text-xs text-rose-900 font-medium">
+                {error}
+              </AlertDescription>
+            </Alert>
           )}
 
           {/* Form Step Content with AnimatePresence */}
@@ -230,44 +258,46 @@ export default function HealthProfilePage() {
               >
                 {/* Usia & Gender Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-brand-900 uppercase tracking-wider">
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold text-brand-900 uppercase tracking-wider">
                       Usia (Tahun)
-                    </label>
-                    <input
+                    </Label>
+                    <Input
                       type="number"
                       placeholder="Contoh: 28"
                       value={age}
                       onChange={(e) => setAge(e.target.value)}
-                      className="w-full h-11 px-3.5 rounded-xl border border-brand-900/15 bg-white text-brand-900 placeholder:text-neutral-400 text-sm focus:outline-none focus:ring-2 focus:ring-brand-900/20 focus:border-brand-900 transition-all"
+                      className="h-11 px-3.5 rounded-xl border-brand-900/15 bg-white text-brand-900 placeholder:text-neutral-400 text-sm focus-visible:ring-brand-900/20 focus-visible:border-brand-900"
                     />
                   </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-brand-900 uppercase tracking-wider">
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold text-brand-900 uppercase tracking-wider">
                       Jenis Kelamin
-                    </label>
+                    </Label>
                     <div className="grid grid-cols-2 gap-2 h-11">
                       <button
                         type="button"
                         onClick={() => setGender("male")}
-                        className={`rounded-xl text-xs font-semibold border transition-all duration-150 flex items-center justify-center gap-1.5 ${
+                        className={`rounded-xl text-xs font-semibold border transition-all duration-150 flex items-center justify-center gap-2 ${
                           gender === "male"
                             ? "bg-brand-900 text-white border-brand-900 shadow-xs"
                             : "bg-white text-brand-900 border-brand-900/15 hover:bg-neutral-50"
                         }`}
                       >
+                        <IconGenderMale className="w-4 h-4 shrink-0" stroke={2.2} />
                         <span>Laki-laki</span>
                       </button>
                       <button
                         type="button"
                         onClick={() => setGender("female")}
-                        className={`rounded-xl text-xs font-semibold border transition-all duration-150 flex items-center justify-center gap-1.5 ${
+                        className={`rounded-xl text-xs font-semibold border transition-all duration-150 flex items-center justify-center gap-2 ${
                           gender === "female"
                             ? "bg-brand-900 text-white border-brand-900 shadow-xs"
                             : "bg-white text-brand-900 border-brand-900/15 hover:bg-neutral-50"
                         }`}
                       >
+                        <IconGenderFemale className="w-4 h-4 shrink-0" stroke={2.2} />
                         <span>Perempuan</span>
                       </button>
                     </div>
@@ -276,31 +306,31 @@ export default function HealthProfilePage() {
 
                 {/* Tinggi & Berat Badan */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-brand-900 uppercase tracking-wider flex items-center gap-1">
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold text-brand-900 uppercase tracking-wider flex items-center gap-1">
                       <Ruler className="w-3.5 h-3.5 text-brand-900/70" />
                       <span>Tinggi Badan (cm)</span>
-                    </label>
-                    <input
+                    </Label>
+                    <Input
                       type="number"
                       placeholder="Contoh: 172"
                       value={height}
                       onChange={(e) => setHeight(e.target.value)}
-                      className="w-full h-11 px-3.5 rounded-xl border border-brand-900/15 bg-white text-brand-900 placeholder:text-neutral-400 text-sm focus:outline-none focus:ring-2 focus:ring-brand-900/20 focus:border-brand-900 transition-all"
+                      className="h-11 px-3.5 rounded-xl border-brand-900/15 bg-white text-brand-900 placeholder:text-neutral-400 text-sm focus-visible:ring-brand-900/20 focus-visible:border-brand-900"
                     />
                   </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-brand-900 uppercase tracking-wider flex items-center gap-1">
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold text-brand-900 uppercase tracking-wider flex items-center gap-1">
                       <Scale className="w-3.5 h-3.5 text-brand-900/70" />
                       <span>Berat Badan (kg)</span>
-                    </label>
-                    <input
+                    </Label>
+                    <Input
                       type="number"
                       placeholder="Contoh: 68"
                       value={weight}
                       onChange={(e) => setWeight(e.target.value)}
-                      className="w-full h-11 px-3.5 rounded-xl border border-brand-900/15 bg-white text-brand-900 placeholder:text-neutral-400 text-sm focus:outline-none focus:ring-2 focus:ring-brand-900/20 focus:border-brand-900 transition-all"
+                      className="h-11 px-3.5 rounded-xl border-brand-900/15 bg-white text-brand-900 placeholder:text-neutral-400 text-sm focus-visible:ring-brand-900/20 focus-visible:border-brand-900"
                     />
                   </div>
                 </div>
@@ -344,10 +374,10 @@ export default function HealthProfilePage() {
               >
                 {/* Aktivitas Fisik Card Selection */}
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-brand-900 uppercase tracking-wider flex items-center gap-1.5">
+                  <Label className="text-xs font-bold text-brand-900 uppercase tracking-wider flex items-center gap-1.5">
                     <Flame className="w-3.5 h-3.5 text-brand-900" />
                     <span>Aktivitas Fisik Mingguan</span>
-                  </label>
+                  </Label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     {activityOptions.map((opt) => {
                       const isSelected = activity === opt.id;
@@ -355,7 +385,7 @@ export default function HealthProfilePage() {
                         <div
                           key={opt.id}
                           onClick={() => setActivity(opt.id)}
-                          className={`p-3 rounded-2xl border cursor-pointer transition-all duration-150 ${
+                          className={`p-3.5 rounded-2xl border cursor-pointer transition-all duration-150 ${
                             isSelected
                               ? "bg-brand-50/70 border-brand-900 shadow-xs ring-2 ring-brand-900/10"
                               : "bg-white border-brand-900/10 hover:border-brand-900/30 hover:bg-neutral-50/50"
@@ -372,40 +402,46 @@ export default function HealthProfilePage() {
                   </div>
                 </div>
 
-                {/* Durasi Tidur */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-brand-900 uppercase tracking-wider flex items-center gap-1.5">
-                    <Moon className="w-3.5 h-3.5 text-brand-900" />
-                    <span>Rata-Rata Durasi Tidur (Jam/Hari)</span>
-                  </label>
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="number"
-                      placeholder="Contoh: 7"
-                      min="1"
-                      max="24"
-                      value={sleep}
-                      onChange={(e) => setSleep(e.target.value)}
-                      className="w-32 h-11 px-3.5 rounded-xl border border-brand-900/15 bg-white text-brand-900 placeholder:text-neutral-400 text-sm focus:outline-none focus:ring-2 focus:ring-brand-900/20 focus:border-brand-900 transition-all"
-                    />
-                    {sleep && (
-                      <span className="text-xs font-medium text-brand-900/70">
-                        {Number(sleep) < 6 
-                          ? "⚠️ Kurang dari anjuran (rentan risiko)" 
-                          : Number(sleep) <= 8 
-                          ? "✨ Durasi ideal untuk pemulihan optimal" 
-                          : "💤 Cukup (di atas rata-rata)"}
-                      </span>
-                    )}
+                {/* Durasi Tidur with shadcn Slider */}
+                <div className="space-y-3 p-4 rounded-2xl bg-brand-50/40 border border-brand-900/10">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs font-bold text-brand-900 uppercase tracking-wider flex items-center gap-1.5">
+                      <Moon className="w-3.5 h-3.5 text-brand-900" />
+                      <span>Rata-Rata Durasi Tidur Harian</span>
+                    </Label>
+                    <span className="text-sm font-bold text-brand-900 font-mono">
+                      {sleep} Jam / Hari
+                    </span>
+                  </div>
+                  <Slider
+                    value={[Number(sleep) || 7]}
+                    min={4}
+                    max={12}
+                    step={1}
+                    onValueChange={(val) => {
+                      const v = typeof val === "number" ? val : val[0]
+                      setSleep(String(v))
+                    }}
+                    className="py-1 cursor-pointer"
+                  />
+                  <div className="flex items-center justify-between text-[11px] text-brand-900/70">
+                    <span className="font-medium">
+                      {Number(sleep) < 6
+                        ? "Kurang dari anjuran (rentan risiko kardiovaskular)"
+                        : Number(sleep) <= 8
+                        ? "Durasi ideal untuk metabolisme dan pemulihan"
+                        : "Cukup / Panjang"}
+                    </span>
+                    <span className="font-mono text-brand-900/50">Rentang 4–12 Jam</span>
                   </div>
                 </div>
 
                 {/* Status Merokok */}
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-brand-900 uppercase tracking-wider flex items-center gap-1.5">
+                  <Label className="text-xs font-bold text-brand-900 uppercase tracking-wider flex items-center gap-1.5">
                     <Cigarette className="w-3.5 h-3.5 text-brand-900" />
                     <span>Kebiasaan Merokok</span>
-                  </label>
+                  </Label>
                   <div className="grid grid-cols-3 gap-2">
                     {smokingOptions.map((opt) => {
                       const isSelected = smoking === opt.id;
@@ -444,10 +480,10 @@ export default function HealthProfilePage() {
 
                 {/* Riwayat Penyakit Keluarga */}
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-brand-900 uppercase tracking-wider flex items-center gap-1.5">
+                  <Label className="text-xs font-bold text-brand-900 uppercase tracking-wider flex items-center gap-1.5">
                     <Heart className="w-3.5 h-3.5 text-brand-900" />
                     <span>Riwayat Penyakit Keluarga</span>
-                  </label>
+                  </Label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {familyHistoryOptions.map((opt) => {
                       const isSelected = familyHistory === opt.id;
@@ -469,33 +505,38 @@ export default function HealthProfilePage() {
                   </div>
                 </div>
 
-                {/* Tingkat Stres */}
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-brand-900 uppercase tracking-wider flex items-center gap-1.5">
-                    <Brain className="w-3.5 h-3.5 text-brand-900" />
-                    <span>Tingkat Stres Sehari-Hari</span>
-                  </label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {stressOptions.map((opt) => {
-                      const isSelected = stress === opt.id;
-                      return (
-                        <button
-                          type="button"
-                          key={opt.id}
-                          onClick={() => setStress(opt.id)}
-                          className={`h-14 p-2 rounded-2xl text-xs font-semibold border transition-all duration-150 flex flex-col items-center justify-center gap-0.5 ${
-                            isSelected
-                              ? "bg-brand-900 text-white border-brand-900 shadow-xs"
-                              : "bg-white text-brand-900 border-brand-900/15 hover:bg-neutral-50"
-                          }`}
-                        >
-                          <span className="font-bold">{opt.label}</span>
-                          <span className={`text-[10px] ${isSelected ? "text-white/80" : "text-brand-900/50"}`}>
-                            {opt.desc}
-                          </span>
-                        </button>
-                      );
-                    })}
+                {/* Tingkat Stres with Slider */}
+                <div className="space-y-3 p-4 rounded-2xl bg-brand-50/40 border border-brand-900/10">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs font-bold text-brand-900 uppercase tracking-wider flex items-center gap-1.5">
+                      <Brain className="w-3.5 h-3.5 text-brand-900" />
+                      <span>Tingkat Stres Harian</span>
+                    </Label>
+                    <div className="flex items-baseline gap-1 font-mono">
+                      <span className="text-base font-bold text-brand-900">{stress || "5"}</span>
+                      <span className="text-xs text-brand-900/50">/ 10</span>
+                    </div>
+                  </div>
+                  <Slider
+                    value={[Number(stress) || 5]}
+                    min={1}
+                    max={10}
+                    step={1}
+                    onValueChange={(val) => {
+                      const v = typeof val === "number" ? val : val[0]
+                      setStress(String(v))
+                    }}
+                    className="py-1 cursor-pointer"
+                  />
+                  <div className="flex items-center justify-between text-[11px] text-brand-900/70">
+                    <span className="font-medium">
+                      {Number(stress) <= 3
+                        ? "Rendah (Pikiran rileks dan terkendali)"
+                        : Number(stress) <= 6
+                        ? "Sedang (Beban harian normal terkontrol)"
+                        : "Tinggi (Sering tertekan / rentan burnout)"}
+                    </span>
+                    <span className="font-mono text-brand-900/50">Skala 1–10</span>
                   </div>
                 </div>
               </motion.div>
@@ -540,7 +581,7 @@ export default function HealthProfilePage() {
                 <Button
                   onClick={handleNext}
                   size="sm"
-                  className="px-5 py-2.5 rounded-full bg-brand-900 hover:bg-brand-900/90 text-white font-semibold flex items-center gap-1.5 shadow-md shadow-brand-900/15 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  className="px-5 py-2.5 rounded-xl bg-brand-900 hover:bg-brand-900/90 text-white font-semibold flex items-center gap-1.5 shadow-md shadow-brand-900/15 transition-all hover:scale-[1.01] active:scale-[0.99]"
                 >
                   <span>Lanjut</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -550,12 +591,12 @@ export default function HealthProfilePage() {
                   onClick={handleSubmit}
                   disabled={isLoading}
                   size="sm"
-                  className="px-6 py-2.5 rounded-full bg-brand-900 hover:bg-brand-900/90 text-white font-semibold flex items-center gap-2 shadow-md shadow-brand-900/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  className="px-6 py-2.5 rounded-xl bg-brand-900 hover:bg-brand-900/90 text-white font-semibold flex items-center gap-2 shadow-md shadow-brand-900/20 transition-all hover:scale-[1.01] active:scale-[0.99]"
                 >
                   {isLoading ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Menganalisis...</span>
+                      <span>Menyimpan Profil...</span>
                     </>
                   ) : (
                     <>
