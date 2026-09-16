@@ -7,15 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AuthLayout } from "@/components/auth-layout";
 import { apiClient, ApiClientError } from "@/lib/api-client";
-import { 
-  IconHeartbeat, 
-  IconArrowRight, 
-  IconEye, 
-  IconEyeOff, 
-  IconShieldCheck,
-  IconSparkles,
-  IconLock
+import {
+  IconArrowRight,
+  IconEye,
+  IconEyeOff
 } from "@tabler/icons-react";
 
 export default function LoginPage() {
@@ -61,210 +58,140 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex h-screen max-h-screen overflow-hidden bg-brand-50/20 text-brand-900 selection:bg-brand-200">
-      {/* LEFT COLUMN: FORM SECTION (45%) */}
-      <div className="flex flex-1 flex-col justify-between px-6 py-4 sm:px-10 lg:px-12 xl:px-16 overflow-y-auto lg:overflow-hidden">
-        {/* Center Content Container */}
-        <div className="w-full max-w-[420px] mx-auto my-auto py-2">
-          {/* Logo & Header */}
-          <div className="mb-4">
-            <Link href="/" className="inline-flex items-center gap-2 mb-2 group">
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-brand-900 text-white shadow-xs transition-transform group-hover:scale-105">
-                <IconHeartbeat size={18} stroke={2.2} />
-              </div>
-              <span className="text-lg font-bold tracking-tight text-brand-900">HELIORA</span>
-            </Link>
+    <AuthLayout title="Masuk ke Akun Anda" showDisclaimer>
+      {/* Solid High-Contrast Form Card (Apple HIG) */}
+      <div className="bg-white border border-brand-900/10 rounded-2xl p-4 sm:p-5 shadow-xs space-y-3">
+        <form onSubmit={handleLogin} className="space-y-3">
+          {error && (
+            <Alert variant="destructive" className="rounded-xl border-red-200 bg-red-50 text-red-900 text-xs py-2 px-3">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
 
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-brand-900 leading-tight">
-              Masuk ke Akun Anda
-            </h1>
-            <p className="text-xs text-brand-900/60 leading-normal font-medium mt-0.5">
-              Akses panel analisis risiko preventif dan data kesehatan terpadu Anda.
-            </p>
+          {/* Email Field */}
+          <div className="space-y-1">
+            <Label htmlFor="email" className="text-[11px] font-semibold text-brand-900/80 uppercase tracking-wider">
+              Alamat Email
+            </Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="nama@domain.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              disabled={isLoading}
+              className="h-9 rounded-xl bg-white border-neutral-300 text-brand-900 placeholder:text-neutral-400 focus-visible:ring-1 focus-visible:ring-brand-900 focus-visible:border-brand-900 transition-all text-xs shadow-2xs"
+            />
           </div>
 
-          {/* Frosted Glass Form Card (Apple HIG Material) */}
-          <div className="bg-white/80 backdrop-blur-xl border border-brand-900/10 rounded-2xl p-4 sm:p-5 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-3.5">
-            <form onSubmit={handleLogin} className="space-y-3">
-              {error && (
-                <Alert variant="destructive" className="rounded-xl border-red-200 bg-red-50/80 text-red-900 text-xs py-2 px-3">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
+          {/* Password Field */}
+          <div className="space-y-1">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="password" className="text-[11px] font-semibold text-brand-900/80 uppercase tracking-wider">
+                Kata Sandi
+              </Label>
+              <Link 
+                href="/forgot-password" 
+                className="text-[11px] font-medium text-brand-900/60 hover:text-brand-900 transition-colors"
+              >
+                Lupa sandi?
+              </Link>
+            </div>
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="••••••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                disabled={isLoading}
+                className="h-9 rounded-xl bg-white border-neutral-300 text-brand-900 placeholder:text-neutral-400 focus-visible:ring-1 focus-visible:ring-brand-900 focus-visible:border-brand-900 transition-all pr-8 text-xs shadow-2xs"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                disabled={isLoading}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-brand-900 transition-colors disabled:opacity-50"
+                aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
+              >
+                {showPassword ? <IconEyeOff size={15} /> : <IconEye size={15} />}
+              </button>
+            </div>
+          </div>
+
+          {/* Remember Me Checkbox */}
+          <div className="flex items-center space-x-2 pt-0.5">
+            <input
+              id="remember"
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              disabled={isLoading}
+              className="h-3.5 w-3.5 rounded border-neutral-300 text-brand-900 focus:ring-brand-900 focus:ring-offset-0 cursor-pointer accent-brand-900 disabled:opacity-50"
+            />
+            <label htmlFor="remember" className="text-[11px] font-medium text-brand-900/70 cursor-pointer select-none">
+              Ingat saya di perangkat ini
+            </label>
+          </div>
+
+          {/* Submit Button & Switch Link */}
+          <div className="pt-1.5 space-y-2">
+            <Button 
+              type="submit" 
+              className="w-full h-9.5 rounded-xl bg-brand-900 hover:bg-brand-900/90 text-white text-xs font-semibold shadow-xs transition-all flex items-center justify-center gap-1.5"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Memverifikasi...
+                </span>
+              ) : (
+                <>
+                  <span>Masuk ke Akun</span>
+                  <IconArrowRight size={15} />
+                </>
               )}
+            </Button>
 
-              {/* Email Field */}
-              <div className="space-y-1">
-                <Label htmlFor="email" className="text-[11px] font-semibold text-brand-900/80 uppercase tracking-wider">
-                  Alamat Email
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="nama@domain.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="h-9 rounded-xl bg-neutral-50/70 border-neutral-200/80 text-brand-900 placeholder:text-neutral-400 focus-visible:ring-brand-900 focus-visible:border-brand-900 transition-all text-xs"
-                />
+            {/* Divider */}
+            <div className="relative my-2.5">
+              <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                <div className="w-full border-t border-neutral-200/80" />
               </div>
-
-              {/* Password Field */}
-              <div className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password" className="text-[11px] font-semibold text-brand-900/80 uppercase tracking-wider">
-                    Kata Sandi
-                  </Label>
-                  <Link 
-                    href="/forgot-password" 
-                    className="text-[11px] font-medium text-brand-900/60 hover:text-brand-900 transition-colors"
-                  >
-                    Lupa sandi?
-                  </Link>
-                </div>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    className="h-9 rounded-xl bg-neutral-50/70 border-neutral-200/80 text-brand-900 placeholder:text-neutral-400 focus-visible:ring-brand-900 focus-visible:border-brand-900 transition-all pr-8 text-xs"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-brand-900 transition-colors"
-                    aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
-                  >
-                    {showPassword ? <IconEyeOff size={15} /> : <IconEye size={15} />}
-                  </button>
-                </div>
+              <div className="relative flex justify-center text-[11px] font-medium">
+                <span className="bg-white px-2.5 text-neutral-400">Atau lanjutkan dengan</span>
               </div>
+            </div>
 
-              {/* Remember Me Checkbox */}
-              <div className="flex items-center space-x-2 pt-0.5">
-                <input
-                  id="remember"
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="h-3.5 w-3.5 rounded border-neutral-300 text-brand-900 focus:ring-brand-900 focus:ring-offset-0 cursor-pointer accent-brand-900"
-                />
-                <label htmlFor="remember" className="text-[11px] font-medium text-brand-900/70 cursor-pointer select-none">
-                  Ingat saya di perangkat ini
-                </label>
-              </div>
+            {/* Google Sign In Button */}
+            <Button
+              type="button"
+              variant="outline"
+              disabled={isLoading}
+              onClick={() => setError("Integrasi Google Login sedang disiapkan.")}
+              className="w-full h-9 rounded-xl border-neutral-200 bg-white hover:bg-neutral-50 text-brand-900 text-xs font-semibold shadow-2xs transition-all flex items-center justify-center gap-2"
+            >
+              <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+              </svg>
+              <span>Google</span>
+            </Button>
 
-              {/* Action Buttons */}
-              <div className="pt-1.5 space-y-2">
-                <Button 
-                  type="submit" 
-                  className="w-full h-9.5 rounded-xl bg-brand-900 hover:bg-brand-900/90 text-white text-xs font-semibold shadow-xs transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-1.5"
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <span className="inline-flex items-center gap-1.5">
-                      <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Memverifikasi...
-                    </span>
-                  ) : (
-                    <>
-                      <span>Masuk ke Akun</span>
-                      <IconArrowRight size={15} />
-                    </>
-                  )}
-                </Button>
-
-                <Link href="/register" className="block w-full">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full h-9 rounded-xl border-brand-900/15 bg-white/50 hover:bg-brand-50/60 text-brand-900 text-xs font-semibold transition-all"
-                  >
-                    Daftar Akun Baru
-                  </Button>
-                </Link>
-              </div>
-            </form>
+            <div className="text-center text-[11px] text-brand-900/60 pt-1">
+              Belum memiliki akun?{" "}
+              <Link href="/register" className="font-semibold text-brand-900 hover:underline underline-offset-2">
+                Daftar sekarang
+              </Link>
+            </div>
           </div>
-        </div>
-
-        {/* Footer info */}
-        <div className="text-center text-[10px] text-brand-900/40 py-1">
-          © {new Date().getFullYear()} Heliora Inc. Privasi data terenkripsi end-to-end.
-        </div>
+        </form>
       </div>
-
-      {/* RIGHT COLUMN: BRAND WELLNESS BENTO PANEL (55%) */}
-      <div className="hidden lg:flex flex-1 relative bg-gradient-to-br from-[#0F381E] via-[#0A2614] to-[#06180C] overflow-hidden items-center justify-center p-8 xl:p-12 text-white border-l border-brand-900/20">
-        {/* Soft Ambient Glows */}
-        <div className="absolute top-1/4 right-1/4 w-[380px] h-[380px] bg-brand-400/15 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-1/4 left-1/4 w-[300px] h-[300px] bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none" />
-
-        {/* Subtle Geometric Grid */}
-        <div 
-          className="absolute inset-0 opacity-[0.04] pointer-events-none"
-          style={{
-            backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 0)`,
-            backgroundSize: "32px 32px"
-          }}
-        />
-
-        {/* Bento Showcase Card (Frosted Glassmorphism Apple HIG) */}
-        <div className="relative z-10 w-full max-w-md space-y-4">
-          
-          {/* Main Statement Glass Card */}
-          <div className="bg-white/10 backdrop-blur-2xl border border-white/15 rounded-2xl p-6 shadow-2xl space-y-4 relative overflow-hidden group">
-            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
-            
-            <p className="text-[11px] font-mono font-bold tracking-widest text-emerald-400/90 uppercase">
-              Sistem Preventif Personal
-            </p>
-
-            <blockquote className="space-y-2.5">
-              <p className="text-xl xl:text-2xl font-semibold tracking-tight text-white leading-snug">
-                &ldquo;Predict Today.<br />Prevent Tomorrow.&rdquo;
-              </p>
-              <p className="text-xs xl:text-sm text-white/70 leading-relaxed font-normal">
-                Ketahui tren risiko kardiometabolik Anda bertahun-tahun sebelum vonis dokter. Hidup lebih tenang dengan intervensi harian yang terukur.
-              </p>
-            </blockquote>
-
-            {/* Micro Metric Preview Strip */}
-            <div className="pt-4 border-t border-white/10 grid grid-cols-2 gap-3">
-              <div className="space-y-0.5">
-                <div className="flex items-center gap-1.5 text-[11px] text-white/60 font-medium">
-                  <IconSparkles size={13} className="text-emerald-400" />
-                  <span>Akurasi Model</span>
-                </div>
-                <div className="text-lg font-bold tracking-tight text-white">98.2%</div>
-                <div className="text-[10px] text-white/50">Validasi CDC BRFSS</div>
-              </div>
-
-              <div className="space-y-0.5">
-                <div className="flex items-center gap-1.5 text-[11px] text-white/60 font-medium">
-                  <IconLock size={13} className="text-emerald-400" />
-                  <span>Enkripsi Data</span>
-                </div>
-                <div className="text-lg font-bold tracking-tight text-white">AES-256</div>
-                <div className="text-[10px] text-white/50">Zero-Knowledge Storage</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Secondary Reassuring Badge */}
-          <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-3.5 flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center shrink-0 text-emerald-400">
-              <IconShieldCheck size={18} />
-            </div>
-            <div className="text-xs text-white/80 leading-relaxed">
-              Data Anda aman dan tidak pernah dijual atau digunakan untuk tujuan komersial pihak ketiga.
-            </div>
-          </div>
-
-        </div>
-      </div>
-    </div>
+    </AuthLayout>
   );
 }

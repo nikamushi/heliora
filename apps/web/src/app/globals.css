@@ -2,120 +2,147 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Palette source of truth: docs/Design.md §2.2 (light), §2.3 (dark), §2.4 (risk semantics) */
 :root {
-  /* User requested palette (Material Green scale) */
-  --brand-50: #E8F5E9;
-  --brand-200: #A5D6A7;
-  --brand-400: #66BB6A;
-  --brand-900: #1B5E20;
+  --background: #FFFFFF;
+  --foreground: #14201A;
 
-  --background: 0 0% 100%;
-  /* Using the dark forest green as the primary foreground text color instead of black */
-  --foreground: 124 55% 15%; 
+  --card: #FFFFFF;
+  --card-foreground: #14201A;
 
-  --card: 0 0% 100%;
-  --card-foreground: 124 55% 15%;
+  --popover: #FFFFFF;
+  --popover-foreground: #14201A;
 
-  --popover: 0 0% 100%;
-  --popover-foreground: 124 55% 15%;
+  --primary: #0F7A4E;
+  --primary-foreground: #FFFFFF;
 
-  /* Primary is the dark forest green */
-  --primary: 124 55% 24%; /* #1B5E20 */
-  --primary-foreground: 0 0% 100%;
+  --secondary: #F0FDF6;
+  --secondary-foreground: #0D5F3F;
 
-  /* Secondary is the medium green */
-  --secondary: 123 38% 57%; /* #66BB6A */
-  --secondary-foreground: 124 55% 15%;
+  --muted: #F7F9F8;
+  --muted-foreground: #3A423D;
 
-  /* Muted uses the pale green */
-  --muted: 125 46% 94%; /* #E8F5E9 */
-  --muted-foreground: 124 20% 40%;
+  --accent: #DCFCE9;
+  --accent-foreground: #0D5F3F;
 
-  --accent: 125 46% 94%;
-  --accent-foreground: 124 55% 24%;
+  --destructive: #B8392E;
+  --destructive-foreground: #FFFFFF;
 
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 0 0% 98%;
+  --border: #DEE5E1;
+  --input: #DEE5E1;
+  --ring: #0F7A4E;
 
-  --border: 125 25% 85%;
-  --input: 125 25% 85%;
-  --ring: 124 55% 24%;
+  --risk-low: #0F7A4E;
+  --risk-low-soft: #DCFCE9;
+  --risk-moderate: #92400E;
+  --risk-moderate-soft: #FEF3D6;
+  --risk-higher: #9A2E24;
+  --risk-higher-soft: #FBE3E0;
 
-  --radius: 1rem; /* Soft UI large radius */
+  --radius: 1rem;
 }
 
 .dark {
-  --background: 124 55% 10%;
-  --foreground: 0 0% 98%;
+  --background: #0E1512;
+  --foreground: #EAF3EE;
 
-  --card: 124 55% 12%;
-  --card-foreground: 0 0% 98%;
+  --card: #182620;
+  --card-foreground: #EAF3EE;
 
-  --popover: 124 55% 12%;
-  --popover-foreground: 0 0% 98%;
+  --popover: #182620;
+  --popover-foreground: #EAF3EE;
 
-  --primary: 123 38% 57%; /* #66BB6A */
-  --primary-foreground: 124 55% 10%;
+  --primary: #4ED18C;
+  --primary-foreground: #0E1512;
 
-  --secondary: 124 55% 24%; /* #1B5E20 */
-  --secondary-foreground: 0 0% 98%;
+  --secondary: #22332B;
+  --secondary-foreground: #EAF3EE;
 
-  --muted: 124 55% 20%;
-  --muted-foreground: 124 20% 70%;
+  --muted: #182620;
+  --muted-foreground: #A9B8B0;
 
-  --accent: 124 55% 20%;
-  --accent-foreground: 0 0% 98%;
+  --accent: #22332B;
+  --accent-foreground: #EAF3EE;
 
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 0 0% 98%;
+  --destructive: #F2726B;
+  --destructive-foreground: #0E1512;
 
-  --border: 124 55% 20%;
-  --input: 124 55% 20%;
-  --ring: 123 38% 57%;
+  --border: #2A3A32;
+  --input: #2A3A32;
+  --ring: #4ED18C;
+
+  --risk-low: #4ED18C;
+  --risk-low-soft: #182620;
+  --risk-moderate: #FBBF24;
+  --risk-moderate-soft: #182620;
+  --risk-higher: #F2726B;
+  --risk-higher-soft: #182620;
 }
 
-@theme {
-  --color-border: hsl(var(--border));
-  --color-input: hsl(var(--input));
-  --color-ring: hsl(var(--ring));
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
+/* inline: utilities read the variables where they are used, so .dark overrides actually apply */
+@theme inline {
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
 
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
 
-  --color-secondary: hsl(var(--secondary));
-  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
 
-  --color-destructive: hsl(var(--destructive));
-  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
 
-  --color-muted: hsl(var(--muted));
-  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
 
-  --color-accent: hsl(var(--accent));
-  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
 
-  --color-popover: hsl(var(--popover));
-  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
 
-  --color-card: hsl(var(--card));
-  --color-card-foreground: hsl(var(--card-foreground));
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-risk-low: var(--risk-low);
+  --color-risk-low-soft: var(--risk-low-soft);
+  --color-risk-moderate: var(--risk-moderate);
+  --color-risk-moderate-soft: var(--risk-moderate-soft);
+  --color-risk-higher: var(--risk-higher);
+  --color-risk-higher-soft: var(--risk-higher-soft);
 
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
 
-  --color-brand-50: var(--brand-50);
-  --color-brand-200: var(--brand-200);
-  --color-brand-400: var(--brand-400);
-  --color-brand-900: var(--brand-900);
-
   --font-sans: var(--font-jakarta-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
+@theme {
+  --color-primary-50: #F0FDF6;
+  --color-primary-100: #DCFCE9;
+  --color-primary-300: #86E8B0;
+  --color-primary-500: #22B573;
+  --color-primary-700: #0F7A4E;
+  --color-primary-800: #0D5F3F;
+
+  /*
+   * Legacy aliases used across existing pages. brand-900 doubles as text and
+   * button color in page code, so it maps to primary-800 (7.7:1 on white).
+   * brand-200 maps to primary-100 because pages use it as text on brand-900.
+   */
+  --color-brand-50: #F0FDF6;
+  --color-brand-200: #DCFCE9;
+  --color-brand-400: #22B573;
+  --color-brand-900: #0D5F3F;
+}
+
 body {
-  background-color: var(--color-background);
-  color: var(--color-foreground);
+  background-color: var(--background);
+  color: var(--foreground);
   font-family: var(--font-sans);
 }

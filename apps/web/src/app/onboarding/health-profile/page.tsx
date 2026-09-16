@@ -28,6 +28,7 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Slider } from "@/components/ui/slider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { DisclaimerBanner } from "@/components/disclaimer-banner";
 import { apiClient, ApiClientError } from "@/lib/api-client";
 import { HealthProfileCreateRequest } from "@/types/api";
 
@@ -80,8 +81,23 @@ export default function HealthProfilePage() {
   const [smoking, setSmoking] = useState("");
 
   // Step 3: Riwayat Medis (Opsional)
-  const [familyHistory, setFamilyHistory] = useState<string>("none");
+  const [familyHistory, setFamilyHistory] = useState<string[]>(["none"]);
   const [stress, setStress] = useState("5");
+
+  const toggleFamilyHistory = (id: string) => {
+    if (id === "none") {
+      setFamilyHistory(["none"]);
+      return;
+    }
+    setFamilyHistory((prev) => {
+      const withoutNone = prev.filter((item) => item !== "none");
+      if (withoutNone.includes(id)) {
+        const next = withoutNone.filter((item) => item !== id);
+        return next.length === 0 ? ["none"] : next;
+      }
+      return [...withoutNone, id];
+    });
+  };
 
   // Live BMI Calculation & Classification
   const bmiInfo = useMemo(() => {
@@ -143,12 +159,25 @@ export default function HealthProfilePage() {
     setError("");
 
     try {
+      if (!apiClient.getToken()) {
+        router.push("/login?redirect=/onboarding/health-profile");
+        return;
+      }
+
       const activityMap: Record<string, number> = {
         sedentary: 0,
         light: 60,
         moderate: 150,
         active: 300,
       };
+
+      const hasFamilyHistory = !familyHistory.includes("none") && familyHistory.length > 0;
+      const familyHistoryDetails = hasFamilyHistory
+        ? familyHistoryOptions
+            .filter((opt) => familyHistory.includes(opt.id) && opt.id !== "none")
+            .map((opt) => opt.label)
+            .join(", ")
+        : null;
 
       const payload: HealthProfileCreateRequest = {
         age: parseInt(age, 10),
@@ -158,31 +187,34 @@ export default function HealthProfilePage() {
         physical_activity_min_per_week: activityMap[activity] ?? 150,
         sleep_duration_hours: parseFloat(sleep) || 7,
         smoking_status: smoking || "never",
-        family_history: familyHistory !== "none",
+        family_history: hasFamilyHistory,
+        family_history_details: familyHistoryDetails,
         stress_level: stress ? parseInt(stress, 10) : 5,
         bmi: bmiInfo?.value || null,
       };
 
-      if (apiClient.getToken()) {
-        try {
-          await apiClient.healthProfile.save(payload);
-        } catch (apiErr: unknown) {
-          if (apiErr instanceof ApiClientError && apiErr.status === 401) {
-            router.push("/login?redirect=/onboarding/health-profile");
-            return;
-          }
-          console.warn("Backend health profile save deferred:", apiErr);
-        }
+      // Simpan langsung ke backend API — kegagalan tidak lagi ditelan diam-diam
+      await apiClient.healthProfile.save(payload);
+
+      // Sinkronkan ke cache lokal untuk percepatan UI
+      if (typeof window !== "undefined") {
+        localStorage.setItem("heliora_health_profile", JSON.stringify(payload));
       }
 
-      router.push("/assessment/processing");
+      router.push("/dashboard");
     } catch (err: unknown) {
+      setIsLoading(false);
       if (err instanceof ApiClientError) {
+        if (err.status === 401) {
+          router.push("/login?redirect=/onboarding/health-profile");
+          return;
+        }
+        setError(err.message || "Gagal menyimpan profil kesehatan ke server.");
+      } else if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError("Gagal menyimpan profil kesehatan. Periksa kembali isian Anda.");
+        setError("Gagal menyimpan profil kesehatan ke server. Periksa koneksi Anda dan coba lagi.");
       }
-      setIsLoading(false);
     }
   };
 
@@ -486,11 +518,11 @@ export default function HealthProfilePage() {
                   </Label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {familyHistoryOptions.map((opt) => {
-                      const isSelected = familyHistory === opt.id;
+                      const isSelected = familyHistory.includes(opt.id);
                       return (
                         <div
                           key={opt.id}
-                          onClick={() => setFamilyHistory(opt.id)}
+                          onClick={() => toggleFamilyHistory(opt.id)}
                           className={`p-3 rounded-2xl border cursor-pointer transition-all duration-150 flex items-center justify-between ${
                             isSelected
                               ? "bg-brand-50/70 border-brand-900 shadow-xs ring-2 ring-brand-900/10"
@@ -503,6 +535,9 @@ export default function HealthProfilePage() {
                       );
                     })}
                   </div>
+                  <p className="text-[11px] text-brand-900/55">
+                    Dapat memilih lebih dari satu kondisi riwayat penyakit keluarga.
+                  </p>
                 </div>
 
                 {/* Tingkat Stres with Slider */}
@@ -550,7 +585,7 @@ export default function HealthProfilePage() {
                 type="button"
                 onClick={handleBack}
                 disabled={isLoading}
-                className="px-4 py-2 text-xs font-semibold text-brand-900/70 hover:text-brand-900 flex items-center gap-1 transition-colors"
+                className="px-4 py-2 text-xs font-semibold text-brand-900/70 hover:text-brand-900 flex items-center gap-1 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Kembali</span>
@@ -558,7 +593,9 @@ export default function HealthProfilePage() {
             ) : (
               <Link
                 href="/onboarding/consent"
-                className="px-4 py-2 text-xs font-semibold text-brand-900/70 hover:text-brand-900 flex items-center gap-1 transition-colors"
+                className={`px-4 py-2 text-xs font-semibold text-brand-900/70 hover:text-brand-900 flex items-center gap-1 transition-colors ${
+                  isLoading ? "pointer-events-none opacity-50" : ""
+                }`}
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Consent</span>
@@ -571,7 +608,7 @@ export default function HealthProfilePage() {
                   type="button"
                   onClick={handleSubmit}
                   disabled={isLoading}
-                  className="px-4 py-2 text-xs font-semibold text-brand-900/60 hover:text-brand-900 transition-colors"
+                  className="px-4 py-2 text-xs font-semibold text-brand-900/60 hover:text-brand-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Lewati
                 </button>
@@ -591,7 +628,7 @@ export default function HealthProfilePage() {
                   onClick={handleSubmit}
                   disabled={isLoading}
                   size="sm"
-                  className="px-6 py-2.5 rounded-xl bg-brand-900 hover:bg-brand-900/90 text-white font-semibold flex items-center gap-2 shadow-md shadow-brand-900/20 transition-all hover:scale-[1.01] active:scale-[0.99]"
+                  className="px-6 py-2.5 rounded-xl bg-brand-900 hover:bg-brand-900/90 text-white font-semibold flex items-center gap-2 shadow-md shadow-brand-900/20 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {isLoading ? (
                     <>
@@ -608,6 +645,11 @@ export default function HealthProfilePage() {
               )}
             </div>
           </div>
+        </div>
+
+        {/* Banner Disclaimer Medis Onboarding */}
+        <div className="mt-4 px-2">
+          <DisclaimerBanner variant="note" className="text-brand-900/60 text-center justify-center" />
         </div>
       </div>
     </div>

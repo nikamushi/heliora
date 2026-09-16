@@ -264,7 +264,7 @@ DEMO-xxx    Demo
 **Owner:** Pino & Tumir  
 **Priority:** P0  
 **Sprint:** S1  
-**Status:** BACKLOG
+**Status:** DONE
 
 Tasks:
 
@@ -273,7 +273,7 @@ Tasks:
 - [x] Create development branch.
 - [x] Configure `.gitignore`.
 - [x] Configure commit convention.
-- [ ] Create initial README.
+- [x] Create initial README.
 - [x] Define project structure.
 
 Acceptance Criteria:
@@ -292,16 +292,16 @@ Acceptance Criteria:
 **Owner:** Pino & Tumir  
 **Priority:** P0  
 **Sprint:** S1  
-**Status:** BACKLOG
+**Status:** DONE
 
 Tasks:
 
-- [ ] Initialize Next.js.
-- [ ] Configure TypeScript.
-- [ ] Configure styling.
-- [ ] Configure environment variables.
-- [ ] Configure development scripts.
-- [ ] Verify local build.
+- [x] Initialize Next.js.
+- [x] Configure TypeScript.
+- [x] Configure styling.
+- [x] Configure environment variables.
+- [x] Configure development scripts.
+- [x] Verify local build.
 
 Acceptance Criteria:
 
@@ -318,16 +318,16 @@ Acceptance Criteria:
 **Owner:** Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S1  
-**Status:** BACKLOG
+**Status:** DONE
 
 Tasks:
 
-- [ ] Initialize FastAPI.
-- [ ] Configure Python environment.
-- [ ] Configure dependencies.
-- [ ] Configure environment variables.
-- [ ] Create application structure.
-- [ ] Create health check endpoint.
+- [x] Initialize FastAPI.
+- [x] Configure Python environment.
+- [x] Configure dependencies.
+- [x] Configure environment variables.
+- [x] Create application structure.
+- [x] Create health check endpoint.
 
 Acceptance Criteria:
 
@@ -344,15 +344,15 @@ Acceptance Criteria:
 **Owner:** Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S1  
-**Status:** BACKLOG
+**Status:** DONE
 
 Tasks:
 
-- [ ] Setup PostgreSQL.
-- [ ] Configure database connection.
-- [ ] Configure migration.
-- [ ] Configure local database.
-- [ ] Test connection.
+- [x] Setup PostgreSQL.
+- [x] Configure database connection.
+- [x] Configure migration.
+- [x] Configure local database.
+- [x] Test connection.
 
 Acceptance Criteria:
 
@@ -373,15 +373,15 @@ Acceptance Criteria:
 **Owner:** Angga  
 **Priority:** P0  
 **Sprint:** S1  
-**Status:** BACKLOG
+**Status:** DONE
 
 Tasks:
 
-- [ ] Validate preventive health problem.
-- [ ] Review supporting evidence.
-- [ ] Validate target user.
-- [ ] Validate lifestyle-related risk problem.
-- [ ] Document findings.
+- [x] Validate preventive health problem.
+- [x] Review supporting evidence.
+- [x] Validate target user.
+- [x] Validate lifestyle-related risk problem.
+- [x] Document findings.
 
 Acceptance Criteria:
 
@@ -398,17 +398,17 @@ Acceptance Criteria:
 **Owner:** Angga + Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S1-S2  
-**Status:** BACKLOG
+**Status:** DONE
 
 Tasks:
 
-- [ ] Review candidate datasets.
-- [ ] Evaluate feature availability.
-- [ ] Evaluate target variables.
-- [ ] Evaluate data quality.
-- [ ] Evaluate licensing.
-- [ ] Determine primary dataset.
-- [ ] Document dataset decision.
+- [x] Review candidate datasets.
+- [x] Evaluate feature availability.
+- [x] Evaluate target variables.
+- [x] Evaluate data quality.
+- [x] Evaluate licensing.
+- [x] Determine primary dataset.
+- [x] Document dataset decision.
 
 Primary candidate:
 
@@ -438,15 +438,15 @@ Acceptance Criteria:
 **Owner:** Angga  
 **Priority:** P0  
 **Sprint:** S1  
-**Status:** BACKLOG
+**Status:** DONE
 
 Tasks:
 
-- [ ] Review MVP scope.
-- [ ] Review killer features.
-- [ ] Review out-of-scope features.
-- [ ] Review competition strategy.
-- [ ] Freeze MVP scope.
+- [x] Review MVP scope.
+- [x] Review killer features.
+- [x] Review out-of-scope features.
+- [x] Review competition strategy.
+- [x] Freeze MVP scope.
 
 Killer Features:
 
@@ -475,17 +475,17 @@ Acceptance Criteria:
 **Owner:** Angga + Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S1  
-**Status:** BACKLOG
+**Status:** DONE
 
 Tasks:
 
-- [ ] Review system architecture.
-- [ ] Review frontend architecture.
-- [ ] Review backend architecture.
-- [ ] Review AI architecture.
-- [ ] Review database architecture.
-- [ ] Review deployment architecture.
-- [ ] Review security boundaries.
+- [x] Review system architecture.
+- [x] Review frontend architecture.
+- [x] Review backend architecture.
+- [x] Review AI architecture.
+- [x] Review database architecture.
+- [x] Review deployment architecture.
+- [x] Review security boundaries.
 
 Technology baseline:
 
@@ -526,16 +526,16 @@ Acceptance Criteria:
 **Owner:** Gilang & Aksal + Pino & Tumir  
 **Priority:** P0  
 **Sprint:** S2  
-**Status:** BACKLOG
+**Status:** DONE
 
 Tasks:
 
-- [ ] Define endpoint structure.
-- [ ] Define request schema.
-- [ ] Define response schema.
-- [ ] Define authentication requirements.
-- [ ] Define error response.
-- [ ] Document API contract.
+- [x] Define endpoint structure.
+- [x] Define request schema.
+- [x] Define response schema.
+- [x] Define authentication requirements.
+- [x] Define error response.
+- [x] Document API contract.
 
 Acceptance Criteria:
 
@@ -555,17 +555,17 @@ Acceptance Criteria:
 **Owner:** Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S1  
-**Status:** BACKLOG
+**Status:** DONE
 
 Tasks:
 
-- [ ] Identify entities.
-- [ ] Define relationships.
-- [ ] Define primary keys.
-- [ ] Define foreign keys.
-- [ ] Define constraints.
-- [ ] Create ERD.
-- [ ] Document schema.
+- [x] Identify entities.
+- [x] Define relationships.
+- [x] Define primary keys.
+- [x] Define foreign keys.
+- [x] Define constraints.
+- [x] Create ERD.
+- [x] Document schema.
 
 Core entities:
 
@@ -596,16 +596,16 @@ Acceptance Criteria:
 **Owner:** Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S1-S2  
-**Status:** BACKLOG
+**Status:** IN PROGRESS
 
 Tasks:
 
-- [ ] Create tables.
-- [ ] Create migrations.
-- [ ] Create indexes.
-- [ ] Create constraints.
+- [x] Create tables.
+- [x] Create migrations.
+- [x] Create indexes.
+- [x] Create constraints.
 - [ ] Create seed data if required.
-- [ ] Test migrations.
+- [x] Test migrations.
 
 Acceptance Criteria:
 
@@ -630,18 +630,18 @@ Acceptance Criteria:
 **Owner:** Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S2  
-**Status:** BACKLOG
+**Status:** DONE
 
 Tasks:
 
-- [ ] Register endpoint.
-- [ ] Login endpoint.
-- [ ] Logout/session handling.
-- [ ] Password hashing.
-- [ ] Authentication middleware.
-- [ ] Authorization.
-- [ ] Validation.
-- [ ] Error handling.
+- [x] Register endpoint.
+- [x] Login endpoint.
+- [x] Logout/session handling.
+- [x] Password hashing.
+- [x] Authentication middleware.
+- [x] Authorization.
+- [x] Validation.
+- [x] Error handling.
 
 Acceptance Criteria:
 
@@ -663,14 +663,14 @@ Acceptance Criteria:
 **Owner:** Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S2  
-**Status:** BACKLOG
+**Status:** DONE
 
 Tasks:
 
-- [ ] Consent model.
-- [ ] Consent endpoint.
-- [ ] Consent validation.
-- [ ] Medical disclaimer handling.
+- [x] Consent model.
+- [x] Consent endpoint.
+- [x] Consent validation.
+- [x] Medical disclaimer handling.
 
 Acceptance Criteria:
 
@@ -690,7 +690,7 @@ Acceptance Criteria:
 **Owner:** Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S2  
-**Status:** BACKLOG
+**Status:** READY
 
 Required fields:
 
@@ -1337,21 +1337,21 @@ Acceptance Criteria:
 **Owner:** Pino & Tumir  
 **Priority:** P0  
 **Sprint:** S1-S2  
-**Status:** BACKLOG
+**Status:** DONE
 
 Tasks:
 
-- [ ] Typography.
-- [ ] Color system.
-- [ ] Spacing.
-- [ ] Buttons.
-- [ ] Inputs.
-- [ ] Cards.
-- [ ] Alerts.
-- [ ] Navigation.
-- [ ] Layout.
-- [ ] Loading states.
-- [ ] Error states.
+- [x] Typography.
+- [x] Color system.
+- [x] Spacing.
+- [x] Buttons.
+- [x] Inputs.
+- [x] Cards.
+- [x] Alerts.
+- [x] Navigation.
+- [x] Layout.
+- [x] Loading states.
+- [x] Error states.
 
 Reference:
 
@@ -1377,16 +1377,16 @@ Acceptance Criteria:
 **Owner:** Pino & Tumir  
 **Priority:** P0  
 **Sprint:** S2  
-**Status:** BACKLOG
+**Status:** DONE
 
 Tasks:
 
-- [ ] Login.
-- [ ] Register.
-- [ ] Validation.
-- [ ] Error state.
-- [ ] Loading state.
-- [ ] Logout.
+- [x] Login.
+- [x] Register.
+- [x] Validation.
+- [x] Error state.
+- [x] Loading state.
+- [x] Logout.
 
 Acceptance Criteria:
 
@@ -1405,15 +1405,15 @@ Acceptance Criteria:
 **Owner:** Pino & Tumir  
 **Priority:** P0  
 **Sprint:** S2  
-**Status:** BACKLOG
+**Status:** DONE
 
 Tasks:
 
-- [ ] Consent information.
-- [ ] Medical disclaimer.
-- [ ] Consent action.
-- [ ] Validation.
-- [ ] Error state.
+- [x] Consent information.
+- [x] Medical disclaimer.
+- [x] Consent action.
+- [x] Validation.
+- [x] Error state.
 
 Acceptance Criteria:
 
@@ -1432,16 +1432,16 @@ Acceptance Criteria:
 **Owner:** Pino & Tumir  
 **Priority:** P0  
 **Sprint:** S2  
-**Status:** BACKLOG
+**Status:** DONE
 
 Tasks:
 
-- [ ] Profile form.
-- [ ] Input validation.
-- [ ] BMI display if required.
-- [ ] Save interaction.
-- [ ] Loading state.
-- [ ] Error state.
+- [x] Profile form.
+- [x] Input validation.
+- [x] BMI display if required.
+- [x] Save interaction.
+- [x] Loading state.
+- [x] Error state.
 
 Acceptance Criteria:
 
@@ -1462,7 +1462,7 @@ Acceptance Criteria:
 **Owner:** Pino & Tumir  
 **Priority:** P0  
 **Sprint:** S4-S5  
-**Status:** BACKLOG
+**Status:** DONE
 
 Display:
 
@@ -1477,13 +1477,13 @@ Simulation CTA
 
 Tasks:
 
-- [ ] Dashboard layout.
-- [ ] Score cards.
-- [ ] Risk summary.
-- [ ] Key factors.
-- [ ] Recommendation summary.
-- [ ] Loading state.
-- [ ] Error state.
+- [x] Dashboard layout.
+- [x] Score cards.
+- [x] Risk summary.
+- [x] Key factors.
+- [x] Recommendation summary.
+- [x] Loading state.
+- [x] Error state.
 
 Acceptance Criteria:
 
@@ -1504,15 +1504,15 @@ Acceptance Criteria:
 **Owner:** Pino & Tumir  
 **Priority:** P0  
 **Sprint:** S5  
-**Status:** BACKLOG
+**Status:** DONE
 
 Tasks:
 
-- [ ] Risk detail.
-- [ ] Risk level.
-- [ ] Contributing factors.
-- [ ] Explanation CTA.
-- [ ] Simulation CTA.
+- [x] Risk detail.
+- [x] Risk level.
+- [x] Contributing factors.
+- [x] Explanation CTA.
+- [x] Simulation CTA.
 
 Acceptance Criteria:
 
@@ -1531,13 +1531,13 @@ Acceptance Criteria:
 **Owner:** Pino & Tumir  
 **Priority:** P0  
 **Sprint:** S5  
-**Status:** BACKLOG
+**Status:** IN PROGRESS
 
 Tasks:
 
-- [ ] Display top factors.
-- [ ] Display contribution.
-- [ ] Human-readable explanation.
+- [x] Display top factors.
+- [x] Display contribution.
+- [x] Human-readable explanation.
 - [ ] Link to recommendation.
 
 Acceptance Criteria:
@@ -1686,12 +1686,12 @@ Acceptance Criteria:
 **Owner:** Pino & Tumir + Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S2  
-**Status:** BACKLOG
+**Status:** DONE
 
-- [ ] Connect login.
-- [ ] Connect register.
-- [ ] Handle authentication state.
-- [ ] Handle errors.
+- [x] Connect login.
+- [x] Connect register.
+- [x] Handle authentication state.
+- [x] Handle errors.
 
 ---
 
@@ -1702,7 +1702,7 @@ Acceptance Criteria:
 **Owner:** Pino & Tumir + Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S2  
-**Status:** BACKLOG
+**Status:** READY
 
 - [ ] Connect profile form.
 - [ ] Connect API.
@@ -2461,12 +2461,12 @@ HELIORA MVP hanya dianggap siap apabila seluruh P0 berikut selesai.
 
 ## Product
 
-- [ ] Authentication
-- [ ] Consent
-- [ ] Health Profile
+- [x] Authentication
+- [x] Consent
+- [x] Health Profile
 - [ ] Health Assessment
-- [ ] Dashboard
-- [ ] Risk Detail
+- [x] Dashboard
+- [x] Risk Detail
 - [ ] Recommendation
 - [ ] Evidence Center
 
@@ -2488,12 +2488,12 @@ HELIORA MVP hanya dianggap siap apabila seluruh P0 berikut selesai.
 
 ## Technical
 
-- [ ] Next.js
-- [ ] FastAPI
-- [ ] PostgreSQL
-- [ ] API Integration
-- [ ] Authentication
-- [ ] Security baseline
+- [x] Next.js
+- [x] FastAPI
+- [x] PostgreSQL
+- [x] API Integration
+- [x] Authentication
+- [x] Security baseline
 - [ ] Production deployment
 
 

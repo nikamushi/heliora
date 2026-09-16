@@ -17,46 +17,64 @@ import {
   X,
   ChevronRight,
   BookOpen,
-  ArrowRight,
+  Clock,
   Heart,
-  Brain
+  Brain,
+  ArrowRight,
+  AlertCircle,
+  type LucideIcon,
 } from "lucide-react";
-import { apiClient } from "@/lib/api-client";
+import { apiClient, ApiClientError } from "@/lib/api-client";
+import { useRequireAuth } from "@/lib/use-require-auth";
 import { AssessmentSummaryResponse, UserResponse } from "@/types/api";
 import { Button } from "@/components/ui/button";
+import { DisclaimerBanner } from "@/components/disclaimer-banner";
+import { MockDataNotice } from "@/components/mock-data-notice";
+import { RiskBadge, getRiskTone } from "@/components/risk-badge";
 
 export default function DashboardPage() {
   const router = useRouter();
+  const { isAuthorized, redirectToLogin } = useRequireAuth();
   const [user, setUser] = useState<UserResponse | null>(null);
   const [assessment, setAssessment] = useState<AssessmentSummaryResponse | null>(null);
+  const [error, setError] = useState<ApiClientError | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isRiskMenuExpanded, setIsRiskMenuExpanded] = useState(true);
 
-  useEffect(() => {
-    const loadDashboard = async () => {
-      try {
-        const storedUser = apiClient.getStoredUser();
-        setUser(storedUser);
-
-        const data = await apiClient.assessment.getLatest();
-        setAssessment(data);
-      } catch {
-        // Fallback handled gracefully in apiClient
-      } finally {
-        setIsLoading(false);
+  const loadDashboard = async () => {
+    setIsLoading(true);
+    setError(null);
+    setUser(apiClient.getStoredUser());
+    try {
+      const data = await apiClient.assessment.getLatest();
+      setAssessment(data);
+    } catch (err) {
+      if (err instanceof ApiClientError) {
+        if (err.kind === "unauthorized") {
+          redirectToLogin();
+          return;
+        }
+        setError(err);
+      } else {
+        setError(new ApiClientError(0, "Terjadi kendala saat memuat data dashboard. Silakan coba kembali."));
       }
-    };
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
+    if (!isAuthorized) return;
     loadDashboard();
-  }, []);
+  }, [isAuthorized, redirectToLogin]);
 
   const handleLogout = () => {
     apiClient.auth.logout();
     router.push("/login");
   };
 
-  if (isLoading || !assessment) {
+  if (!isAuthorized || isLoading) {
     return (
       <div className="min-h-screen bg-brand-50/20 text-brand-900 flex items-center justify-center p-6">
         <div className="text-center space-y-2">
@@ -67,6 +85,82 @@ export default function DashboardPage() {
         </div>
       </div>
     );
+  }
+
+  if (error) {
+    if (error.kind === "not_found") {
+      return (
+        <div className="min-h-screen bg-brand-50/20 text-brand-900 flex items-center justify-center p-6">
+          <div className="w-full max-w-md bg-white border border-brand-900/10 rounded-3xl p-8 shadow-xl shadow-brand-900/5 text-center space-y-5">
+            <div className="w-12 h-12 rounded-2xl bg-brand-50 border border-brand-900/10 text-brand-900 flex items-center justify-center mx-auto text-lg font-bold">
+              H
+            </div>
+            <div className="space-y-2">
+              <h1 className="text-xl font-bold tracking-tight text-brand-900">
+                Belum Ada Asesmen Risiko
+              </h1>
+              <p className="text-xs sm:text-sm text-brand-900/65 leading-relaxed">
+                Anda belum memiliki hasil asesmen risiko preventif. Lengkapi profil kesehatan dan gaya hidup Anda untuk memulai estimasi model AI.
+              </p>
+            </div>
+            <div className="pt-2 flex flex-col sm:flex-row gap-2 justify-center">
+              <Link
+                href="/onboarding/health-profile"
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-brand-900 hover:bg-brand-900/90 text-white text-xs font-semibold shadow-md shadow-brand-900/15 transition-all"
+              >
+                <span>Isi Profil Kesehatan</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="inline-flex items-center justify-center px-4 py-2.5 rounded-xl border border-brand-900/15 text-xs font-semibold text-brand-900/70 hover:text-brand-900 hover:bg-neutral-50 transition-all"
+              >
+                Keluar
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="min-h-screen bg-brand-50/20 text-brand-900 flex items-center justify-center p-6">
+        <div className="w-full max-w-md bg-white border border-rose-500/20 rounded-3xl p-8 shadow-xl text-center space-y-5">
+          <div className="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-600 flex items-center justify-center mx-auto">
+            <AlertCircle className="w-6 h-6" />
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-xl font-bold tracking-tight text-brand-900">
+              Gagal Memuat Dashboard
+            </h1>
+            <p className="text-xs sm:text-sm text-rose-800/80 leading-relaxed">
+              {error.message}
+            </p>
+          </div>
+          <div className="pt-2 flex flex-col sm:flex-row gap-2 justify-center">
+            <Button
+              onClick={loadDashboard}
+              size="sm"
+              className="px-5 py-2.5 rounded-xl bg-brand-900 hover:bg-brand-900/90 text-white text-xs font-semibold shadow-md shadow-brand-900/15"
+            >
+              Coba Lagi
+            </Button>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="px-4 py-2.5 rounded-xl border border-brand-900/15 text-xs font-semibold text-brand-900/70 hover:text-brand-900"
+            >
+              Keluar
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!assessment) {
+    return null;
   }
 
 
@@ -172,20 +266,8 @@ export default function DashboardPage() {
               <p className="text-[10px] font-mono font-bold tracking-widest text-brand-900/40 uppercase px-3 mb-2">
                 Simulasi
               </p>
-              <Link
-                href="/simulation/what-if"
-                className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-brand-900/70 hover:bg-neutral-100/60 hover:text-brand-900 transition-colors"
-              >
-                <Sliders className="w-4 h-4 shrink-0 text-brand-900" />
-                <span>What-If Simulator</span>
-              </Link>
-              <Link
-                href="/simulation/future"
-                className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-brand-900/70 hover:bg-neutral-100/60 hover:text-brand-900 transition-colors"
-              >
-                <TrendingUp className="w-4 h-4 shrink-0 text-brand-900" />
-                <span>Proyeksi 180 Hari</span>
-              </Link>
+              <ComingSoonNavItem icon={Sliders} label="What-If Simulator" />
+              <ComingSoonNavItem icon={TrendingUp} label="Proyeksi 180 Hari" />
             </div>
 
             {/* Group 3: Profil & Pengaturan (Menu Sendiri) */}
@@ -312,22 +394,8 @@ export default function DashboardPage() {
                     <Brain className="w-4 h-4 shrink-0" />
                     <span>Risiko Kardiovaskular</span>
                   </Link>
-                  <Link
-                    href="/simulation/what-if"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-brand-900/70 hover:bg-neutral-100"
-                  >
-                    <Sliders className="w-4 h-4 shrink-0" />
-                    <span>What-If Simulator</span>
-                  </Link>
-                  <Link
-                    href="/simulation/future"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-brand-900/70 hover:bg-neutral-100"
-                  >
-                    <TrendingUp className="w-4 h-4 shrink-0" />
-                    <span>Proyeksi 180 Hari</span>
-                  </Link>
+                  <ComingSoonNavItem icon={Sliders} label="What-If Simulator" />
+                  <ComingSoonNavItem icon={TrendingUp} label="Proyeksi 180 Hari" />
                   <Link
                     href="/onboarding/health-profile"
                     onClick={() => setIsMobileMenuOpen(false)}
@@ -383,211 +451,77 @@ export default function DashboardPage() {
         {/* Scrollable Dashboard Body */}
         <main className="flex-1 p-6 sm:p-8 space-y-8 max-w-6xl w-full mx-auto">
           {/* Welcome Header */}
-          <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 border-b border-brand-900/10 pb-6">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-brand-900">
-                Halo, {user?.full_name?.split(" ")[0] || "Pengguna"}
-              </h1>
-              <p className="text-xs text-brand-900/60 mt-1 font-mono">
-                Ringkasan komposit profil kesehatan preventif Anda berbasis model CDC BRFSS.
-              </p>
+          <div className="space-y-4 border-b border-brand-900/10 pb-6">
+            <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-brand-900">
+                  Halo, {user?.full_name?.split(" ")[0] || "Pengguna"}
+                </h1>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Ringkasan skor dan estimasi risiko dari profil gaya hidup Anda.
+                </p>
+              </div>
+              {!assessment.is_mock && (
+                <p className="text-xs text-muted-foreground">
+                  Asesmen terakhir:{" "}
+                  {new Intl.DateTimeFormat("id-ID", { dateStyle: "long" }).format(
+                    new Date(assessment.assessed_at)
+                  )}
+                </p>
+              )}
             </div>
-            <span className="text-xs font-mono font-bold text-emerald-800">
-              STATUS ASSESSMENT: AKTIF & TERVERIFIKASI
-            </span>
+            {assessment.is_mock && <MockDataNotice />}
           </div>
 
-          {/* Row 1: Primary Score Visual Gauges (Bento Grid) */}
+          {/* Row 1: Score cards */}
           <section className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {/* Health Score Card */}
-            <div className="bg-white/85 backdrop-blur-xl border border-brand-900/10 rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex flex-col justify-between space-y-5">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-[11px] font-mono font-bold tracking-widest text-brand-900/50 uppercase">
-                    Metrik 01 • Health Score
-                  </p>
-                  <h2 className="text-base font-bold text-brand-900 mt-1">
-                    Indeks Kesehatan Fisiologis
-                  </h2>
-                </div>
-                <span className="text-xs font-mono font-bold text-emerald-800">
-                  KATEGORI BAIK
-                </span>
-              </div>
-
-              <div className="flex items-center gap-6">
-                {/* Visual Circular Gauge */}
-                <div className="relative size-24 shrink-0 flex items-center justify-center">
-                  <svg className="size-full -rotate-90" viewBox="0 0 36 36">
-                    <path
-                      className="text-brand-900/10"
-                      strokeWidth="3.5"
-                      stroke="currentColor"
-                      fill="none"
-                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                    />
-                    <path
-                      className="text-emerald-700"
-                      strokeDasharray={`${assessment.health_score}, 100`}
-                      strokeWidth="3.5"
-                      strokeLinecap="round"
-                      stroke="currentColor"
-                      fill="none"
-                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                    />
-                  </svg>
-                  <div className="absolute flex flex-col items-center">
-                    <span className="text-2xl font-bold font-mono text-brand-900">
-                      {assessment.health_score}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="space-y-1">
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-xl font-bold font-mono text-brand-900">
-                      {assessment.health_score}
-                    </span>
-                    <span className="text-xs font-mono text-brand-900/40">/ 100 poin</span>
-                  </div>
-                  <p className="text-xs text-brand-900/70 leading-relaxed">
-                    Parameter kardiometabolik dasar Anda stabil. Menunjukkan perlindungan memadai dari akumulasi stres oksidatif.
-                  </p>
-                </div>
-              </div>
-
-              <div className="pt-3 border-t border-brand-900/5 text-[11px] font-mono text-brand-900/60 flex justify-between">
-                <span>Benchmark Populasi: Rata-rata 68</span>
-                <span className="text-emerald-800 font-semibold">↑ Lebih tinggi dari 74% kohort</span>
-              </div>
-            </div>
-
-            {/* Lifestyle Score Card */}
-            <div className="bg-white/85 backdrop-blur-xl border border-brand-900/10 rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex flex-col justify-between space-y-5">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-[11px] font-mono font-bold tracking-widest text-brand-900/50 uppercase">
-                    Metrik 02 • Lifestyle Score
-                  </p>
-                  <h2 className="text-base font-bold text-brand-900 mt-1">
-                    Kepatuhan Kebiasaan Harian
-                  </h2>
-                </div>
-                <span className="text-xs font-mono font-bold text-emerald-800">
-                  OPTIMAL TERKONTROL
-                </span>
-              </div>
-
-              <div className="flex items-center gap-6">
-                {/* Visual Circular Gauge */}
-                <div className="relative size-24 shrink-0 flex items-center justify-center">
-                  <svg className="size-full -rotate-90" viewBox="0 0 36 36">
-                    <path
-                      className="text-brand-900/10"
-                      strokeWidth="3.5"
-                      stroke="currentColor"
-                      fill="none"
-                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                    />
-                    <path
-                      className="text-emerald-700"
-                      strokeDasharray={`${assessment.lifestyle_score}, 100`}
-                      strokeWidth="3.5"
-                      strokeLinecap="round"
-                      stroke="currentColor"
-                      fill="none"
-                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                    />
-                  </svg>
-                  <div className="absolute flex flex-col items-center">
-                    <span className="text-2xl font-bold font-mono text-brand-900">
-                      {assessment.lifestyle_score}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="space-y-1">
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-xl font-bold font-mono text-brand-900">
-                      {assessment.lifestyle_score}
-                    </span>
-                    <span className="text-xs font-mono text-brand-900/40">/ 100 poin</span>
-                  </div>
-                  <p className="text-xs text-brand-900/70 leading-relaxed">
-                    Kombinasi durasi istirahat dan pola aktivitas fisik harian Anda membentuk daya tahan metabolik yang baik.
-                  </p>
-                </div>
-              </div>
-
-              <div className="pt-3 border-t border-brand-900/5 text-[11px] font-mono text-brand-900/60 flex justify-between">
-                <span>Target Ideal: &gt; 80 poin</span>
-                <span className="text-amber-800 font-semibold">Tidur &amp; aktivitas perlu dijaga</span>
-              </div>
-            </div>
+            <ScoreCard
+              title="Health Score"
+              description="Ringkasan dari BMI, aktivitas fisik, durasi tidur, dan kebiasaan merokok Anda."
+              score={assessment.health_score}
+            />
+            <ScoreCard
+              title="Lifestyle Score"
+              description="Ringkasan kebiasaan harian Anda: tidur, aktivitas fisik, dan merokok."
+              score={assessment.lifestyle_score}
+            />
           </section>
 
-          {/* Row 2: Disease Risk Profile (CDC BRFSS Validation) */}
+          {/* Row 2: Estimated disease risk */}
           <section className="space-y-4">
-            <div className="flex items-baseline justify-between">
-              <div>
-                <p className="text-[11px] font-mono font-bold tracking-widest text-brand-900/50 uppercase">
-                  Estimasi Risiko Kardiometabolik (Validasi Model BRFSS)
-                </p>
-                <h2 className="text-base font-bold text-brand-900 mt-0.5">
-                  Profil Risiko Penyakit Utama
-                </h2>
-              </div>
-              <span className="text-xs font-mono text-brand-900/50">
-                Klik kartu untuk analisis klinis mendalam
-              </span>
+            <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">
+              <h2 className="text-base font-bold text-brand-900">Estimasi Risiko Kesehatan</h2>
+              <p className="text-xs text-muted-foreground">
+                Pilih kartu untuk melihat faktor yang memengaruhinya.
+              </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {assessment.risks.map((risk) => {
                 const pct = Math.round(risk.probability * 100);
-                let levelColor = "text-emerald-800";
-                let barColor = "bg-emerald-600";
-                let levelLabel = "Risiko Rendah";
-
-                if (risk.risk_level === "moderate") {
-                  levelColor = "text-amber-800";
-                  barColor = "bg-amber-600";
-                  levelLabel = "Risiko Sedang";
-                } else if (risk.risk_level === "high") {
-                  levelColor = "text-rose-800";
-                  barColor = "bg-rose-600";
-                  levelLabel = "Risiko Tinggi";
-                }
+                const tone = getRiskTone(risk.risk_level);
 
                 return (
                   <Link
                     key={risk.condition}
                     href={`/dashboard/risk/${risk.condition}`}
-                    className="bg-white/85 backdrop-blur-xl border border-brand-900/10 rounded-2xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex flex-col justify-between space-y-4 hover:border-brand-900/30 hover:-translate-y-0.5 hover:shadow-md transition-all group cursor-pointer"
+                    className="bg-white border border-brand-900/10 rounded-2xl p-5 shadow-xs flex flex-col justify-between space-y-4 hover:border-brand-900/30 hover:shadow-sm transition-all group focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                   >
                     <div className="space-y-2.5">
-                      <div className="flex items-baseline justify-between">
-                        <h3 className="text-sm font-bold text-brand-900 group-hover:text-brand-800 transition-colors">
-                          {risk.label}
-                        </h3>
-                        <span className={`text-xs font-mono font-bold ${levelColor}`}>
-                          {levelLabel}
-                        </span>
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className="text-sm font-bold text-brand-900">{risk.label}</h3>
+                        <RiskBadge level={risk.risk_level} />
                       </div>
 
                       <div className="flex items-baseline gap-2">
-                        <span className="text-3xl font-bold font-mono text-brand-900">
+                        <span className="text-3xl font-bold tabular-nums text-brand-900">
                           {pct}%
                         </span>
-                        <span className="text-xs font-mono text-brand-900/40">probabilitas</span>
+                        <span className="text-xs text-muted-foreground">estimasi skor risiko</span>
                       </div>
 
-                      {/* Mini Linear Progress Bar */}
-                      <div className="h-1.5 w-full bg-brand-900/10 rounded-full overflow-hidden">
-                        <div
-                          style={{ width: `${pct}%` }}
-                          className={`h-full rounded-full ${barColor}`}
-                        />
+                      <div aria-hidden="true" className="h-1.5 w-full bg-brand-900/10 rounded-full overflow-hidden">
+                        <div style={{ width: `${pct}%` }} className={`h-full rounded-full ${tone.fillClass}`} />
                       </div>
 
                       <p className="text-xs text-brand-900/70 leading-relaxed pt-1">
@@ -595,11 +529,10 @@ export default function DashboardPage() {
                       </p>
                     </div>
 
-                    <div className="pt-3 border-t border-brand-900/5 flex justify-between items-center text-[11px] text-brand-900/50 font-mono">
-                      <span>Tren: {risk.trend === "stable" ? "Stabil" : "Meningkat"}</span>
-                      <span className="font-semibold text-brand-900 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
-                        <span>Rincian Klinis</span>
-                        <span>→</span>
+                    <div className="pt-3 border-t border-brand-900/5 flex justify-between items-center text-xs text-muted-foreground">
+                      <span>Tren: {TREND_LABELS[risk.trend]}</span>
+                      <span className="font-semibold text-brand-900 group-hover:underline underline-offset-2">
+                        Lihat rincian
                       </span>
                     </div>
                   </Link>
@@ -611,70 +544,63 @@ export default function DashboardPage() {
           {/* Row 3: Interactive Simulation Hub (Killer Features) */}
           <section className="rounded-2xl bg-brand-900 text-white p-6 sm:p-7 shadow-sm space-y-5">
             <div className="space-y-1">
-              <span className="text-xs font-mono font-bold tracking-widest text-brand-200 uppercase">
-                Fitur Unggulan Simulasi
-              </span>
-              <h2 className="text-lg sm:text-xl font-bold text-white">
-                Eksplorasi Proyeksi Interaktif Gaya Hidup
-              </h2>
+              <h2 className="text-lg sm:text-xl font-bold text-white">Simulasi Gaya Hidup</h2>
               <p className="text-xs text-brand-200/80 leading-relaxed max-w-2xl">
-                Gunakan simulator preventif berbasis machine learning untuk melihat bagaimana perubahan kebiasaan tidur, olahraga, dan nutrisi memengaruhi profil risiko Anda sebelum terlambat.
+                Dua simulasi ini sedang dibangun. Setelah tersedia, Anda bisa mengubah durasi tidur,
+                aktivitas fisik, dan berat badan untuk melihat perubahan estimasi risiko.
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-              {/* Card A: What-If Simulator */}
-              <div className="p-5 rounded-xl bg-white/10 border border-white/15 backdrop-blur-xs flex flex-col justify-between space-y-4">
+              <div className="p-5 rounded-xl bg-white/10 border border-white/15 flex flex-col justify-between space-y-4">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <Sliders className="w-4 h-4 text-emerald-300" />
+                    <Sliders aria-hidden="true" className="w-4 h-4 text-brand-200" />
                     <h3 className="text-sm font-bold text-white">What-If Simulator</h3>
                   </div>
                   <p className="text-xs text-brand-200/80 leading-relaxed">
-                    Geser slider durasi tidur, frekuensi aktivitas fisik, dan target berat badan untuk melihat proyeksi penurunan risiko secara real-time.
+                    Geser durasi tidur, aktivitas fisik, dan berat badan, lalu bandingkan estimasi risiko saat ini dengan hasil simulasi.
                   </p>
                 </div>
 
-                <Link href="/simulation/what-if">
-                  <Button className="w-full h-9 rounded-xl bg-white text-brand-900 hover:bg-neutral-100 text-xs font-semibold shadow-xs">
-                    <span>Buka What-If Simulator</span>
-                    <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
-                  </Button>
-                </Link>
+                <Button
+                  disabled
+                  className="w-full h-9 rounded-xl border border-white/25 bg-white/10 text-white text-xs font-semibold disabled:opacity-100"
+                >
+                  <Clock aria-hidden="true" className="w-3.5 h-3.5" />
+                  Segera hadir
+                </Button>
               </div>
 
-              {/* Card B: Future Health Trajectory */}
-              <div className="p-5 rounded-xl bg-white/10 border border-white/15 backdrop-blur-xs flex flex-col justify-between space-y-4">
+              <div className="p-5 rounded-xl bg-white/10 border border-white/15 flex flex-col justify-between space-y-4">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-emerald-300" />
+                    <TrendingUp aria-hidden="true" className="w-4 h-4 text-brand-200" />
                     <h3 className="text-sm font-bold text-white">Proyeksi 180 Hari</h3>
                   </div>
                   <p className="text-xs text-brand-200/80 leading-relaxed">
-                    Evaluasi lintasan tren kesehatan Anda pada horizon 30, 90, dan 180 hari ke depan dengan perbandingan intervensi aktif.
+                    Lihat proyeksi skor untuk 30, 90, dan 180 hari ke depan jika kebiasaan Anda tetap sama.
                   </p>
                 </div>
 
-                <Link href="/simulation/future">
-                  <Button
-                    variant="outline"
-                    className="w-full h-9 rounded-xl border-white/20 bg-brand-900/50 text-white hover:bg-brand-900/80 hover:text-white text-xs font-semibold"
-                  >
-                    <span>Lihat Garis Proyeksi</span>
-                    <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
-                  </Button>
-                </Link>
+                <Button
+                  disabled
+                  className="w-full h-9 rounded-xl border border-white/25 bg-white/10 text-white text-xs font-semibold disabled:opacity-100"
+                >
+                  <Clock aria-hidden="true" className="w-3.5 h-3.5" />
+                  Segera hadir
+                </Button>
               </div>
             </div>
           </section>
 
-          {/* Row 4: Two-Column Analysis (SHAP Factors & Recommendations) */}
+          {/* Row 4: Two-Column Analysis (Key Factors & Recommendations) */}
           <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Left Column: Top Contributing Factors (Explainable AI / SHAP) */}
-            <div className="bg-white/85 backdrop-blur-xl border border-brand-900/10 rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] space-y-4">
+            {/* Left Column: Top Contributing Factors (Explainable AI / Risk Factors) */}
+            <div className="bg-white border border-brand-900/10 rounded-2xl p-6 shadow-xs space-y-4">
               <div>
                 <p className="text-[11px] font-mono font-bold tracking-widest text-brand-900/50 uppercase">
-                  Explainable AI (Kontribusi Faktor SHAP)
+                  Analisis Penentu Risiko
                 </p>
                 <h2 className="text-base font-bold text-brand-900 mt-1">
                   Faktor Penentu Profil Risiko Anda
@@ -682,37 +608,45 @@ export default function DashboardPage() {
               </div>
 
               <div className="space-y-3">
-                {assessment.top_factors.map((factor) => {
-                  const isProtective = factor.impact === "decrease";
+                {assessment.top_factors && assessment.top_factors.length > 0 ? (
+                  assessment.top_factors.map((factor) => {
+                    const isProtective = factor.impact === "decrease";
 
-                  return (
-                    <div
-                      key={factor.feature}
-                      className="p-3.5 rounded-xl bg-neutral-50/70 border border-brand-900/5 space-y-1.5"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-semibold text-brand-900">
-                          {factor.label}
-                        </span>
-                        <span
-                          className={`text-[11px] font-mono font-bold ${
-                            isProtective ? "text-emerald-800" : "text-amber-800"
-                          }`}
-                        >
-                          {isProtective ? "Protektif" : `Beban +${factor.weight_percentage}%`}
-                        </span>
+                    return (
+                      <div
+                        key={factor.feature}
+                        className="p-3.5 rounded-xl bg-brand-50/40 border border-brand-900/5 space-y-1.5"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-semibold text-brand-900">
+                            {factor.label}
+                          </span>
+                          <span
+                            className={`text-[11px] font-mono font-bold ${
+                              isProtective ? "text-emerald-800" : "text-amber-800"
+                            }`}
+                          >
+                            {isProtective ? "Protektif" : `Beban +${factor.weight_percentage}%`}
+                          </span>
+                        </div>
+                        <p className="text-xs text-brand-900/60 leading-relaxed">
+                          {factor.description}
+                        </p>
                       </div>
-                      <p className="text-xs text-brand-900/60 leading-relaxed">
-                        {factor.description}
-                      </p>
-                    </div>
-                  );
-                })}
+                    );
+                  })
+                ) : (
+                  <div className="p-6 rounded-xl bg-neutral-50/60 border border-brand-900/5 text-center">
+                    <p className="text-xs text-brand-900/60 leading-relaxed">
+                      Belum ada rincian faktor penentu risiko tambahan.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 
             {/* Right Column: Recommended Action Plan */}
-            <div className="bg-white/85 backdrop-blur-xl border border-brand-900/10 rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] space-y-4">
+            <div className="bg-white border border-brand-900/10 rounded-2xl p-6 shadow-xs space-y-4">
               <div>
                 <p className="text-[11px] font-mono font-bold tracking-widest text-brand-900/50 uppercase">
                   Intervensi Terarah
@@ -723,38 +657,109 @@ export default function DashboardPage() {
               </div>
 
               <div className="space-y-3">
-                {assessment.recommendations.map((rec) => (
-                  <div
-                    key={rec.id}
-                    className="p-3.5 rounded-xl bg-neutral-50/70 border border-brand-900/5 space-y-1.5"
-                  >
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-xs font-semibold text-brand-900">{rec.title}</h3>
-                      <span className="text-[11px] font-mono font-bold text-brand-900/50">
-                        Bukti Grade {rec.evidence_level}
-                      </span>
+                {assessment.recommendations && assessment.recommendations.length > 0 ? (
+                  assessment.recommendations.map((rec) => (
+                    <div
+                      key={rec.id}
+                      className="p-3.5 rounded-xl bg-brand-50/40 border border-brand-900/5 space-y-1.5"
+                    >
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-xs font-semibold text-brand-900">{rec.title}</h3>
+                        <span className="text-[11px] font-mono font-bold text-brand-900/50">
+                          Bukti Grade {rec.evidence_level}
+                        </span>
+                      </div>
+                      <p className="text-xs text-brand-900/70 leading-relaxed">{rec.action}</p>
+                      <div className="pt-1 flex items-center gap-1.5 text-[11px] text-brand-900/50 font-mono">
+                        <BookOpen className="w-3 h-3 text-brand-900/40" />
+                        <span>{rec.source}</span>
+                      </div>
                     </div>
-                    <p className="text-xs text-brand-900/70 leading-relaxed">{rec.action}</p>
-                    <div className="pt-1 flex items-center gap-1.5 text-[11px] text-brand-900/50 font-mono">
-                      <BookOpen className="w-3 h-3 text-brand-900/40" />
-                      <span>{rec.source}</span>
-                    </div>
+                  ))
+                ) : (
+                  <div className="p-6 rounded-xl bg-neutral-50/60 border border-brand-900/5 text-center">
+                    <p className="text-xs text-brand-900/60 leading-relaxed">
+                      Belum ada rekomendasi tindakan untuk saat ini.
+                    </p>
                   </div>
-                ))}
+                )}
               </div>
             </div>
           </section>
 
-          {/* Persistent Medical Disclaimer */}
-          <footer className="pt-6 border-t border-brand-900/10 space-y-2 text-center sm:text-left">
-            <p className="text-xs font-mono font-bold text-brand-900/50 uppercase tracking-widest">
-              Pemberitahuan Medis Penting
-            </p>
-            <p className="text-xs text-brand-900/60 leading-relaxed">
-              HELIORA adalah platform edukasi kesehatan dan sarana estimasi risiko preventif berbasis model probabilistik machine learning (CDC BRFSS), bukan alat diagnosis medis klinis. Konsultasikan kondisi Anda kepada dokter atau tenaga medis berlisensi sebelum mengambil keputusan medis.
-            </p>
+          <footer className="pt-6 border-t border-brand-900/10">
+            <DisclaimerBanner />
           </footer>
         </main>
+      </div>
+    </div>
+  );
+}
+
+const TREND_LABELS: Record<AssessmentSummaryResponse["risks"][number]["trend"], string> = {
+  stable: "Stabil",
+  increasing: "Meningkat",
+  decreasing: "Menurun",
+};
+
+function ComingSoonNavItem({ icon: Icon, label }: { icon: LucideIcon; label: string }) {
+  return (
+    <div
+      aria-disabled="true"
+      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-brand-900/50 cursor-not-allowed"
+    >
+      <Icon aria-hidden="true" className="w-4 h-4 shrink-0" />
+      <span className="flex flex-col leading-tight">
+        <span>{label}</span>
+        <span className="text-[11px] font-medium text-muted-foreground">Segera hadir</span>
+      </span>
+    </div>
+  );
+}
+
+// Provisional cut-offs until the scoring formula is documented (Architecture §9.2).
+function getScoreCategory(score: number) {
+  if (score >= 80) return { label: "Baik", className: "text-primary-700" };
+  if (score >= 60) return { label: "Cukup", className: "text-foreground" };
+  return { label: "Perlu perhatian", className: "text-risk-moderate" };
+}
+
+function ScoreCard({ title, description, score }: { title: string; description: string; score: number }) {
+  const category = getScoreCategory(score);
+
+  return (
+    <div className="bg-white border border-brand-900/10 rounded-2xl p-6 shadow-xs flex items-center gap-6">
+      <div className="relative size-24 shrink-0 flex items-center justify-center">
+        <svg aria-hidden="true" className="size-full -rotate-90" viewBox="0 0 36 36">
+          <path
+            className="text-brand-900/10"
+            strokeWidth="3.5"
+            stroke="currentColor"
+            fill="none"
+            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+          />
+          <path
+            className="text-primary-700"
+            strokeDasharray={`${score}, 100`}
+            strokeWidth="3.5"
+            strokeLinecap="round"
+            stroke="currentColor"
+            fill="none"
+            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+          />
+        </svg>
+        <span aria-hidden="true" className="absolute text-2xl font-bold tabular-nums text-brand-900">
+          {score}
+        </span>
+      </div>
+
+      <div className="space-y-1">
+        <h2 className="text-base font-bold text-brand-900">{title}</h2>
+        <p className={`text-sm font-semibold ${category.className}`}>
+          <span className="sr-only">Skor {score} dari 100, kategori </span>
+          {category.label}
+        </p>
+        <p className="text-xs text-muted-foreground leading-relaxed">{description}</p>
       </div>
     </div>
   );

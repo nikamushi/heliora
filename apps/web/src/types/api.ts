@@ -70,6 +70,7 @@ export interface HealthProfileCreateRequest {
   sleep_duration_hours: number;
   smoking_status: string;
   family_history: boolean;
+  family_history_details?: string | null;
   stress_level?: number | null;
   bmi?: number | null;
   waist_circumference_cm?: number | null;
@@ -90,6 +91,7 @@ export interface HealthProfileResponse {
   sleep_duration_hours: number;
   smoking_status: string;
   family_history: boolean;
+  family_history_details?: string | null;
   stress_level?: number | null;
   created_at: string;
   updated_at?: string | null;
@@ -133,4 +135,6 @@ export interface AssessmentSummaryResponse {
   top_factors: ContributingFactor[];
   recommendations: RecommendationItem[];
   assessed_at: string;
+  /** Set by the frontend when it shows example data because no real assessment could be loaded. */
+  is_mock?: boolean;
 }
