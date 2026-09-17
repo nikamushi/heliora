@@ -364,6 +364,32 @@ Acceptance Criteria:
 
 
 
+### SETUP-005 — SOP Alur Kerja Issue & Template GitHub
+
+**Owner:** Pino
+**Priority:** P0
+**Sprint:** S1
+**Status:** IN PROGRESS
+**Issue:** #12
+
+Tasks:
+
+- [x] Write SOP issue workflow document (`docs/SOP-Issue-Workflow.md`).
+- [x] Add feature/bug issue templates and correct legacy template.
+- [x] Add branch protection guide and setup script for `main`.
+- [x] Record `/code-review` slash command guide.
+
+Acceptance Criteria:
+
+- Dokumen panduan alur kerja (`docs/SOP-Issue-Workflow.md`) tersedia di repositori.
+- Template GitHub Issue (`feature_task.md` & `bug_report.md`) dibuat dengan kolom wajib: Type, Platform, Priority, Assignee, Acceptance Criteria.
+- GitHub Ruleset / Branch Protection untuk branch `main` terdokumentasi (wajib PR, CI hijau, squash merge; `develop` tidak ada di repo ini).
+- Panduan slash command `/code-review` untuk self-review developer tercatat di repositori.
+
+---
+
+
+
 # 5. Product & Research Tasks
 
 
