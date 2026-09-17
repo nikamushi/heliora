@@ -8,6 +8,8 @@
 
 import {
   TokenResponse,
+  SupabaseAuthUser,
+  SupabaseOAuthProvider,
   UserLoginRequest,
   UserRegisterRequest,
   UserResponse,
@@ -19,6 +21,11 @@ import {
   HealthProfileResponse,
   AssessmentSummaryResponse,
 } from "@/types/api";
+import {
+  getSupabaseAccessToken,
+  getSupabaseClient,
+  isSupabaseConfigured,
+} from "@/lib/supabase-client";
 
 const TOKEN_STORAGE_KEY = "heliora_access_token";
 const USER_STORAGE_KEY = "heliora_user_data";
@@ -62,6 +69,19 @@ class ApiClient {
     return localStorage.getItem(TOKEN_STORAGE_KEY);
   }
 
+  /**
+   * Sumber token utama (FE-012, ADR-011): session Supabase bila dikonfigurasi,
+   * fallback ke token legacy di localStorage sampai backend JWKS live.
+   */
+  public async getAccessToken(): Promise<string | null> {
+    if (typeof window === "undefined") return null;
+    if (isSupabaseConfigured()) {
+      const supabaseToken = await getSupabaseAccessToken();
+      if (supabaseToken) return supabaseToken;
+    }
+    return this.getToken();
+  }
+
   public setToken(token: string): void {
     if (typeof window === "undefined") return;
     localStorage.setItem(TOKEN_STORAGE_KEY, token);
@@ -102,7 +122,7 @@ class ApiClient {
     headers.set("Content-Type", "application/json");
 
     if (requiresAuth) {
-      const token = this.getToken();
+      const token = await this.getAccessToken();
       if (!token) {
         throw new ApiClientError(401, "Sesi Anda telah berakhir. Silakan login kembali.");
       }
@@ -146,9 +166,37 @@ class ApiClient {
     }
   }
 
-  // ── Authentication Endpoints (Architecture §20, BE-001) ───────
+  // ── Authentication (FE-012, ADR-011; Architecture §20, BE-001) ───
+  // Supabase Auth adalah identity provider. Selama backend JWKS belum live,
+  // path legacy POST /auth/* dipertahankan sebagai fallback dan hanya dipakai
+  // bila Supabase belum dikonfigurasi.
   public readonly auth = {
     register: async (payload: UserRegisterRequest): Promise<TokenResponse> => {
+      const supabase = getSupabaseClient();
+      if (supabase) {
+        const { data, error } = await supabase.auth.signUp({
+          email: payload.email,
+          password: payload.password,
+          options: { data: { full_name: payload.full_name } },
+        });
+        if (error) {
+          throw new ApiClientError(400, error.message);
+        }
+        const accessToken = data.session?.access_token;
+        const supabaseUser = data.user ?? (await supabase.auth.getUser()).data.user;
+        if (!accessToken || !supabaseUser) {
+          // Email confirmation aktif: tidak ada session — arahkan user untuk login setelah verifikasi.
+          throw new ApiClientError(
+            401,
+            "Pendaftaran berhasil. Silakan verifikasi email lalu login."
+          );
+        }
+        const user = this.mapSupabaseUser(supabaseUser);
+        this.setToken(accessToken);
+        this.setStoredUser(user);
+        return { access_token: accessToken, token_type: "bearer", user };
+      }
+
       const res = await this.request<TokenResponse>("/auth/register", {
         method: "POST",
         body: JSON.stringify(payload),
@@ -159,6 +207,25 @@ class ApiClient {
     },
 
     login: async (payload: UserLoginRequest): Promise<TokenResponse> => {
+      const supabase = getSupabaseClient();
+      if (supabase) {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: payload.email,
+          password: payload.password,
+        });
+        if (error) {
+          throw new ApiClientError(401, error.message);
+        }
+        const accessToken = data.session?.access_token;
+        if (!accessToken || !data.user) {
+          throw new ApiClientError(401, "Gagal masuk. Pastikan email dan kata sandi Anda benar.");
+        }
+        const user = this.mapSupabaseUser(data.user);
+        this.setToken(accessToken);
+        this.setStoredUser(user);
+        return { access_token: accessToken, token_type: "bearer", user };
+      }
+
       const res = await this.request<TokenResponse>("/auth/login", {
         method: "POST",
         body: JSON.stringify(payload),
@@ -168,16 +235,48 @@ class ApiClient {
       return res;
     },
 
+    signInWithOAuth: async (provider: SupabaseOAuthProvider): Promise<void> => {
+      const supabase = getSupabaseClient();
+      if (!supabase) {
+        throw new ApiClientError(400, "Login Google belum dikonfigurasi (Supabase belum diset).");
+      }
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: { redirectTo: `${window.location.origin}/dashboard` },
+      });
+      if (error) {
+        throw new ApiClientError(400, error.message);
+      }
+    },
+
     me: async (): Promise<UserResponse> => {
       const res = await this.request<UserResponse>("/auth/me", { method: "GET" }, true);
       this.setStoredUser(res);
       return res;
     },
 
-    logout: (): void => {
+    logout: async (): Promise<void> => {
+      const supabase = getSupabaseClient();
+      if (supabase) {
+        await supabase.auth.signOut();
+      }
       this.clearToken();
     },
   };
+
+  private mapSupabaseUser(supabaseUser: SupabaseAuthUser): UserResponse {
+    const email = supabaseUser.email ?? "";
+    const metadataName = supabaseUser.user_metadata?.["full_name"];
+    return {
+      id: supabaseUser.id,
+      email,
+      full_name:
+        typeof metadataName === "string" && metadataName
+          ? metadataName
+          : email.split("@")[0] || "Pengguna",
+      created_at: supabaseUser.created_at ?? new Date().toISOString(),
+    };
+  }
 
   // ── Consent & Privacy Endpoints (Architecture §21, BE-002) ────
   public readonly consent = {
