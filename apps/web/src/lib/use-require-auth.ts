@@ -1,28 +1,63 @@
 "use client";
 
-import { useCallback, useEffect, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { apiClient } from "@/lib/api-client";
+import { getSupabaseClient, isSupabaseConfigured } from "@/lib/supabase-client";
 
 type AuthStatus = "checking" | "signed-in" | "signed-out";
 
-function subscribeToStorage(onChange: () => void) {
-  window.addEventListener("storage", onChange);
-  return () => window.removeEventListener("storage", onChange);
-}
-
-// The token lives in localStorage, which proxy.ts cannot read, so this guard runs client-side; the API still enforces auth.
+// Guard berjalan client-side (FE-012, ADR-011): sumber kebenaran adalah session
+// Supabase bila dikonfigurasi, fallback ke token legacy. API tetap menegakkan auth.
 export function useRequireAuth() {
   const router = useRouter();
   const pathname = usePathname();
-  const status = useSyncExternalStore<AuthStatus>(
-    subscribeToStorage,
-    () => (apiClient.getToken() ? "signed-in" : "signed-out"),
-    () => "checking"
-  );
+  const [status, setStatus] = useState<AuthStatus>("checking");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const resolve = async () => {
+      if (isSupabaseConfigured()) {
+        const client = getSupabaseClient();
+        if (client) {
+          const { data } = await client.auth.getSession();
+          if (!cancelled) {
+            setStatus(data.session ? "signed-in" : "signed-out");
+          }
+          return;
+        }
+      }
+      if (!cancelled) {
+        setStatus(apiClient.getToken() ? "signed-in" : "signed-out");
+      }
+    };
+
+    void resolve();
+
+    const onStorage = () => {
+      void resolve();
+    };
+    window.addEventListener("storage", onStorage);
+
+    const client = getSupabaseClient();
+    const { data: listener } = client
+      ? client.auth.onAuthStateChange((_event, session) => {
+          if (!cancelled) {
+            setStatus(session ? "signed-in" : "signed-out");
+          }
+        })
+      : { data: { subscription: null } };
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener("storage", onStorage);
+      listener?.subscription?.unsubscribe();
+    };
+  }, []);
 
   const redirectToLogin = useCallback(() => {
-    apiClient.auth.logout();
+    void apiClient.auth.logout();
     router.replace(`/login?redirect=${encodeURIComponent(pathname)}`);
   }, [pathname, router]);
 
