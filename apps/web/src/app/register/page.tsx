@@ -81,6 +81,21 @@ export default function RegisterPage() {
     }
   };
 
+  const handleGoogleSignUp = async () => {
+    setIsLoading(true);
+    setError("");
+    try {
+      await apiClient.auth.signInWithOAuth("google");
+    } catch (err: unknown) {
+      if (err instanceof ApiClientError) {
+        setError(err.message);
+      } else {
+        setError("Gagal mendaftar dengan Google. Coba lagi.");
+      }
+      setIsLoading(false);
+    }
+  };
+
   return (
     <AuthLayout title="Mulai Perjalanan Preventif" showDisclaimer>
       {/* Solid High-Contrast Form Card (Apple HIG) */}
@@ -270,7 +285,7 @@ export default function RegisterPage() {
               type="button"
               variant="outline"
               disabled={isLoading}
-              onClick={() => setError("Integrasi Google Sign up sedang disiapkan.")}
+              onClick={handleGoogleSignUp}
               className="w-full h-9 rounded-xl border-neutral-200 bg-white hover:bg-neutral-50 text-brand-900 text-xs font-semibold shadow-2xs transition-all flex items-center justify-center gap-2"
             >
               <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
