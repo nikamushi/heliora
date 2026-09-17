@@ -43,8 +43,8 @@ export function Navbar() {
               {[
                 { name: "Features", href: "#features" },
                 { name: "How it works", href: "#how-it-works" },
+                { name: "Simulation", href: "#simulation" },
                 { name: "Science", href: "#science" },
-                { name: "Pricing", href: "#pricing" },
               ].map((item) => (
                 <Link
                   key={item.name}
@@ -88,8 +88,8 @@ export function Navbar() {
           <nav className="flex flex-col gap-6 text-2xl font-medium tracking-tight text-brand-900">
             <Link href="#features" onClick={() => setMobileMenuOpen(false)}>Features</Link>
             <Link href="#how-it-works" onClick={() => setMobileMenuOpen(false)}>How it works</Link>
+            <Link href="#simulation" onClick={() => setMobileMenuOpen(false)}>Simulation</Link>
             <Link href="#science" onClick={() => setMobileMenuOpen(false)}>Science</Link>
-            <Link href="#pricing" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
           </nav>
           <div className="mt-auto pb-12 flex flex-col gap-4">
             <Link href="/login" onClick={() => setMobileMenuOpen(false)}>

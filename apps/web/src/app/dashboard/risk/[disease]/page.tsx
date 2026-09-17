@@ -3,23 +3,28 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { motion } from "motion/react";
 import {
   ArrowLeft,
+  ArrowRight,
+  AlertCircle,
   Sliders,
   TrendingUp,
-  BookOpen
+  BookOpen,
+  Clock
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { apiClient } from "@/lib/api-client";
-import { AssessmentSummaryResponse, RiskAssessmentItem } from "@/types/api";
+import { apiClient, ApiClientError } from "@/lib/api-client";
+import { useRequireAuth } from "@/lib/use-require-auth";
+import { AssessmentSummaryResponse, RiskAssessmentItem, RiskLevel } from "@/types/api";
+import { DisclaimerBanner } from "@/components/disclaimer-banner";
+import { MockDataNotice } from "@/components/mock-data-notice";
+import { RiskBadge, getRiskTone } from "@/components/risk-badge";
 
 interface DiseaseDetailMeta {
   title: string;
   category: string;
   definition: string;
   guidelineSource: string;
-  defaultProbability: number;
   factors: {
     name: string;
     weight: number;
@@ -38,10 +43,9 @@ const DISEASE_METADATA: Record<string, DiseaseDetailMeta> = {
     title: "Diabetes Melitus Tipe 2",
     category: "Metabolik & Endokrin",
     definition:
-      "Estimasi probabilitas gangguan metabolisme glukosa dan resistensi insulin berbasis parameter CDC BRFSS, gaya hidup, dan indeks massa tubuh.",
+      "Estimasi tingkat risiko gangguan metabolisme glukosa dan resistensi insulin berbasis parameter CDC BRFSS, gaya hidup, dan indeks massa tubuh.",
     guidelineSource:
       "Konsensus Pengelolaan & Pencegahan DM Tipe 2 di Indonesia (PERKENI, 2021) & WHO Global Report on Diabetes",
-    defaultProbability: 0.38,
     factors: [
       {
         name: "Indeks Massa Tubuh (BMI)",
@@ -90,10 +94,9 @@ const DISEASE_METADATA: Record<string, DiseaseDetailMeta> = {
     title: "Hipertensi & Vaskular",
     category: "Sirkulasi & Hemodinamik",
     definition:
-      "Estimasi probabilitas peningkatan resistensi vaskular sistemik dan tekanan arterial persisten berbasis pemodelan risiko preventif.",
+      "Estimasi tingkat risiko peningkatan resistensi vaskular sistemik dan tekanan arterial persisten berbasis pemodelan risiko preventif.",
     guidelineSource:
       "Pedoman Tata Laksana Hipertensi pada Penyakit Kardiovaskular (PERKI, 2021) & AHA/ACC Hypertension Guidelines",
-    defaultProbability: 0.22,
     factors: [
       {
         name: "Tingkat Beban Stres Harian",
@@ -142,10 +145,9 @@ const DISEASE_METADATA: Record<string, DiseaseDetailMeta> = {
     title: "Penyakit Kardiovaskular",
     category: "Jantung & Sirkulasi Sistemik",
     definition:
-      "Estimasi probabilitas beban hemodinamik jantung, disfungsi mikrovaskular, dan aterosklerosis preventif jangka panjang.",
+      "Estimasi tingkat risiko beban hemodinamik jantung, disfungsi mikrovaskular, dan aterosklerosis preventif jangka panjang.",
     guidelineSource:
       "Panduan Pencegahan Primer Penyakit Kardiovaskular (PERKI & ESC Guidelines, 2021)",
-    defaultProbability: 0.18,
     factors: [
       {
         name: "Aktivitas Kardio & Sedentari",
@@ -192,73 +194,153 @@ const DISEASE_METADATA: Record<string, DiseaseDetailMeta> = {
   }
 };
 
+const LEVEL_INTERPRETATION: Record<RiskLevel, string> = {
+  low: "Kebiasaan yang Anda isi saat ini mendukung estimasi risiko yang lebih rendah. Pertahankan.",
+  moderate: "Beberapa kebiasaan Anda masih bisa diperbaiki untuk menurunkan estimasi ini.",
+  high: "Estimasi ini relatif tinggi. Pertimbangkan untuk membicarakannya dengan tenaga kesehatan.",
+};
+
 export default function RiskDetailPage() {
   const params = useParams();
-  const rawDisease = (params?.disease as string) || "diabetes";
-  const diseaseKey = rawDisease.toLowerCase();
+  const diseaseKey = ((params?.disease as string) || "").toLowerCase();
+  const { isAuthorized, redirectToLogin } = useRequireAuth();
 
   const [assessment, setAssessment] = useState<AssessmentSummaryResponse | null>(null);
+  const [error, setError] = useState<ApiClientError | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchLatestAssessment = async () => {
-      try {
-        const data = await apiClient.assessment.getLatest();
-        setAssessment(data);
-      } catch {
-        // Fallback already handled gracefully in apiClient
-      } finally {
-        setIsLoading(false);
+  const fetchLatestAssessment = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await apiClient.assessment.getLatest();
+      setAssessment(data);
+    } catch (err) {
+      if (err instanceof ApiClientError) {
+        if (err.kind === "unauthorized") {
+          redirectToLogin();
+          return;
+        }
+        setError(err);
+      } else {
+        setError(new ApiClientError(0, "Terjadi kendala saat memuat data analisis risiko."));
       }
-    };
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
+    if (!isAuthorized) return;
     fetchLatestAssessment();
-  }, []);
+  }, [isAuthorized, redirectToLogin]);
 
-  if (isLoading) {
+  if (!isAuthorized || isLoading) {
     return (
       <div className="min-h-screen bg-brand-50/20 text-brand-900 flex items-center justify-center p-6">
-        <div className="text-center space-y-2">
-          <p className="text-xs font-mono font-bold tracking-widest text-brand-900/50 uppercase">
-            HELIORA
-          </p>
-          <p className="text-sm font-medium text-brand-900/70">Memuat analisis risiko klinis...</p>
+        <p className="text-sm font-medium text-brand-900/70">Memuat analisis risiko...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    if (error.kind === "not_found") {
+      return (
+        <div className="min-h-screen bg-brand-50/20 text-brand-900 flex items-center justify-center p-6">
+          <div className="w-full max-w-md bg-white border border-brand-900/10 rounded-3xl p-8 shadow-xl text-center space-y-5">
+            <div className="w-12 h-12 rounded-2xl bg-brand-50 border border-brand-900/10 text-brand-900 flex items-center justify-center mx-auto text-lg font-bold">
+              H
+            </div>
+            <div className="space-y-2">
+              <h1 className="text-xl font-bold tracking-tight text-brand-900">
+                Belum Ada Data Asesmen
+              </h1>
+              <p className="text-xs sm:text-sm text-brand-900/65 leading-relaxed">
+                Lengkapi profil kesehatan Anda terlebih dahulu agar model AI dapat memproyeksikan estimasi risiko untuk kondisi ini.
+              </p>
+            </div>
+            <div className="pt-2 flex flex-col sm:flex-row gap-2 justify-center">
+              <Link
+                href="/onboarding/health-profile"
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-brand-900 hover:bg-brand-900/90 text-white text-xs font-semibold shadow-md shadow-brand-900/15"
+              >
+                <span>Isi Profil Kesehatan</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center justify-center px-4 py-2.5 rounded-xl border border-brand-900/15 text-xs font-semibold text-brand-900/70 hover:text-brand-900 hover:bg-neutral-50"
+              >
+                Kembali
+              </Link>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="min-h-screen bg-brand-50/20 text-brand-900 flex items-center justify-center p-6">
+        <div className="w-full max-w-md bg-white border border-rose-500/20 rounded-3xl p-8 shadow-xl text-center space-y-5">
+          <div className="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-600 flex items-center justify-center mx-auto">
+            <AlertCircle className="w-6 h-6" />
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-xl font-bold tracking-tight text-brand-900">
+              Gagal Memuat Analisis
+            </h1>
+            <p className="text-xs sm:text-sm text-rose-800/80 leading-relaxed">
+              {error.message}
+            </p>
+          </div>
+          <div className="pt-2 flex flex-col sm:flex-row gap-2 justify-center">
+            <Button
+              onClick={fetchLatestAssessment}
+              size="sm"
+              className="px-5 py-2.5 rounded-xl bg-brand-900 hover:bg-brand-900/90 text-white text-xs font-semibold shadow-md shadow-brand-900/15"
+            >
+              Coba Lagi
+            </Button>
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center justify-center px-4 py-2.5 rounded-xl border border-brand-900/15 text-xs font-semibold text-brand-900/70 hover:text-brand-900"
+            >
+              Ke Dashboard
+            </Link>
+          </div>
         </div>
       </div>
     );
   }
 
-  const meta = DISEASE_METADATA[diseaseKey] || DISEASE_METADATA.diabetes;
+  if (!assessment) {
+    return null;
+  }
 
-  // Extract actual risk from user assessment if matching
-  const matchedRisk: RiskAssessmentItem | undefined = assessment?.risks?.find(
+  const meta: DiseaseDetailMeta | undefined = DISEASE_METADATA[diseaseKey];
+  const matchedRisk: RiskAssessmentItem | undefined = assessment.risks.find(
     (r) => r.condition.toLowerCase() === diseaseKey
   );
 
-  const probability = matchedRisk ? matchedRisk.probability : meta.defaultProbability;
-  const pct = Math.round(probability * 100);
-
-  let levelText = "Risiko Rendah";
-  let levelColor = "text-emerald-800";
-  let meterFillWidth = "30%";
-  let meterFillColor = "bg-emerald-600";
-  let interpretation = "Profil metabolik dan gaya hidup saat ini menunjukkan proteksi yang baik. Lanjutkan kebiasaan sehat ini.";
-
-  if (probability >= 0.5) {
-    levelText = "Risiko Tinggi";
-    levelColor = "text-rose-800";
-    meterFillWidth = `${pct}%`;
-    meterFillColor = "bg-rose-600";
-    interpretation =
-      "Estimasi menunjukkan beban faktor risiko yang signifikan. Diperlukan intervensi gaya hidup terencana dan konsultasi medis.";
-  } else if (probability >= 0.2) {
-    levelText = "Risiko Sedang";
-    levelColor = "text-amber-800";
-    meterFillWidth = `${pct}%`;
-    meterFillColor = "bg-amber-600";
-    interpretation =
-      "Terdapat faktor kontributor gaya hidup yang dapat dioptimalkan sebelum berkembang menjadi kondisi klinis persisten.";
+  if (!meta || !matchedRisk) {
+    return (
+      <div className="min-h-screen bg-brand-50/20 text-brand-900 flex items-center justify-center p-6">
+        <div className="max-w-sm text-center space-y-3">
+          <h1 className="text-lg font-bold">Kondisi tidak ditemukan</h1>
+          <p className="text-sm text-muted-foreground">
+            Halaman ini hanya tersedia untuk diabetes, hipertensi, dan penyakit kardiovaskular.
+          </p>
+          <Link href="/dashboard" className="inline-block text-sm font-semibold text-brand-900 underline underline-offset-2">
+            Kembali ke Dashboard
+          </Link>
+        </div>
+      </div>
+    );
   }
+
+  // Level comes from the assessment itself so this page always agrees with the dashboard card.
+  const pct = Math.round(matchedRisk.probability * 100);
+  const tone = getRiskTone(matchedRisk.risk_level);
 
   return (
     <div className="min-h-screen bg-brand-50/20 text-brand-900 selection:bg-brand-200">
@@ -269,89 +351,67 @@ export default function RiskDetailPage() {
             href="/dashboard"
             className="flex items-center gap-2 text-xs font-semibold text-brand-900/70 hover:text-brand-900 transition-colors"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft aria-hidden="true" className="w-4 h-4" />
             <span>Kembali ke Dashboard</span>
           </Link>
-
-          <span className="text-xs font-mono font-bold tracking-widest text-brand-900/40 uppercase">
-            FE-006 • Risk Detail
-          </span>
         </div>
       </header>
 
       {/* Main Container */}
       <main className="max-w-4xl mx-auto px-6 py-8 space-y-8">
-        {/* Page Eyebrow & Title */}
+        {assessment.is_mock && <MockDataNotice />}
+
         <section className="space-y-2 border-b border-brand-900/10 pb-6">
-          <p className="text-xs font-mono font-bold tracking-widest text-brand-900/40 uppercase">
-            {meta.category} • Analisis Risiko Preventif
-          </p>
-          <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
+          <p className="text-sm text-muted-foreground">{meta.category}</p>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-brand-900">
               {meta.title}
             </h1>
-            <span className={`text-base font-mono font-bold ${levelColor}`}>
-              {pct}% • {levelText}
-            </span>
+            <RiskBadge level={matchedRisk.risk_level} className="self-start sm:self-auto text-sm" />
           </div>
           <p className="text-sm text-brand-900/70 leading-relaxed max-w-2xl">
             {meta.definition}
           </p>
         </section>
 
-        {/* Clinical Gauge & Score Card */}
-        <section className="bg-white/90 backdrop-blur-xl border border-brand-900/10 rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] space-y-6">
+        <section className="bg-white border border-brand-900/10 rounded-2xl p-6 shadow-xs space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <p className="text-[11px] font-mono font-bold tracking-widest text-brand-900/40 uppercase">
-                Tingkat Estimasi Probabilitas
-              </p>
-              <div className="flex items-baseline gap-2 mt-1">
-                <span className="text-4xl font-mono font-bold text-brand-900">{pct}%</span>
-                <span className="text-xs font-mono text-brand-900/50">skala komposit CDC BRFSS</span>
-              </div>
+              <h2 className="text-sm font-semibold text-muted-foreground">Skor Estimasi Risiko</h2>
+              <p className="text-4xl font-bold tabular-nums text-brand-900 mt-1">{pct}%</p>
             </div>
 
-            <div className="text-left sm:text-right">
-              <span className={`text-xs font-mono font-bold uppercase tracking-wider ${levelColor}`}>
-                Status: {levelText}
-              </span>
-              <p className="text-xs text-brand-900/60 mt-0.5 max-w-sm sm:ml-auto">
-                {interpretation}
-              </p>
-            </div>
+            <p className="text-sm text-brand-900/70 max-w-sm sm:text-right">
+              {LEVEL_INTERPRETATION[matchedRisk.risk_level]}
+            </p>
           </div>
 
-          {/* Continuous Progress Bar Gauge */}
           <div className="space-y-2">
-            <div className="h-3 w-full bg-brand-900/10 rounded-full overflow-hidden p-0.5">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: meterFillWidth }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
-                className={`h-full rounded-full ${meterFillColor}`}
-              />
+            <div
+              role="img"
+              aria-label={`Estimasi skor risiko ${pct} persen`}
+              className="h-3 w-full bg-brand-900/10 rounded-full overflow-hidden p-0.5"
+            >
+              <div style={{ width: `${pct}%` }} className={`h-full rounded-full ${tone.fillClass}`} />
             </div>
-            <div className="flex justify-between text-[10px] font-mono text-brand-900/40 uppercase">
-              <span>0% Rendah</span>
-              <span>20% Moderat</span>
-              <span>50% Tinggi</span>
-              <span>100% Kritis</span>
+            <div aria-hidden="true" className="flex justify-between text-xs text-muted-foreground tabular-nums">
+              <span>0%</span>
+              <span>100%</span>
             </div>
           </div>
         </section>
 
-        {/* Contributing Factors (Explainable Attribution) */}
+        {/* Contributing Factors */}
         <section className="space-y-4">
           <div>
             <p className="text-xs font-mono font-bold tracking-widest text-brand-900/40 uppercase">
-              Explainable AI (Atribusi Fitur)
+              Analisis Penentu Risiko
             </p>
             <h2 className="text-lg font-bold text-brand-900 mt-1">
-              Faktor Penentu Probabilitas Anda
+              Faktor Penentu Skor Risiko Anda
             </h2>
             <p className="text-xs text-brand-900/60 mt-0.5">
-              Bobot pengaruh variabel gaya hidup dan biometrik Anda terhadap hasil kalkulasi model.
+              Bobot pengaruh variabel gaya hidup dan biometrik Anda terhadap kalkulasi model preventif.
             </p>
           </div>
 
@@ -362,7 +422,7 @@ export default function RiskDetailPage() {
               return (
                 <div
                   key={factor.name}
-                  className="p-4 rounded-xl bg-white/80 border border-brand-900/10 space-y-2.5 transition-all"
+                  className="p-4 rounded-xl bg-white border border-brand-900/10 space-y-2.5 shadow-xs transition-all"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -411,7 +471,7 @@ export default function RiskDetailPage() {
             {meta.actionPlan.map((action, idx) => (
               <div
                 key={action.title}
-                className="bg-white/80 border border-brand-900/10 rounded-2xl p-5 flex flex-col justify-between space-y-3"
+                className="bg-white border border-brand-900/10 rounded-2xl p-5 flex flex-col justify-between space-y-3 shadow-xs"
               >
                 <div className="space-y-2">
                   <span className="text-[11px] font-mono font-bold text-brand-900/40">
@@ -438,47 +498,41 @@ export default function RiskDetailPage() {
         {/* Action CTAs (Simulation Integrations) */}
         <section className="p-6 rounded-2xl bg-brand-900 text-white space-y-4 shadow-sm">
           <div className="space-y-1">
-            <span className="text-xs font-mono font-bold tracking-widest text-brand-200 uppercase">
-              Simulasi Interaktif
-            </span>
-            <h2 className="text-lg font-bold text-white">
-              Coba Uji Dampak Perubahan Gaya Hidup Anda
-            </h2>
+            <h2 className="text-lg font-bold text-white">Simulasi Gaya Hidup</h2>
             <p className="text-xs text-brand-200/80 leading-relaxed max-w-xl">
-              Gunakan What-If Simulator untuk melihat bagaimana perbaikan tidur, olahraga, dan target berat badan dapat langsung menurunkan angka probabilitas {meta.title}.
+              Simulasi sedang dibangun. Setelah tersedia, Anda bisa melihat bagaimana perubahan tidur,
+              aktivitas fisik, dan berat badan memengaruhi estimasi risiko {meta.title}.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3 pt-2">
-            <Link href={`/simulation/what-if?disease=${diseaseKey}`}>
-              <Button className="h-10 px-5 rounded-xl bg-white text-brand-900 hover:bg-neutral-100 font-semibold text-xs shadow-xs">
-                <Sliders className="w-3.5 h-3.5 mr-1.5" />
-                <span>Buka What-If Simulator</span>
-              </Button>
-            </Link>
+            <Button disabled className="h-10 px-5 rounded-xl border border-white/25 bg-white/10 text-white font-semibold text-xs disabled:opacity-100">
+              <Sliders aria-hidden="true" className="w-3.5 h-3.5" />
+              What-If Simulator
+              <span className="inline-flex items-center gap-1 font-medium text-white/75">
+                <Clock aria-hidden="true" className="w-3 h-3" />
+                Segera hadir
+              </span>
+            </Button>
 
-            <Link href={`/simulation/future?disease=${diseaseKey}`}>
-              <Button
-                variant="outline"
-                className="h-10 px-5 rounded-xl border-white/20 bg-brand-900/40 text-white hover:bg-brand-900/70 hover:text-white font-semibold text-xs"
-              >
-                <TrendingUp className="w-3.5 h-3.5 mr-1.5" />
-                <span>Lihat Proyeksi 180 Hari</span>
-              </Button>
-            </Link>
+            <Button disabled className="h-10 px-5 rounded-xl border border-white/25 bg-white/10 text-white font-semibold text-xs disabled:opacity-100">
+              <TrendingUp aria-hidden="true" className="w-3.5 h-3.5" />
+              Proyeksi 180 Hari
+              <span className="inline-flex items-center gap-1 font-medium text-white/75">
+                <Clock aria-hidden="true" className="w-3 h-3" />
+                Segera hadir
+              </span>
+            </Button>
           </div>
         </section>
 
-        {/* Clinical Guideline Reference & Medical Disclaimer */}
         <section className="pt-4 border-t border-brand-900/10 space-y-3">
           <div className="flex items-center gap-2 text-xs text-brand-900/60">
-            <BookOpen className="w-3.5 h-3.5 shrink-0" />
+            <BookOpen aria-hidden="true" className="w-3.5 h-3.5 shrink-0" />
             <span>Dasar Referensi: {meta.guidelineSource}</span>
           </div>
 
-          <p className="text-[11px] text-brand-900/50 leading-relaxed">
-            <strong>Disclaimer Medis:</strong> HELIORA adalah platform edukasi kesehatan dan sarana estimasi risiko preventif berbasis pemodelan machine learning (CDC BRFSS). Seluruh hasil probabilitas, skor, dan proyeksi bersifat informatif dan <u>bukan merupakan diagnosis klinis medis</u>. Konsultasikan kondisi kesehatan Anda dengan dokter atau tenaga medis berlisensi sebelum mengambil tindakan klinis apa pun.
-          </p>
+          <DisclaimerBanner />
         </section>
       </main>
     </div>

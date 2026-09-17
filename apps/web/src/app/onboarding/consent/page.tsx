@@ -4,9 +4,8 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "motion/react";
-import { 
-  ShieldAlert, 
-  ShieldCheck, 
+import {
+  ShieldCheck,
   Activity, 
   Sparkles, 
   HeartPulse, 
@@ -18,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { apiClient, ApiClientError } from "@/lib/api-client";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { DisclaimerBanner } from "@/components/disclaimer-banner";
 
 const features = [
   {
@@ -135,20 +135,7 @@ export default function ConsentPage() {
             })}
           </div>
 
-          {/* Medical Disclaimer Alert (Clean Apple-Style) */}
-          <div className="flex gap-3.5 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-950">
-            <div className="w-8 h-8 rounded-xl bg-amber-500/15 flex items-center justify-center shrink-0 text-amber-900">
-              <ShieldAlert className="w-4 h-4" />
-            </div>
-            <div className="space-y-1">
-              <h3 className="text-sm font-bold text-amber-950 flex items-center gap-1.5">
-                Disclaimer Medis Penting
-              </h3>
-              <p className="text-xs text-amber-950/80 leading-relaxed">
-                HELIORA adalah alat bantu analisis prediktif risiko gaya hidup, <strong>bukan pengganti diagnosis, pemeriksaan klinis, atau resep dokter</strong>. Hasil kalkulasi bersifat indikatif preventif. Selalu konsultasikan kondisi kesehatan Anda ke tenaga medis profesional.
-              </p>
-            </div>
-          </div>
+          <DisclaimerBanner />
 
           {/* Interactive Consent Checkbox Box */}
           <div
