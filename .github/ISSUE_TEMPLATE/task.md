@@ -1,6 +1,6 @@
 ---
 name: "Task / Feature / Bug"
-about: "Template issue mengikuti alur kerja standar SOP (To Do → Development → Code Review → Waiting for Test → Testing → Done)"
+about: "Template issue generik mengikuti SOP alur kerja standar (To Do → Development → Code Review → Waiting for Test → Testing → Done). Untuk kasus baru, gunakan template Feature / Task atau Bug Report. Lihat docs/SOP-Issue-Workflow.md."
 title: "type(scope): description #TASK-ID"
 labels: ["status:todo"]
 assignees: ""
@@ -28,8 +28,8 @@ assignees: ""
 ---
 
 ## 🚦 Gate Checklist Sebelum Ganti Stage
-- [ ] **To Do → Development:** Issue sudah diambil developer & branch dibuat dari `develop` (`SG-xxx` atau `type/task-id`).
-- [ ] **Development → Code Review:** Gate lokal lolos (`pnpm lint`, `pnpm test`, `pnpm build`), PR dibuka ke `develop`.
-- [ ] **Code Review → Waiting for Test:** Review selesai (peer-review atau `/code-review`), semua diskusi di-resolve, CI hijau.
-- [ ] **Waiting for Test → Testing:** Build siap diakses QA (`bun dev` lokal / build CI).
-- [ ] **Testing → Done:** QA approve PR di GitHub dengan catatan hasil uji, lalu squash-merge ke `develop`.
+- [ ] **To Do → Development:** Issue sudah diambil developer & branch dibuat dari `main` (`<type>/<task-id>-<one-line-description>`, lihat `CONTRIBUTING.md`).
+- [ ] **Development → Code Review:** Gate lokal lolos (`pnpm lint`, `pnpm test`, `pnpm build`), PR dibuka ke `main` dengan format standar.
+- [ ] **Code Review → Waiting for Test:** Review selesai (peer-review atau `/code-review`, lihat `docs/Code-Review-Guide.md`), semua diskusi di-resolve, CI hijau.
+- [ ] **Waiting for Test → Testing:** Build siap diakses QA (`pnpm dev` lokal / preview URL / build CI).
+- [ ] **Testing → Done:** QA approve PR di GitHub dengan catatan hasil uji, lalu squash-merge ke `main`.
