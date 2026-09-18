@@ -24,6 +24,21 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const handleGoogleLogin = async () => {
+    setIsLoading(true);
+    setError("");
+    try {
+      await apiClient.auth.signInWithOAuth("google");
+    } catch (err: unknown) {
+      if (err instanceof ApiClientError) {
+        setError(err.message);
+      } else {
+        setError("Gagal masuk dengan Google. Coba lagi.");
+      }
+      setIsLoading(false);
+    }
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -171,7 +186,7 @@ export default function LoginPage() {
               type="button"
               variant="outline"
               disabled={isLoading}
-              onClick={() => setError("Integrasi Google Login sedang disiapkan.")}
+              onClick={handleGoogleLogin}
               className="w-full h-9 rounded-xl border-neutral-200 bg-white hover:bg-neutral-50 text-brand-900 text-xs font-semibold shadow-2xs transition-all flex items-center justify-center gap-2"
             >
               <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">

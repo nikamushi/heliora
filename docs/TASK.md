@@ -1677,6 +1677,33 @@ Acceptance Criteria:
 
 
 
+## FE-012 — Supabase Auth Integration
+
+**Owner:** Pino & Tumir  
+**Priority:** P0  
+**Sprint:** S9  
+**Status:** REVIEW
+
+Tasks:
+
+- [x] Supabase client and environment.
+- [x] Token source from Supabase session in API client.
+- [x] Login and register via Supabase Auth.
+- [x] Auth guard via Supabase session.
+- [x] Google OAuth via Supabase.
+- [x] Supabase user types.
+- [x] Lint and build gate.
+
+Acceptance Criteria:
+
+- Register/login/logout berjalan via Supabase Auth sebagai identity provider.
+- Seluruh request terautentikasi mengirim Bearer JWT Supabase (verifikasi JWKS di sisi backend).
+- Google OAuth berjalan via Supabase, bukan stub.
+
+---
+
+
+
 # 19. Integration Tasks
 
 

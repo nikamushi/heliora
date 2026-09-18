@@ -18,6 +18,23 @@ export interface TokenResponse {
   user: UserResponse;
 }
 
+// ── Supabase identity (FE-012, ADR-011) ──────────────────────────
+// Supabase Auth adalah identity provider; UserResponse tetap menjadi bentuk
+// user kanonis di frontend (dipetakan dari Supabase user via api-client).
+export type SupabaseOAuthProvider = "google";
+
+export interface SupabaseUserMetadata {
+  full_name?: string;
+  [key: string]: unknown;
+}
+
+export interface SupabaseAuthUser {
+  id: string;
+  email?: string | null;
+  user_metadata?: SupabaseUserMetadata;
+  created_at?: string;
+}
+
 export interface UserRegisterRequest {
   email: string;
   password: string;
