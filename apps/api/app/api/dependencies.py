@@ -57,30 +57,7 @@ async def get_current_user(
 
     user = await user_repo.get_by_id(db, user_id)
     if user is None:
-        email = payload.get("email")
-        if not email:
-            raise credentials_exception
-        user_metadata = payload.get("user_metadata") or {}
-        full_name = (
-            user_metadata.get("full_name")
-            or payload.get("name")
-            or email.split("@")[0]
-        )
-        user = User(
-            id=user_id,
-            email=email.lower().strip(),
-            password_hash="supabase_managed",
-            full_name=str(full_name).strip(),
-        )
-        db.add(user)
-        try:
-            await db.commit()
-            await db.refresh(user)
-        except Exception:
-            await db.rollback()
-            user = await user_repo.get_by_id(db, user_id)
-            if user is None:
-                raise credentials_exception
+        raise credentials_exception
 
     return user
 

@@ -30,8 +30,9 @@ class UserRepository:
         self,
         session: AsyncSession,
         *,
+        id: uuid.UUID | None = None,
         email: str,
-        password_hash: str,
+        password_hash: str | None = None,
         full_name: str,
     ) -> User:
         """Create and persist a new user."""
@@ -40,6 +41,8 @@ class UserRepository:
             password_hash=password_hash,
             full_name=full_name.strip(),
         )
+        if id is not None:
+            user.id = id
         session.add(user)
         await session.commit()
         await session.refresh(user)

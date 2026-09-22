@@ -44,6 +44,14 @@ def test_model_instantiation():
     assert user.email == "test@heliora.health"
     assert user.full_name == "Dr. Jane Doe"
 
+    oauth_user = User(
+        email="oauth@heliora.health",
+        password_hash=None,
+        full_name="OAuth User",
+    )
+    assert oauth_user.password_hash is None
+    assert oauth_user.email == "oauth@heliora.health"
+
     profile = HealthProfile(
         user_id=uuid.uuid4(),
         age=32,
