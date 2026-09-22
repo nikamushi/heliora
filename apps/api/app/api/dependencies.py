@@ -13,7 +13,7 @@ from jose import JWTError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
-from app.core.security import decode_access_token
+from app.core.security import verify_token
 from app.db.models.consent import Consent
 from app.db.models.user import User
 from app.db.session import async_session_factory
@@ -40,14 +40,14 @@ async def get_current_user(
     token: str = Depends(oauth2_scheme),
     db: AsyncSession = Depends(get_db),
 ) -> User:
-    """Validate JWT bearer token and resolve the active User entity."""
+    """Validate JWT bearer token (Supabase JWKS or legacy) and resolve User entity."""
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials.",
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = decode_access_token(token)
+        payload = verify_token(token)
         user_id_str: str | None = payload.get("sub")
         if user_id_str is None:
             raise credentials_exception
@@ -57,7 +57,30 @@ async def get_current_user(
 
     user = await user_repo.get_by_id(db, user_id)
     if user is None:
-        raise credentials_exception
+        email = payload.get("email")
+        if not email:
+            raise credentials_exception
+        user_metadata = payload.get("user_metadata") or {}
+        full_name = (
+            user_metadata.get("full_name")
+            or payload.get("name")
+            or email.split("@")[0]
+        )
+        user = User(
+            id=user_id,
+            email=email.lower().strip(),
+            password_hash="supabase_managed",
+            full_name=str(full_name).strip(),
+        )
+        db.add(user)
+        try:
+            await db.commit()
+            await db.refresh(user)
+        except Exception:
+            await db.rollback()
+            user = await user_repo.get_by_id(db, user_id)
+            if user is None:
+                raise credentials_exception
 
     return user
 

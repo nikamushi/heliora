@@ -1,24 +1,39 @@
 """HELIORA API — Health profile service.
 
 Business logic for managing user health profiles.
-Implements Architecture §8.3, §22 and BE-003.
+Implements Architecture §8.3, §22, PRD FR-006, FR-007, FR-008, and BE-003.
 """
 
 import uuid
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.db.models.health_profile import HealthProfile
 from app.repositories.health_profile_repo import health_profile_repo
 from app.schemas.health_profile import (
     HealthProfileCreateRequest,
     HealthProfileResponse,
+    HealthProfileUpdateRequest,
+    get_bmi_category,
 )
 
 
 class HealthProfileService:
     """Service handling health profile creation, update, and retrieval."""
 
-    async def save_profile(
+    def _to_response(
+        self, profile: HealthProfile, family_history_details: str | None = None
+    ) -> HealthProfileResponse:
+        """Convert ORM model to response schema with enriched BMI category."""
+        resp = HealthProfileResponse.model_validate(profile)
+        if profile.bmi is not None:
+            resp.bmi = float(profile.bmi)
+            resp.bmi_category = get_bmi_category(resp.bmi)
+        if family_history_details is not None:
+            resp.family_history_details = family_history_details
+        return resp
+
+    async def create_profile(
         self,
         session: AsyncSession,
         user_id: uuid.UUID,
@@ -30,11 +45,23 @@ class HealthProfileService:
             user_id=user_id,
             payload=payload,
         )
-        response = HealthProfileResponse.model_validate(profile)
-        # Populate granular family history details if provided
-        if payload.family_history_details:
-            response.family_history_details = payload.family_history_details
-        return response
+        return self._to_response(profile, payload.family_history_details)
+
+    async def update_profile(
+        self,
+        session: AsyncSession,
+        user_id: uuid.UUID,
+        payload: HealthProfileUpdateRequest,
+    ) -> HealthProfileResponse:
+        """Update existing health profile for authenticated user."""
+        existing = await health_profile_repo.get_by_user_id(session, user_id)
+        if existing is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Profil kesehatan tidak ditemukan. Buat profil terlebih dahulu.",
+            )
+        updated = await health_profile_repo.update(session, existing, payload)
+        return self._to_response(updated, payload.family_history_details)
 
     async def get_profile(
         self, session: AsyncSession, user_id: uuid.UUID
@@ -46,7 +73,16 @@ class HealthProfileService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Profil kesehatan belum ditemukan. Silakan lengkapi profil terlebih dahulu.",
             )
-        return HealthProfileResponse.model_validate(profile)
+        return self._to_response(profile)
+
+    async def save_profile(
+        self,
+        session: AsyncSession,
+        user_id: uuid.UUID,
+        payload: HealthProfileCreateRequest,
+    ) -> HealthProfileResponse:
+        """Alias for create_profile."""
+        return await self.create_profile(session, user_id, payload)
 
 
 health_profile_service = HealthProfileService()

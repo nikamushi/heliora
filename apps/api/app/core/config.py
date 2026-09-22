@@ -15,6 +15,7 @@ class Settings(BaseSettings):
         env_file=".env",
         env_file_encoding="utf-8",
         case_sensitive=False,
+        extra="ignore",
     )
 
     # ── Application ──────────────────────────────────────────────
@@ -29,9 +30,17 @@ class Settings(BaseSettings):
     # ── CORS ─────────────────────────────────────────────────────
     CORS_ORIGINS: list[str] = ["http://localhost:3000"]
 
-    # ── Auth ─────────────────────────────────────────────────────
+    # ── Auth (Legacy & FastAPI Native) ───────────────────────────
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 24 hours
     TOKEN_ALGORITHM: str = "HS256"
+
+    # ── Supabase Auth / JWKS Verifier (ADR-011 / Issue #18) ──────
+    SUPABASE_URL: str | None = None
+    SUPABASE_JWKS_URL: str | None = None
+    SUPABASE_ISSUER: str | None = None
+    SUPABASE_AUDIENCE: str = "authenticated"
+    SUPABASE_ALLOWED_ALGS: list[str] = ["ES256", "RS256"]
+    SUPABASE_JWKS_CACHE_TTL_SECONDS: int = 3600
 
     @property
     def database_url_sync(self) -> str:

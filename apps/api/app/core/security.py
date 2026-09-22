@@ -4,10 +4,13 @@ Password hashing (bcrypt) and JWT token helpers.
 Implements Architecture §20.2 (password hashing) and §20.1 (auth flow).
 """
 
+import time
 from datetime import UTC, datetime, timedelta
+from typing import Any
 
 import bcrypt
-from jose import jwt
+import httpx
+from jose import jwk, jwt
 
 from app.core.config import settings
 
@@ -50,8 +53,107 @@ def create_access_token(
     )
 
 
-def decode_access_token(token: str) -> dict:
-    """Decode and verify a JWT access token.
+# ── Supabase JWKS Verifier (ADR-011 / Issue #18) ────────────────
+class SupabaseJWKSVerifier:
+    """Verifier for Supabase JWT tokens via JWKS public keys (ADR-011)."""
+
+    def __init__(self) -> None:
+        self._keys: dict[str, Any] = {}
+        self._last_fetched: float = 0.0
+
+    def fetch_keys(self, force: bool = False) -> dict[str, Any]:
+        """Fetch and cache public keys from Supabase JWKS endpoint."""
+        now = time.time()
+        ttl = settings.SUPABASE_JWKS_CACHE_TTL_SECONDS
+        if not force and self._keys and (now - self._last_fetched < ttl):
+            return self._keys
+
+        jwks_url = settings.SUPABASE_JWKS_URL
+        if not jwks_url:
+            return self._keys
+
+        try:
+            with httpx.Client(timeout=10.0) as client:
+                resp = client.get(jwks_url)
+                resp.raise_for_status()
+                data = resp.json()
+                keys = data.get("keys", [])
+                parsed_keys = {}
+                for k in keys:
+                    kid = k.get("kid")
+                    if kid:
+                        parsed_keys[kid] = jwk.construct(k)
+                self._keys = parsed_keys
+                self._last_fetched = now
+        except Exception as exc:
+            if force and not self._keys:
+                raise jwt.JWTError(f"Cannot reach JWKS endpoint: {exc}") from exc
+
+        return self._keys
+
+    def verify_supabase_token(self, token: str) -> dict[str, Any]:
+        """Verify Supabase JWT token against JWKS public key."""
+        try:
+            header = jwt.get_unverified_header(token)
+        except Exception as exc:
+            raise jwt.JWTError(f"Invalid token header: {exc}") from exc
+
+        kid = header.get("kid")
+        if not kid:
+            raise jwt.JWTError("Token header missing 'kid' (Key ID)")
+
+        alg = header.get("alg")
+        if alg not in settings.SUPABASE_ALLOWED_ALGS:
+            raise jwt.JWTError(
+                f"Algorithm '{alg}' is not in allowed algorithms {settings.SUPABASE_ALLOWED_ALGS}"
+            )
+
+        keys = self.fetch_keys(force=False)
+        if kid not in keys:
+            keys = self.fetch_keys(force=True)
+
+        if kid not in keys:
+            raise jwt.JWTError(f"Key ID '{kid}' not found in Supabase JWKS")
+
+        key = keys[kid]
+
+        options = {
+            "verify_signature": True,
+            "verify_aud": bool(settings.SUPABASE_AUDIENCE),
+            "verify_iat": True,
+            "verify_exp": True,
+            "verify_nbf": True,
+            "verify_iss": bool(settings.SUPABASE_ISSUER),
+        }
+
+        return jwt.decode(
+            token,
+            key,
+            algorithms=settings.SUPABASE_ALLOWED_ALGS,
+            audience=settings.SUPABASE_AUDIENCE,
+            issuer=settings.SUPABASE_ISSUER,
+            options=options,
+        )
+
+
+supabase_jwks_verifier = SupabaseJWKSVerifier()
+
+
+def verify_token(token: str) -> dict[str, Any]:
+    """Unified token verifier supporting Supabase JWKS and legacy HS256 tokens."""
+    try:
+        header = jwt.get_unverified_header(token)
+    except Exception:
+        return decode_access_token(token)
+
+    if header.get("kid") and settings.SUPABASE_JWKS_URL:
+        return supabase_jwks_verifier.verify_supabase_token(token)
+
+    return decode_access_token(token)
+
+
+def decode_access_token(token: str) -> dict[str, Any]:
+    """Decode and verify a legacy HS256 JWT access token.
 
     Raises ``jose.JWTError`` on invalid/expired tokens.
     """
