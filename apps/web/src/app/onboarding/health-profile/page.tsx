@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
@@ -82,11 +82,78 @@ export default function HealthProfilePage() {
 
   // Step 3: Riwayat Medis (Opsional)
   const [familyHistory, setFamilyHistory] = useState<string[]>(["none"]);
+  const [familyHistoryDetails, setFamilyHistoryDetails] = useState("");
   const [stress, setStress] = useState("5");
+
+  useEffect(() => {
+    let isMounted = true;
+    async function loadExistingProfile() {
+      try {
+        if (!apiClient.getToken()) return;
+        const profile = await apiClient.healthProfile.get();
+        if (!isMounted || !profile) return;
+
+        if (profile.age) setAge(String(profile.age));
+        if (profile.gender) setGender(profile.gender);
+        if (profile.height_cm) setHeight(String(profile.height_cm));
+        if (profile.weight_kg) setWeight(String(profile.weight_kg));
+
+        if (profile.physical_activity_min_per_week !== undefined) {
+          const actVal = profile.physical_activity_min_per_week;
+          if (actVal <= 0) setActivity("sedentary");
+          else if (actVal <= 60) setActivity("light");
+          else if (actVal <= 150) setActivity("moderate");
+          else setActivity("active");
+        }
+
+        if (profile.sleep_duration_hours) {
+          setSleep(String(Math.round(profile.sleep_duration_hours)));
+        }
+        if (profile.smoking_status) {
+          setSmoking(profile.smoking_status);
+        }
+
+        if (profile.family_history) {
+          const details = profile.family_history_details || "";
+          setFamilyHistoryDetails(details);
+          const found: string[] = [];
+          if (details.toLowerCase().includes("diabet")) found.push("diabetes");
+          if (
+            details.toLowerCase().includes("hipertensi") ||
+            details.toLowerCase().includes("hypertension")
+          ) {
+            found.push("hypertension");
+          }
+          if (
+            details.toLowerCase().includes("jantung") ||
+            details.toLowerCase().includes("heart")
+          ) {
+            found.push("heart_disease");
+          }
+          setFamilyHistory(found.length > 0 ? found : ["diabetes"]);
+        } else {
+          setFamilyHistory(["none"]);
+          setFamilyHistoryDetails("");
+        }
+
+        if (profile.stress_level) {
+          setStress(String(profile.stress_level));
+        }
+      } catch {
+        // Silently skip if no existing profile exists or unauthorized
+      }
+    }
+
+    loadExistingProfile();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const toggleFamilyHistory = (id: string) => {
     if (id === "none") {
       setFamilyHistory(["none"]);
+      setFamilyHistoryDetails("");
       return;
     }
     setFamilyHistory((prev) => {
@@ -172,11 +239,12 @@ export default function HealthProfilePage() {
       };
 
       const hasFamilyHistory = !familyHistory.includes("none") && familyHistory.length > 0;
-      const familyHistoryDetails = hasFamilyHistory
-        ? familyHistoryOptions
-            .filter((opt) => familyHistory.includes(opt.id) && opt.id !== "none")
-            .map((opt) => opt.label)
-            .join(", ")
+      const selectedLabels = familyHistoryOptions
+        .filter((opt) => familyHistory.includes(opt.id) && opt.id !== "none")
+        .map((opt) => opt.label)
+        .join(", ");
+      const resolvedDetails = hasFamilyHistory
+        ? (familyHistoryDetails.trim() || selectedLabels || "Riwayat keluarga dilaporkan")
         : null;
 
       const payload: HealthProfileCreateRequest = {
@@ -188,7 +256,7 @@ export default function HealthProfilePage() {
         sleep_duration_hours: parseFloat(sleep) || 7,
         smoking_status: smoking || "never",
         family_history: hasFamilyHistory,
-        family_history_details: familyHistoryDetails,
+        family_history_details: resolvedDetails,
         stress_level: stress ? parseInt(stress, 10) : 5,
         bmi: bmiInfo?.value || null,
       };
@@ -545,6 +613,25 @@ export default function HealthProfilePage() {
                   <p className="text-[11px] text-brand-900/55">
                     Dapat memilih lebih dari satu kondisi riwayat penyakit keluarga.
                   </p>
+
+                  {/* Input Rincian Riwayat Keluarga */}
+                  {!familyHistory.includes("none") && familyHistory.length > 0 && (
+                    <div className="space-y-2 pt-2">
+                      <Label className="text-xs font-bold text-brand-900 uppercase tracking-wider">
+                        Rincian Riwayat Keluarga (Opsional)
+                      </Label>
+                      <Input
+                        type="text"
+                        placeholder="Contoh: Ayah menderita diabetes tipe 2 sejak usia 45, kakek ada riwayat hipertensi"
+                        value={familyHistoryDetails}
+                        onChange={(e) => setFamilyHistoryDetails(e.target.value)}
+                        className="h-11 px-3.5 rounded-xl border-brand-900/15 bg-white text-brand-900 placeholder:text-neutral-400 text-sm focus-visible:ring-brand-900/20 focus-visible:border-brand-900"
+                      />
+                      <p className="text-[11px] text-brand-900/55">
+                        Catatan spesifik ini membantu model AI mengalibrasi faktor risiko metabolik & kardiovaskular secara akurat.
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Tingkat Stres with Slider */}

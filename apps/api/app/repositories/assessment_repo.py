@@ -15,6 +15,7 @@ from sqlalchemy.orm import selectinload
 from app.db.models.assessment import Assessment
 from app.db.models.recommendation import Recommendation
 from app.db.models.risk_result import RiskResult
+from app.db.models.xai_result import XAIResult
 
 
 class AssessmentRepository:
@@ -28,7 +29,9 @@ class AssessmentRepository:
             select(Assessment)
             .where(Assessment.user_id == user_id)
             .options(
-                selectinload(Assessment.risk_result),
+                selectinload(Assessment.risk_result).selectinload(
+                    RiskResult.xai_results
+                ),
                 selectinload(Assessment.recommendations),
                 selectinload(Assessment.health_profile),
             )
@@ -45,7 +48,9 @@ class AssessmentRepository:
             select(Assessment)
             .where(Assessment.id == assessment_id, Assessment.user_id == user_id)
             .options(
-                selectinload(Assessment.risk_result),
+                selectinload(Assessment.risk_result).selectinload(
+                    RiskResult.xai_results
+                ),
                 selectinload(Assessment.recommendations),
                 selectinload(Assessment.health_profile),
             )
@@ -117,6 +122,39 @@ class AssessmentRepository:
             )
             session.add(rec)
             records.append(rec)
+        await session.flush()
+        return records
+
+    async def create_xai_results(
+        self,
+        session: AsyncSession,
+        *,
+        risk_result_id: uuid.UUID,
+        factors_data: list[Any],
+    ) -> list[XAIResult]:
+        """Create and persist XAI contributing factor attributions."""
+        records: list[XAIResult] = []
+        for rank, factor in enumerate(factors_data, start=1):
+            if isinstance(factor, dict):
+                feature_name = factor["feature"]
+                direction = (
+                    "positive" if factor.get("impact") == "increase" else "negative"
+                )
+                raw_weight = float(factor.get("weight_percentage", 0.0))
+            else:
+                feature_name = factor.feature
+                direction = "positive" if factor.impact == "increase" else "negative"
+                raw_weight = float(factor.weight_percentage)
+
+            xai = XAIResult(
+                risk_result_id=risk_result_id,
+                feature_name=feature_name,
+                contribution=Decimal(str(round(raw_weight, 4))),
+                direction=direction,
+                rank=rank,
+            )
+            session.add(xai)
+            records.append(xai)
         await session.flush()
         return records
 

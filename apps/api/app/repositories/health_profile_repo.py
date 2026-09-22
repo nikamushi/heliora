@@ -6,6 +6,7 @@ Implements Architecture §8.3, §22, PRD FR-006, FR-007, FR-008, and BE-003.
 
 import uuid
 from decimal import Decimal
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -66,6 +67,7 @@ class HealthProfileRepository:
             sleep_duration_hours=Decimal(str(payload.sleep_duration_hours)),
             smoking_status=smoking_str,
             family_history=payload.family_history,
+            family_history_details=payload.family_history_details,
             stress_level=payload.stress_level,
             waist_circumference_cm=(
                 Decimal(str(payload.waist_circumference_cm))
@@ -123,10 +125,14 @@ class HealthProfileRepository:
             )
         if payload.family_history is not None:
             profile.family_history = payload.family_history
+        if payload.family_history_details is not None:
+            profile.family_history_details = payload.family_history_details
         if payload.stress_level is not None:
             profile.stress_level = payload.stress_level
         if payload.waist_circumference_cm is not None:
-            profile.waist_circumference_cm = Decimal(str(payload.waist_circumference_cm))
+            profile.waist_circumference_cm = Decimal(
+                str(payload.waist_circumference_cm)
+            )
         if payload.blood_pressure is not None:
             profile.blood_pressure = payload.blood_pressure
         if payload.blood_sugar_mg_dl is not None:

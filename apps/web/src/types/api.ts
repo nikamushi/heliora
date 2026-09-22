@@ -114,14 +114,16 @@ export interface HealthProfileResponse {
   updated_at?: string | null;
 }
 
-// ── Assessment & Dashboard Endpoints (Architecture §8.7, FE-005) ──
 export type RiskLevel = "low" | "moderate" | "high";
+export type StandardizedRiskLabel = "Lower" | "Moderate" | "Higher";
 
 export interface RiskAssessmentItem {
   condition: "diabetes" | "hypertension" | "cardiovascular";
   label: string;
-  probability: number;
+  probability?: number;
+  estimated_risk_score?: number;
   risk_level: RiskLevel;
+  risk_label?: StandardizedRiskLabel;
   trend: "stable" | "increasing" | "decreasing";
   description: string;
 }
@@ -136,8 +138,10 @@ export interface ContributingFactor {
 
 export interface RecommendationItem {
   id: string;
+  rule_id?: string;
   title: string;
   category: "sleep" | "activity" | "nutrition" | "stress";
+  priority?: "high" | "medium" | "low" | "protective";
   action: string;
   evidence_level: "A" | "B" | "C";
   source: string;

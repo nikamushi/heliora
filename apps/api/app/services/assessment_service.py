@@ -1,7 +1,8 @@
 """HELIORA API — Assessment service.
 
-Orchestrates the health assessment pipeline: profile validation, risk calculation,
-scoring, factor attribution, recommendations, and persistence (Architecture §6.6, §8, BE-004).
+Orchestrates the health assessment pipeline: profile validation,
+risk calculation, scoring, factor attribution, recommendations,
+and persistence (Architecture §6.6, §8, BE-004).
 """
 
 import uuid
@@ -38,7 +39,7 @@ class AssessmentService:
     def _format_assessment_response(
         cls, assessment: Assessment, top_factors: list[ContributingFactor] | None = None
     ) -> AssessmentSummaryResponse:
-        """Format an Assessment ORM entity and relations into AssessmentSummaryResponse."""
+        """Format an Assessment ORM entity into AssessmentSummaryResponse."""
         rr = assessment.risk_result
         if rr is None:
             raise HTTPException(
@@ -46,30 +47,47 @@ class AssessmentService:
                 detail="Asesmen ditemukan tetapi hasil kalkulasi risiko tidak lengkap.",
             )
 
+        def map_risk_item(
+            condition: Literal["diabetes", "hypertension", "cardiovascular"],
+            label: str,
+            prob: float,
+            description: str,
+        ) -> RiskAssessmentItem:
+            level = cls._to_risk_level(prob)
+            label_map: dict[str, Literal["Lower", "Moderate", "Higher"]] = {
+                "low": "Lower",
+                "moderate": "Moderate",
+                "high": "Higher",
+            }
+            return RiskAssessmentItem(
+                condition=condition,
+                label=label,
+                probability=prob,
+                estimated_risk_score=round(prob * 100.0, 1),
+                risk_level=level,
+                risk_label=label_map[level],
+                trend="stable",
+                description=description,
+            )
+
         risks = [
-            RiskAssessmentItem(
-                condition="diabetes",
-                label="Diabetes Melitus",
-                probability=float(rr.diabetes_risk),
-                risk_level=cls._to_risk_level(float(rr.diabetes_risk)),
-                trend="stable",
-                description="Estimasi faktor risiko metabolik dan pola gaya hidup.",
+            map_risk_item(
+                "diabetes",
+                "Diabetes Melitus",
+                float(rr.diabetes_risk),
+                "Estimasi faktor risiko metabolik dan pola gaya hidup.",
             ),
-            RiskAssessmentItem(
-                condition="hypertension",
-                label="Hipertensi",
-                probability=float(rr.hypertension_risk),
-                risk_level=cls._to_risk_level(float(rr.hypertension_risk)),
-                trend="stable",
-                description="Estimasi regulasi vaskular dan faktor stres/tidur.",
+            map_risk_item(
+                "hypertension",
+                "Hipertensi",
+                float(rr.hypertension_risk),
+                "Estimasi regulasi vaskular dan faktor stres/tidur.",
             ),
-            RiskAssessmentItem(
-                condition="cardiovascular",
-                label="Penyakit Jantung",
-                probability=float(rr.cardiovascular_risk),
-                risk_level=cls._to_risk_level(float(rr.cardiovascular_risk)),
-                trend="stable",
-                description="Estimasi risiko kardiovaskular kumulatif.",
+            map_risk_item(
+                "cardiovascular",
+                "Penyakit Jantung",
+                float(rr.cardiovascular_risk),
+                "Estimasi risiko kardiovaskular kumulatif.",
             ),
         ]
 
@@ -87,19 +105,39 @@ class AssessmentService:
         recommendations: list[RecommendationItem] = []
         if assessment.recommendations:
             for rec in assessment.recommendations:
+                rec_priority: Literal["high", "medium", "low", "protective"] = (
+                    rec.priority  # type: ignore[assignment]
+                    if rec.priority in ("high", "medium", "low", "protective")
+                    else "medium"
+                )
                 recommendations.append(
                     RecommendationItem(
                         id=str(rec.id),
+                        rule_id=rec.rule_id,
                         title=rec.title,
                         category=map_rec_category(rec.rule_id),
+                        priority=rec_priority,
                         action=rec.description,
                         evidence_level="A",
                         source=rec.guideline_source,
                     )
                 )
 
-        # If top_factors not passed, generate baseline from health profile if available
+        # 1. Prefer explicitly supplied in-memory factors (e.g. fresh run)
         factors = top_factors or []
+
+        # 2. Reconstruct from persisted XAI results (historical immutability)
+        if not factors and rr.xai_results:
+            factors = [
+                risk_engine.format_factor_from_xai(
+                    xr.feature_name,
+                    xr.direction,
+                    float(xr.contribution),
+                )
+                for xr in rr.xai_results
+            ]
+
+        # 3. Fallback only for legacy records without persisted XAI results
         if not factors and assessment.health_profile:
             factors = risk_engine.extract_top_factors(
                 assessment.health_profile,
@@ -119,9 +157,7 @@ class AssessmentService:
             top_factors=factors,
             recommendations=recommendations,
             assessed_at=(
-                assessment.created_at.isoformat()
-                if assessment.created_at
-                else ""
+                assessment.created_at.isoformat() if assessment.created_at else ""
             ),
             is_mock=False,
         )
@@ -129,12 +165,15 @@ class AssessmentService:
     async def run_assessment(
         self, session: AsyncSession, user_id: uuid.UUID
     ) -> AssessmentSummaryResponse:
-        """Run complete assessment for user using their current active health profile."""
+        """Run complete assessment for user using their active health profile."""
         profile = await health_profile_repo.get_by_user_id(session, user_id)
         if profile is None:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Profil kesehatan belum ditemukan. Silakan lengkapi profil kesehatan sebelum melakukan asesmen risiko.",
+                detail=(
+                    "Profil kesehatan belum ditemukan. Silakan lengkapi "
+                    "profil kesehatan sebelum melakukan asesmen risiko."
+                ),
             )
 
         # 1. Compute risks & composite scores
@@ -168,9 +207,16 @@ class AssessmentService:
             recommendations_data=recs_data,
         )
 
+        xai_records = await assessment_repo.create_xai_results(
+            session,
+            risk_result_id=risk_res.id,
+            factors_data=top_factors,
+        )
+
         await assessment_repo.commit_assessment_transaction(session, assessment)
 
         # Attach relations in memory for immediate formatting
+        risk_res.xai_results = xai_records
         assessment.risk_result = risk_res
         assessment.recommendations = rec_records
         assessment.health_profile = profile
@@ -185,7 +231,10 @@ class AssessmentService:
         if assessment is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Belum ada data asesmen risiko. Silakan jalankan asesmen terlebih dahulu.",
+                detail=(
+                    "Belum ada data asesmen risiko. "
+                    "Silakan jalankan asesmen terlebih dahulu."
+                ),
             )
         return self._format_assessment_response(assessment)
 

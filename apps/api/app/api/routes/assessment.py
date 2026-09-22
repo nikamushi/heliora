@@ -5,6 +5,7 @@ Implements Architecture §6.6, §8.7, §21.1, PRD FR-042, and BE-004.
 """
 
 import uuid
+
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -71,4 +72,3 @@ async def get_assessment_by_id(
     return await assessment_service.get_assessment_by_id(
         db, assessment_id, current_user.id
     )
-

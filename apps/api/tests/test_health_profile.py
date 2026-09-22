@@ -6,7 +6,7 @@ CRUD repository/service operations, and endpoint access controls.
 
 import uuid
 from decimal import Decimal
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from fastapi import HTTPException
@@ -27,8 +27,8 @@ from app.schemas.health_profile import (
 )
 from app.services.health_profile_service import health_profile_service
 
-
 # ── 1. BMI Calculation & Category Unit Tests ─────────────────────────────────
+
 
 def test_calculate_bmi():
     """BMI formula: weight (kg) / (height (m) ^ 2) rounded to 1 decimal place."""
@@ -51,6 +51,7 @@ def test_get_bmi_category():
 
 
 # ── 2. Pydantic Schema Validation Tests (FR-007) ─────────────────────────────
+
 
 def test_health_profile_valid_payload():
     """Valid payload instantiates cleanly with default family_history."""
@@ -158,6 +159,7 @@ def test_health_profile_invalid_enums():
 
 
 # ── 3. Service Layer Unit Tests (Mock DB) ────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_service_create_profile():
@@ -297,7 +299,40 @@ async def test_service_get_profile_not_found():
         assert exc_info.value.status_code == 404
 
 
+@pytest.mark.asyncio
+async def test_service_get_profile_returns_family_history_details():
+    """Retrieving a profile preserves persisted family_history_details."""
+    user_id = uuid.uuid4()
+    mock_session = AsyncMock()
+
+    stored_profile = HealthProfile(
+        id=uuid.uuid4(),
+        user_id=user_id,
+        age=45,
+        gender="male",
+        height_cm=Decimal("170.0"),
+        weight_kg=Decimal("70.0"),
+        physical_activity_min_per_week=Decimal("150.0"),
+        sleep_duration_hours=Decimal("8.0"),
+        smoking_status="never",
+        family_history=True,
+        family_history_details="Maternal grandfather had early CVD",
+        bmi=Decimal("24.2"),
+    )
+
+    with patch(
+        "app.services.health_profile_service.health_profile_repo.get_by_user_id",
+        new_callable=AsyncMock,
+        return_value=stored_profile,
+    ):
+        res = await health_profile_service.get_profile(mock_session, user_id)
+        assert res.family_history is True
+        assert res.family_history_details == "Maternal grandfather had early CVD"
+        assert res.bmi == 24.2
+
+
 # ── 4. Route Layer Tests (Dependency Injection / Overrides) ──────────────────
+
 
 @pytest.mark.asyncio
 async def test_routes_require_consent_403():
@@ -313,12 +348,14 @@ async def test_routes_require_consent_403():
     from app.api.dependencies import get_current_user, get_db, require_active_consent
 
     app.dependency_overrides[get_current_user] = lambda: dummy_user
+
     # Simulate missing/revoked consent
     async def override_missing_consent():
         raise HTTPException(
             status_code=403,
             detail="Active consent and medical disclaimer agreement required",
         )
+
     app.dependency_overrides[require_active_consent] = override_missing_consent
     app.dependency_overrides[get_db] = lambda: AsyncMock()
 

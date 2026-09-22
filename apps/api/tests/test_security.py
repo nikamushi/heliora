@@ -255,6 +255,3 @@ async def test_get_current_user_oauth_user_without_password():
         assert resolved.id == user_id
         assert resolved.password_hash is None
         assert resolved.email == "google_user@heliora.health"
-
-
-
