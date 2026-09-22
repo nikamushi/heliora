@@ -325,6 +325,12 @@ class ApiClient {
     getLatest: async (): Promise<AssessmentSummaryResponse> => {
       return this.request<AssessmentSummaryResponse>("/assessment/latest", { method: "GET" }, true);
     },
+    run: async (): Promise<AssessmentSummaryResponse> => {
+      return this.request<AssessmentSummaryResponse>("/assessment", { method: "POST" }, true);
+    },
+    getById: async (assessmentId: string): Promise<AssessmentSummaryResponse> => {
+      return this.request<AssessmentSummaryResponse>(`/assessment/${assessmentId}`, { method: "GET" }, true);
+    },
   };
 }
 

@@ -26,10 +26,12 @@ router = APIRouter()
     "/register",
     response_model=TokenResponse,
     status_code=status.HTTP_201_CREATED,
-    summary="Register a new user",
+    deprecated=True,
+    summary="Register a new user (Deprecated)",
     description=(
+        "[DEPRECATED per ADR-011: Use Supabase Auth for user registration.] "
         "Registers a new user account with validated credentials "
-        "and returns a JWT access token."
+        "and returns a legacy JWT access token."
     ),
 )
 async def register(
@@ -44,10 +46,12 @@ async def register(
     "/login",
     response_model=TokenResponse,
     status_code=status.HTTP_200_OK,
-    summary="User login (JSON)",
+    deprecated=True,
+    summary="User login via JSON (Deprecated)",
     description=(
+        "[DEPRECATED per ADR-011: Use Supabase Auth for user authentication.] "
         "Authenticates user credentials provided via JSON body "
-        "and returns a JWT bearer token."
+        "and returns a legacy JWT bearer token."
     ),
 )
 async def login(
@@ -64,8 +68,12 @@ async def login(
     "/token",
     response_model=TokenResponse,
     status_code=status.HTTP_200_OK,
-    summary="OAuth2 Password token endpoint",
-    description="OAuth2-compatible form login endpoint for Swagger UI authorization.",
+    deprecated=True,
+    summary="OAuth2 Password token endpoint (Deprecated)",
+    description=(
+        "[DEPRECATED per ADR-011: Kept for OpenAPI Swagger UI and legacy local dev.] "
+        "OAuth2-compatible form login endpoint for Swagger UI authorization."
+    ),
 )
 async def login_for_access_token(
     form_data: OAuth2PasswordRequestForm = Depends(),

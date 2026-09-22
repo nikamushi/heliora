@@ -104,17 +104,39 @@ export default function DashboardPage() {
               </p>
             </div>
             <div className="pt-2 flex flex-col sm:flex-row gap-2 justify-center">
+              <button
+                type="button"
+                onClick={async () => {
+                  setIsLoading(true);
+                  setError(null);
+                  try {
+                    await apiClient.assessment.run();
+                    await loadDashboard();
+                  } catch (e: unknown) {
+                    if (e instanceof ApiClientError && e.status === 400) {
+                      router.push("/onboarding/health-profile");
+                    } else {
+                      setError(e instanceof ApiClientError ? e : new ApiClientError(0, "Gagal menjalankan asesmen."));
+                    }
+                  } finally {
+                    setIsLoading(false);
+                  }
+                }}
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-brand-900 hover:bg-brand-900/90 text-white text-xs font-semibold shadow-md shadow-brand-900/15 transition-all cursor-pointer"
+              >
+                <span>Jalankan Asesmen</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
               <Link
                 href="/onboarding/health-profile"
-                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-brand-900 hover:bg-brand-900/90 text-white text-xs font-semibold shadow-md shadow-brand-900/15 transition-all"
+                className="inline-flex items-center justify-center px-4 py-2.5 rounded-xl border border-brand-900/15 text-xs font-semibold text-brand-900/70 hover:text-brand-900 hover:bg-neutral-50 transition-all"
               >
-                <span>Isi Profil Kesehatan</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                <span>Isi / Ubah Profil</span>
               </Link>
               <button
                 type="button"
                 onClick={handleLogout}
-                className="inline-flex items-center justify-center px-4 py-2.5 rounded-xl border border-brand-900/15 text-xs font-semibold text-brand-900/70 hover:text-brand-900 hover:bg-neutral-50 transition-all"
+                className="inline-flex items-center justify-center px-4 py-2.5 rounded-xl border border-brand-900/15 text-xs font-semibold text-brand-900/70 hover:text-brand-900 hover:bg-neutral-50 transition-all cursor-pointer"
               >
                 Keluar
               </button>

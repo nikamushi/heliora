@@ -196,6 +196,13 @@ export default function HealthProfilePage() {
       // Simpan langsung ke backend API — kegagalan tidak lagi ditelan diam-diam
       await apiClient.healthProfile.save(payload);
 
+      // Otomatis jalankan asesmen risiko awal berbasis profil kesehatan yang baru disimpan
+      try {
+        await apiClient.assessment.run();
+      } catch (assessmentErr) {
+        console.warn("Auto-assessment on onboarding warning:", assessmentErr);
+      }
+
       // Sinkronkan ke cache lokal untuk percepatan UI
       if (typeof window !== "undefined") {
         localStorage.setItem("heliora_health_profile", JSON.stringify(payload));

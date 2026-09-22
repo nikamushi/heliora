@@ -716,7 +716,7 @@ Acceptance Criteria:
 **Owner:** Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S2  
-**Status:** READY
+**Status:** DONE
 
 Required fields:
 
@@ -733,11 +733,11 @@ Family History
 
 Tasks:
 
-- [ ] Create profile.
-- [ ] Read profile.
-- [ ] Update profile.
-- [ ] Validation.
-- [ ] BMI calculation.
+- [x] Create profile.
+- [x] Read profile.
+- [x] Update profile.
+- [x] Validation.
+- [x] BMI calculation.
 
 Acceptance Criteria:
 
@@ -758,16 +758,16 @@ Acceptance Criteria:
 **Owner:** Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S4  
-**Status:** BACKLOG
+**Status:** DONE
 
 Tasks:
 
-- [ ] Assessment endpoint.
-- [ ] Profile validation.
-- [ ] Risk engine integration.
-- [ ] Score integration.
-- [ ] Store assessment.
-- [ ] Return result.
+- [x] Assessment endpoint.
+- [x] Profile validation.
+- [x] Risk engine integration.
+- [x] Score integration.
+- [x] Store assessment.
+- [x] Return result.
 
 Acceptance Criteria:
 
