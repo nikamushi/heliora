@@ -6,6 +6,7 @@ Implements Architecture §8.3, §22, PRD FR-006, FR-007, FR-008, and BE-003.
 import uuid
 from datetime import datetime
 from enum import StrEnum
+
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -63,7 +64,10 @@ class HealthProfileCreateRequest(BaseModel):
     height_cm: float = Field(..., gt=0, le=300, description="Height in cm")
     weight_kg: float = Field(..., gt=0, le=500, description="Weight in kg")
     physical_activity_min_per_week: float = Field(
-        ..., ge=0, le=10080, description="Physical activity duration in minutes per week"
+        ...,
+        ge=0,
+        le=10080,
+        description="Physical activity duration in minutes per week",
     )
     sleep_duration_hours: float = Field(
         ..., ge=0, le=24, description="Average daily sleep duration in hours"
@@ -72,7 +76,8 @@ class HealthProfileCreateRequest(BaseModel):
         ..., description="Smoking status (never, former, current)"
     )
     family_history: bool = Field(
-        default=False, description="Family history of chronic disease (diabetes, CVD, hypertension)"
+        default=False,
+        description="Family history of chronic disease (diabetes, CVD, hypertension)",
     )
     family_history_details: str | None = Field(
         default=None, description="Granular family history details if available"
@@ -81,7 +86,10 @@ class HealthProfileCreateRequest(BaseModel):
         default=None, ge=1, le=10, description="Self-reported stress level (1-10 scale)"
     )
     bmi: float | None = Field(
-        default=None, gt=0, le=100, description="Optional precomputed BMI (auto-calculated if omitted)"
+        default=None,
+        gt=0,
+        le=100,
+        description="Optional precomputed BMI (auto-calculated if omitted)",
     )
     waist_circumference_cm: float | None = Field(
         default=None, gt=0, le=300, description="Waist circumference in cm"

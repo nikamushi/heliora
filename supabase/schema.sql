@@ -77,6 +77,7 @@ CREATE TABLE IF NOT EXISTS public.health_profiles (
     sleep_duration_hours NUMERIC(3,1) NOT NULL CHECK (sleep_duration_hours >= 0 AND sleep_duration_hours <= 24),
     smoking_status VARCHAR(30) NOT NULL,
     family_history BOOLEAN NOT NULL DEFAULT false,
+    family_history_details TEXT,
     stress_level INTEGER CHECK (stress_level IS NULL OR (stress_level >= 1 AND stress_level <= 10)),
     waist_circumference_cm NUMERIC(5,1) CHECK (waist_circumference_cm IS NULL OR waist_circumference_cm > 0),
     blood_pressure VARCHAR(20),
@@ -212,6 +213,10 @@ CREATE POLICY "Users can view own consents" ON public.consents
 DROP POLICY IF EXISTS "Users can insert own consents" ON public.consents;
 CREATE POLICY "Users can insert own consents" ON public.consents
     FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Users can update own consents" ON public.consents;
+CREATE POLICY "Users can update own consents" ON public.consents
+    FOR UPDATE USING (auth.uid() = user_id);
 
 -- 3. health_profiles
 ALTER TABLE public.health_profiles ENABLE ROW LEVEL SECURITY;

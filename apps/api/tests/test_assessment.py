@@ -19,11 +19,12 @@ from app.db.models.health_profile import HealthProfile
 from app.db.models.recommendation import Recommendation
 from app.db.models.risk_result import RiskResult
 from app.db.models.user import User
+from app.db.models.xai_result import XAIResult
 from app.main import app
 from app.services.assessment_service import assessment_service
 
-
 # ── 1. Risk Engine Unit Tests ────────────────────────────────────────────────
+
 
 def test_risk_engine_healthy_profile():
     """Healthy profile produces low risk and high health/lifestyle scores."""
@@ -115,6 +116,7 @@ def test_risk_engine_factors_and_recommendations():
 
 # ── 2. Service Layer Tests (Mock DB) ─────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_service_run_assessment_no_profile_raises_400():
     """Running assessment without health profile raises 400 Bad Request."""
@@ -204,6 +206,11 @@ async def test_service_run_assessment_success():
             return_value=recs,
         ),
         patch(
+            "app.services.assessment_service.assessment_repo.create_xai_results",
+            new_callable=AsyncMock,
+            return_value=[],
+        ),
+        patch(
             "app.services.assessment_service.assessment_repo.commit_assessment_transaction",
             new_callable=AsyncMock,
             return_value=assessment,
@@ -214,6 +221,118 @@ async def test_service_run_assessment_success():
         assert result.user_id == str(user_id)
         assert result.health_score > 0
         assert len(result.risks) == 3
+        for r in result.risks:
+            assert r.estimated_risk_score == round(r.probability * 100.0, 1)
+            assert r.risk_label in ["Lower", "Moderate", "Higher"]
+
+
+@pytest.mark.asyncio
+async def test_service_get_latest_loads_persisted_xai_results():
+    """get_latest_assessment reconstructs top factors from persisted xai_results."""
+    user_id = uuid.uuid4()
+    assessment_id = uuid.uuid4()
+    mock_session = AsyncMock()
+
+    xai_item = XAIResult(
+        risk_result_id=uuid.uuid4(),
+        feature_name="physical_activity",
+        contribution=Decimal("25.0000"),
+        direction="positive",
+        rank=1,
+    )
+    risk_result = RiskResult(
+        assessment_id=assessment_id,
+        diabetes_risk=Decimal("0.1000"),
+        hypertension_risk=Decimal("0.1500"),
+        cardiovascular_risk=Decimal("0.1200"),
+        health_score=Decimal("82.0"),
+        lifestyle_score=Decimal("80.0"),
+    )
+    risk_result.xai_results = [xai_item]
+
+    assessment = Assessment(
+        id=assessment_id,
+        user_id=user_id,
+        health_profile_id=uuid.uuid4(),
+        status="completed",
+    )
+    assessment.risk_result = risk_result
+    assessment.recommendations = []
+    assessment.health_profile = None  # No health profile attached
+
+    with patch(
+        "app.services.assessment_service.assessment_repo.get_latest_by_user_id",
+        new_callable=AsyncMock,
+        return_value=assessment,
+    ):
+        res = await assessment_service.get_latest_assessment(mock_session, user_id)
+        assert len(res.top_factors) == 1
+        assert res.top_factors[0].feature == "physical_activity"
+        assert res.top_factors[0].impact == "increase"
+        assert res.top_factors[0].weight_percentage == 25.0
+
+
+@pytest.mark.asyncio
+async def test_historical_assessment_factors_immutable_when_profile_changes():
+    """Historical assessment factors do not alter even when current profile differs."""
+    user_id = uuid.uuid4()
+    assessment_id = uuid.uuid4()
+    mock_session = AsyncMock()
+
+    # Past assessment had BMI factor with 28.0%
+    past_xai = XAIResult(
+        risk_result_id=uuid.uuid4(),
+        feature_name="bmi",
+        contribution=Decimal("28.0000"),
+        direction="positive",
+        rank=1,
+    )
+    risk_result = RiskResult(
+        assessment_id=assessment_id,
+        diabetes_risk=Decimal("0.2000"),
+        hypertension_risk=Decimal("0.2500"),
+        cardiovascular_risk=Decimal("0.1800"),
+        health_score=Decimal("75.0"),
+        lifestyle_score=Decimal("70.0"),
+    )
+    risk_result.xai_results = [past_xai]
+
+    # Current profile has updated weight/bmi
+    new_profile = HealthProfile(
+        id=uuid.uuid4(),
+        user_id=user_id,
+        age=30,
+        gender="male",
+        height_cm=Decimal("175.0"),
+        weight_kg=Decimal("60.0"),  # lost weight
+        bmi=Decimal("19.6"),
+        physical_activity_min_per_week=Decimal("300.0"),
+        sleep_duration_hours=Decimal("8.0"),
+        smoking_status="never",
+        family_history=False,
+    )
+
+    assessment = Assessment(
+        id=assessment_id,
+        user_id=user_id,
+        health_profile_id=new_profile.id,
+        status="completed",
+    )
+    assessment.risk_result = risk_result
+    assessment.recommendations = []
+    assessment.health_profile = new_profile
+
+    with patch(
+        "app.services.assessment_service.assessment_repo.get_latest_by_user_id",
+        new_callable=AsyncMock,
+        return_value=assessment,
+    ):
+        res = await assessment_service.get_latest_assessment(mock_session, user_id)
+        # Factor must be from persisted xai_results, NOT from new_profile!
+        assert len(res.top_factors) == 1
+        assert res.top_factors[0].feature == "bmi"
+        assert res.top_factors[0].impact == "increase"
+        assert res.top_factors[0].weight_percentage == 28.0
 
 
 @pytest.mark.asyncio
@@ -253,6 +372,7 @@ async def test_service_get_by_id_not_found():
 
 # ── 3. Route Layer Tests (FastAPI Dependency Injection) ──────────────────────
 
+
 @pytest.mark.asyncio
 async def test_routes_assessment_require_consent_403():
     """POST /assessment without active consent returns 403 Forbidden."""
@@ -267,11 +387,13 @@ async def test_routes_assessment_require_consent_403():
     from app.api.dependencies import get_current_user, get_db, require_active_consent
 
     app.dependency_overrides[get_current_user] = lambda: dummy_user
+
     async def override_missing_consent():
         raise HTTPException(
             status_code=403,
             detail="Active consent and medical disclaimer agreement required",
         )
+
     app.dependency_overrides[require_active_consent] = override_missing_consent
     app.dependency_overrides[get_db] = lambda: AsyncMock()
 

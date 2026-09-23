@@ -5,6 +5,7 @@ Implements Architecture §8.3, §22, PRD FR-006, FR-007, FR-008, and BE-003.
 """
 
 import uuid
+
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -71,7 +72,10 @@ class HealthProfileService:
         if profile is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Profil kesehatan belum ditemukan. Silakan lengkapi profil terlebih dahulu.",
+                detail=(
+                    "Profil kesehatan belum ditemukan. "
+                    "Silakan lengkapi profil terlebih dahulu."
+                ),
             )
         return self._to_response(profile)
 

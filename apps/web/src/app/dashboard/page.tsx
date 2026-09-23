@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
@@ -17,7 +17,6 @@ import {
   X,
   ChevronRight,
   BookOpen,
-  Clock,
   Heart,
   Brain,
   ArrowRight,
@@ -25,8 +24,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { apiClient, ApiClientError } from "@/lib/api-client";
-import { useRequireAuth } from "@/lib/use-require-auth";
-import { AssessmentSummaryResponse, UserResponse } from "@/types/api";
+import { useLatestAssessment } from "@/lib/use-latest-assessment";
+import { AssessmentSummaryResponse } from "@/types/api";
 import { Button } from "@/components/ui/button";
 import { DisclaimerBanner } from "@/components/disclaimer-banner";
 import { MockDataNotice } from "@/components/mock-data-notice";
@@ -34,40 +33,47 @@ import { RiskBadge, getRiskTone } from "@/components/risk-badge";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { isAuthorized, redirectToLogin } = useRequireAuth();
-  const [user, setUser] = useState<UserResponse | null>(null);
-  const [assessment, setAssessment] = useState<AssessmentSummaryResponse | null>(null);
-  const [error, setError] = useState<ApiClientError | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { isAuthorized, assessment, isLoading, error, refetch: loadDashboard } = useLatestAssessment();
+  const user = useMemo(
+    () => (typeof window !== "undefined" ? apiClient.getStoredUser() : null),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [assessment]
+  );
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isRiskMenuExpanded, setIsRiskMenuExpanded] = useState(true);
+  const [highlightedRecId, setHighlightedRecId] = useState<string | null>(null);
+  const [activeFactorFeature, setActiveFactorFeature] = useState<string | null>(null);
+  const [isTriggering, setIsTriggering] = useState(false);
+  const [triggerError, setTriggerError] = useState<ApiClientError | null>(null);
 
-  const loadDashboard = async () => {
-    setIsLoading(true);
-    setError(null);
-    setUser(apiClient.getStoredUser());
-    try {
-      const data = await apiClient.assessment.getLatest();
-      setAssessment(data);
-    } catch (err) {
-      if (err instanceof ApiClientError) {
-        if (err.kind === "unauthorized") {
-          redirectToLogin();
-          return;
-        }
-        setError(err);
-      } else {
-        setError(new ApiClientError(0, "Terjadi kendala saat memuat data dashboard. Silakan coba kembali."));
-      }
-    } finally {
-      setIsLoading(false);
-    }
+  const FEATURE_TO_CATEGORY: Record<string, "sleep" | "activity" | "nutrition" | "stress"> = {
+    sleep_duration: "sleep",
+    physical_activity: "activity",
+    bmi: "nutrition",
+    smoking_status: "activity",
+    family_history: "nutrition",
+    stress_level: "stress",
   };
 
-  useEffect(() => {
-    if (!isAuthorized) return;
-    loadDashboard();
-  }, [isAuthorized, redirectToLogin]);
+  const handleFactorClick = (feature: string) => {
+    setActiveFactorFeature(feature);
+    const targetCategory = FEATURE_TO_CATEGORY[feature];
+    const matchedRec = assessment?.recommendations.find(
+      (r) => r.category === targetCategory
+    );
+
+    const targetId = matchedRec ? `rec-${matchedRec.id}` : "recommendations-section";
+    const el = document.getElementById(targetId);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      if (matchedRec) {
+        setHighlightedRecId(matchedRec.id);
+        setTimeout(() => {
+          setHighlightedRecId(null);
+        }, 2500);
+      }
+    }
+  };
 
   const handleLogout = () => {
     apiClient.auth.logout();
@@ -103,12 +109,18 @@ export default function DashboardPage() {
                 Anda belum memiliki hasil asesmen risiko preventif. Lengkapi profil kesehatan dan gaya hidup Anda untuk memulai estimasi model AI.
               </p>
             </div>
+            {triggerError && (
+              <p className="text-xs text-rose-600 font-medium">
+                {triggerError.message}
+              </p>
+            )}
             <div className="pt-2 flex flex-col sm:flex-row gap-2 justify-center">
               <button
                 type="button"
+                disabled={isTriggering}
                 onClick={async () => {
-                  setIsLoading(true);
-                  setError(null);
+                  setIsTriggering(true);
+                  setTriggerError(null);
                   try {
                     await apiClient.assessment.run();
                     await loadDashboard();
@@ -116,15 +128,19 @@ export default function DashboardPage() {
                     if (e instanceof ApiClientError && e.status === 400) {
                       router.push("/onboarding/health-profile");
                     } else {
-                      setError(e instanceof ApiClientError ? e : new ApiClientError(0, "Gagal menjalankan asesmen."));
+                      setTriggerError(
+                        e instanceof ApiClientError
+                          ? e
+                          : new ApiClientError(0, "Gagal menjalankan asesmen.")
+                      );
                     }
                   } finally {
-                    setIsLoading(false);
+                    setIsTriggering(false);
                   }
                 }}
-                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-brand-900 hover:bg-brand-900/90 text-white text-xs font-semibold shadow-md shadow-brand-900/15 transition-all cursor-pointer"
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-brand-900 hover:bg-brand-900/90 text-white text-xs font-semibold shadow-md shadow-brand-900/15 transition-all cursor-pointer disabled:opacity-60"
               >
-                <span>Jalankan Asesmen</span>
+                <span>{isTriggering ? "Menjalankan Asesmen..." : "Jalankan Asesmen"}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
               <Link
@@ -283,7 +299,28 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Group 2: Simulasi & Prediksi */}
+            {/* Group 2: Intervensi & Bukti */}
+            <div className="space-y-1">
+              <p className="text-[10px] font-mono font-bold tracking-widest text-brand-900/40 uppercase px-3 mb-2">
+                Intervensi &amp; Bukti
+              </p>
+              <Link
+                href="/dashboard/recommendations"
+                className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-brand-900/70 hover:bg-neutral-100/60 hover:text-brand-900 transition-colors"
+              >
+                <ShieldCheck className="w-4 h-4 shrink-0 text-brand-900/70" />
+                <span>Rencana Tindakan</span>
+              </Link>
+              <Link
+                href="/dashboard/evidence"
+                className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-brand-900/70 hover:bg-neutral-100/60 hover:text-brand-900 transition-colors"
+              >
+                <BookOpen className="w-4 h-4 shrink-0 text-brand-900/70" />
+                <span>Pusat Bukti Medis</span>
+              </Link>
+            </div>
+
+            {/* Group 3: Simulasi & Prediksi */}
             <div className="space-y-1">
               <p className="text-[10px] font-mono font-bold tracking-widest text-brand-900/40 uppercase px-3 mb-2">
                 Simulasi
@@ -416,6 +453,22 @@ export default function DashboardPage() {
                     <Brain className="w-4 h-4 shrink-0" />
                     <span>Risiko Kardiovaskular</span>
                   </Link>
+                  <Link
+                    href="/dashboard/recommendations"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-brand-900/70 hover:bg-neutral-100"
+                  >
+                    <ShieldCheck className="w-4 h-4 shrink-0" />
+                    <span>Rencana Tindakan</span>
+                  </Link>
+                  <Link
+                    href="/dashboard/evidence"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-brand-900/70 hover:bg-neutral-100"
+                  >
+                    <BookOpen className="w-4 h-4 shrink-0" />
+                    <span>Pusat Bukti Medis</span>
+                  </Link>
                   <ComingSoonNavItem icon={Sliders} label="What-If Simulator" />
                   <ComingSoonNavItem icon={TrendingUp} label="Proyeksi 180 Hari" />
                   <Link
@@ -520,7 +573,11 @@ export default function DashboardPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {assessment.risks.map((risk) => {
-                const pct = Math.round(risk.probability * 100);
+                const rawScore = risk.estimated_risk_score ?? risk.probability;
+                const pct =
+                  rawScore !== undefined
+                    ? Math.round(rawScore <= 1.0 ? rawScore * 100 : rawScore)
+                    : 0;
                 const tone = getRiskTone(risk.risk_level);
 
                 return (
@@ -532,7 +589,7 @@ export default function DashboardPage() {
                     <div className="space-y-2.5">
                       <div className="flex items-start justify-between gap-2">
                         <h3 className="text-sm font-bold text-brand-900">{risk.label}</h3>
-                        <RiskBadge level={risk.risk_level} />
+                        <RiskBadge level={risk.risk_level} labelOverride={risk.risk_label} />
                       </div>
 
                       <div className="flex items-baseline gap-2">
@@ -565,53 +622,82 @@ export default function DashboardPage() {
 
           {/* Row 3: Interactive Simulation Hub (Killer Features) */}
           <section className="rounded-2xl bg-brand-900 text-white p-6 sm:p-7 shadow-sm space-y-5">
-            <div className="space-y-1">
-              <h2 className="text-lg sm:text-xl font-bold text-white">Simulasi Gaya Hidup</h2>
-              <p className="text-xs text-brand-200/80 leading-relaxed max-w-2xl">
-                Dua simulasi ini sedang dibangun. Setelah tersedia, Anda bisa mengubah durasi tidur,
-                aktivitas fisik, dan berat badan untuk melihat perubahan estimasi risiko.
-              </p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+              <div className="space-y-1">
+                <span className="text-[10px] font-mono font-bold tracking-widest text-brand-200/60 uppercase">
+                  Eksplorasi Skenario Preventif
+                </span>
+                <h2 className="text-lg sm:text-xl font-bold text-white">Simulasi Gaya Hidup & Proyeksi Horison</h2>
+                <p className="text-xs text-brand-200/80 leading-relaxed max-w-2xl">
+                  Modul eksperimental untuk menguji dampak 4 variabel gaya hidup (Durasi Tidur, Aktivitas Fisik, Berat Badan, dan Status Bebas Rokok) terhadap estimasi risiko kesehatan.
+                </p>
+              </div>
+
+              <div className="text-left sm:text-right shrink-0">
+                <span className="text-[10px] font-mono font-bold text-brand-200/60 uppercase block">
+                  Status Engine AI/ML
+                </span>
+                <span className="text-xs font-mono font-semibold text-brand-200">
+                  Tahap Kalibrasi Model (AI-002)
+                </span>
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-              <div className="p-5 rounded-xl bg-white/10 border border-white/15 flex flex-col justify-between space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-5 rounded-xl bg-white/5 border border-white/10 flex flex-col justify-between space-y-4">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <Sliders aria-hidden="true" className="w-4 h-4 text-brand-200" />
                     <h3 className="text-sm font-bold text-white">What-If Simulator</h3>
                   </div>
                   <p className="text-xs text-brand-200/80 leading-relaxed">
-                    Geser durasi tidur, aktivitas fisik, dan berat badan, lalu bandingkan estimasi risiko saat ini dengan hasil simulasi.
+                    Eksplorasi skenario interaktif: ubah durasi tidur, frekuensi latihan, dan target berat badan untuk melihat proyeksi perubahan estimasi risiko kardiometabolik Anda secara komparatif.
                   </p>
+                  <div className="pt-1 text-[11px] font-mono text-brand-200/60">
+                    Parameter: Tidur • Aktivitas Fisik • Berat Badan • Rokok
+                  </div>
                 </div>
 
-                <Button
-                  disabled
-                  className="w-full h-9 rounded-xl border border-white/25 bg-white/10 text-white text-xs font-semibold disabled:opacity-100"
-                >
-                  <Clock aria-hidden="true" className="w-3.5 h-3.5" />
-                  Segera hadir
-                </Button>
+                <div className="pt-3 border-t border-white/10 flex items-center justify-between">
+                  <span className="text-[10px] font-mono font-bold text-brand-200/60 uppercase">
+                    Tahap Kalibrasi Model AI/ML
+                  </span>
+                  <Link
+                    href="/dashboard/recommendations"
+                    className="text-xs font-semibold text-brand-200 hover:text-white underline underline-offset-2 flex items-center gap-1"
+                  >
+                    <span>Lihat Rekomendasi Terarah</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </Link>
+                </div>
               </div>
 
-              <div className="p-5 rounded-xl bg-white/10 border border-white/15 flex flex-col justify-between space-y-4">
+              <div className="p-5 rounded-xl bg-white/5 border border-white/10 flex flex-col justify-between space-y-4">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <TrendingUp aria-hidden="true" className="w-4 h-4 text-brand-200" />
-                    <h3 className="text-sm font-bold text-white">Proyeksi 180 Hari</h3>
+                    <h3 className="text-sm font-bold text-white">Proyeksi Horison 180 Hari</h3>
                   </div>
                   <p className="text-xs text-brand-200/80 leading-relaxed">
-                    Lihat proyeksi skor untuk 30, 90, dan 180 hari ke depan jika kebiasaan Anda tetap sama.
+                    Analisis tren kardiometabolik 30, 90, dan 180 hari ke depan berdasarkan pola kebiasaan preventif saat ini tanpa intervensi spekulatif.
                   </p>
+                  <div className="pt-1 text-[11px] font-mono text-brand-200/60">
+                    Horison: 30 Hari • 90 Hari • 180 Hari
+                  </div>
                 </div>
 
-                <Button
-                  disabled
-                  className="w-full h-9 rounded-xl border border-white/25 bg-white/10 text-white text-xs font-semibold disabled:opacity-100"
-                >
-                  <Clock aria-hidden="true" className="w-3.5 h-3.5" />
-                  Segera hadir
-                </Button>
+                <div className="pt-3 border-t border-white/10 flex items-center justify-between">
+                  <span className="text-[10px] font-mono font-bold text-brand-200/60 uppercase">
+                    Tahap Kalibrasi Model AI/ML
+                  </span>
+                  <Link
+                    href="/dashboard/evidence"
+                    className="text-xs font-semibold text-brand-200 hover:text-white underline underline-offset-2 flex items-center gap-1"
+                  >
+                    <span>Pusat Bukti Medis</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </Link>
+                </div>
               </div>
             </div>
           </section>
@@ -627,20 +713,30 @@ export default function DashboardPage() {
                 <h2 className="text-base font-bold text-brand-900 mt-1">
                   Faktor Penentu Profil Risiko Anda
                 </h2>
+                <p className="text-xs text-brand-900/60 mt-0.5">
+                  Klik salah satu faktor untuk melihat rekomendasi intervensi terarah di sebelahnya.
+                </p>
               </div>
 
               <div className="space-y-3">
                 {assessment.top_factors && assessment.top_factors.length > 0 ? (
                   assessment.top_factors.map((factor) => {
                     const isProtective = factor.impact === "decrease";
+                    const isSelected = activeFactorFeature === factor.feature;
 
                     return (
-                      <div
+                      <button
                         key={factor.feature}
-                        className="p-3.5 rounded-xl bg-brand-50/40 border border-brand-900/5 space-y-1.5"
+                        type="button"
+                        onClick={() => handleFactorClick(factor.feature)}
+                        className={`w-full text-left p-3.5 rounded-xl border space-y-1.5 transition-all duration-200 group ${
+                          isSelected
+                            ? "bg-brand-50/90 border-brand-900/30 shadow-xs"
+                            : "bg-brand-50/40 border-brand-900/5 hover:border-brand-900/20 hover:bg-brand-50/70"
+                        }`}
                       >
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-semibold text-brand-900">
+                          <span className="text-xs font-semibold text-brand-900 group-hover:text-brand-900">
                             {factor.label}
                           </span>
                           <span
@@ -651,10 +747,18 @@ export default function DashboardPage() {
                             {isProtective ? "Protektif" : `Beban +${factor.weight_percentage}%`}
                           </span>
                         </div>
-                        <p className="text-xs text-brand-900/60 leading-relaxed">
+                        <p className="text-xs text-brand-900/65 leading-relaxed">
                           {factor.description}
                         </p>
-                      </div>
+                        <div className="pt-2 flex items-center justify-between border-t border-brand-900/5">
+                          <span className="text-[10px] font-mono font-bold tracking-widest text-brand-900/40 uppercase group-hover:text-brand-900/70">
+                            Intervensi Terkait
+                          </span>
+                          <span className="text-[10px] font-mono font-bold text-brand-900/60 group-hover:text-brand-900 flex items-center gap-1">
+                            Lihat Rencana Aksi ↓
+                          </span>
+                        </div>
+                      </button>
                     );
                   })
                 ) : (
@@ -668,36 +772,62 @@ export default function DashboardPage() {
             </div>
 
             {/* Right Column: Recommended Action Plan */}
-            <div className="bg-white border border-brand-900/10 rounded-2xl p-6 shadow-xs space-y-4">
-              <div>
-                <p className="text-[11px] font-mono font-bold tracking-widest text-brand-900/50 uppercase">
-                  Intervensi Terarah
-                </p>
-                <h2 className="text-base font-bold text-brand-900 mt-1">
-                  Rencana Tindakan Berbasis Bukti
-                </h2>
+            <div id="recommendations-section" className="bg-white border border-brand-900/10 rounded-2xl p-6 shadow-xs space-y-4">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-[11px] font-mono font-bold tracking-widest text-brand-900/50 uppercase">
+                    Intervensi Terarah
+                  </p>
+                  <h2 className="text-base font-bold text-brand-900 mt-1">
+                    Rencana Tindakan Berbasis Bukti
+                  </h2>
+                </div>
+                <Link
+                  href="/dashboard/recommendations"
+                  className="text-xs font-semibold text-brand-900 hover:underline flex items-center gap-1 shrink-0"
+                >
+                  <span>Lihat Semua</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
               </div>
 
               <div className="space-y-3">
                 {assessment.recommendations && assessment.recommendations.length > 0 ? (
-                  assessment.recommendations.map((rec) => (
-                    <div
-                      key={rec.id}
-                      className="p-3.5 rounded-xl bg-brand-50/40 border border-brand-900/5 space-y-1.5"
-                    >
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-xs font-semibold text-brand-900">{rec.title}</h3>
-                        <span className="text-[11px] font-mono font-bold text-brand-900/50">
-                          Bukti Grade {rec.evidence_level}
-                        </span>
+                  assessment.recommendations.map((rec) => {
+                    const isHighlighted = highlightedRecId === rec.id;
+
+                    return (
+                      <div
+                        id={`rec-${rec.id}`}
+                        key={rec.id}
+                        className={`p-3.5 rounded-xl border space-y-1.5 transition-all duration-300 ${
+                          isHighlighted
+                            ? "bg-brand-50/90 border-brand-700/50 ring-2 ring-brand-700/30 shadow-sm"
+                            : "bg-brand-50/40 border-brand-900/5 hover:border-brand-900/15"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-xs font-semibold text-brand-900">{rec.title}</h3>
+                          <span className="text-[11px] font-mono font-bold text-brand-900/50">
+                            Bukti Grade {rec.evidence_level}
+                          </span>
+                        </div>
+                        <p className="text-xs text-brand-900/70 leading-relaxed">{rec.action}</p>
+                        <div className="pt-2 flex items-center justify-between border-t border-brand-900/5">
+                          <div className="flex items-center gap-1.5 text-[11px] text-brand-900/50 font-mono">
+                            <BookOpen className="w-3 h-3 text-brand-900/40" />
+                            <span>{rec.source}</span>
+                          </div>
+                          <Link
+                            href={`/dashboard/evidence?ref=${rec.id}`}
+                            className="text-[10px] font-mono font-bold text-brand-900/60 hover:text-brand-900 hover:underline"
+                          >
+                            Bukti Medis →
+                          </Link>
+                        </div>
                       </div>
-                      <p className="text-xs text-brand-900/70 leading-relaxed">{rec.action}</p>
-                      <div className="pt-1 flex items-center gap-1.5 text-[11px] text-brand-900/50 font-mono">
-                        <BookOpen className="w-3 h-3 text-brand-900/40" />
-                        <span>{rec.source}</span>
-                      </div>
-                    </div>
-                  ))
+                    );
+                  })
                 ) : (
                   <div className="p-6 rounded-xl bg-neutral-50/60 border border-brand-900/5 text-center">
                     <p className="text-xs text-brand-900/60 leading-relaxed">

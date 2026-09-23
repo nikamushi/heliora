@@ -12,6 +12,7 @@ from sqlalchemy import (
     Integer,
     Numeric,
     String,
+    Text,
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -55,6 +56,9 @@ class HealthProfile(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         String(30), nullable=False
     )  # never / former / current
     family_history: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    family_history_details: Mapped[str | None] = mapped_column(
+        Text, nullable=True
+    )
 
     # ── Optional fields ──────────────────────────────────────────
     stress_level: Mapped[int | None] = mapped_column(

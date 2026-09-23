@@ -1,23 +1,21 @@
 import { CircleCheck, TriangleAlert, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { RiskLevel } from "@/types/api";
+import type { RiskLevel, StandardizedRiskLabel } from "@/types/api";
 
 interface RiskTone {
-  label: string;
+  label: StandardizedRiskLabel;
   Icon: LucideIcon;
   filledIcon: boolean;
-  badgeClass: string;
   textClass: string;
   fillClass: string;
 }
 
-// Design.md §2.4: status is always icon + label + color, never color alone.
+// Design.md §2.4 & §15.1: status is always icon + label + color, strictly plain editorial typography.
 const RISK_TONES: Record<RiskLevel, RiskTone> = {
   low: {
     label: "Lower",
     Icon: CircleCheck,
     filledIcon: false,
-    badgeClass: "bg-risk-low-soft text-risk-low",
     textClass: "text-risk-low",
     fillClass: "bg-risk-low",
   },
@@ -25,7 +23,6 @@ const RISK_TONES: Record<RiskLevel, RiskTone> = {
     label: "Moderate",
     Icon: TriangleAlert,
     filledIcon: false,
-    badgeClass: "bg-risk-moderate-soft text-risk-moderate",
     textClass: "text-risk-moderate",
     fillClass: "bg-risk-moderate",
   },
@@ -33,37 +30,39 @@ const RISK_TONES: Record<RiskLevel, RiskTone> = {
     label: "Higher",
     Icon: TriangleAlert,
     filledIcon: true,
-    badgeClass: "bg-risk-higher-soft text-risk-higher",
     textClass: "text-risk-higher",
     fillClass: "bg-risk-higher",
   },
 };
 
 export function getRiskTone(level: RiskLevel): RiskTone {
-  return RISK_TONES[level];
+  return RISK_TONES[level] ?? RISK_TONES.low;
 }
 
 interface RiskBadgeProps {
   level: RiskLevel;
+  labelOverride?: StandardizedRiskLabel;
   className?: string;
 }
 
-export function RiskBadge({ level, className }: RiskBadgeProps) {
-  const { label, Icon, filledIcon, badgeClass } = RISK_TONES[level];
+export function RiskBadge({ level, labelOverride, className }: RiskBadgeProps) {
+  const tone = RISK_TONES[level] ?? RISK_TONES.low;
+  const label = labelOverride || tone.label;
+  const { Icon, filledIcon, textClass } = tone;
 
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-semibold",
-        badgeClass,
+        "inline-flex items-center gap-1.5 font-mono text-xs font-bold tracking-tight",
+        textClass,
         className
       )}
     >
       <Icon
         aria-hidden="true"
-        className={cn("size-3.5", filledIcon && "fill-current [&>path:not(:first-child)]:stroke-risk-higher-soft")}
+        className={cn("size-3.5 shrink-0", filledIcon && "fill-current")}
       />
-      {label}
+      <span>{label}</span>
     </span>
   );
 }

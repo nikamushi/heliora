@@ -18,7 +18,7 @@ class User(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     email: Mapped[str] = mapped_column(
         String(320), unique=True, nullable=False, index=True
     )
-    password_hash: Mapped[str] = mapped_column(String(128), nullable=False)
+    password_hash: Mapped[str | None] = mapped_column(String(128), nullable=True)
     full_name: Mapped[str] = mapped_column(String(255), nullable=False)
 
     # ── Relationships ────────────────────────────────────────────

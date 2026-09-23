@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import {
@@ -10,12 +10,10 @@ import {
   Sliders,
   TrendingUp,
   BookOpen,
-  Clock
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { apiClient, ApiClientError } from "@/lib/api-client";
-import { useRequireAuth } from "@/lib/use-require-auth";
-import { AssessmentSummaryResponse, RiskAssessmentItem, RiskLevel } from "@/types/api";
+import { useLatestAssessment } from "@/lib/use-latest-assessment";
+import { RiskAssessmentItem, RiskLevel } from "@/types/api";
 import { DisclaimerBanner } from "@/components/disclaimer-banner";
 import { MockDataNotice } from "@/components/mock-data-notice";
 import { RiskBadge, getRiskTone } from "@/components/risk-badge";
@@ -76,17 +74,17 @@ const DISEASE_METADATA: Record<string, DiseaseDetailMeta> = {
       {
         title: "Aktivitas Aerobik 150 Menit/Minggu",
         description: "Bagi dalam 3–5 sesi (seperti jalan cepat atau sepeda) untuk meningkatkan ambilan glukosa tanpa insulin.",
-        impactLabel: "Potensi reduksi risiko: -14%"
+        impactLabel: "Target: Panduan WHO 2020"
       },
       {
         title: "Stabilisasi Jam Tidur (7–8 Jam)",
         description: "Jaga jadwal tidur konsisten guna menormalkan ritme sirkadian dan regulasi nafsu makan leptin/ghrelin.",
-        impactLabel: "Potensi reduksi risiko: -8%"
+        impactLabel: "Target: Regulasi Sirkadian"
       },
       {
         title: "Manajemen Porsi & Karbohidrat Olahan",
         description: "Ganti karbohidrat sederhana dengan serat pangan tinggi (biji-bijian, sayuran hijau) untuk memperlambat lonjakan glikemik.",
-        impactLabel: "Potensi reduksi risiko: -11%"
+        impactLabel: "Target: Konsensus PERKENI"
       }
     ]
   },
@@ -127,17 +125,17 @@ const DISEASE_METADATA: Record<string, DiseaseDetailMeta> = {
       {
         title: "Manajemen Stres & Protokol Pernapasan",
         description: "Latihan pernapasan dalam terstruktur (4-7-8) 10 menit setiap malam untuk meredam tonus simpatis.",
-        impactLabel: "Potensi reduksi risiko: -12%"
+        impactLabel: "Target: Relaksasi Parasimpatis"
       },
       {
         title: "Diet Rendah Natrium (Pola DASH)",
         description: "Batasi asupan natrium harian di bawah 2.000 mg dan perbanyak kalium dari buah segar serta pisang/alpukat.",
-        impactLabel: "Potensi reduksi risiko: -15%"
+        impactLabel: "Target: Pola DASH & AHA"
       },
       {
         title: "Latihan Kardiorespirasi Konsisten",
         description: "Jalan santai atau renang 30 menit sehari menjaga kelenturan dinding pembuluh arteri.",
-        impactLabel: "Potensi reduksi risiko: -9%"
+        impactLabel: "Target: 150 Menit/Minggu"
       }
     ]
   },
@@ -178,17 +176,17 @@ const DISEASE_METADATA: Record<string, DiseaseDetailMeta> = {
       {
         title: "Hindari Perilaku Sedentari Panjang",
         description: "Berdiri dan regangkan tubuh minimal 3–5 menit setiap 60 menit duduk bekerja di meja.",
-        impactLabel: "Potensi reduksi risiko: -10%"
+        impactLabel: "Target: Interupsi Sedentari"
       },
       {
         title: "Pertahankan Gaya Hidup Bebas Rokok",
         description: "Pertahankan perlindungan vaskular maksimal dari paparan tar dan zat karsinogenik aerosol.",
-        impactLabel: "Proteksi optimal terjaga"
+        impactLabel: "Target: Bebas Rokok (WHO)"
       },
       {
         title: "Pemeriksaan Profil Metabolik Berkala",
         description: "Cek tekanan darah dan profil kolesterol setahun sekali sebagai langkah pengawasan preventif.",
-        impactLabel: "Deteksi dini preventif"
+        impactLabel: "Target: Skrining Berkala"
       }
     ]
   }
@@ -203,37 +201,27 @@ const LEVEL_INTERPRETATION: Record<RiskLevel, string> = {
 export default function RiskDetailPage() {
   const params = useParams();
   const diseaseKey = ((params?.disease as string) || "").toLowerCase();
-  const { isAuthorized, redirectToLogin } = useRequireAuth();
+  const {
+    isAuthorized,
+    assessment,
+    isLoading,
+    error,
+    refetch: fetchLatestAssessment,
+  } = useLatestAssessment();
 
-  const [assessment, setAssessment] = useState<AssessmentSummaryResponse | null>(null);
-  const [error, setError] = useState<ApiClientError | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [highlightedActionIdx, setHighlightedActionIdx] = useState<number | null>(null);
+  const [activeFactorIdx, setActiveFactorIdx] = useState<number | null>(null);
 
-  const fetchLatestAssessment = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const data = await apiClient.assessment.getLatest();
-      setAssessment(data);
-    } catch (err) {
-      if (err instanceof ApiClientError) {
-        if (err.kind === "unauthorized") {
-          redirectToLogin();
-          return;
-        }
-        setError(err);
-      } else {
-        setError(new ApiClientError(0, "Terjadi kendala saat memuat data analisis risiko."));
-      }
-    } finally {
-      setIsLoading(false);
+  const handleFactorClick = (factorIdx: number) => {
+    setActiveFactorIdx(factorIdx);
+    const targetIdx = factorIdx % (meta?.actionPlan.length || 1);
+    const el = document.getElementById(`action-step-${targetIdx}`);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      setHighlightedActionIdx(targetIdx);
+      setTimeout(() => setHighlightedActionIdx(null), 2500);
     }
   };
-
-  useEffect(() => {
-    if (!isAuthorized) return;
-    fetchLatestAssessment();
-  }, [isAuthorized, redirectToLogin]);
 
   if (!isAuthorized || isLoading) {
     return (
@@ -339,7 +327,11 @@ export default function RiskDetailPage() {
   }
 
   // Level comes from the assessment itself so this page always agrees with the dashboard card.
-  const pct = Math.round(matchedRisk.probability * 100);
+  const rawScore = matchedRisk.estimated_risk_score ?? matchedRisk.probability;
+  const pct =
+    rawScore !== undefined
+      ? Math.round(rawScore <= 1.0 ? rawScore * 100 : rawScore)
+      : 0;
   const tone = getRiskTone(matchedRisk.risk_level);
 
   return (
@@ -367,7 +359,11 @@ export default function RiskDetailPage() {
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-brand-900">
               {meta.title}
             </h1>
-            <RiskBadge level={matchedRisk.risk_level} className="self-start sm:self-auto text-sm" />
+            <RiskBadge
+              level={matchedRisk.risk_level}
+              labelOverride={matchedRisk.risk_label}
+              className="self-start sm:self-auto text-sm"
+            />
           </div>
           <p className="text-sm text-brand-900/70 leading-relaxed max-w-2xl">
             {meta.definition}
@@ -377,7 +373,7 @@ export default function RiskDetailPage() {
         <section className="bg-white border border-brand-900/10 rounded-2xl p-6 shadow-xs space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h2 className="text-sm font-semibold text-muted-foreground">Skor Estimasi Risiko</h2>
+              <h2 className="text-sm font-semibold text-muted-foreground">Estimasi Skor Risiko</h2>
               <p className="text-4xl font-bold tabular-nums text-brand-900 mt-1">{pct}%</p>
             </div>
 
@@ -405,42 +401,61 @@ export default function RiskDetailPage() {
         <section className="space-y-4">
           <div>
             <p className="text-xs font-mono font-bold tracking-widest text-brand-900/40 uppercase">
-              Analisis Penentu Risiko
+              Explainable AI (XAI)
             </p>
             <h2 className="text-lg font-bold text-brand-900 mt-1">
-              Faktor Penentu Skor Risiko Anda
+              Faktor Gaya Hidup Penentu Estimasi Anda
             </h2>
             <p className="text-xs text-brand-900/60 mt-0.5">
-              Bobot pengaruh variabel gaya hidup dan biometrik Anda terhadap kalkulasi model preventif.
+              Variabel gaya hidup yang paling berkontribusi terhadap kalkulasi estimasi risiko {meta.title}.
             </p>
           </div>
 
           <div className="grid grid-cols-1 gap-3">
-            {meta.factors.map((factor) => {
+            {(assessment.top_factors && assessment.top_factors.length > 0
+              ? assessment.top_factors
+              : meta.factors.map((f) => ({
+                  feature: f.name,
+                  label: f.name,
+                  impact: f.impact,
+                  weight_percentage: f.weight,
+                  description: f.note,
+                }))
+            ).map((factor, idx) => {
               const isBurden = factor.impact === "increase";
+              const isSelected = activeFactorIdx === idx;
+              const weightVal = Math.round(factor.weight_percentage);
 
               return (
-                <div
-                  key={factor.name}
-                  className="p-4 rounded-xl bg-white border border-brand-900/10 space-y-2.5 shadow-xs transition-all"
+                <button
+                  key={factor.feature || factor.label}
+                  type="button"
+                  onClick={() => handleFactorClick(idx)}
+                  className={`w-full text-left p-4 rounded-xl border space-y-2.5 shadow-xs transition-all duration-200 group ${
+                    isSelected
+                      ? "bg-brand-50/90 border-brand-900/30"
+                      : "bg-white border-brand-900/10 hover:border-brand-900/25 hover:bg-neutral-50/60"
+                  }`}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-brand-900">{factor.name}</span>
+                      <span className="text-sm font-semibold text-brand-900 group-hover:text-brand-900">
+                        {factor.label}
+                      </span>
                     </div>
                     <span
                       className={`text-xs font-mono font-bold ${
                         isBurden ? "text-amber-700" : "text-emerald-700"
                       }`}
                     >
-                      {isBurden ? `+${factor.weight}% Beban Risiko` : `-${factor.weight}% Protektif`}
+                      {isBurden ? `+${weightVal}% Beban Relatif` : `-${weightVal}% Protektif`}
                     </span>
                   </div>
 
                   {/* Visual Weight Bar */}
                   <div className="h-1.5 w-full bg-brand-900/10 rounded-full overflow-hidden">
                     <div
-                      style={{ width: `${factor.weight}%` }}
+                      style={{ width: `${Math.min(100, Math.max(5, weightVal))}%` }}
                       className={`h-full rounded-full ${
                         isBurden ? "bg-amber-600" : "bg-emerald-600"
                       }`}
@@ -448,81 +463,153 @@ export default function RiskDetailPage() {
                   </div>
 
                   <p className="text-xs text-brand-900/70 leading-relaxed">
-                    {factor.note}
+                    {factor.description}
                   </p>
-                </div>
+
+                  <div className="pt-2 flex items-center justify-between border-t border-brand-900/5">
+                    <span className="text-[10px] font-mono font-bold tracking-widest text-brand-900/40 uppercase group-hover:text-brand-900/70">
+                      Rencana Aksi Terarah
+                    </span>
+                    <span className="text-[10px] font-mono font-bold text-brand-900/60 group-hover:text-brand-900 flex items-center gap-1">
+                      Lihat Langkah Tindakan ↓
+                    </span>
+                  </div>
+                </button>
               );
             })}
           </div>
         </section>
 
         {/* Targeted Action Plan */}
-        <section className="space-y-4">
-          <div>
-            <p className="text-xs font-mono font-bold tracking-widest text-brand-900/40 uppercase">
-              Rencana Intervensi
-            </p>
-            <h2 className="text-lg font-bold text-brand-900 mt-1">
-              Target Perubahan Gaya Hidup Paling Efektif
-            </h2>
+        <section id="action-plan-section" className="space-y-4">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-xs font-mono font-bold tracking-widest text-brand-900/40 uppercase">
+                Rencana Intervensi
+              </p>
+              <h2 className="text-lg font-bold text-brand-900 mt-1">
+                Target Perubahan Gaya Hidup Paling Efektif
+              </h2>
+            </div>
+            <Link
+              href="/dashboard/recommendations"
+              className="text-xs font-semibold text-brand-900 hover:underline flex items-center gap-1 shrink-0"
+            >
+              <span>Semua Rekomendasi</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {meta.actionPlan.map((action, idx) => (
-              <div
-                key={action.title}
-                className="bg-white border border-brand-900/10 rounded-2xl p-5 flex flex-col justify-between space-y-3 shadow-xs"
-              >
-                <div className="space-y-2">
-                  <span className="text-[11px] font-mono font-bold text-brand-900/40">
-                    Langkah 0{idx + 1}
-                  </span>
-                  <h3 className="text-sm font-bold text-brand-900 leading-snug">
-                    {action.title}
-                  </h3>
-                  <p className="text-xs text-brand-900/70 leading-relaxed">
-                    {action.description}
-                  </p>
-                </div>
+            {meta.actionPlan.map((action, idx) => {
+              const isHighlighted = highlightedActionIdx === idx;
 
-                <div className="pt-2 border-t border-brand-900/5">
-                  <span className="text-[11px] font-mono font-bold text-emerald-800">
-                    {action.impactLabel}
-                  </span>
+              return (
+                <div
+                  id={`action-step-${idx}`}
+                  key={action.title}
+                  className={`border rounded-2xl p-5 flex flex-col justify-between space-y-3 shadow-xs transition-all duration-300 ${
+                    isHighlighted
+                      ? "bg-brand-50/90 border-brand-700/50 ring-2 ring-brand-700/30 shadow-sm"
+                      : "bg-white border-brand-900/10 hover:border-brand-900/20"
+                  }`}
+                >
+                  <div className="space-y-2">
+                    <span className="text-[11px] font-mono font-bold text-brand-900/40">
+                      Langkah 0{idx + 1}
+                    </span>
+                    <h3 className="text-sm font-bold text-brand-900 leading-snug">
+                      {action.title}
+                    </h3>
+                    <p className="text-xs text-brand-900/70 leading-relaxed">
+                      {action.description}
+                    </p>
+                  </div>
+
+                  <div className="pt-2 border-t border-brand-900/5 flex items-center justify-between">
+                    <span className="text-[11px] font-mono font-bold text-emerald-800">
+                      {action.impactLabel}
+                    </span>
+                    <Link
+                      href={`/dashboard/evidence?disease=${diseaseKey}`}
+                      className="text-[10px] font-mono font-bold text-brand-900/60 hover:text-brand-900"
+                    >
+                      Bukti →
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
 
         {/* Action CTAs (Simulation Integrations) */}
-        <section className="p-6 rounded-2xl bg-brand-900 text-white space-y-4 shadow-sm">
-          <div className="space-y-1">
-            <h2 className="text-lg font-bold text-white">Simulasi Gaya Hidup</h2>
-            <p className="text-xs text-brand-200/80 leading-relaxed max-w-xl">
-              Simulasi sedang dibangun. Setelah tersedia, Anda bisa melihat bagaimana perubahan tidur,
-              aktivitas fisik, dan berat badan memengaruhi estimasi risiko {meta.title}.
-            </p>
+        <section className="p-6 rounded-2xl bg-brand-900 text-white space-y-5 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+            <div className="space-y-1">
+              <span className="text-[10px] font-mono font-bold tracking-widest text-brand-200/60 uppercase">
+                Simulasi Eksploratif
+              </span>
+              <h2 className="text-lg font-bold text-white">Eksplorasi Skenario Gaya Hidup</h2>
+              <p className="text-xs text-brand-200/80 leading-relaxed max-w-xl">
+                Nantinya Anda dapat menggeser variabel tidur, kebugaran fisik, dan berat badan untuk melihat dampaknya secara langsung terhadap estimasi risiko {meta.title}.
+              </p>
+            </div>
+
+            <div className="text-left sm:text-right shrink-0">
+              <span className="text-[10px] font-mono font-bold text-brand-200/60 uppercase block">
+                Status Modul
+              </span>
+              <span className="text-xs font-mono font-semibold text-brand-200">
+                Tahap Kalibrasi AI/ML
+              </span>
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 pt-2">
-            <Button disabled className="h-10 px-5 rounded-xl border border-white/25 bg-white/10 text-white font-semibold text-xs disabled:opacity-100">
-              <Sliders aria-hidden="true" className="w-3.5 h-3.5" />
-              What-If Simulator
-              <span className="inline-flex items-center gap-1 font-medium text-white/75">
-                <Clock aria-hidden="true" className="w-3 h-3" />
-                Segera hadir
-              </span>
-            </Button>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-3">
+              <div className="flex items-center gap-2">
+                <Sliders aria-hidden="true" className="w-4 h-4 text-brand-200" />
+                <h3 className="text-sm font-bold text-white">What-If Simulator</h3>
+              </div>
+              <p className="text-xs text-brand-200/75 leading-relaxed">
+                Uji skenario modifikasi target gaya hidup Anda tanpa mengubah data profil asli.
+              </p>
+              <div className="pt-2 border-t border-white/10 flex items-center justify-between">
+                <span className="text-[10px] font-mono font-bold text-brand-200/60 uppercase">
+                  Tahap Kalibrasi Model
+                </span>
+                <Link
+                  href="/dashboard/recommendations"
+                  className="text-xs font-semibold text-brand-200 hover:text-white underline underline-offset-2 flex items-center gap-1"
+                >
+                  <span>Rekomendasi Terarah</span>
+                  <ArrowRight className="w-3 h-3" />
+                </Link>
+              </div>
+            </div>
 
-            <Button disabled className="h-10 px-5 rounded-xl border border-white/25 bg-white/10 text-white font-semibold text-xs disabled:opacity-100">
-              <TrendingUp aria-hidden="true" className="w-3.5 h-3.5" />
-              Proyeksi 180 Hari
-              <span className="inline-flex items-center gap-1 font-medium text-white/75">
-                <Clock aria-hidden="true" className="w-3 h-3" />
-                Segera hadir
-              </span>
-            </Button>
+            <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-3">
+              <div className="flex items-center gap-2">
+                <TrendingUp aria-hidden="true" className="w-4 h-4 text-brand-200" />
+                <h3 className="text-sm font-bold text-white">Proyeksi Horison 180 Hari</h3>
+              </div>
+              <p className="text-xs text-brand-200/75 leading-relaxed">
+                Visualisasi estimasi lintasan risiko preventif 30, 90, dan 180 hari ke depan.
+              </p>
+              <div className="pt-2 border-t border-white/10 flex items-center justify-between">
+                <span className="text-[10px] font-mono font-bold text-brand-200/60 uppercase">
+                  Tahap Kalibrasi Model
+                </span>
+                <Link
+                  href={`/dashboard/evidence?disease=${diseaseKey}`}
+                  className="text-xs font-semibold text-brand-200 hover:text-white underline underline-offset-2 flex items-center gap-1"
+                >
+                  <span>Dasar Ilmiah</span>
+                  <ArrowRight className="w-3 h-3" />
+                </Link>
+              </div>
+            </div>
           </div>
         </section>
 

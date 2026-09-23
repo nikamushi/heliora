@@ -1,4 +1,6 @@
-"""Tests for core security utilities: bcrypt hashing, JWT tokens, and Supabase JWKS verification."""
+"""Tests for core security utilities: bcrypt hashing, JWT tokens,
+and Supabase JWKS verification.
+"""
 
 import time
 from datetime import timedelta
@@ -24,6 +26,8 @@ def test_password_hashing():
     assert hashed != raw
     assert verify_password(raw, hashed) is True
     assert verify_password("WrongPassword", hashed) is False
+    assert verify_password("AnyPassword", None) is False
+    assert verify_password("AnyPassword", "") is False
 
 
 def test_jwt_token_lifecycle():
@@ -103,7 +107,9 @@ def test_supabase_jwks_verifier_key_not_found():
         headers={"kid": "unknown-kid"},
     )
     verifier = SupabaseJWKSVerifier()
-    with patch.object(verifier, "fetch_keys", return_value={"different-kid": MagicMock()}):
+    with patch.object(
+        verifier, "fetch_keys", return_value={"different-kid": MagicMock()}
+    ):
         with pytest.raises(jwt.JWTError, match="not found in Supabase JWKS"):
             verifier.verify_supabase_token(token)
 
@@ -115,37 +121,37 @@ def test_supabase_jwks_verifier_end_to_end():
     from jose import jwk
 
     private_key = ec.generate_private_key(ec.SECP256R1())
+    public_key = private_key.public_key()
+
     pem_private = private_key.private_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PrivateFormat.PKCS8,
         encryption_algorithm=serialization.NoEncryption(),
     )
-    pem_public = private_key.public_key().public_bytes(
-        encoding=serialization.Encoding.PEM,
-        format=serialization.PublicFormat.SubjectPublicKeyInfo,
-    )
+    jwk_dict = jwk.construct(public_key, algorithm="ES256").to_dict()
+    jwk_dict["kid"] = "valid-kid"
 
     claims = {
         "sub": "123e4567-e89b-12d3-a456-426614174000",
         "email": "test@heliora.health",
-        "iss": settings.SUPABASE_ISSUER,
         "aud": settings.SUPABASE_AUDIENCE,
     }
+    if settings.SUPABASE_ISSUER:
+        claims["iss"] = settings.SUPABASE_ISSUER
 
     token = jwt.encode(
         claims,
         pem_private,
         algorithm="ES256",
-        headers={"kid": "my-test-kid"},
+        headers={"kid": "valid-kid"},
     )
 
-    ec_jwk = jwk.construct(pem_public, algorithm="ES256")
-
     verifier = SupabaseJWKSVerifier()
-    verifier._keys = {"my-test-kid": ec_jwk}
-    verifier._last_fetched = time.time()
-
-    with patch.object(verifier, "fetch_keys", return_value=verifier._keys):
+    with patch.object(
+        verifier,
+        "fetch_keys",
+        return_value={"valid-kid": jwk_dict},
+    ):
         payload = verifier.verify_supabase_token(token)
         assert payload["sub"] == "123e4567-e89b-12d3-a456-426614174000"
         assert payload["email"] == "test@heliora.health"
@@ -170,43 +176,82 @@ async def test_get_current_user_resolves_existing():
     mock_db = AsyncMock()
 
     with (
-        patch("app.api.dependencies.verify_token", return_value={"sub": str(user_id)}),
-        patch("app.api.dependencies.user_repo.get_by_id", new_callable=AsyncMock, return_value=dummy_user),
+        patch(
+            "app.api.dependencies.verify_token",
+            return_value={"sub": str(user_id)},
+        ),
+        patch(
+            "app.api.dependencies.user_repo.get_by_id",
+            new_callable=AsyncMock,
+            return_value=dummy_user,
+        ),
     ):
-        resolved_user = await get_current_user(token="mock.jwt.token", db=mock_db)
+        resolved_user = await get_current_user(
+            token="mock.jwt.token",
+            db=mock_db,
+        )
         assert resolved_user.id == user_id
         assert resolved_user.email == "existing@heliora.health"
 
 
 @pytest.mark.asyncio
-async def test_get_current_user_jit_provisioning():
-    """get_current_user provisions new user if absent from local DB."""
+async def test_get_current_user_not_found_raises_401():
+    """get_current_user raises 401 when token is valid but user is absent."""
     import uuid
     from unittest.mock import AsyncMock
+
+    from fastapi import HTTPException
 
     from app.api.dependencies import get_current_user
 
     user_id = uuid.uuid4()
     mock_db = AsyncMock()
-    mock_db.add = MagicMock()
 
     payload = {
         "sub": str(user_id),
-        "email": "newuser@heliora.health",
-        "user_metadata": {"full_name": "New Supabase User"},
+        "email": "absentuser@heliora.health",
     }
 
     with (
         patch("app.api.dependencies.verify_token", return_value=payload),
-        patch("app.api.dependencies.user_repo.get_by_id", new_callable=AsyncMock, return_value=None),
+        patch(
+            "app.api.dependencies.user_repo.get_by_id",
+            new_callable=AsyncMock,
+            return_value=None,
+        ),
     ):
-        resolved_user = await get_current_user(token="mock.supabase.token", db=mock_db)
-        assert resolved_user.id == user_id
-        assert resolved_user.email == "newuser@heliora.health"
-        assert resolved_user.full_name == "New Supabase User"
-        assert resolved_user.password_hash == "supabase_managed"
-        mock_db.add.assert_called_once()
-        mock_db.commit.assert_awaited_once()
+        with pytest.raises(HTTPException) as exc_info:
+            await get_current_user(token="mock.supabase.token", db=mock_db)
+        assert exc_info.value.status_code == 401
 
 
+@pytest.mark.asyncio
+async def test_get_current_user_oauth_user_without_password():
+    """get_current_user cleanly resolves an OAuth user whose password_hash is None."""
+    import uuid
+    from unittest.mock import AsyncMock
 
+    from app.api.dependencies import get_current_user
+    from app.db.models.user import User
+
+    user_id = uuid.uuid4()
+    oauth_user = User(
+        id=user_id,
+        email="google_user@heliora.health",
+        password_hash=None,
+        full_name="Google OAuth User",
+    )
+    mock_db = AsyncMock()
+
+    with (
+        patch("app.api.dependencies.verify_token", return_value={"sub": str(user_id)}),
+        patch(
+            "app.api.dependencies.user_repo.get_by_id",
+            new_callable=AsyncMock,
+            return_value=oauth_user,
+        ),
+    ):
+        resolved = await get_current_user(token="mock.oauth.token", db=mock_db)
+        assert resolved.id == user_id
+        assert resolved.password_hash is None
+        assert resolved.email == "google_user@heliora.health"

@@ -9,11 +9,10 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field
 
 DEFAULT_MEDICAL_DISCLAIMER = (
-    "HELIORA adalah platform analisis risiko preventif dan panduan gaya hidup "
-    "berbasis kecerdasan buatan (AI). Platform ini bukan alat diagnosis medis, "
-    "pengganti konsultasi dokter, atau dasar penentuan resep/terapi medis. "
-    "Selalu konsultasikan kondisi kesehatan Anda dengan tenaga medis profesional "
-    "yang berwenang."
+    "HELIORA adalah alat bantu preventive health berbasis lifestyle dan AI. "
+    "Hasil yang diberikan merupakan estimasi dan simulasi berdasarkan data dan "
+    "model yang digunakan, bukan diagnosis medis dan bukan pengganti "
+    "konsultasi tenaga kesehatan."
 )
 
 

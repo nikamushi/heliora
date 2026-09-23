@@ -23,8 +23,10 @@ def hash_password(plain_password: str) -> str:
     return bcrypt.hashpw(pw_bytes, salt).decode("utf-8")
 
 
-def verify_password(plain_password: str, hashed_password: str) -> bool:
+def verify_password(plain_password: str, hashed_password: str | None) -> bool:
     """Verify a plain-text password against a bcrypt hash."""
+    if not hashed_password:
+        return False
     return bcrypt.checkpw(
         plain_password.encode("utf-8"), hashed_password.encode("utf-8")
     )
@@ -105,7 +107,8 @@ class SupabaseJWKSVerifier:
         alg = header.get("alg")
         if alg not in settings.SUPABASE_ALLOWED_ALGS:
             raise jwt.JWTError(
-                f"Algorithm '{alg}' is not in allowed algorithms {settings.SUPABASE_ALLOWED_ALGS}"
+                f"Algorithm '{alg}' is not in allowed algorithms "
+                f"{settings.SUPABASE_ALLOWED_ALGS}"
             )
 
         keys = self.fetch_keys(force=False)

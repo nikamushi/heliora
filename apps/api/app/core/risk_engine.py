@@ -10,8 +10,6 @@ from typing import Any
 
 from app.schemas.assessment import (
     ContributingFactor,
-    RecommendationItem,
-    RiskAssessmentItem,
 )
 
 
@@ -332,6 +330,69 @@ class PreventiveLifestyleRiskEngine:
             )
 
         return factors[:4]
+
+    @staticmethod
+    def format_factor_from_xai(
+        feature: str,
+        direction: str,
+        contribution: float,
+    ) -> ContributingFactor:
+        """Format an XAIResult row into a ContributingFactor."""
+        labels = {
+            "bmi": "Indeks Massa Tubuh (BMI)",
+            "physical_activity": "Aktivitas Fisik",
+            "smoking_status": (
+                "Kebiasaan Merokok" if direction == "positive" else "Bebas Asap Rokok"
+            ),
+            "sleep_duration": "Durasi Tidur",
+            "family_history": "Riwayat Penyakit Keluarga",
+        }
+        descriptions = {
+            ("bmi", "positive"): (
+                "BMI tergolong di atas batas ideal, meningkatkan beban metabolik & vaskular."
+            ),
+            ("bmi", "negative"): (
+                "BMI berada pada rentang sehat dan melindungi fungsi metabolik."
+            ),
+            ("physical_activity", "positive"): (
+                "Aktivitas fisik di bawah panduan 150 menit/minggu rekomendasi WHO."
+            ),
+            ("physical_activity", "negative"): (
+                "Aktivitas fisik mencukupi rekomendasi kardioprotektif WHO."
+            ),
+            ("smoking_status", "positive"): (
+                "Merokok aktif merupakan faktor pemicu utama disfungsi endotel & plak kardiovaskular."
+            ),
+            ("smoking_status", "negative"): (
+                "Tidak merokok menjaga integritas endotel dan elastisitas arteri jangka panjang."
+            ),
+            ("sleep_duration", "positive"): (
+                "Durasi tidur berpotensi memicu lonjakan kortisol & resistensi insulin nokturnal."
+            ),
+            ("sleep_duration", "negative"): (
+                "Pola tidur optimal mendukung regulasi kardiometabolik."
+            ),
+            ("family_history", "positive"): (
+                "Riwayat keluarga mengindikasikan kecenderungan "
+                "predisposisi genetik metabolik."
+            ),
+            ("family_history", "negative"): (
+                "Tanpa riwayat keluarga penyakit kronis memberikan "
+                "keuntungan protektif."
+            ),
+        }
+        label = labels.get(feature, feature.replace("_", " ").title())
+        desc = descriptions.get(
+            (feature, direction),
+            f"Kontribusi faktor {feature} terhadap estimasi risiko.",
+        )
+        return ContributingFactor(
+            feature=feature,
+            label=label,
+            impact="increase" if direction == "positive" else "decrease",
+            weight_percentage=round(contribution, 1),
+            description=desc,
+        )
 
     @staticmethod
     def generate_recommendations(profile: Any) -> list[dict[str, Any]]:

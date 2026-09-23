@@ -44,6 +44,14 @@ def test_model_instantiation():
     assert user.email == "test@heliora.health"
     assert user.full_name == "Dr. Jane Doe"
 
+    oauth_user = User(
+        email="oauth@heliora.health",
+        password_hash=None,
+        full_name="OAuth User",
+    )
+    assert oauth_user.password_hash is None
+    assert oauth_user.email == "oauth@heliora.health"
+
     profile = HealthProfile(
         user_id=uuid.uuid4(),
         age=32,
@@ -53,11 +61,14 @@ def test_model_instantiation():
         physical_activity_min_per_week=180.0,
         sleep_duration_hours=7.5,
         smoking_status="never",
-        family_history=False,
+        family_history=True,
+        family_history_details="Grandmother had diabetes",
     )
     assert profile.age == 32
     assert profile.gender == "female"
     assert profile.smoking_status == "never"
+    assert profile.family_history is True
+    assert profile.family_history_details == "Grandmother had diabetes"
 
     assessment = Assessment(
         user_id=uuid.uuid4(),
