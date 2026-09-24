@@ -804,7 +804,7 @@ export function BilateralPatternFlow({ triggerRef }: BilateralPatternFlowProps =
   return (
     <div
       ref={cameraViewportRef}
-      className="relative w-full h-full min-h-[480px] z-10 cursor-crosshair flex items-center justify-center overflow-hidden"
+      className="relative w-full h-full z-10 cursor-crosshair flex items-center justify-center overflow-hidden"
     >
       {/* Debug Acceptance Crosshair (Verifies the Red Dot stays locked at dotAnchor) */}
       {process.env.NODE_ENV === "development" && dotAnchor.x > 0 && (
@@ -834,7 +834,7 @@ export function BilateralPatternFlow({ triggerRef }: BilateralPatternFlowProps =
         {/* Central Human Bio-Mesh / Topographic Wave Silhouette */}
         <div 
           ref={bodyRef} 
-          className="relative w-36 h-60 sm:w-40 sm:h-68 md:w-48 md:h-80 flex items-center justify-center pointer-events-none select-none"
+          className="relative w-32 h-56 sm:w-36 sm:h-64 md:w-40 md:h-72 flex items-center justify-center pointer-events-none select-none"
         >
           {/* Subtle Ambient Radial Glow behind the body */}
           <div className="absolute inset-0 bg-gradient-to-b from-emerald-400/20 via-emerald-600/25 to-transparent rounded-full blur-3xl -z-10" />

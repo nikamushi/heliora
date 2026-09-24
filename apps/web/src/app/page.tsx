@@ -95,7 +95,7 @@ function SectionPatternsPinned() {
         className="h-[100dvh] w-full overflow-hidden flex flex-col justify-between pt-24 md:pt-28 pb-8 px-6 lg:px-12 relative"
       >
         {/* Top Typographic Header (Clean spacing below navbar, fades out on camera zoom) */}
-        <div className="container mx-auto max-w-6xl w-full z-20 pointer-events-none">
+        <div className="container mx-auto max-w-6xl w-full z-20 pointer-events-none mb-3 md:mb-5">
           <div 
             ref={headlineRef}
             className="max-w-4xl pointer-events-auto"
@@ -107,8 +107,8 @@ function SectionPatternsPinned() {
           </div>
         </div>
 
-        {/* Dedicated Camera Viewport for Visualization (Full Sticky Viewport Scene) */}
-        <div className="absolute inset-0 w-full h-full overflow-hidden flex items-center justify-center pointer-events-none z-10">
+        {/* Dedicated Camera Viewport for Visualization (In-flow flex-1 with clean vertical clearance) */}
+        <div className="relative w-full flex-1 min-h-0 overflow-hidden flex items-center justify-center pointer-events-none z-10 my-auto">
           {/* Soft Ambient Radial Glows */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[450px] bg-emerald-300/15 rounded-full blur-[140px] -z-10" />
           <div className="absolute top-1/3 left-12 w-[350px] h-[280px] bg-[#d97757]/10 rounded-full blur-[110px] -z-10" />
@@ -118,7 +118,7 @@ function SectionPatternsPinned() {
         </div>
 
         {/* Editorial Conceptual Forward Bridge */}
-        <div className="container mx-auto max-w-6xl w-full flex justify-center z-20 pointer-events-none">
+        <div className="container mx-auto max-w-6xl w-full flex justify-center z-20 pointer-events-none mt-3 md:mt-5">
           <div 
             ref={bridgeRef}
             className="flex justify-center pointer-events-auto"
