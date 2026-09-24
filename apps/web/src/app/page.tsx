@@ -193,29 +193,6 @@ export default function LandingPage() {
         {/* SECTION 02: NARASI POLA HIDUP & EKSPLORASI RISIKO */}
         <SectionLifestyleNarrative />
 
-        {/* SECTION: ALUR PREVENTIF (Understand → Explore → Simulate → Recommend → Act.) */}
-        <section className="w-full bg-brand-100/60 border-y border-brand-900/10 py-16 sm:py-20 md:py-24 text-center my-4 relative overflow-hidden">
-          <div className="container mx-auto px-6 lg:px-12 relative z-10">
-            <div className="max-w-5xl mx-auto flex flex-col items-center space-y-5">
-              <span className="text-xs font-semibold uppercase tracking-[0.25em] text-brand-900/60 font-mono bg-white/60 px-3.5 py-1 rounded-full border border-brand-900/10">
-                Alur Intelijen Kesehatan
-              </span>
-
-              <div className="flex flex-wrap items-center justify-center gap-x-3 sm:gap-x-4 md:gap-x-6 gap-y-3 text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-medium tracking-tight text-brand-900">
-                <span className="hover:text-emerald-800 transition-colors">Understand</span>
-                <span className="text-brand-900/30 font-light select-none">→</span>
-                <span className="hover:text-emerald-800 transition-colors">Explore</span>
-                <span className="text-brand-900/30 font-light select-none">→</span>
-                <span className="hover:text-emerald-800 transition-colors">Simulate</span>
-                <span className="text-brand-900/30 font-light select-none">→</span>
-                <span className="hover:text-emerald-800 transition-colors">Recommend</span>
-                <span className="text-brand-900/30 font-light select-none">→</span>
-                <span className="text-emerald-800 font-semibold">Act.</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* SECTION 03: KENAPA HARUS HELIORA (#features) */}
         <section id="features" className="w-full bg-white/80 backdrop-blur-md border-y border-brand-900/5 py-20 sm:py-28 md:py-32 my-8 sm:my-12 scroll-mt-24">
           <div className="container mx-auto px-6 lg:px-12">
@@ -346,6 +323,29 @@ export default function LandingPage() {
                     </p>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* SECTION: ALUR PREVENTIF (Understand → Explore → Simulate → Recommend → Act.) */}
+        <section className="w-full bg-brand-100/60 border-y border-brand-900/10 py-16 sm:py-20 md:py-24 text-center my-4 relative overflow-hidden">
+          <div className="container mx-auto px-6 lg:px-12 relative z-10">
+            <div className="max-w-5xl mx-auto flex flex-col items-center space-y-5">
+              <span className="text-xs font-semibold uppercase tracking-[0.25em] text-brand-900/60 font-mono bg-white/60 px-3.5 py-1 rounded-full border border-brand-900/10">
+                Alur Intelijen Kesehatan
+              </span>
+
+              <div className="flex flex-wrap items-center justify-center gap-x-3 sm:gap-x-4 md:gap-x-6 gap-y-3 text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-medium tracking-tight text-brand-900">
+                <span className="hover:text-emerald-800 transition-colors">Understand</span>
+                <span className="text-brand-900/30 font-light select-none">→</span>
+                <span className="hover:text-emerald-800 transition-colors">Explore</span>
+                <span className="text-brand-900/30 font-light select-none">→</span>
+                <span className="hover:text-emerald-800 transition-colors">Simulate</span>
+                <span className="text-brand-900/30 font-light select-none">→</span>
+                <span className="hover:text-emerald-800 transition-colors">Recommend</span>
+                <span className="text-brand-900/30 font-light select-none">→</span>
+                <span className="text-emerald-800 font-semibold">Act.</span>
               </div>
             </div>
           </div>
