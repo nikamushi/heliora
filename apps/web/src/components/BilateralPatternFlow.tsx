@@ -862,9 +862,8 @@ export function BilateralPatternFlow({ triggerRef }: BilateralPatternFlowProps =
               </linearGradient>
 
               <radialGradient id="coreAura" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="#D97757" stopOpacity="0.75" />
-                <stop offset="35%" stopColor="#D97757" stopOpacity="0.3" />
-                <stop offset="70%" stopColor="#0F7A4E" stopOpacity="0.15" />
+                <stop offset="0%" stopColor="#2D5A43" stopOpacity="0.85" />
+                <stop offset="35%" stopColor="#0F7A4E" stopOpacity="0.4" />
                 <stop offset="100%" stopColor="#0F7A4E" stopOpacity="0" />
               </radialGradient>
             </defs>
@@ -988,7 +987,7 @@ export function BilateralPatternFlow({ triggerRef }: BilateralPatternFlowProps =
               </g>
             </g>
 
-            {/* Central Focal Core: Revolving Bio-Orbital Rings and PRIMARY Central Red Dot */}
+            {/* Central Focal Core: Revolving Bio-Orbital Rings and Focal Center Dot */}
             <g transform="translate(0, -20)">
               {/* Radiant Core Aura */}
               <circle cx="0" cy="0" r="26" fill="url(#coreAura)" />
@@ -1010,7 +1009,7 @@ export function BilateralPatternFlow({ triggerRef }: BilateralPatternFlowProps =
                   cx="0"
                   cy="0"
                   r="24"
-                  stroke="#D97757"
+                  stroke="#2D5A43"
                   strokeWidth="0.6"
                   strokeDasharray="2 4"
                   strokeOpacity="0.45"
@@ -1040,8 +1039,8 @@ export function BilateralPatternFlow({ triggerRef }: BilateralPatternFlowProps =
                 />
                 <circle cx="18" cy="0" r="1.6" fill="#0F7A4E" />
                 <circle cx="-18" cy="0" r="1.6" fill="#0F7A4E" />
-                <circle cx="0" cy="18" r="1.4" fill="#D97757" />
-                <circle cx="0" cy="-18" r="1.4" fill="#D97757" />
+                <circle cx="0" cy="18" r="1.2" fill="#2D5A43" opacity="0.8" />
+                <circle cx="0" cy="-18" r="1.2" fill="#2D5A43" opacity="0.8" />
               </g>
 
               {/* Middle Counter-Clockwise Revolving Ring */}
@@ -1058,7 +1057,7 @@ export function BilateralPatternFlow({ triggerRef }: BilateralPatternFlowProps =
                   cx="0"
                   cy="0"
                   r="11.5"
-                  stroke="#D97757"
+                  stroke="#2D5A43"
                   strokeWidth="1"
                   strokeDasharray="3 4 1 4"
                   strokeOpacity="0.8"
@@ -1066,8 +1065,8 @@ export function BilateralPatternFlow({ triggerRef }: BilateralPatternFlowProps =
                 />
                 <circle cx="0" cy="11.5" r="1.5" fill="#D97757" />
                 <circle cx="0" cy="-11.5" r="1.5" fill="#D97757" />
-                <circle cx="11.5" cy="0" r="1.2" fill="#0F7A4E" opacity="0.8" />
-                <circle cx="-11.5" cy="0" r="1.2" fill="#0F7A4E" opacity="0.8" />
+                <circle cx="11.5" cy="0" r="1.1" fill="#0F7A4E" opacity="0.8" />
+                <circle cx="-11.5" cy="0" r="1.1" fill="#0F7A4E" opacity="0.8" />
               </g>
 
               {/* Inner Fast Orbiting Calibrated Ring */}
@@ -1093,17 +1092,11 @@ export function BilateralPatternFlow({ triggerRef }: BilateralPatternFlowProps =
                 <circle cx="7" cy="0" r="1.2" fill="#ffffff" />
               </g>
 
-              {/* Solid Core Vivid Red Focal Dot (PRIMARY FOCAL POINT) */}
-              <g id="central-red-dot" ref={focalDotRef}>
-                {/* Soft warm aura */}
-                <circle cx="0" cy="0" r="9" fill="#D97757" fillOpacity="0.3" />
-                <circle cx="0" cy="0" r="6" fill="#D97757" fillOpacity="0.55" />
-                {/* Solid Core Red Dot */}
-                <circle cx="0" cy="0" r="4.2" fill="#D97757" />
-                <circle cx="0" cy="0" r="3.2" fill="#C53030" />
-                <circle cx="0" cy="0" r="2.2" fill="#E53E3E" />
-                {/* Crisp Specular Glint */}
-                <circle cx="-0.8" cy="-0.8" r="1.0" fill="#FFFFFF" opacity="0.95" />
+              {/* Solid Core Focal Center Dot */}
+              <g id="central-focal-core" ref={focalDotRef}>
+                <circle cx="0" cy="0" r="5" fill="#2D5A43" />
+                <circle cx="0" cy="0" r="3.2" fill="#0F7A4E" />
+                <circle cx="-1" cy="-1" r="1.2" fill="#ffffff" opacity="0.95" />
               </g>
             </g>
           </svg>
