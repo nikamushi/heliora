@@ -65,7 +65,7 @@ function SectionPatterns() {
   );
 }
 
-function NarrativeItem({ block }: { block: { num: string; text: string } }) {
+function NarrativeItem({ text }: { text: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -79,36 +79,21 @@ function NarrativeItem({ block }: { block: { num: string; text: string } }) {
     <motion.div
       ref={ref}
       style={{ opacity }}
-      className="flex flex-col items-center text-center space-y-5 min-h-[50vh] sm:min-h-[60vh] justify-center px-4"
+      className="flex flex-col items-center text-center min-h-[50vh] sm:min-h-[60vh] justify-center px-4"
     >
-      <span className="text-xs sm:text-sm font-mono font-bold text-emerald-800/70 uppercase tracking-[0.3em]">
-        {block.num}
-      </span>
       <p className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-brand-900 font-normal tracking-tight leading-snug sm:leading-[1.35] text-balance max-w-3xl">
-        {block.text}
+        {text}
       </p>
     </motion.div>
   );
 }
 
 function SectionLifestyleNarrative() {
-  const narrativeBlocks = [
-    {
-      num: "01",
-      text: "Setiap hari, kita menjalani pola hidup masing-masing, dari kebiasaan kecil sampai keputusan yang sering kita ambil tanpa sadar.",
-    },
-    {
-      num: "02",
-      text: "Satu per satu, semuanya terlihat sederhana. Tetapi jika dilihat bersama, kebiasaan-kebiasaan itu membentuk gambaran yang lebih utuh tentang cara kita menjalani hari.",
-    },
-    {
-      num: "03",
-      text: "Seiring waktu, perubahan kecil bisa memperlihatkan hal baru tentang kesehatan kita: bagaimana kondisinya hari ini, dan apa yang mungkin terjadi ke depannya.",
-    },
-    {
-      num: "04",
-      text: "Dengan memahami bagaimana kebiasaan itu saling terkait, kita bisa melihat kesehatan dengan cara yang lebih personal, lalu mulai mempertimbangkan perubahan sebelum kita benar-benar membutuhkannya.",
-    },
+  const narrativeTexts = [
+    "Setiap hari, kita menjalani pola hidup masing-masing, dari kebiasaan kecil sampai keputusan yang sering kita ambil tanpa sadar.",
+    "Satu per satu, semuanya terlihat sederhana. Tetapi jika dilihat bersama, kebiasaan-kebiasaan itu membentuk gambaran yang lebih utuh tentang cara kita menjalani hari.",
+    "Seiring waktu, perubahan kecil bisa memperlihatkan hal baru tentang kesehatan kita: bagaimana kondisinya hari ini, dan apa yang mungkin terjadi ke depannya.",
+    "Dengan memahami bagaimana kebiasaan itu saling terkait, kita bisa melihat kesehatan dengan cara yang lebih personal, lalu mulai mempertimbangkan perubahan sebelum kita benar-benar membutuhkannya.",
   ];
 
   return (
@@ -117,8 +102,8 @@ function SectionLifestyleNarrative() {
       className="container mx-auto px-6 lg:px-12 py-16 sm:py-24 scroll-mt-24"
     >
       <div className="max-w-4xl mx-auto flex flex-col items-center">
-        {narrativeBlocks.map((block, idx) => (
-          <NarrativeItem key={idx} block={block} />
+        {narrativeTexts.map((text, idx) => (
+          <NarrativeItem key={idx} text={text} />
         ))}
       </div>
     </section>
