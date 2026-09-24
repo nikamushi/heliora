@@ -41,7 +41,7 @@ export function Navbar() {
           <nav className="hidden md:flex items-center absolute left-1/2 -translate-x-1/2">
             <div className="flex items-center gap-1 rounded-full bg-brand-50/80 px-1.5 py-1.5 backdrop-blur-md border border-brand-200/50 shadow-sm">
               {[
-                { name: "Features", href: "#features" },
+                { name: "Fitur", href: "#features" },
                 { name: "How it works", href: "#how-it-works" },
                 { name: "Science", href: "#science" },
               ].map((item) => (
@@ -85,7 +85,7 @@ export function Navbar() {
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-40 bg-brand-50 pt-24 px-6 md:hidden flex flex-col h-screen">
           <nav className="flex flex-col gap-6 text-2xl font-medium tracking-tight text-brand-900">
-            <Link href="#features" onClick={() => setMobileMenuOpen(false)}>Features</Link>
+            <Link href="#features" onClick={() => setMobileMenuOpen(false)}>Fitur</Link>
             <Link href="#how-it-works" onClick={() => setMobileMenuOpen(false)}>How it works</Link>
             <Link href="#science" onClick={() => setMobileMenuOpen(false)}>Science</Link>
           </nav>

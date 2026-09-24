@@ -394,7 +394,7 @@ export default function LandingPage() {
         <section id="features" className="container mx-auto px-6 lg:px-12 py-16 sm:py-24 scroll-mt-24">
           <div className="mb-10 sm:mb-14">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-brand-900 leading-[1.15]">
-              Features
+              Fitur
             </h2>
           </div>
 
