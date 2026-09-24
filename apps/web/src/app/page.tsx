@@ -329,15 +329,15 @@ export default function LandingPage() {
         </section>
 
         {/* SECTION: ALUR PREVENTIF (Understand Explore Simulate Recommend Act.) */}
-        <section className="w-full bg-brand-100/60 border-y border-brand-900/10 py-16 sm:py-20 md:py-24 text-center my-4 relative overflow-hidden">
-          <div className="container mx-auto px-6 lg:px-12 relative z-10">
-            <div className="max-w-5xl mx-auto flex flex-col items-center justify-center">
-              <div className="flex items-center justify-center whitespace-nowrap flex-nowrap gap-x-3.5 sm:gap-x-6 md:gap-x-9 lg:gap-x-12 xl:gap-x-14 text-base sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-medium tracking-tight text-brand-900 w-full overflow-x-auto no-scrollbar">
-                <span className="hover:text-emerald-800 transition-colors shrink-0">Understand</span>
-                <span className="hover:text-emerald-800 transition-colors shrink-0">Explore</span>
-                <span className="hover:text-emerald-800 transition-colors shrink-0">Simulate</span>
-                <span className="hover:text-emerald-800 transition-colors shrink-0">Recommend</span>
-                <span className="text-emerald-800 font-semibold shrink-0">Act.</span>
+        <section className="w-full bg-brand-100/60 border-y border-brand-900/10 py-10 sm:py-14 md:py-16 text-center my-4 relative overflow-hidden">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-12 relative z-10">
+            <div className="max-w-4xl mx-auto flex items-center justify-center">
+              <div className="flex items-center justify-between sm:justify-center whitespace-nowrap flex-nowrap gap-x-2 sm:gap-x-5 md:gap-x-8 lg:gap-10 text-xs sm:text-lg md:text-2xl lg:text-3xl font-medium tracking-tight text-brand-900 w-full">
+                <span className="hover:text-emerald-800 transition-colors">Understand</span>
+                <span className="hover:text-emerald-800 transition-colors">Explore</span>
+                <span className="hover:text-emerald-800 transition-colors">Simulate</span>
+                <span className="hover:text-emerald-800 transition-colors">Recommend</span>
+                <span className="text-emerald-800 font-semibold">Act.</span>
               </div>
             </div>
           </div>
