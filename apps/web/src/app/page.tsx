@@ -88,13 +88,17 @@ export default function LandingPage() {
             custom={3} initial="hidden" animate="visible" variants={fadeUpVariants}
             className="flex flex-col items-center pt-6"
           >
-            <Link 
+            <a 
               href="#patterns" 
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById("patterns")?.scrollIntoView({ behavior: "smooth" });
+              }}
               className="flex flex-col items-center gap-1.5 text-brand-900/40 hover:text-brand-900/80 transition-colors group cursor-pointer"
             >
               <span className="text-[10px] font-semibold tracking-[0.2em] uppercase">Eksplorasi Pola</span>
               <span className="animate-bounce text-sm opacity-70 group-hover:opacity-100 transition-opacity">↓</span>
-            </Link>
+            </a>
           </motion.div>
         </section>
 

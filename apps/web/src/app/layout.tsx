@@ -18,7 +18,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" className={plusJakartaSans.variable}>
+    <html lang="id" className={`${plusJakartaSans.variable} scroll-smooth`}>
       <body className="antialiased">
         {children}
       </body>
