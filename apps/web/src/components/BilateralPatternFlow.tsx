@@ -41,12 +41,12 @@ export function BilateralPatternFlow({ progress }: BilateralPatternFlowProps = {
   });
 
   const activeProgress = progress || internalScroll.scrollYProgress;
-  // Phase 1 (0.00 - 0.22): 100% static 1.0x overview (only bilateral lines flow)
-  // Phase 2 (0.22 - 0.80): Camera plunges directly into the central spinning dot (1.0x -> 7.2x)
-  const zoomScale = useTransform(activeProgress, [0.0, 0.22, 0.80], [1.0, 1.0, 7.2]);
-  const bodyMeshOpacity = useTransform(activeProgress, [0.22, 0.42], [1.0, 0.0]);
-  const streamsCanvasOpacity = useTransform(activeProgress, [0.22, 0.48], [1.0, 0.15]);
-  const macroDetailOpacity = useTransform(activeProgress, [0.42, 0.68], [0.0, 1.0]);
+  // Phase 1 (0.00 - 0.20): 100% static 1.0x overview (only bilateral lines flow)
+  // Phase 2 (0.20 - 0.85): Camera plunges directly into the central spinning dot (1.0x -> 8.5x)
+  const zoomScale = useTransform(activeProgress, [0.0, 0.20, 0.85], [1.0, 1.0, 8.5]);
+  const bodyMeshOpacity = useTransform(activeProgress, [0.20, 0.42], [1.0, 0.0]);
+  const streamsCanvasOpacity = useTransform(activeProgress, [0.20, 0.48], [1.0, 0.15]);
+  const macroDetailOpacity = useTransform(activeProgress, [0.42, 0.72], [0.0, 1.0]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -720,7 +720,7 @@ export function BilateralPatternFlow({ progress }: BilateralPatternFlowProps = {
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-full min-h-[560px] md:min-h-[680px] lg:min-h-[760px] z-10 cursor-crosshair flex items-center justify-center"
+      className="relative w-full h-full min-h-[460px] md:min-h-[540px] max-h-[640px] z-10 cursor-crosshair flex items-center justify-center"
     >
       <motion.canvas 
         ref={canvasRef} 
@@ -736,7 +736,7 @@ export function BilateralPatternFlow({ progress }: BilateralPatternFlowProps = {
         }}
         className="relative z-20 pointer-events-none flex flex-col items-center justify-center select-none will-change-transform"
       >
-        <div ref={bodyRef} className="relative w-44 h-72 sm:w-52 sm:h-88 md:w-60 md:h-[400px] lg:w-72 lg:h-[480px] flex items-center justify-center">
+        <div ref={bodyRef} className="relative w-36 h-60 sm:w-40 sm:h-68 md:w-48 md:h-80 flex items-center justify-center">
           {/* Subtle Ambient Radial Glow behind the body */}
           <div className="absolute inset-0 bg-gradient-to-b from-emerald-400/20 via-emerald-600/25 to-transparent rounded-full blur-3xl -z-10" />
 

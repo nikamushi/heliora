@@ -43,7 +43,7 @@ function SectionPatternsPinned() {
     <section 
       ref={sectionRef} 
       id="patterns" 
-      className="relative w-full h-[260vh] border-t border-brand-900/5"
+      className="relative w-full h-[400vh] border-t border-brand-900/5"
     >
       <div className="sticky top-0 h-[100dvh] w-full overflow-hidden flex flex-col justify-between pt-24 md:pt-28 pb-8 px-6 lg:px-12">
         {/* Top Typographic Header (Clean spacing below navbar, fades out on camera zoom) */}
