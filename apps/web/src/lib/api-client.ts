@@ -20,6 +20,11 @@ import {
   HealthProfileCreateRequest,
   HealthProfileResponse,
   AssessmentSummaryResponse,
+  FutureSimulationRequest,
+  FutureSimulationResponse,
+  WhatIfSimulationRequest,
+  WhatIfSimulationResponse,
+  EvidenceListResponse,
 } from "@/types/api";
 import {
   getSupabaseAccessToken,
@@ -332,6 +337,54 @@ class ApiClient {
       return this.request<AssessmentSummaryResponse>(`/assessment/${assessmentId}`, { method: "GET" }, true);
     },
   };
+
+  // ── Simulation Endpoints (Architecture §14, PRD BR-SIM-001–008, SIM-002) ──
+  public readonly simulation = {
+    future: async (payload: FutureSimulationRequest): Promise<FutureSimulationResponse> => {
+      return this.request<FutureSimulationResponse>(
+        "/simulation/future",
+        {
+          method: "POST",
+          body: JSON.stringify(payload),
+        },
+        true
+      );
+    },
+    whatIf: async (payload: WhatIfSimulationRequest): Promise<WhatIfSimulationResponse> => {
+      return this.request<WhatIfSimulationResponse>(
+        "/simulation/what-if",
+        {
+          method: "POST",
+          body: JSON.stringify(payload),
+        },
+        true
+      );
+    },
+  };
+
+  // ── Evidence Center Endpoints (Architecture §14, PRD FR-027, BR-EVIDENCE-001) ──
+  public readonly evidence = {
+    list: async (params?: {
+      category?: string;
+      rule_id?: string;
+      search?: string;
+    }): Promise<EvidenceListResponse> => {
+      const searchParams = new URLSearchParams();
+      if (params?.category && params.category !== "all") {
+        searchParams.append("category", params.category);
+      }
+      if (params?.rule_id) {
+        searchParams.append("rule_id", params.rule_id);
+      }
+      if (params?.search) {
+        searchParams.append("search", params.search);
+      }
+      const qs = searchParams.toString();
+      const path = qs ? `/evidence?${qs}` : "/evidence";
+      return this.request<EvidenceListResponse>(path, { method: "GET" }, true);
+    },
+  };
 }
 
 export const apiClient = new ApiClient();
+

@@ -1557,14 +1557,14 @@ Acceptance Criteria:
 **Owner:** Pino & Tumir  
 **Priority:** P0  
 **Sprint:** S5  
-**Status:** IN PROGRESS
+**Status:** DONE
 
 Tasks:
 
 - [x] Display top factors.
 - [x] Display contribution.
 - [x] Human-readable explanation.
-- [ ] Link to recommendation.
+- [x] Link to recommendation.
 
 Acceptance Criteria:
 
@@ -1583,15 +1583,15 @@ Acceptance Criteria:
 **Owner:** Pino & Tumir  
 **Priority:** P0  
 **Sprint:** S5-S6  
-**Status:** BACKLOG
+**Status:** DONE
 
 Tasks:
 
-- [ ] Horizon selection.
-- [ ] Baseline result.
-- [ ] Projected result.
-- [ ] Comparison visualization.
-- [ ] Disclaimer.
+- [x] Horizon selection.
+- [x] Baseline result.
+- [x] Projected result.
+- [x] Comparison visualization.
+- [x] Disclaimer.
 
 Acceptance Criteria:
 
@@ -1611,7 +1611,7 @@ Acceptance Criteria:
 **Owner:** Pino & Tumir  
 **Priority:** P0  
 **Sprint:** S6  
-**Status:** BACKLOG
+**Status:** DONE
 
 Controls:
 
@@ -1624,14 +1624,14 @@ Smoking Status
 
 Tasks:
 
-- [ ] Slider/input controls.
-- [ ] Scenario state.
-- [ ] Baseline state.
-- [ ] Simulated state.
-- [ ] Comparison result.
-- [ ] Reset scenario.
-- [ ] Loading state.
-- [ ] Error state.
+- [x] Slider/input controls.
+- [x] Scenario state.
+- [x] Baseline state.
+- [x] Simulated state.
+- [x] Comparison result.
+- [x] Reset scenario.
+- [x] Loading state.
+- [x] Error state.
 
 Acceptance Criteria:
 
@@ -1653,14 +1653,14 @@ Acceptance Criteria:
 **Owner:** Pino & Tumir  
 **Priority:** P0  
 **Sprint:** S7-S8  
-**Status:** BACKLOG
+**Status:** DONE
 
 Tasks:
 
-- [ ] Recommendation cards.
-- [ ] Priority.
-- [ ] Explanation.
-- [ ] Evidence CTA.
+- [x] Recommendation cards.
+- [x] Priority.
+- [x] Explanation.
+- [x] Evidence CTA.
 
 Acceptance Criteria:
 
@@ -1680,7 +1680,7 @@ Acceptance Criteria:
 **Owner:** Pino & Tumir  
 **Priority:** P0  
 **Sprint:** S8  
-**Status:** BACKLOG
+**Status:** IN PROGRESS
 
 Display:
 
@@ -1692,6 +1692,17 @@ Summary
 Evidence Level
 Reference
 ```
+
+Tasks:
+
+- [x] Evidence page layout.
+- [x] Filter by category.
+- [x] Search by title/organization.
+- [x] API integration (`GET /api/v1/evidence`).
+- [x] Evidence level display.
+- [x] External link to source.
+- [x] Disclaimer.
+- [ ] Evidence content: 15–30 entries (saat ini 5, menunggu EVD-001).
 
 Acceptance Criteria:
 
@@ -2520,7 +2531,7 @@ HELIORA MVP hanya dianggap siap apabila seluruh P0 berikut selesai.
 - [ ] Health Assessment
 - [x] Dashboard
 - [x] Risk Detail
-- [ ] Recommendation
+- [x] Recommendation
 - [ ] Evidence Center
 
 

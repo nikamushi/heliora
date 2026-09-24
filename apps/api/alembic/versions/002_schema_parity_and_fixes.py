@@ -37,6 +37,17 @@ def upgrade() -> None:
         sa.Column("family_history_details", sa.Text(), nullable=True),
     )
 
+    # 3. Update ck_rec_priority check constraint to allow 'protective'
+    try:
+        op.drop_constraint("ck_rec_priority", "recommendations", type_="check")
+        op.create_check_constraint(
+            "ck_rec_priority",
+            "recommendations",
+            "priority IN ('high', 'medium', 'low', 'protective')",
+        )
+    except Exception:
+        pass
+
 
 def downgrade() -> None:
     # 1. Drop family_history_details column

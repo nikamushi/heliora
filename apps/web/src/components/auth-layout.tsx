@@ -21,19 +21,19 @@ export function AuthLayout({
   return (
     <div className="flex h-screen max-h-screen overflow-hidden bg-brand-50/20 text-brand-900 selection:bg-brand-200">
       {/* LEFT COLUMN: FORM SECTION (45%) */}
-      <div className="flex flex-1 flex-col justify-between px-6 py-4 sm:px-10 lg:px-12 xl:px-16 overflow-y-auto">
+      <div className="flex flex-1 flex-col justify-between px-6 py-2.5 sm:px-10 lg:px-12 xl:px-16 overflow-y-auto no-scrollbar">
         {/* Center Content Container */}
-        <div className="w-full max-w-[440px] mx-auto my-auto py-2">
+        <div className="w-full max-w-[430px] mx-auto my-auto py-1">
           <Link
             href="/"
-            className="mb-3 inline-flex items-center gap-1.5 rounded-md text-xs font-medium text-muted-foreground hover:text-brand-900 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            className="mb-2 inline-flex items-center gap-1.5 rounded-md text-xs font-medium text-muted-foreground hover:text-brand-900 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
           >
             <IconArrowLeft size={15} aria-hidden="true" />
             Kembali ke Beranda
           </Link>
 
           {/* Header */}
-          <div className="mb-4">
+          <div className="mb-2.5">
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-brand-900 leading-tight">
               {title}
             </h1>
@@ -47,13 +47,13 @@ export function AuthLayout({
 
           {/* Medical Disclaimer */}
           {showDisclaimer && (
-            <div className="mt-4 pt-3 border-t border-brand-900/10">
+            <div className="mt-2.5 pt-2 border-t border-brand-900/10">
               <DisclaimerBanner variant="note" className="text-[10.5px] text-brand-900/60" />
             </div>
           )}
         </div>
 
-        <div className="text-center text-[11px] text-muted-foreground py-1">
+        <div className="text-center text-[11px] text-muted-foreground py-0.5">
           © {new Date().getFullYear()} HELIORA
         </div>
       </div>

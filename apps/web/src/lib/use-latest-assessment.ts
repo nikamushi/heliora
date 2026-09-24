@@ -25,62 +25,77 @@ export function useLatestAssessment(): UseLatestAssessmentResult {
   const [error, setError] = useState<ApiClientError | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const refetch = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const data = await apiClient.assessment.getLatest();
-      setAssessment(data);
-    } catch (err) {
-      if (err instanceof ApiClientError) {
-        if (err.kind === "unauthorized") {
-          redirectToLogin();
-          return;
-        }
-        setError(err);
-      } else {
-        setError(
-          new ApiClientError(
-            0,
-            "Terjadi kendala saat memuat data asesmen kesehatan."
-          )
-        );
+  const fetchAssessment = useCallback(
+    async (showLoading = true) => {
+      if (showLoading) {
+        setIsLoading(true);
       }
-    } finally {
-      setIsLoading(false);
-    }
-  }, [redirectToLogin]);
+      setError(null);
+      try {
+        const data = await apiClient.assessment.getLatest();
+        setAssessment(data);
+      } catch (err) {
+        if (err instanceof ApiClientError) {
+          if (err.kind === "unauthorized") {
+            redirectToLogin();
+            return;
+          }
+          setError(err);
+        } else {
+          setError(
+            new ApiClientError(
+              0,
+              "Terjadi kendala saat memuat data asesmen kesehatan."
+            )
+          );
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [redirectToLogin]
+  );
+
+  const refetch = useCallback(() => fetchAssessment(true), [fetchAssessment]);
 
   useEffect(() => {
     if (!isAuthorized) return;
-    let isMounted = true;
+    let isCancelled = false;
 
-    apiClient.assessment
-      .getLatest()
-      .then((data) => {
-        if (!isMounted) return;
-        setAssessment(data);
-        setIsLoading(false);
-      })
-      .catch((err: unknown) => {
-        if (!isMounted) return;
-        if (err instanceof ApiClientError && err.kind === "unauthorized") {
-          redirectToLogin();
-          return;
+    async function initialLoad() {
+      setError(null);
+      try {
+        const data = await apiClient.assessment.getLatest();
+        if (!isCancelled) {
+          setAssessment(data);
         }
-        setError(
-          err instanceof ApiClientError
-            ? err
-            : new ApiClientError(
-                0,
-                "Terjadi kendala saat memuat data asesmen kesehatan."
-              )
-        );
-        setIsLoading(false);
-      });
+      } catch (err) {
+        if (isCancelled) return;
+        if (err instanceof ApiClientError) {
+          if (err.kind === "unauthorized") {
+            redirectToLogin();
+            return;
+          }
+          setError(err);
+        } else {
+          setError(
+            new ApiClientError(
+              0,
+              "Terjadi kendala saat memuat data asesmen kesehatan."
+            )
+          );
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    initialLoad();
 
     return () => {
-      isMounted = false;
+      isCancelled = true;
     };
   }, [isAuthorized, redirectToLogin]);
 
