@@ -987,11 +987,8 @@ export function BilateralPatternFlow({ triggerRef }: BilateralPatternFlowProps =
               </g>
             </g>
 
-            {/* Central Focal Core: Revolving Bio-Orbital Rings and Focal Center Dot */}
+            {/* Central Focal Core */}
             <g transform="translate(0, -20)">
-              {/* Radiant Core Aura */}
-              <circle cx="0" cy="0" r="26" fill="url(#coreAura)" />
-
               {/* Macro High-Detail Telemetry Rings (revealed as you zoom in) */}
               <g ref={macroDetailRef} style={{ opacity: 0 }}>
                 {/* Outermost Telemetry Ring */}
@@ -1017,86 +1014,11 @@ export function BilateralPatternFlow({ triggerRef }: BilateralPatternFlowProps =
                 />
               </g>
 
-              {/* Outer Clockwise Revolving Orbital Ring */}
-              <g>
-                <animateTransform
-                  attributeName="transform"
-                  type="rotate"
-                  from="0"
-                  to="360"
-                  dur="14s"
-                  repeatCount="indefinite"
-                />
-                <circle
-                  cx="0"
-                  cy="0"
-                  r="18"
-                  stroke="#0F7A4E"
-                  strokeWidth="1.2"
-                  strokeDasharray="4 6 2 6"
-                  strokeOpacity="0.75"
-                  fill="none"
-                />
-                <circle cx="18" cy="0" r="1.6" fill="#0F7A4E" />
-                <circle cx="-18" cy="0" r="1.6" fill="#0F7A4E" />
-                <circle cx="0" cy="18" r="1.2" fill="#2D5A43" opacity="0.8" />
-                <circle cx="0" cy="-18" r="1.2" fill="#2D5A43" opacity="0.8" />
-              </g>
-
-              {/* Middle Counter-Clockwise Revolving Ring */}
-              <g>
-                <animateTransform
-                  attributeName="transform"
-                  type="rotate"
-                  from="360"
-                  to="0"
-                  dur="8.5s"
-                  repeatCount="indefinite"
-                />
-                <circle
-                  cx="0"
-                  cy="0"
-                  r="11.5"
-                  stroke="#2D5A43"
-                  strokeWidth="1"
-                  strokeDasharray="3 4 1 4"
-                  strokeOpacity="0.8"
-                  fill="none"
-                />
-                <circle cx="0" cy="11.5" r="1.5" fill="#D97757" />
-                <circle cx="0" cy="-11.5" r="1.5" fill="#D97757" />
-                <circle cx="11.5" cy="0" r="1.1" fill="#0F7A4E" opacity="0.8" />
-                <circle cx="-11.5" cy="0" r="1.1" fill="#0F7A4E" opacity="0.8" />
-              </g>
-
-              {/* Inner Fast Orbiting Calibrated Ring */}
-              <g>
-                <animateTransform
-                  attributeName="transform"
-                  type="rotate"
-                  from="0"
-                  to="360"
-                  dur="4.5s"
-                  repeatCount="indefinite"
-                />
-                <circle
-                  cx="0"
-                  cy="0"
-                  r="7"
-                  stroke="#0F7A4E"
-                  strokeWidth="0.85"
-                  strokeDasharray="2 3"
-                  strokeOpacity="0.65"
-                  fill="none"
-                />
-                <circle cx="7" cy="0" r="1.2" fill="#ffffff" />
-              </g>
-
               {/* Solid Core Focal Center Dot */}
               <g id="central-focal-core" ref={focalDotRef}>
-                <circle cx="0" cy="0" r="5" fill="#2D5A43" />
-                <circle cx="0" cy="0" r="3.2" fill="#0F7A4E" />
-                <circle cx="-1" cy="-1" r="1.2" fill="#ffffff" opacity="0.95" />
+                <circle cx="0" cy="0" r="4.5" fill="#2D5A43" />
+                <circle cx="0" cy="0" r="3" fill="#0F7A4E" />
+                <circle cx="-0.8" cy="-0.8" r="1.1" fill="#ffffff" opacity="0.95" />
               </g>
             </g>
           </svg>
