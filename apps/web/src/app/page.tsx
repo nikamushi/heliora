@@ -192,40 +192,8 @@ export default function LandingPage() {
         {/* SECTION 02: NARASI POLA HIDUP & EKSPLORASI RISIKO */}
         <SectionLifestyleNarrative />
 
-        {/* SECTION 04: AI UNTUK KESEHATAN - HELIORA (#how-it-works) */}
-        <section id="how-it-works" className="w-full bg-[#13281c] text-white py-20 sm:py-24 md:py-32 mt-16 sm:mt-20 md:mt-28 mb-10 sm:mb-12 relative overflow-hidden border-y border-emerald-950 scroll-mt-24">
-          {/* Subtle Ambient Glows */}
-          <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[140px] pointer-events-none" />
-          <div className="absolute bottom-0 left-1/4 w-[400px] h-[400px] bg-teal-500/10 rounded-full blur-[120px] pointer-events-none" />
-
-          <div className="container mx-auto px-6 lg:px-12 relative z-10">
-            <div className="max-w-4xl mx-auto text-center">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.1] text-balance">
-                Melihat kesehatan secara lebih utuh.
-              </h2>
-            </div>
-
-            {/* Generative Abstract Layered Health Visual */}
-            <div className="mt-8 sm:mt-10 md:mt-12">
-              <LayeredHealthPicture />
-            </div>
-
-            {/* Editorial Description Text */}
-            <div className="mt-6 sm:mt-8 max-w-3xl mx-auto text-center">
-              <p className="text-base sm:text-lg md:text-xl text-emerald-100/65 font-normal leading-relaxed text-balance">
-                Kesehatan bukan sekadar angka. HELIORA membantu Anda{" "}
-                <span className="text-white">memahami</span> apa yang membentuk kesehatan,{" "}
-                <span className="text-white">mengeksplorasi</span> apa yang mungkin, dan melihat bagaimana{" "}
-                <span className="text-white">perubahan kecil</span> dapat membawa arah yang berbeda. Dengan insight yang dipersonalisasi dan didukung evidence ilmiah, Anda dapat menemukan{" "}
-                <span className="text-white">langkah yang lebih tepat</span> untuk diri Anda.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* SECTION 03: KENAPA HARUS HELIORA (#features & #simulation) */}
-        <section id="features" className="w-full bg-white/80 backdrop-blur-md border-y border-brand-900/5 py-20 sm:py-28 md:py-36 my-12 scroll-mt-24">
-          <div id="simulation" className="scroll-mt-24" />
+        {/* SECTION 03: KENAPA HARUS HELIORA (#features) */}
+        <section id="features" className="w-full bg-white/80 backdrop-blur-md border-y border-brand-900/5 py-20 sm:py-28 md:py-32 my-8 sm:my-12 scroll-mt-24">
           <div className="container mx-auto px-6 lg:px-12">
             <div className="max-w-3xl mx-auto text-center mb-16 sm:mb-20 md:mb-24">
               <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-brand-900 leading-tight">
@@ -304,6 +272,38 @@ export default function LandingPage() {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* SECTION 04: AI UNTUK KESEHATAN - HELIORA (#how-it-works) */}
+        <section id="how-it-works" className="w-full bg-[#13281c] text-white py-20 sm:py-24 md:py-32 my-12 sm:my-16 relative overflow-hidden border-y border-emerald-950 scroll-mt-24">
+          <div id="simulation" className="scroll-mt-24" />
+          {/* Subtle Ambient Glows */}
+          <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[140px] pointer-events-none" />
+          <div className="absolute bottom-0 left-1/4 w-[400px] h-[400px] bg-teal-500/10 rounded-full blur-[120px] pointer-events-none" />
+
+          <div className="container mx-auto px-6 lg:px-12 relative z-10">
+            <div className="max-w-4xl mx-auto text-center">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.1] text-balance">
+                Melihat kesehatan secara lebih utuh.
+              </h2>
+            </div>
+
+            {/* Generative Abstract Layered Health Visual */}
+            <div className="mt-8 sm:mt-10 md:mt-12">
+              <LayeredHealthPicture />
+            </div>
+
+            {/* Editorial Description Text */}
+            <div className="mt-6 sm:mt-8 max-w-3xl mx-auto text-center">
+              <p className="text-base sm:text-lg md:text-xl text-emerald-100/65 font-normal leading-relaxed text-balance">
+                Kesehatan bukan sekadar angka. HELIORA membantu Anda{" "}
+                <span className="text-white">memahami</span> apa yang membentuk kesehatan,{" "}
+                <span className="text-white">mengeksplorasi</span> apa yang mungkin, dan melihat bagaimana{" "}
+                <span className="text-white">perubahan kecil</span> dapat membawa arah yang berbeda. Dengan insight yang dipersonalisasi dan didukung evidence ilmiah, Anda dapat menemukan{" "}
+                <span className="text-white">langkah yang lebih tepat</span> untuk diri Anda.
+              </p>
             </div>
           </div>
         </section>
