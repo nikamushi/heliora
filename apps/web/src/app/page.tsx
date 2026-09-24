@@ -200,7 +200,7 @@ export default function LandingPage() {
 
           <div className="container mx-auto px-6 lg:px-12 relative z-10">
             <div className="max-w-4xl mx-auto text-center space-y-4 sm:space-y-6">
-              <span className="text-base sm:text-lg md:text-xl font-medium tracking-normal text-emerald-300/80 block">
+              <span className="text-base sm:text-lg md:text-xl font-medium tracking-normal text-white block">
                 Platform Intelijen Kesehatan Berbasis AI
               </span>
               <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.1] text-balance">
