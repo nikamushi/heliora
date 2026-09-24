@@ -61,27 +61,6 @@ function SectionPatterns() {
 
         <BilateralPatternFlow />
       </div>
-
-      {/* Editorial Conceptual Forward Bridge */}
-      <div className="container mx-auto max-w-6xl w-full flex justify-center z-20 pointer-events-none mt-3 md:mt-5">
-        <div className="flex justify-center pointer-events-auto">
-          <motion.div
-            custom={2}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.25 }}
-            variants={fadeUpVariants}
-          >
-            <Link 
-              href="#how-it-works"
-              className="group inline-flex items-center gap-2 text-sm md:text-base font-medium text-brand-900/80 hover:text-brand-900 transition-colors tracking-wide"
-            >
-              <span>Bagaimana HELIORA membaca pola</span>
-              <IconArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-300" />
-            </Link>
-          </motion.div>
-        </div>
-      </div>
     </section>
   );
 }
