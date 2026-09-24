@@ -222,12 +222,14 @@ export default function LandingPage() {
         </section>
 
         {/* SECTION 03: KENAPA HARUS HELIORA (#features & #simulation) */}
-        <section id="features" className="container mx-auto px-6 lg:px-12 pt-20 sm:pt-28 md:pt-36 pb-16 scroll-mt-24">
+        <section id="features" className="w-full bg-white/80 backdrop-blur-md border-y border-brand-900/5 py-20 sm:py-28 md:py-32 my-12 scroll-mt-24">
           <div id="simulation" className="scroll-mt-24" />
-          <div className="max-w-2xl mx-auto text-center">
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-brand-900 leading-tight">
-              Kenapa harus HELIORA?
-            </h2>
+          <div className="container mx-auto px-6 lg:px-12">
+            <div className="max-w-2xl mx-auto text-center">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-brand-900 leading-tight">
+                Kenapa harus HELIORA?
+              </h2>
+            </div>
           </div>
         </section>
 
