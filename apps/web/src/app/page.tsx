@@ -392,16 +392,10 @@ export default function LandingPage() {
 
         {/* SECTION: FEATURES */}
         <section id="features" className="container mx-auto px-6 lg:px-12 py-16 sm:py-24 scroll-mt-24">
-          <div className="max-w-3xl mb-12 sm:mb-16">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-brand-900/5 text-emerald-800 mb-3 border border-brand-900/10">
-              Fitur Unggulan
-            </span>
+          <div className="mb-10 sm:mb-14">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-brand-900 leading-[1.15]">
               Features
             </h2>
-            <p className="text-base sm:text-lg text-brand-900/65 mt-4 font-normal leading-relaxed">
-              Solusi preventif cerdas untuk memetakan kesehatan, mensimulasikan masa depan, dan mengambil keputusan gaya hidup berbasis bukti.
-            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
