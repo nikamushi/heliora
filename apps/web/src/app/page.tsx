@@ -197,7 +197,7 @@ export default function LandingPage() {
             <span className="text-xs sm:text-sm font-semibold uppercase tracking-[0.3em] text-brand-900/60 block">
               AI UNTUK KESEHATAN
             </span>
-            <h2 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight text-brand-900 leading-[1.05]">
+            <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-brand-900 leading-[1.05]">
               HELIORA
             </h2>
             <p className="text-base sm:text-lg text-brand-900/60 mt-2 font-normal max-w-xl mx-auto">
