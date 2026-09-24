@@ -193,11 +193,11 @@ export default function LandingPage() {
 
         {/* SECTION 04: AI UNTUK KESEHATAN - HELIORA (#how-it-works) */}
         <section id="how-it-works" className="container mx-auto px-6 lg:px-12 pt-24 sm:pt-32 md:pt-40 pb-16 scroll-mt-24">
-          <div className="mb-14 max-w-3xl mx-auto text-center space-y-3">
-            <span className="text-xs font-semibold uppercase tracking-[0.28em] text-brand-900/60 block">
+          <div className="mb-14 max-w-4xl mx-auto text-center space-y-4">
+            <span className="text-xs sm:text-sm font-semibold uppercase tracking-[0.3em] text-brand-900/60 block">
               AI UNTUK KESEHATAN
             </span>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-brand-900 leading-tight">
+            <h2 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight text-brand-900 leading-[1.05]">
               HELIORA
             </h2>
             <p className="text-base sm:text-lg text-brand-900/60 mt-2 font-normal max-w-xl mx-auto">
