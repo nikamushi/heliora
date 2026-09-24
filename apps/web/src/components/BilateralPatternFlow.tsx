@@ -814,16 +814,6 @@ export function BilateralPatternFlow() {
             </g>
           </svg>
         </div>
-
-        {/* Label tepat di bawah tubuh */}
-        <div className="flex flex-col items-center text-center mt-2">
-          <span className="text-[10px] md:text-[11px] font-semibold tracking-[0.24em] uppercase text-emerald-900 bg-emerald-100/80 px-3 py-0.5 rounded-full border border-emerald-800/15 shadow-xs backdrop-blur-xs">
-            POLA KESEHATAN
-          </span>
-          <span className="text-[11px] md:text-[12px] text-brand-900/60 mt-1 max-w-[260px] leading-snug">
-            Berbagai kebiasaan &amp; respons biologis. Bertemu di satu pola yang terus bergerak.
-          </span>
-        </div>
       </div>
     </div>
   );
