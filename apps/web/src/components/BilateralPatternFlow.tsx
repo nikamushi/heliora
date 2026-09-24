@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
-import { motion } from "motion/react";
+import { motion, useScroll, useTransform } from "motion/react";
 
 interface StreamConfig {
   side: "left" | "right";
@@ -30,6 +30,14 @@ export function BilateralPatternFlow() {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
+
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start 90%", "end 10%"],
+  });
+
+  const zoomScale = useTransform(scrollYProgress, [0.05, 0.8], [1.0, 2.5]);
+  const bodyOpacity = useTransform(scrollYProgress, [0.0, 0.2, 0.85, 1.0], [0.4, 1, 1, 0.7]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -707,13 +715,14 @@ export function BilateralPatternFlow() {
     >
       <canvas ref={canvasRef} className="w-full h-full block absolute inset-0" />
 
-      {/* Central Human Bio-Mesh / Topographic Wave Silhouette with Scroll Reveal */}
+      {/* Central Human Bio-Mesh / Topographic Wave Silhouette: Scroll-Driven Dynamic Zoom into Focal Dot */}
       <motion.div 
-        initial={{ opacity: 0, scale: 0.93, y: 16 }}
-        whileInView={{ opacity: 1, scale: 1, y: 0 }}
-        viewport={{ once: true, margin: "0px 0px -120px 0px" }}
-        transition={{ duration: 0.85, ease: [0.21, 0.47, 0.32, 0.98] }}
-        className="relative z-20 pointer-events-none flex flex-col items-center justify-center select-none translate-y-1"
+        style={{ 
+          scale: zoomScale, 
+          opacity: bodyOpacity,
+          transformOrigin: "50% 40.74%" 
+        }}
+        className="relative z-20 pointer-events-none flex flex-col items-center justify-center select-none translate-y-1 will-change-transform"
       >
         <div ref={bodyRef} className="relative w-32 h-52 sm:w-36 sm:h-60 md:w-40 md:h-68 flex items-center justify-center">
           {/* Subtle Ambient Radial Glow behind the body */}
