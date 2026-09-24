@@ -193,7 +193,7 @@ export default function LandingPage() {
         <SectionLifestyleNarrative />
 
         {/* SECTION 04: AI UNTUK KESEHATAN - HELIORA (#how-it-works) */}
-        <section id="how-it-works" className="w-full bg-[#13281c] text-white py-16 sm:py-20 md:py-28 my-6 sm:my-8 relative overflow-hidden border-y border-emerald-950 scroll-mt-24">
+        <section id="how-it-works" className="w-full bg-[#13281c] text-white py-20 sm:py-24 md:py-32 mt-12 sm:mt-16 md:mt-20 mb-8 sm:mb-12 relative overflow-hidden border-y border-emerald-950 scroll-mt-24">
           {/* Subtle Ambient Glows */}
           <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[140px] pointer-events-none" />
           <div className="absolute bottom-0 left-1/4 w-[400px] h-[400px] bg-teal-500/10 rounded-full blur-[120px] pointer-events-none" />
@@ -224,7 +224,7 @@ export default function LandingPage() {
         </section>
 
         {/* SECTION 03: KENAPA HARUS HELIORA & FITUR (#features & #simulation) */}
-        <section id="features" className="container mx-auto px-6 lg:px-12 py-16 scroll-mt-24">
+        <section id="features" className="container mx-auto px-6 lg:px-12 pt-20 sm:pt-24 pb-16 scroll-mt-24">
           <div id="simulation" className="scroll-mt-24" />
           <div className="mb-12 max-w-2xl">
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-brand-900 leading-tight">
