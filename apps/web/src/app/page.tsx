@@ -191,13 +191,13 @@ export default function LandingPage() {
         {/* SECTION 02: NARASI POLA HIDUP & EKSPLORASI RISIKO */}
         <SectionLifestyleNarrative />
 
-        {/* SECTION 03: ALUR KERJA (#how-it-works) */}
+        {/* SECTION 04: A MORE COMPLETE PICTURE OF YOUR HEALTH (#how-it-works) */}
         <section id="how-it-works" className="container mx-auto px-6 lg:px-12 py-16 scroll-mt-24">
-          <div className="mb-12 max-w-2xl">
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-brand-900 leading-tight">
-              Alur Kerja
+          <div className="mb-12 max-w-3xl">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-brand-900 leading-tight">
+              A more complete picture of your health.
             </h2>
-            <p className="text-base text-brand-900/60 mt-2 font-normal">
+            <p className="text-base sm:text-lg text-brand-900/60 mt-3 font-normal">
               Tiga tahap mengolah data kesehatan Anda secara terarah.
             </p>
           </div>
