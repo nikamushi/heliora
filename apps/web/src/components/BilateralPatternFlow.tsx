@@ -1,13 +1,6 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger, useGSAP);
-}
 
 interface StreamConfig {
   side: "left" | "right";
@@ -32,97 +25,10 @@ interface Particle {
   lateralOffset: number;
 }
 
-interface BilateralPatternFlowProps {
-  timeline?: gsap.core.Timeline | null;
-}
-
-export function BilateralPatternFlow({ timeline }: BilateralPatternFlowProps = {}) {
+export function BilateralPatternFlow() {
   const cameraViewportRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const visualizationContentRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
-  const focalPointRef = useRef<HTMLDivElement>(null);
-  const questionMarkRef = useRef<SVGGElement>(null);
-  const loopIconRef = useRef<SVGGElement>(null);
-
-  useEffect(() => {
-    if (!timeline || !focalPointRef.current) return;
-
-    // 1. Focal Icon zooms up progressively across the entire scroll range (Scale 1 -> 14)
-    timeline.to(
-      focalPointRef.current,
-      {
-        scale: 14,
-        transformOrigin: "50% 50%",
-        ease: "none",
-        duration: 1,
-      },
-      0
-    );
-
-    // 2. Surrounding visualization content (human figure) fades away
-    if (visualizationContentRef.current) {
-      timeline.to(
-        visualizationContentRef.current,
-        {
-          opacity: 0,
-          ease: "none",
-          duration: 0.45,
-        },
-        0.3
-      );
-    }
-
-    // 3. Bilateral flowing stream lines canvas fades away
-    if (canvasRef.current) {
-      timeline.to(
-        canvasRef.current,
-        {
-          opacity: 0,
-          ease: "none",
-          duration: 0.45,
-        },
-        0.3
-      );
-    }
-
-    // 4. Question mark fades out near the end of scroll
-    if (questionMarkRef.current) {
-      timeline.to(
-        questionMarkRef.current,
-        {
-          opacity: 0,
-          scale: 0.85,
-          transformOrigin: "50% 50%",
-          ease: "none",
-          duration: 0.18,
-        },
-        0.72
-      );
-    }
-
-    // 5. Loop icon appears and settles cleanly at the end state
-    if (loopIconRef.current) {
-      timeline.fromTo(
-        loopIconRef.current,
-        {
-          opacity: 0,
-          scale: 0.85,
-          rotation: -15,
-          transformOrigin: "50% 50%",
-        },
-        {
-          opacity: 1,
-          scale: 1,
-          rotation: 0,
-          transformOrigin: "50% 50%",
-          ease: "none",
-          duration: 0.22,
-        },
-        0.72
-      );
-    }
-  }, [timeline]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -306,7 +212,7 @@ export function BilateralPatternFlow({ timeline }: BilateralPatternFlowProps = {
         speed: 0.0016,
         amplitude: 24,
         frequency: 2.1,
-      },
+        },
       {
         side: "left",
         name: "knee-joint",
@@ -566,7 +472,7 @@ export function BilateralPatternFlow({ timeline }: BilateralPatternFlowProps = {
 
       context.clearRect(0, 0, width, height);
 
-      // Untransformed focal dot center in canvas pixel coordinates
+      // Focal center in canvas pixel coordinates
       const bElem = bodyRef.current;
       const bHeight = bElem ? bElem.offsetHeight : 300;
       const focalX = width * 0.5;
@@ -677,7 +583,7 @@ export function BilateralPatternFlow({ timeline }: BilateralPatternFlowProps = {
     >
       {/* Visualization Scene (Static composition) */}
       <div className="w-full h-full absolute inset-0 flex items-center justify-center pointer-events-none">
-        {/* Fading Flowing Lines Canvas Layer */}
+        {/* Flowing Lines Canvas Layer */}
         <canvas 
           ref={canvasRef} 
           className="w-full h-full block absolute inset-0 pointer-events-none" 
@@ -688,217 +594,161 @@ export function BilateralPatternFlow({ timeline }: BilateralPatternFlowProps = {
           ref={bodyRef} 
           className="relative w-32 h-56 sm:w-36 sm:h-64 md:w-40 md:h-72 flex items-center justify-center pointer-events-none select-none"
         >
-          {/* Fading Surrounding Visualization Layer (Human Figure + Background Glow) */}
-          <div ref={visualizationContentRef} className="w-full h-full absolute inset-0 flex items-center justify-center">
-            {/* Subtle Ambient Radial Glow behind the body */}
-            <div className="absolute inset-0 bg-gradient-to-b from-emerald-400/20 via-emerald-600/25 to-transparent rounded-full blur-3xl -z-10" />
+          {/* Subtle Ambient Radial Glow behind the body */}
+          <div className="absolute inset-0 bg-gradient-to-b from-emerald-400/20 via-emerald-600/25 to-transparent rounded-full blur-3xl -z-10" />
 
-            {/* Topographic Bio-Wave Mesh Human Figure */}
-            <svg
-              viewBox="-50 -108 100 216"
-              className="w-full h-full drop-shadow-sm overflow-visible"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <defs>
-                <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#8A9A86" stopOpacity="0.4" />
-                  <stop offset="30%" stopColor="#2D5A43" stopOpacity="0.9" />
-                  <stop offset="50%" stopColor="#0F7A4E" stopOpacity="1" />
-                  <stop offset="70%" stopColor="#2D5A43" stopOpacity="0.9" />
-                  <stop offset="100%" stopColor="#8A9A86" stopOpacity="0.4" />
-                </linearGradient>
-
-                <linearGradient id="bodyBackdrop" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#2D5A43" stopOpacity="0.12" />
-                  <stop offset="50%" stopColor="#0F7A4E" stopOpacity="0.08" />
-                  <stop offset="100%" stopColor="#8A9A86" stopOpacity="0.04" />
-                </linearGradient>
-              </defs>
-
-              {/* Outer Body Mesh Silhouette */}
-              <g>
-                {/* Subtle Outer Human Silhouette Contour Reference */}
-                <path
-                  d="M 0 -96
-                     C 6.5 -96 11.5 -90 11.5 -82 
-                     C 11.5 -73.5 7.5 -67.5 4.5 -65.5 
-                     C 4.5 -63 6.5 -61 9.5 -60 
-                     C 17.5 -57.5 25.5 -53.5 27.5 -48 
-                     C 29.5 -42.5 28.5 -28 26.5 -8 
-                     C 25.5 7 23.5 22 21.5 37 
-                     C 20.5 42 18.5 47 16.5 50 
-                     C 14.5 52 12.5 50 12.5 46 
-                     C 14.5 37 16.5 20 16.5 4 
-                     C 16.5 -13 14.5 -33 14.5 -40 
-                     C 13.5 -33 14.5 -18 13.5 -3 
-                     C 12.5 12 14.5 22 15.5 30 
-                     C 15.5 40 14.5 57 12.5 74 
-                     C 10.5 90 8.5 100 6.5 106 
-                     C 4.5 108 1.5 108 1.5 104 
-                     C 2.5 97 3.5 82 3.5 67 
-                     C 3.5 52 2.5 40 0.5 30 
-                     C 0 30 0 30 -0.5 30 
-                     C -2.5 40 -3.5 52 -3.5 67 
-                     C -3.5 82 -2.5 97 -1.5 104 
-                     C -1.5 108 -4.5 108 -6.5 106 
-                     C -8.5 100 -10.5 90 -12.5 74 
-                     C -14.5 57 -15.5 40 -15.5 30 
-                     C -14.5 22 -12.5 12 -13.5 -3 
-                     C -14.5 -18 -13.5 -33 -14.5 -40 
-                     C -14.5 -33 -16.5 -13 -16.5 4 
-                     C -16.5 20 -14.5 37 -12.5 46 
-                     C -12.5 50 -14.5 52 -16.5 50 
-                     C -18.5 47 -20.5 42 -21.5 37 
-                     C -23.5 22 -25.5 7 -26.5 -8 
-                     C -28.5 -28 -29.5 -42.5 -27.5 -48 
-                     C -25.5 -53.5 -17.5 -57.5 -9.5 -60 
-                     C -6.5 -61 -4.5 -63 -4.5 -65.5 
-                     C -7.5 -67.5 -11.5 -73.5 -11.5 -82 
-                     C -11.5 -90 -6.5 -96 0 -96 Z"
-                  fill="url(#bodyBackdrop)"
-                  stroke="#2D5A43"
-                  strokeOpacity="0.2"
-                  strokeWidth="0.8"
-                  strokeDasharray="2 3"
-                />
-
-                {/* Central Bio-Meridian Vertical Axis */}
-                <line
-                  x1="0"
-                  y1="-88"
-                  x2="0"
-                  y2="28"
-                  stroke="#0F7A4E"
-                  strokeOpacity="0.35"
-                  strokeWidth="1"
-                  strokeDasharray="2 2"
-                />
-
-                {/* Topographic Wave Slices Group */}
-                <g stroke="url(#waveGrad)" strokeWidth="1.25" strokeLinecap="round">
-                  {/* Head Slices */}
-                  <path d="M -5 -92 Q 0 -93.5 5 -92" />
-                  <path d="M -8.5 -88 Q 0 -90 8.5 -88" />
-                  <path d="M -11 -84 Q 0 -86.5 11 -84" />
-                  <path d="M -11.5 -80 Q 0 -82.5 11.5 -80" />
-                  <path d="M -9.5 -76 Q 0 -78 9.5 -76" />
-                  <path d="M -7 -72 Q 0 -73.5 7 -72" />
-
-                  {/* Neck Slices */}
-                  <path d="M -5.5 -68 Q 0 -69.5 5.5 -68" />
-                  <path d="M -6.5 -64 Q 0 -65.5 6.5 -64" />
-                  <path d="M -9.5 -60 Q 0 -62 9.5 -60" />
-
-                  {/* Shoulders & Upper Chest */}
-                  <path d="M -18 -56 Q -9 -58 0 -57 Q 9 -58 18 -56" />
-                  <path d="M -24 -52 Q -12 -54.5 0 -53 Q 12 -54.5 24 -52" />
-                  <path d="M -27.5 -48 Q -14 -51 0 -49 Q 14 -51 27.5 -48" />
-                  <path d="M -28.5 -44 Q -14 -47 0 -45 Q 14 -47 28.5 -44" />
-                  <path d="M -28 -40 Q -14 -43 0 -41 Q 14 -43 28 -40" />
-                  <path d="M -27 -36 Q -13.5 -39 0 -37 Q 13.5 -39 27 -36" />
-                  <path d="M -26 -32 Q -13 -35 0 -33 Q 13 -35 26 -32" />
-
-                  {/* Core / Heart / Solar Plexus Area */}
-                  <path d="M -25 -28 Q -12.5 -31 0 -29 Q 12.5 -31 25 -28" />
-                  <path d="M -24 -24 Q -12 -27 0 -25 Q 12 -27 24 -24" />
-                  <path d="M -23 -20 Q -11 -23 0 -21 Q 11 -23 23 -20" />
-                  <path d="M -22 -16 Q -10 -19 0 -17 Q 10 -19 22 -16" />
-                  <path d="M -21 -12 Q -9.5 -15 0 -13 Q 9.5 -15 21 -12" />
-                  <path d="M -20 -8 Q -9 -11 0 -9 Q 9 -11 20 -8" />
-
-                  {/* Waist / Navel & Pelvis */}
-                  <path d="M -19 -4 Q -8.5 -7 0 -5 Q 8.5 -7 19 -4" />
-                  <path d="M -18.5 0 Q -8.5 -3 0 -1 Q 8.5 -3 18.5 0" />
-                  <path d="M -18 4 Q -8.5 1 0 3 Q 8.5 1 18 4" />
-                  <path d="M -17.5 8 Q -9 5 0 7 Q 9 5 17.5 8" />
-                  <path d="M -17 12 Q -9 9 0 11 Q 9 9 17 12" />
-                  <path d="M -16.5 16 Q -9.5 13 0 15 Q 9.5 13 16.5 16" />
-                  <path d="M -16 20 Q -9.5 17 0 19 Q 9.5 17 16 20" />
-                  <path d="M -15.5 24 Q -9 21 0 23 Q 9 21 15.5 24" />
-                  <path d="M -15 28 Q -8 25 0 27 Q 8 25 15 28" />
-
-                  {/* Legs / Kinetic Slices */}
-                  <path d="M -15 34 Q -9 31.5 -3 34 M 3 34 Q 9 31.5 15 34" />
-                  <path d="M -14.5 40 Q -8.5 37.5 -3 40 M 3 40 Q 8.5 37.5 14.5 40" />
-                  <path d="M -14 46 Q -8.5 43.5 -3 46 M 3 46 Q 8.5 43.5 14 46" />
-                  <path d="M -13 52 Q -8 49.5 -3.2 52 M 3.2 52 Q 8 49.5 13 52" />
-                  <path d="M -12 58 Q -7.5 55.5 -3.5 58 M 3.5 58 Q 7.5 55.5 12 58" />
-                  <path d="M -11 64 Q -7 61.5 -3.5 64 M 3.5 64 Q 7 61.5 11 64" />
-                  <path d="M -10.5 70 Q -7 67.5 -3.5 70 M 3.5 70 Q 7 67.5 10.5 70" />
-                  <path d="M -10 76 Q -6.5 73.5 -3.5 76 M 3.5 76 Q 6.5 73.5 10 76" />
-                  <path d="M -9.5 82 Q -6.5 79.5 -3.5 82 M 3.5 82 Q 6.5 79.5 9.5 82" />
-                  <path d="M -9 88 Q -6 85.5 -3.5 88 M 3.5 88 Q 6 85.5 9 88" />
-                  <path d="M -8.5 94 Q -5.5 91.5 -3.5 94 M 3.5 94 Q 5.5 91.5 8.5 94" />
-                  <path d="M -8 100 Q -5.5 97.5 -3 100 M 3 100 Q 5.5 97.5 8 100" />
-                  <path d="M -7.5 105 Q -5 102.5 -2.5 105 M 2.5 105 Q 5 102.5 7.5 105" />
-                </g>
-              </g>
-            </svg>
-          </div>
-
-          {/* Isolated Central Focal Point (Floating icon without background badge) */}
-          <div 
-            ref={focalPointRef}
-            style={{ 
-              top: "40.74%", 
-              left: "50%",
-              transformOrigin: "50% 50%"
-            }}
-            className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none z-30 flex items-center justify-center w-7 h-7 bg-transparent border-0 shadow-none"
+          {/* Topographic Bio-Wave Mesh Human Figure */}
+          <svg
+            viewBox="-50 -108 100 216"
+            className="w-full h-full drop-shadow-sm overflow-visible"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
           >
-            <svg viewBox="-14 -14 28 28" className="w-7 h-7 overflow-visible">
-              {/* State 1: Question Mark '?' (Clean outline icon) */}
-              <g ref={questionMarkRef} style={{ transformOrigin: "0px 0px" }}>
-                <path
-                  d="M -2.8 -3.2 C -2.8 -5.8, 2.8 -5.8, 2.8 -3.2 C 2.8 -1.2, 0 -0.4, 0 1.6"
-                  fill="none"
-                  stroke="#1e3a2b"
-                  strokeWidth="1.4"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <circle cx="0" cy="4.2" r="0.75" fill="#1e3a2b" />
-              </g>
+            <defs>
+              <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#8A9A86" stopOpacity="0.4" />
+                <stop offset="30%" stopColor="#2D5A43" stopOpacity="0.9" />
+                <stop offset="50%" stopColor="#0F7A4E" stopOpacity="1" />
+                <stop offset="70%" stopColor="#2D5A43" stopOpacity="0.9" />
+                <stop offset="100%" stopColor="#8A9A86" stopOpacity="0.4" />
+              </linearGradient>
 
-              {/* State 2: Loop / Cycle Icon '⟳' (Clean matching outline icon) */}
-              <g ref={loopIconRef} style={{ transformOrigin: "0px 0px", opacity: 0 }}>
-                {/* Top Clockwise Arc with Minimal Arrow Tip */}
-                <path
-                  d="M -4.2 -2.2 A 4.8 4.8 0 0 1 4.2 -2.2"
-                  fill="none"
-                  stroke="#1e3a2b"
-                  strokeWidth="1.3"
-                  strokeLinecap="round"
-                />
-                <path
-                  d="M 4.6 -4.4 L 4.2 -2.2 L 2.0 -2.4"
-                  fill="none"
-                  stroke="#1e3a2b"
-                  strokeWidth="1.3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
+              <linearGradient id="bodyBackdrop" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#2D5A43" stopOpacity="0.12" />
+                <stop offset="50%" stopColor="#0F7A4E" stopOpacity="0.08" />
+                <stop offset="100%" stopColor="#8A9A86" stopOpacity="0.04" />
+              </linearGradient>
+            </defs>
 
-                {/* Bottom Clockwise Arc with Minimal Arrow Tip */}
-                <path
-                  d="M 4.2 2.2 A 4.8 4.8 0 0 1 -4.2 2.2"
-                  fill="none"
-                  stroke="#1e3a2b"
-                  strokeWidth="1.3"
-                  strokeLinecap="round"
-                />
-                <path
-                  d="M -4.6 4.4 L -4.2 2.2 L -2.0 2.4"
-                  fill="none"
-                  stroke="#1e3a2b"
-                  strokeWidth="1.3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
+            {/* Outer Body Mesh Silhouette */}
+            <g>
+              {/* Subtle Outer Human Silhouette Contour Reference */}
+              <path
+                d="M 0 -96
+                   C 6.5 -96 11.5 -90 11.5 -82 
+                   C 11.5 -73.5 7.5 -67.5 4.5 -65.5 
+                   C 4.5 -63 6.5 -61 9.5 -60 
+                   C 17.5 -57.5 25.5 -53.5 27.5 -48 
+                   C 29.5 -42.5 28.5 -28 26.5 -8 
+                   C 25.5 7 23.5 22 21.5 37 
+                   C 20.5 42 18.5 47 16.5 50 
+                   C 14.5 52 12.5 50 12.5 46 
+                   C 14.5 37 16.5 20 16.5 4 
+                   C 16.5 -13 14.5 -33 14.5 -40 
+                   C 13.5 -33 14.5 -18 13.5 -3 
+                   C 12.5 12 14.5 22 15.5 30 
+                   C 15.5 40 14.5 57 12.5 74 
+                   C 10.5 90 8.5 100 6.5 106 
+                   C 4.5 108 1.5 108 1.5 104 
+                   C 2.5 97 3.5 82 3.5 67 
+                   C 3.5 52 2.5 40 0.5 30 
+                   C 0 30 0 30 -0.5 30 
+                   C -2.5 40 -3.5 52 -3.5 67 
+                   C -3.5 82 -2.5 97 -1.5 104 
+                   C -1.5 108 -4.5 108 -6.5 106 
+                   C -8.5 100 -10.5 90 -12.5 74 
+                   C -14.5 57 -15.5 40 -15.5 30 
+                   C -14.5 22 -12.5 12 -13.5 -3 
+                   C -14.5 -18 -13.5 -33 -14.5 -40 
+                   C -14.5 -33 -16.5 -13 -16.5 4 
+                   C -16.5 20 -14.5 37 -12.5 46 
+                   C -12.5 50 -14.5 52 -16.5 50 
+                   C -18.5 47 -20.5 42 -21.5 37 
+                   C -23.5 22 -25.5 7 -26.5 -8 
+                   C -28.5 -28 -29.5 -42.5 -27.5 -48 
+                   C -25.5 -53.5 -17.5 -57.5 -9.5 -60 
+                   C -6.5 -61 -4.5 -63 -4.5 -65.5 
+                   C -7.5 -67.5 -11.5 -73.5 -11.5 -82 
+                   C -11.5 -90 -6.5 -96 0 -96 Z"
+                fill="url(#bodyBackdrop)"
+                stroke="#2D5A43"
+                strokeOpacity="0.2"
+                strokeWidth="0.8"
+                strokeDasharray="2 3"
+              />
+
+              {/* Central Bio-Meridian Vertical Axis */}
+              <line
+                x1="0"
+                y1="-88"
+                x2="0"
+                y2="28"
+                stroke="#0F7A4E"
+                strokeOpacity="0.35"
+                strokeWidth="1"
+                strokeDasharray="2 2"
+              />
+
+              {/* Topographic Wave Slices Group */}
+              <g stroke="url(#waveGrad)" strokeWidth="1.25" strokeLinecap="round">
+                {/* Head Slices */}
+                <path d="M -5 -92 Q 0 -93.5 5 -92" />
+                <path d="M -8.5 -88 Q 0 -90 8.5 -88" />
+                <path d="M -11 -84 Q 0 -86.5 11 -84" />
+                <path d="M -11.5 -80 Q 0 -82.5 11.5 -80" />
+                <path d="M -9.5 -76 Q 0 -78 9.5 -76" />
+                <path d="M -7 -72 Q 0 -73.5 7 -72" />
+
+                {/* Neck Slices */}
+                <path d="M -5.5 -68 Q 0 -69.5 5.5 -68" />
+                <path d="M -6.5 -64 Q 0 -65.5 6.5 -64" />
+                <path d="M -9.5 -60 Q 0 -62 9.5 -60" />
+
+                {/* Shoulders & Upper Chest */}
+                <path d="M -18 -56 Q -9 -58 0 -57 Q 9 -58 18 -56" />
+                <path d="M -24 -52 Q -12 -54.5 0 -53 Q 12 -54.5 24 -52" />
+                <path d="M -27.5 -48 Q -14 -51 0 -49 Q 14 -51 27.5 -48" />
+                <path d="M -28.5 -44 Q -14 -47 0 -45 Q 14 -47 28.5 -44" />
+                <path d="M -28 -40 Q -14 -43 0 -41 Q 14 -43 28 -40" />
+                <path d="M -27 -36 Q -13.5 -39 0 -37 Q 13.5 -39 27 -36" />
+                <path d="M -26 -32 Q -13 -35 0 -33 Q 13 -35 26 -32" />
+
+                {/* Core / Heart / Solar Plexus Area */}
+                <path d="M -25 -28 Q -12.5 -31 0 -29 Q 12.5 -31 25 -28" />
+                <path d="M -24 -24 Q -12 -27 0 -25 Q 12 -27 24 -24" />
+                <path d="M -23 -20 Q -11 -23 0 -21 Q 11 -23 23 -20" />
+                <path d="M -22 -16 Q -10 -19 0 -17 Q 10 -19 22 -16" />
+                <path d="M -21 -12 Q -9.5 -15 0 -13 Q 9.5 -15 21 -12" />
+                <path d="M -20 -8 Q -9 -11 0 -9 Q 9 -11 20 -8" />
+
+                {/* Waist / Navel & Pelvis */}
+                <path d="M -19 -4 Q -8.5 -7 0 -5 Q 8.5 -7 19 -4" />
+                <path d="M -18.5 0 Q -8.5 -3 0 -1 Q 8.5 -3 18.5 0" />
+                <path d="M -18 4 Q -8.5 1 0 3 Q 8.5 1 18 4" />
+                <path d="M -17.5 8 Q -9 5 0 7 Q 9 5 17.5 8" />
+                <path d="M -17 12 Q -9 9 0 11 Q 9 9 17 12" />
+                <path d="M -16.5 16 Q -9.5 13 0 15 Q 9.5 13 16.5 16" />
+                <path d="M -16 20 Q -9.5 17 0 19 Q 9.5 17 16 20" />
+                <path d="M -15.5 24 Q -9 21 0 23 Q 9 21 15.5 24" />
+                <path d="M -15 28 Q -8 25 0 27 Q 8 25 15 28" />
+
+                {/* Legs / Kinetic Slices */}
+                <path d="M -15 34 Q -9 31.5 -3 34 M 3 34 Q 9 31.5 15 34" />
+                <path d="M -14.5 40 Q -8.5 37.5 -3 40 M 3 40 Q 8.5 37.5 14.5 40" />
+                <path d="M -14 46 Q -8.5 43.5 -3 46 M 3 46 Q 8.5 43.5 14 46" />
+                <path d="M -13 52 Q -8 49.5 -3.2 52 M 3.2 52 Q 8 49.5 13 52" />
+                <path d="M -12 58 Q -7.5 55.5 -3.5 58 M 3.5 58 Q 7.5 55.5 12 58" />
+                <path d="M -11 64 Q -7 61.5 -3.5 64 M 3.5 64 Q 7 61.5 11 64" />
+                <path d="M -10.5 70 Q -7 67.5 -3.5 70 M 3.5 70 Q 7 67.5 10.5 70" />
+                <path d="M -10 76 Q -6.5 73.5 -3.5 76 M 3.5 76 Q 6.5 73.5 10 76" />
+                <path d="M -9.5 82 Q -6.5 79.5 -3.5 82 M 3.5 82 Q 6.5 79.5 9.5 82" />
+                <path d="M -9 88 Q -6 85.5 -3.5 88 M 3.5 88 Q 6 85.5 9 88" />
+                <path d="M -8.5 94 Q -5.5 91.5 -3.5 94 M 3.5 94 Q 5.5 91.5 8.5 94" />
+                <path d="M -8 100 Q -5.5 97.5 -3 100 M 3 100 Q 5.5 97.5 8 100" />
+                <path d="M -7.5 105 Q -5 102.5 -2.5 105 M 2.5 105 Q 5 102.5 7.5 105" />
               </g>
-            </svg>
-          </div>
+            </g>
+
+            {/* Central Focal Center Dot in Original Brand Emerald Palette */}
+            <g id="central-focal-core" transform="translate(0, -20)">
+              <circle cx="0" cy="0" r="8" fill="#0F7A4E" fillOpacity="0.18" />
+              <circle cx="0" cy="0" r="5.5" fill="#0F7A4E" fillOpacity="0.38" />
+              <circle cx="0" cy="0" r="3.8" fill="#2D5A43" />
+              <circle cx="0" cy="0" r="2.8" fill="#0F7A4E" />
+              <circle cx="0" cy="0" r="1.8" fill="#10B981" />
+              <circle cx="-0.8" cy="-0.8" r="0.8" fill="#FFFFFF" opacity="0.95" />
+            </g>
+          </svg>
         </div>
       </div>
     </div>

@@ -6,19 +6,12 @@ import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { BilateralPatternFlow } from "@/components/BilateralPatternFlow";
 import { motion } from "motion/react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
 import { 
   IconHeartbeat,
   IconArrowRight,
   IconAdjustmentsHorizontal,
   IconHistory
 } from "@tabler/icons-react";
-
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger, useGSAP);
-}
 
 // Fluid Apple HIG motion curves
 const fadeUpVariants = {
@@ -34,118 +27,59 @@ const fadeUpVariants = {
   })
 };
 
-function SectionPatternsPinned() {
-  const sectionRef = React.useRef<HTMLElement>(null);
-  const pinContainerRef = React.useRef<HTMLDivElement>(null);
-  const heroCopyRef = React.useRef<HTMLDivElement>(null);
-  const bridgeRef = React.useRef<HTMLDivElement>(null);
-  const [timeline, setTimeline] = React.useState<gsap.core.Timeline | null>(null);
-
-  useGSAP(
-    () => {
-      if (!sectionRef.current || !pinContainerRef.current) return;
-
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top top",
-          end: "+=2200",
-          pin: pinContainerRef.current,
-          scrub: 1,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-        },
-      });
-
-      // Hero headline copy fades out gently during scroll
-      if (heroCopyRef.current) {
-        tl.to(
-          heroCopyRef.current,
-          {
-            opacity: 0,
-            ease: "none",
-            duration: 0.45,
-          },
-          0.25
-        );
-      }
-
-      // CTA bridge button fades out gently during scroll
-      if (bridgeRef.current) {
-        tl.to(
-          bridgeRef.current,
-          {
-            opacity: 0,
-            ease: "none",
-            duration: 0.45,
-          },
-          0.25
-        );
-      }
-
-      setTimeline(tl);
-    },
-    { scope: sectionRef }
-  );
-
+function SectionPatterns() {
   return (
     <section 
-      ref={sectionRef} 
       id="patterns" 
-      className="relative w-full border-t border-brand-900/5"
+      className="min-h-[100dvh] w-full border-t border-brand-900/5 overflow-hidden flex flex-col justify-between pt-24 md:pt-28 pb-8 px-6 lg:px-12 relative"
     >
-      <div 
-        ref={pinContainerRef}
-        className="h-[100dvh] w-full overflow-hidden flex flex-col justify-between pt-24 md:pt-28 pb-8 px-6 lg:px-12 relative"
-      >
-        {/* Top Typographic Header (Clean spacing below navbar, fades out on transition to focal state) */}
-        <div ref={heroCopyRef} className="container mx-auto max-w-6xl w-full z-20 pointer-events-none mb-3 md:mb-5">
-          <div className="max-w-4xl pointer-events-auto">
-            <motion.h2 
-              custom={1}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.25 }}
-              variants={fadeUpVariants}
-              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-normal tracking-tight text-brand-900 leading-[1.08]"
-            >
-              Setiap hari, kita melakukan <br className="hidden sm:inline" />
-              <span className="italic font-light text-brand-900/80">lebih dari yang kita sadari.</span>
-            </motion.h2>
-          </div>
+      {/* Top Typographic Header (Clean spacing below navbar) */}
+      <div className="container mx-auto max-w-6xl w-full z-20 pointer-events-none mb-3 md:mb-5">
+        <div className="max-w-4xl pointer-events-auto">
+          <motion.h2 
+            custom={1}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.25 }}
+            variants={fadeUpVariants}
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-normal tracking-tight text-brand-900 leading-[1.08]"
+          >
+            Setiap hari, kita melakukan <br className="hidden sm:inline" />
+            <span className="italic font-light text-brand-900/80">lebih dari yang kita sadari.</span>
+          </motion.h2>
+        </div>
+      </div>
+
+      {/* Dedicated Camera Viewport for Visualization (In-flow flex-1 with clean vertical clearance) */}
+      <div className="relative w-full flex-1 min-h-0 overflow-hidden flex items-center justify-center pointer-events-none z-10 my-auto">
+        {/* Soft Ambient Radial Glows */}
+        <div className="absolute inset-0 pointer-events-none -z-10">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[450px] bg-emerald-300/15 rounded-full blur-[140px]" />
+          <div className="absolute top-1/3 left-12 w-[350px] h-[280px] bg-[#d97757]/10 rounded-full blur-[110px]" />
+          <div className="absolute bottom-1/4 right-12 w-[380px] h-[300px] bg-[#64748b]/10 rounded-full blur-[110px]" />
         </div>
 
-        {/* Dedicated Camera Viewport for Visualization (In-flow flex-1 with clean vertical clearance) */}
-        <div className="relative w-full flex-1 min-h-0 overflow-hidden flex items-center justify-center pointer-events-none z-10 my-auto">
-          {/* Soft Ambient Radial Glows */}
-          <div className="absolute inset-0 pointer-events-none -z-10">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[450px] bg-emerald-300/15 rounded-full blur-[140px]" />
-            <div className="absolute top-1/3 left-12 w-[350px] h-[280px] bg-[#d97757]/10 rounded-full blur-[110px]" />
-            <div className="absolute bottom-1/4 right-12 w-[380px] h-[300px] bg-[#64748b]/10 rounded-full blur-[110px]" />
-          </div>
+        <BilateralPatternFlow />
+      </div>
 
-          <BilateralPatternFlow timeline={timeline} />
-        </div>
-
-        {/* Editorial Conceptual Forward Bridge (Fades out on transition to focal state) */}
-        <div ref={bridgeRef} className="container mx-auto max-w-6xl w-full flex justify-center z-20 pointer-events-none mt-3 md:mt-5">
-          <div className="flex justify-center pointer-events-auto">
-            <motion.div
-              custom={2}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.25 }}
-              variants={fadeUpVariants}
+      {/* Editorial Conceptual Forward Bridge */}
+      <div className="container mx-auto max-w-6xl w-full flex justify-center z-20 pointer-events-none mt-3 md:mt-5">
+        <div className="flex justify-center pointer-events-auto">
+          <motion.div
+            custom={2}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.25 }}
+            variants={fadeUpVariants}
+          >
+            <Link 
+              href="#how-it-works"
+              className="group inline-flex items-center gap-2 text-sm md:text-base font-medium text-brand-900/80 hover:text-brand-900 transition-colors tracking-wide"
             >
-              <Link 
-                href="#how-it-works"
-                className="group inline-flex items-center gap-2 text-sm md:text-base font-medium text-brand-900/80 hover:text-brand-900 transition-colors tracking-wide"
-              >
-                <span>Bagaimana HELIORA membaca pola</span>
-                <IconArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-300" />
-              </Link>
-            </motion.div>
-          </div>
+              <span>Bagaimana HELIORA membaca pola</span>
+              <IconArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-300" />
+            </Link>
+          </motion.div>
         </div>
       </div>
     </section>
@@ -227,8 +161,8 @@ export default function LandingPage() {
           </motion.div>
         </section>
 
-        {/* SECTION 01 (STITCH SECTION 2: FINAL - BILATERAL CONVERGENCE & PINNED SCROLL ZOOM): KESEHATAN BUKAN SEKADAR ANGKA */}
-        <SectionPatternsPinned />
+        {/* SECTION 01 (STITCH SECTION 2: BILATERAL CONVERGENCE): KESEHATAN BUKAN SEKADAR ANGKA */}
+        <SectionPatterns />
 
         {/* SECTION 02: ALUR KERJA (#how-it-works) */}
         <section id="how-it-works" className="container mx-auto px-6 lg:px-12 py-16 scroll-mt-24">
