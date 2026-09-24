@@ -204,8 +204,8 @@ export default function LandingPage() {
         {/* SECTION 02: NARASI POLA HIDUP & EKSPLORASI RISIKO */}
         <SectionLifestyleNarrative />
 
-        {/* SECTION 03: KENAPA HARUS HELIORA (#features) */}
-        <section id="features" className="w-full bg-white/80 backdrop-blur-md border-y border-brand-900/5 py-20 sm:py-28 md:py-32 my-8 sm:my-12 scroll-mt-24">
+        {/* SECTION 03: KENAPA HARUS HELIORA (#why-heliora) */}
+        <section id="why-heliora" className="w-full bg-white/80 backdrop-blur-md border-y border-brand-900/5 py-20 sm:py-28 md:py-32 my-8 sm:my-12 scroll-mt-24">
           <div className="container mx-auto px-6 lg:px-12">
             <div className="max-w-3xl mx-auto text-center mb-16 sm:mb-20 md:mb-24">
               <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-brand-900 leading-tight">
@@ -388,162 +388,223 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* SECTION: FEATURES AND TECHNOLOGY */}
-        <section id="features-technology" className="container mx-auto px-6 lg:px-12 py-20 sm:py-28 scroll-mt-24">
+        {/* SECTION: FEATURES */}
+        <section id="features" className="container mx-auto px-6 lg:px-12 py-16 sm:py-24 scroll-mt-24">
           <div className="max-w-3xl mb-12 sm:mb-16">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-brand-900/5 text-emerald-800 mb-3 border border-brand-900/10">
-              Inovasi & Arsitektur
+              Fitur Unggulan
             </span>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-brand-900 leading-[1.15]">
-              Features and Technology
+              Features
             </h2>
             <p className="text-base sm:text-lg text-brand-900/65 mt-4 font-normal leading-relaxed">
-              Kombinasi algoritma prediktif modern, simulasi kontrafaktual, dan protokol keamanan data berstandar tinggi untuk kesehatan preventif yang presisi.
+              Solusi preventif cerdas untuk memetakan kesehatan, mensimulasikan masa depan, dan mengambil keputusan gaya hidup berbasis bukti.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            {/* Feature 1: Multi-Disease Predictive AI */}
-            <div className="group bg-white border border-brand-900/10 rounded-3xl p-7 sm:p-8 shadow-xs hover:shadow-md hover:border-emerald-800/30 transition-all flex flex-col justify-between">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Feature 1: Multi-Disease Risk Assessment */}
+            <div className="group bg-white border border-brand-900/10 rounded-3xl p-6 sm:p-7 shadow-xs hover:shadow-md hover:border-emerald-800/30 transition-all flex flex-col justify-between">
               <div>
-                <div className="w-12 h-12 rounded-2xl bg-brand-100/70 border border-brand-900/10 flex items-center justify-center text-emerald-800 mb-6 group-hover:scale-105 group-hover:bg-emerald-800 group-hover:text-white transition-all">
-                  <IconCpu className="w-6 h-6" stroke={1.75} />
+                <div className="w-12 h-12 rounded-2xl bg-brand-100/70 border border-brand-900/10 flex items-center justify-center text-emerald-800 mb-5 group-hover:scale-105 group-hover:bg-emerald-800 group-hover:text-white transition-all">
+                  <IconHeartbeat className="w-6 h-6" stroke={1.75} />
                 </div>
                 <div className="space-y-2">
-                  <span className="text-xs font-mono font-bold text-brand-900/40 uppercase tracking-wide">
-                    Machine Learning
+                  <span className="text-[11px] font-mono font-bold text-brand-900/40 uppercase tracking-wide">
+                    Skrining Holistik
                   </span>
-                  <h3 className="text-xl font-bold text-brand-900 tracking-tight">
-                    Multi-Disease Risk Prediction
+                  <h3 className="text-lg font-bold text-brand-900 tracking-tight">
+                    Multi-Disease Risk Assessment
                   </h3>
-                  <p className="text-sm text-brand-900/65 leading-relaxed">
-                    Model ensemble gradient boosting terkalibrasi yang memetakan probabilitas risiko penyakit metabolik & kardiologis (Hipertensi, Diabetes, Jantung, Stroke) secara simultan.
+                  <p className="text-xs sm:text-sm text-brand-900/65 leading-relaxed">
+                    Evaluasi simultan untuk 4 risiko kardiometabolik utama: Hipertensi, Diabetes Tipe 2, Jantung, dan Stroke dalam satu alur terpadu.
                   </p>
                 </div>
               </div>
-              <div className="pt-6 mt-6 border-t border-brand-900/5 flex items-center justify-between text-xs text-brand-900/50 font-mono">
-                <span>CatBoost & LightGBM</span>
-                <span className="text-emerald-800 font-semibold">Calibrated Probabilities</span>
+              <div className="pt-4 mt-5 border-t border-brand-900/5 text-xs text-emerald-800 font-medium">
+                4 Kondisi Kronis · Real-Time
               </div>
             </div>
 
-            {/* Feature 2: Counterfactual What-If Simulator */}
-            <div className="group bg-white border border-brand-900/10 rounded-3xl p-7 sm:p-8 shadow-xs hover:shadow-md hover:border-emerald-800/30 transition-all flex flex-col justify-between">
+            {/* Feature 2: What-If Scenario Simulator */}
+            <div className="group bg-white border border-brand-900/10 rounded-3xl p-6 sm:p-7 shadow-xs hover:shadow-md hover:border-emerald-800/30 transition-all flex flex-col justify-between">
               <div>
-                <div className="w-12 h-12 rounded-2xl bg-brand-100/70 border border-brand-900/10 flex items-center justify-center text-emerald-800 mb-6 group-hover:scale-105 group-hover:bg-emerald-800 group-hover:text-white transition-all">
+                <div className="w-12 h-12 rounded-2xl bg-brand-100/70 border border-brand-900/10 flex items-center justify-center text-emerald-800 mb-5 group-hover:scale-105 group-hover:bg-emerald-800 group-hover:text-white transition-all">
                   <IconArrowsShuffle className="w-6 h-6" stroke={1.75} />
                 </div>
                 <div className="space-y-2">
-                  <span className="text-xs font-mono font-bold text-brand-900/40 uppercase tracking-wide">
-                    Causal Simulation
+                  <span className="text-[11px] font-mono font-bold text-brand-900/40 uppercase tracking-wide">
+                    Simulasi Kausal
                   </span>
-                  <h3 className="text-xl font-bold text-brand-900 tracking-tight">
+                  <h3 className="text-lg font-bold text-brand-900 tracking-tight">
                     What-If Scenario Simulator
                   </h3>
-                  <p className="text-sm text-brand-900/65 leading-relaxed">
-                    Eksplorasi dinamis yang memproyeksikan perubahan skor risiko saat Anda menyesuaikan variabel gaya hidup seperti durasi tidur, BMI, aktivitas fisik, atau nutrisi.
+                  <p className="text-xs sm:text-sm text-brand-900/65 leading-relaxed">
+                    Eksplorasi dinamis yang memperlihatkan proyeksi perubahan skor risiko saat mengubah kebiasaan tidur, BMI, aktivitas, atau nutrisi.
                   </p>
                 </div>
               </div>
-              <div className="pt-6 mt-6 border-t border-brand-900/5 flex items-center justify-between text-xs text-brand-900/50 font-mono">
-                <span>Interactive Projection</span>
-                <span className="text-emerald-800 font-semibold">Real-Time Delta</span>
+              <div className="pt-4 mt-5 border-t border-brand-900/5 text-xs text-emerald-800 font-medium">
+                Intervensi Terukur · Proyeksi Delta
               </div>
             </div>
 
-            {/* Feature 3: Explainable AI & SHAP Attribution */}
-            <div className="group bg-white border border-brand-900/10 rounded-3xl p-7 sm:p-8 shadow-xs hover:shadow-md hover:border-emerald-800/30 transition-all flex flex-col justify-between">
+            {/* Feature 3: Evidence-Based Action Plans */}
+            <div className="group bg-white border border-brand-900/10 rounded-3xl p-6 sm:p-7 shadow-xs hover:shadow-md hover:border-emerald-800/30 transition-all flex flex-col justify-between">
               <div>
-                <div className="w-12 h-12 rounded-2xl bg-brand-100/70 border border-brand-900/10 flex items-center justify-center text-emerald-800 mb-6 group-hover:scale-105 group-hover:bg-emerald-800 group-hover:text-white transition-all">
-                  <IconDeviceAnalytics className="w-6 h-6" stroke={1.75} />
+                <div className="w-12 h-12 rounded-2xl bg-brand-100/70 border border-brand-900/10 flex items-center justify-center text-emerald-800 mb-5 group-hover:scale-105 group-hover:bg-emerald-800 group-hover:text-white transition-all">
+                  <IconFileCheck className="w-6 h-6" stroke={1.75} />
                 </div>
                 <div className="space-y-2">
-                  <span className="text-xs font-mono font-bold text-brand-900/40 uppercase tracking-wide">
-                    Explainability
+                  <span className="text-[11px] font-mono font-bold text-brand-900/40 uppercase tracking-wide">
+                    Panduan Klinis
                   </span>
-                  <h3 className="text-xl font-bold text-brand-900 tracking-tight">
-                    Transparent Factor Attribution
+                  <h3 className="text-lg font-bold text-brand-900 tracking-tight">
+                    Personalized Action Plans
                   </h3>
-                  <p className="text-sm text-brand-900/65 leading-relaxed">
-                    Bukan kotak hitam. HELIORA mendekomposisi faktor kontributor utama (protektif vs pemberat risiko) agar Anda mengerti alasan di balik setiap hasil analisis.
+                  <p className="text-xs sm:text-sm text-brand-900/65 leading-relaxed">
+                    Rekomendasi tindakan bertingkat yang dipersonalisasi sesuai profil individu dan dirujuk langsung ke konsensus medis terstandar.
                   </p>
                 </div>
               </div>
-              <div className="pt-6 mt-6 border-t border-brand-900/5 flex items-center justify-between text-xs text-brand-900/50 font-mono">
-                <span>SHAP Factor Values</span>
+              <div className="pt-4 mt-5 border-t border-brand-900/5 text-xs text-emerald-800 font-medium">
+                Tindakan Bertahap · Rekomendasi Valid
+              </div>
+            </div>
+
+            {/* Feature 4: Unified Health Canvas */}
+            <div className="group bg-white border border-brand-900/10 rounded-3xl p-6 sm:p-7 shadow-xs hover:shadow-md hover:border-emerald-800/30 transition-all flex flex-col justify-between">
+              <div>
+                <div className="w-12 h-12 rounded-2xl bg-brand-100/70 border border-brand-900/10 flex items-center justify-center text-emerald-800 mb-5 group-hover:scale-105 group-hover:bg-emerald-800 group-hover:text-white transition-all">
+                  <IconLayersSubtract className="w-6 h-6" stroke={1.75} />
+                </div>
+                <div className="space-y-2">
+                  <span className="text-[11px] font-mono font-bold text-brand-900/40 uppercase tracking-wide">
+                    Visualisasi Berlapis
+                  </span>
+                  <h3 className="text-lg font-bold text-brand-900 tracking-tight">
+                    Unified Health Canvas
+                  </h3>
+                  <p className="text-xs sm:text-sm text-brand-900/65 leading-relaxed">
+                    Integrasi seluruh parameter gaya hidup, biomarker metabolik, dan riwayat dalam visualisasi multi-layer yang intuitif.
+                  </p>
+                </div>
+              </div>
+              <div className="pt-4 mt-5 border-t border-brand-900/5 text-xs text-emerald-800 font-medium">
+                Living Dashboard · Data Terpadu
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* SECTION: TECHNOLOGY */}
+        <section id="technology" className="container mx-auto px-6 lg:px-12 py-16 sm:py-24 border-t border-brand-900/5 scroll-mt-24">
+          <div className="max-w-3xl mb-12 sm:mb-16">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-brand-900/5 text-emerald-800 mb-3 border border-brand-900/10">
+              Arsitektur & AI
+            </span>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-brand-900 leading-[1.15]">
+              Technology
+            </h2>
+            <p className="text-base sm:text-lg text-brand-900/65 mt-4 font-normal leading-relaxed">
+              Kombinasi model machine learning terkalibrasi, interpretabilitas tanpa kotak hitam, dan standar enkripsi tingkat tinggi.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Tech 1: Calibrated ML Ensembles */}
+            <div className="group bg-white border border-brand-900/10 rounded-3xl p-6 sm:p-7 shadow-xs hover:shadow-md hover:border-emerald-800/30 transition-all flex flex-col justify-between">
+              <div>
+                <div className="w-12 h-12 rounded-2xl bg-brand-100/70 border border-brand-900/10 flex items-center justify-center text-emerald-800 mb-5 group-hover:scale-105 group-hover:bg-emerald-800 group-hover:text-white transition-all">
+                  <IconCpu className="w-6 h-6" stroke={1.75} />
+                </div>
+                <div className="space-y-2">
+                  <span className="text-[11px] font-mono font-bold text-brand-900/40 uppercase tracking-wide">
+                    Machine Learning
+                  </span>
+                  <h3 className="text-lg font-bold text-brand-900 tracking-tight">
+                    Calibrated ML Ensembles
+                  </h3>
+                  <p className="text-xs sm:text-sm text-brand-900/65 leading-relaxed">
+                    Model gradient boosting (CatBoost & LightGBM) terkalibrasi untuk menghasilkan probabilitas risiko yang objektif dan akurat.
+                  </p>
+                </div>
+              </div>
+              <div className="pt-4 mt-5 border-t border-brand-900/5 flex items-center justify-between text-xs text-brand-900/50 font-mono">
+                <span>CatBoost & LightGBM</span>
+                <span className="text-emerald-800 font-semibold">Calibrated</span>
+              </div>
+            </div>
+
+            {/* Tech 2: Explainable AI & SHAP */}
+            <div className="group bg-white border border-brand-900/10 rounded-3xl p-6 sm:p-7 shadow-xs hover:shadow-md hover:border-emerald-800/30 transition-all flex flex-col justify-between">
+              <div>
+                <div className="w-12 h-12 rounded-2xl bg-brand-100/70 border border-brand-900/10 flex items-center justify-center text-emerald-800 mb-5 group-hover:scale-105 group-hover:bg-emerald-800 group-hover:text-white transition-all">
+                  <IconDeviceAnalytics className="w-6 h-6" stroke={1.75} />
+                </div>
+                <div className="space-y-2">
+                  <span className="text-[11px] font-mono font-bold text-brand-900/40 uppercase tracking-wide">
+                    Explainability
+                  </span>
+                  <h3 className="text-lg font-bold text-brand-900 tracking-tight">
+                    SHAP Factor Attribution
+                  </h3>
+                  <p className="text-xs sm:text-sm text-brand-900/65 leading-relaxed">
+                    Dekonstruksi nilai Shapley (SHAP) untuk transparansi penuh mengenai faktor protektif dan pemicu risiko tanpa kotak hitam AI.
+                  </p>
+                </div>
+              </div>
+              <div className="pt-4 mt-5 border-t border-brand-900/5 flex items-center justify-between text-xs text-brand-900/50 font-mono">
+                <span>SHAP Values</span>
                 <span className="text-emerald-800 font-semibold">Zero Black-Box</span>
               </div>
             </div>
 
-            {/* Feature 4: Clinical Evidence & Action Plans */}
-            <div className="group bg-white border border-brand-900/10 rounded-3xl p-7 sm:p-8 shadow-xs hover:shadow-md hover:border-emerald-800/30 transition-all flex flex-col justify-between">
+            {/* Tech 3: Clinical Protocol Integration */}
+            <div className="group bg-white border border-brand-900/10 rounded-3xl p-6 sm:p-7 shadow-xs hover:shadow-md hover:border-emerald-800/30 transition-all flex flex-col justify-between">
               <div>
-                <div className="w-12 h-12 rounded-2xl bg-brand-100/70 border border-brand-900/10 flex items-center justify-center text-emerald-800 mb-6 group-hover:scale-105 group-hover:bg-emerald-800 group-hover:text-white transition-all">
-                  <IconFileCheck className="w-6 h-6" stroke={1.75} />
+                <div className="w-12 h-12 rounded-2xl bg-brand-100/70 border border-brand-900/10 flex items-center justify-center text-emerald-800 mb-5 group-hover:scale-105 group-hover:bg-emerald-800 group-hover:text-white transition-all">
+                  <IconCertificate className="w-6 h-6" stroke={1.75} />
                 </div>
                 <div className="space-y-2">
-                  <span className="text-xs font-mono font-bold text-brand-900/40 uppercase tracking-wide">
-                    Evidence-Based
+                  <span className="text-[11px] font-mono font-bold text-brand-900/40 uppercase tracking-wide">
+                    Evidence Engine
                   </span>
-                  <h3 className="text-xl font-bold text-brand-900 tracking-tight">
-                    Clinical Consensus Mapping
+                  <h3 className="text-lg font-bold text-brand-900 tracking-tight">
+                    Clinical Protocol Engine
                   </h3>
-                  <p className="text-sm text-brand-900/65 leading-relaxed">
-                    Rekomendasi tindakan yang dihasilkan diselaraskan langsung dengan pedoman klinis global (CDC, WHO) dan nasional (PERKENI, PERKI) dengan tautan rujukan ilmiah.
+                  <p className="text-xs sm:text-sm text-brand-900/65 leading-relaxed">
+                    Pemetaan otomatis ke panduan klinis global & nasional (CDC BRFSS, WHO, PERKENI, PERKI) untuk validitas rekomendasi medis.
                   </p>
                 </div>
               </div>
-              <div className="pt-6 mt-6 border-t border-brand-900/5 flex items-center justify-between text-xs text-brand-900/50 font-mono">
+              <div className="pt-4 mt-5 border-t border-brand-900/5 flex items-center justify-between text-xs text-brand-900/50 font-mono">
                 <span>CDC, WHO & PERKENI</span>
-                <span className="text-emerald-800 font-semibold">Tiered Action Plan</span>
+                <span className="text-emerald-800 font-semibold">Verified</span>
               </div>
             </div>
 
-            {/* Feature 5: Privacy-First Architecture */}
-            <div className="group bg-white border border-brand-900/10 rounded-3xl p-7 sm:p-8 shadow-xs hover:shadow-md hover:border-emerald-800/30 transition-all flex flex-col justify-between">
+            {/* Tech 4: Zero-Knowledge Privacy */}
+            <div className="group bg-white border border-brand-900/10 rounded-3xl p-6 sm:p-7 shadow-xs hover:shadow-md hover:border-emerald-800/30 transition-all flex flex-col justify-between">
               <div>
-                <div className="w-12 h-12 rounded-2xl bg-brand-100/70 border border-brand-900/10 flex items-center justify-center text-emerald-800 mb-6 group-hover:scale-105 group-hover:bg-emerald-800 group-hover:text-white transition-all">
+                <div className="w-12 h-12 rounded-2xl bg-brand-100/70 border border-brand-900/10 flex items-center justify-center text-emerald-800 mb-5 group-hover:scale-105 group-hover:bg-emerald-800 group-hover:text-white transition-all">
                   <IconShieldCheck className="w-6 h-6" stroke={1.75} />
                 </div>
                 <div className="space-y-2">
-                  <span className="text-xs font-mono font-bold text-brand-900/40 uppercase tracking-wide">
+                  <span className="text-[11px] font-mono font-bold text-brand-900/40 uppercase tracking-wide">
                     Data Sovereignty
                   </span>
-                  <h3 className="text-xl font-bold text-brand-900 tracking-tight">
+                  <h3 className="text-lg font-bold text-brand-900 tracking-tight">
                     Zero-Knowledge Privacy
                   </h3>
-                  <p className="text-sm text-brand-900/65 leading-relaxed">
-                    Enkripsi data komprehensif saat transit dan saat disimpan. Hak penuh atas penghapusan riwayat secara permanen dan bebas dari pelacakan komersial pihak ketiga.
+                  <p className="text-xs sm:text-sm text-brand-900/65 leading-relaxed">
+                    Enkripsi data berlapis saat disimpan dan dikirim, kontrol penuh atas penghapusan riwayat, dan zero tracking komersial.
                   </p>
                 </div>
               </div>
-              <div className="pt-6 mt-6 border-t border-brand-900/5 flex items-center justify-between text-xs text-brand-900/50 font-mono">
-                <span>End-to-End Encryption</span>
-                <span className="text-emerald-800 font-semibold">100% Data Sovereignty</span>
-              </div>
-            </div>
-
-            {/* Feature 6: Holistic Bilateral Modeling */}
-            <div className="group bg-white border border-brand-900/10 rounded-3xl p-7 sm:p-8 shadow-xs hover:shadow-md hover:border-emerald-800/30 transition-all flex flex-col justify-between">
-              <div>
-                <div className="w-12 h-12 rounded-2xl bg-brand-100/70 border border-brand-900/10 flex items-center justify-center text-emerald-800 mb-6 group-hover:scale-105 group-hover:bg-emerald-800 group-hover:text-white transition-all">
-                  <IconLayersSubtract className="w-6 h-6" stroke={1.75} />
-                </div>
-                <div className="space-y-2">
-                  <span className="text-xs font-mono font-bold text-brand-900/40 uppercase tracking-wide">
-                    Holistic Analytics
-                  </span>
-                  <h3 className="text-xl font-bold text-brand-900 tracking-tight">
-                    Unified Health Canvas
-                  </h3>
-                  <p className="text-sm text-brand-900/65 leading-relaxed">
-                    Mengintegrasikan pola keseharian, metrik klinis, hingga riwayat keluarga ke dalam satu visualisasi interaktif berlapis yang mudah dipahami setiap saat.
-                  </p>
-                </div>
-              </div>
-              <div className="pt-6 mt-6 border-t border-brand-900/5 flex items-center justify-between text-xs text-brand-900/50 font-mono">
-                <span>Bilateral Framework</span>
-                <span className="text-emerald-800 font-semibold">Living Dashboard</span>
+              <div className="pt-4 mt-5 border-t border-brand-900/5 flex items-center justify-between text-xs text-brand-900/50 font-mono">
+                <span>AES-256 Encryption</span>
+                <span className="text-emerald-800 font-semibold">100% Private</span>
               </div>
             </div>
           </div>
