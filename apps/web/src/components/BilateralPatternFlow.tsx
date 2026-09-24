@@ -32,8 +32,12 @@ interface BilateralPatternFlowProps {
 
 export function BilateralPatternFlow({ progress }: BilateralPatternFlowProps = {}) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const sceneRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
+  const focalDotRef = useRef<SVGGElement>(null);
+
+  const [transformOrigin, setTransformOrigin] = React.useState<string>("50% 45.6%");
 
   const internalScroll = useScroll({
     target: containerRef,
@@ -41,12 +45,39 @@ export function BilateralPatternFlow({ progress }: BilateralPatternFlowProps = {
   });
 
   const activeProgress = progress || internalScroll.scrollYProgress;
-  // Phase 1 (0.00 - 0.20): 100% static 1.0x overview (only bilateral lines flow)
-  // Phase 2 (0.20 - 0.85): Camera plunges directly into the central spinning dot (1.0x -> 8.5x)
-  const zoomScale = useTransform(activeProgress, [0.0, 0.20, 0.85], [1.0, 1.0, 8.5]);
-  const bodyMeshOpacity = useTransform(activeProgress, [0.20, 0.42], [1.0, 0.0]);
-  const streamsCanvasOpacity = useTransform(activeProgress, [0.20, 0.48], [1.0, 0.15]);
-  const macroDetailOpacity = useTransform(activeProgress, [0.42, 0.72], [0.0, 1.0]);
+  // Responsive ease-out camera zoom focused directly on the central red dot
+  const zoomScale = useTransform(
+    activeProgress,
+    [0.0, 0.15, 0.45, 0.8, 1.0],
+    [1.0, 1.35, 3.2, 5.6, 6.8]
+  );
+  const bodyMeshOpacity = useTransform(activeProgress, [0.35, 0.75], [1.0, 0.15]);
+  const macroDetailOpacity = useTransform(activeProgress, [0.25, 0.65], [0.0, 1.0]);
+
+  // Dynamically compute exact central red dot screen-space anchor relative to the scene container
+  useEffect(() => {
+    const updateTransformOrigin = () => {
+      if (!sceneRef.current || !focalDotRef.current) return;
+      const sceneRect = sceneRef.current.getBoundingClientRect();
+      const dotRect = focalDotRef.current.getBoundingClientRect();
+
+      if (sceneRect.width > 0 && sceneRect.height > 0) {
+        const dotCenterX = dotRect.left + dotRect.width / 2 - sceneRect.left;
+        const dotCenterY = dotRect.top + dotRect.height / 2 - sceneRect.top;
+
+        const originXPercent = (dotCenterX / sceneRect.width) * 100;
+        const originYPercent = (dotCenterY / sceneRect.height) * 100;
+
+        if (originXPercent > 0 && originYPercent > 0) {
+          setTransformOrigin(`${originXPercent.toFixed(4)}% ${originYPercent.toFixed(4)}%`);
+        }
+      }
+    };
+
+    updateTransformOrigin();
+    window.addEventListener("resize", updateTransformOrigin);
+    return () => window.removeEventListener("resize", updateTransformOrigin);
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -720,23 +751,27 @@ export function BilateralPatternFlow({ progress }: BilateralPatternFlowProps = {
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-full min-h-[460px] md:min-h-[540px] max-h-[640px] z-10 cursor-crosshair flex items-center justify-center"
+      className="relative w-full h-full min-h-[460px] md:min-h-[540px] max-h-[640px] z-10 cursor-crosshair flex items-center justify-center overflow-hidden"
     >
-      <motion.canvas 
-        ref={canvasRef} 
-        style={{ opacity: streamsCanvasOpacity }}
-        className="w-full h-full block absolute inset-0" 
-      />
-
-      {/* Central Human Bio-Mesh / Topographic Wave Silhouette: Scroll-Driven Camera Zoom into Focal Dot */}
+      {/* Unified Composed Visualization Scene: Centered precisely on the Central Red Dot */}
       <motion.div 
+        ref={sceneRef}
         style={{ 
           scale: zoomScale, 
-          transformOrigin: "50% 40.74%" 
+          transformOrigin: transformOrigin 
         }}
-        className="relative z-20 pointer-events-none flex flex-col items-center justify-center select-none will-change-transform"
+        className="relative w-full h-full flex items-center justify-center will-change-transform"
       >
-        <div ref={bodyRef} className="relative w-36 h-60 sm:w-40 sm:h-68 md:w-48 md:h-80 flex items-center justify-center">
+        <canvas 
+          ref={canvasRef} 
+          className="w-full h-full block absolute inset-0 pointer-events-none" 
+        />
+
+        {/* Central Human Bio-Mesh / Topographic Wave Silhouette */}
+        <div 
+          ref={bodyRef} 
+          className="relative w-36 h-60 sm:w-40 sm:h-68 md:w-48 md:h-80 flex items-center justify-center pointer-events-none select-none"
+        >
           {/* Subtle Ambient Radial Glow behind the body */}
           <div className="absolute inset-0 bg-gradient-to-b from-emerald-400/20 via-emerald-600/25 to-transparent rounded-full blur-3xl -z-10" />
 
@@ -763,8 +798,9 @@ export function BilateralPatternFlow({ progress }: BilateralPatternFlowProps = {
               </linearGradient>
 
               <radialGradient id="coreAura" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="#2D5A43" stopOpacity="0.85" />
-                <stop offset="35%" stopColor="#0F7A4E" stopOpacity="0.4" />
+                <stop offset="0%" stopColor="#D97757" stopOpacity="0.75" />
+                <stop offset="35%" stopColor="#D97757" stopOpacity="0.3" />
+                <stop offset="70%" stopColor="#0F7A4E" stopOpacity="0.15" />
                 <stop offset="100%" stopColor="#0F7A4E" stopOpacity="0" />
               </radialGradient>
             </defs>
@@ -888,7 +924,7 @@ export function BilateralPatternFlow({ progress }: BilateralPatternFlowProps = {
               </g>
             </motion.g>
 
-            {/* Single Unified Central Focal Core: Perpetually Revolving Bio-Orbital Rings */}
+            {/* Central Focal Core: Revolving Bio-Orbital Rings and PRIMARY Central Red Dot */}
             <g transform="translate(0, -20)">
               {/* Radiant Core Aura */}
               <circle cx="0" cy="0" r="26" fill="url(#coreAura)" />
@@ -910,7 +946,7 @@ export function BilateralPatternFlow({ progress }: BilateralPatternFlowProps = {
                   cx="0"
                   cy="0"
                   r="24"
-                  stroke="#2D5A43"
+                  stroke="#D97757"
                   strokeWidth="0.6"
                   strokeDasharray="2 4"
                   strokeOpacity="0.45"
@@ -940,8 +976,8 @@ export function BilateralPatternFlow({ progress }: BilateralPatternFlowProps = {
                 />
                 <circle cx="18" cy="0" r="1.6" fill="#0F7A4E" />
                 <circle cx="-18" cy="0" r="1.6" fill="#0F7A4E" />
-                <circle cx="0" cy="18" r="1.2" fill="#2D5A43" opacity="0.8" />
-                <circle cx="0" cy="-18" r="1.2" fill="#2D5A43" opacity="0.8" />
+                <circle cx="0" cy="18" r="1.4" fill="#D97757" />
+                <circle cx="0" cy="-18" r="1.4" fill="#D97757" />
               </g>
 
               {/* Middle Counter-Clockwise Revolving Ring */}
@@ -958,7 +994,7 @@ export function BilateralPatternFlow({ progress }: BilateralPatternFlowProps = {
                   cx="0"
                   cy="0"
                   r="11.5"
-                  stroke="#2D5A43"
+                  stroke="#D97757"
                   strokeWidth="1"
                   strokeDasharray="3 4 1 4"
                   strokeOpacity="0.8"
@@ -966,8 +1002,8 @@ export function BilateralPatternFlow({ progress }: BilateralPatternFlowProps = {
                 />
                 <circle cx="0" cy="11.5" r="1.5" fill="#D97757" />
                 <circle cx="0" cy="-11.5" r="1.5" fill="#D97757" />
-                <circle cx="11.5" cy="0" r="1.1" fill="#0F7A4E" opacity="0.8" />
-                <circle cx="-11.5" cy="0" r="1.1" fill="#0F7A4E" opacity="0.8" />
+                <circle cx="11.5" cy="0" r="1.2" fill="#0F7A4E" opacity="0.8" />
+                <circle cx="-11.5" cy="0" r="1.2" fill="#0F7A4E" opacity="0.8" />
               </g>
 
               {/* Inner Fast Orbiting Calibrated Ring */}
@@ -993,10 +1029,18 @@ export function BilateralPatternFlow({ progress }: BilateralPatternFlowProps = {
                 <circle cx="7" cy="0" r="1.2" fill="#ffffff" />
               </g>
 
-              {/* Solid Core Focal Center */}
-              <circle cx="0" cy="0" r="5" fill="#2D5A43" />
-              <circle cx="0" cy="0" r="3.2" fill="#0F7A4E" />
-              <circle cx="-1" cy="-1" r="1.2" fill="#ffffff" opacity="0.95" />
+              {/* Solid Core Vivid Red Focal Dot (PRIMARY FOCAL POINT) */}
+              <g id="central-red-dot" ref={focalDotRef}>
+                {/* Soft warm aura */}
+                <circle cx="0" cy="0" r="9" fill="#D97757" fillOpacity="0.3" />
+                <circle cx="0" cy="0" r="6" fill="#D97757" fillOpacity="0.55" />
+                {/* Solid Core Red Dot */}
+                <circle cx="0" cy="0" r="4.2" fill="#D97757" />
+                <circle cx="0" cy="0" r="3.2" fill="#C53030" />
+                <circle cx="0" cy="0" r="2.2" fill="#E53E3E" />
+                {/* Crisp Specular Glint */}
+                <circle cx="-0.8" cy="-0.8" r="1.0" fill="#FFFFFF" opacity="0.95" />
+              </g>
             </g>
           </svg>
         </div>
