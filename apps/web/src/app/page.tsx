@@ -198,7 +198,7 @@ export default function LandingPage() {
           <div className="absolute bottom-0 left-1/4 w-[400px] h-[400px] bg-teal-500/10 rounded-full blur-[120px] pointer-events-none" />
 
           <div className="container mx-auto px-6 lg:px-12 relative z-10">
-            <div className="max-w-4xl mx-auto text-center space-y-8 sm:space-y-12 md:space-y-14">
+            <div className="max-w-4xl mx-auto text-center space-y-6 sm:space-y-8 md:space-y-10">
               <span className="text-base sm:text-lg md:text-xl font-medium tracking-normal text-emerald-300/80 block">
                 AI Untuk Kesehatan
               </span>
