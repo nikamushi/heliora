@@ -212,6 +212,13 @@ export default function LandingPage() {
             <div className="mt-12 sm:mt-16 md:mt-20">
               <LayeredHealthPicture />
             </div>
+
+            {/* Editorial Description Text */}
+            <div className="mt-10 sm:mt-14 max-w-3xl mx-auto text-center">
+              <p className="text-base sm:text-lg md:text-xl text-emerald-100/75 font-normal leading-relaxed text-balance">
+                Kesehatan bukan sekadar angka. HELIORA membantu Anda memahami apa yang membentuk kesehatan, mengeksplorasi apa yang mungkin, dan melihat bagaimana perubahan kecil dapat membawa arah yang berbeda. Dengan insight yang dipersonalisasi dan didukung evidence ilmiah, Anda dapat menemukan langkah yang lebih tepat untuk diri Anda.
+              </p>
+            </div>
           </div>
         </section>
 
