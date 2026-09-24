@@ -720,7 +720,7 @@ export function BilateralPatternFlow({ progress }: BilateralPatternFlowProps = {
   return (
     <div
       ref={containerRef}
-      className="relative w-full aspect-[16/9] md:aspect-[24/9] min-h-[400px] max-h-[520px] z-10 cursor-crosshair flex items-center justify-center"
+      className="relative w-full h-full min-h-[560px] md:min-h-[680px] lg:min-h-[760px] z-10 cursor-crosshair flex items-center justify-center"
     >
       <motion.canvas 
         ref={canvasRef} 
@@ -734,11 +734,11 @@ export function BilateralPatternFlow({ progress }: BilateralPatternFlowProps = {
           scale: zoomScale, 
           transformOrigin: "50% 40.74%" 
         }}
-        className="relative z-20 pointer-events-none flex flex-col items-center justify-center select-none translate-y-1 will-change-transform"
+        className="relative z-20 pointer-events-none flex flex-col items-center justify-center select-none will-change-transform"
       >
-        <div ref={bodyRef} className="relative w-32 h-52 sm:w-36 sm:h-60 md:w-40 md:h-68 flex items-center justify-center">
+        <div ref={bodyRef} className="relative w-44 h-72 sm:w-52 sm:h-88 md:w-60 md:h-[400px] lg:w-72 lg:h-[480px] flex items-center justify-center">
           {/* Subtle Ambient Radial Glow behind the body */}
-          <div className="absolute inset-0 bg-gradient-to-b from-emerald-400/20 via-emerald-600/25 to-transparent rounded-full blur-2xl -z-10" />
+          <div className="absolute inset-0 bg-gradient-to-b from-emerald-400/20 via-emerald-600/25 to-transparent rounded-full blur-3xl -z-10" />
 
           {/* Topographic Bio-Wave Mesh Human Figure */}
           <svg
