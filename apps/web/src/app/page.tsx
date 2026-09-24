@@ -102,7 +102,7 @@ function SectionLifestyleNarrative() {
   return (
     <section 
       id="narrative" 
-      className="container mx-auto px-6 lg:px-12 pt-8 sm:pt-12 md:pt-16 pb-20 sm:pb-28 md:pb-36 scroll-mt-24"
+      className="container mx-auto px-6 lg:px-12 pt-8 sm:pt-12 md:pt-16 pb-14 sm:pb-18 md:pb-24 scroll-mt-24"
     >
       <div className="max-w-5xl mx-auto flex flex-col items-center">
         <NarrativeItem content={narrativeContent} />
@@ -193,7 +193,7 @@ export default function LandingPage() {
         <SectionLifestyleNarrative />
 
         {/* SECTION 04: AI UNTUK KESEHATAN - HELIORA (#how-it-works) */}
-        <section id="how-it-works" className="w-full bg-[#13281c] text-white py-24 sm:py-32 md:py-40 mt-24 sm:mt-32 md:mt-40 mb-12 sm:mb-16 relative overflow-hidden border-y border-emerald-950 scroll-mt-24">
+        <section id="how-it-works" className="w-full bg-[#13281c] text-white py-20 sm:py-24 md:py-32 mt-16 sm:mt-20 md:mt-28 mb-10 sm:mb-12 relative overflow-hidden border-y border-emerald-950 scroll-mt-24">
           {/* Subtle Ambient Glows */}
           <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[140px] pointer-events-none" />
           <div className="absolute bottom-0 left-1/4 w-[400px] h-[400px] bg-teal-500/10 rounded-full blur-[120px] pointer-events-none" />
@@ -224,7 +224,7 @@ export default function LandingPage() {
         </section>
 
         {/* SECTION 03: KENAPA HARUS HELIORA & FITUR (#features & #simulation) */}
-        <section id="features" className="container mx-auto px-6 lg:px-12 pt-28 sm:pt-36 md:pt-44 pb-20 scroll-mt-24">
+        <section id="features" className="container mx-auto px-6 lg:px-12 pt-20 sm:pt-28 md:pt-36 pb-16 scroll-mt-24">
           <div id="simulation" className="scroll-mt-24" />
           <div className="mb-12 max-w-2xl">
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-brand-900 leading-tight">
