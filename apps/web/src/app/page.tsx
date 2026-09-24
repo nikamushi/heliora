@@ -69,23 +69,19 @@ function SectionLifestyleNarrative() {
   const narrativeBlocks = [
     {
       num: "01",
-      lead: "Kita menjalani banyak kebiasaan setiap hari.",
-      body: "Aktivitas fisik, pola tidur, cara beristirahat, hingga kebiasaan kecil yang sering berjalan tanpa kita sadari.",
+      text: "Setiap hari, kita menjalani pola hidup masing-masing, dari kebiasaan kecil sampai keputusan yang sering kita ambil tanpa sadar.",
     },
     {
       num: "02",
-      lead: "Masing-masing mungkin terasa sederhana.",
-      body: "Namun ketika dilakukan berulang, semuanya mulai membentuk pola yang menggambarkan bagaimana kita menjalani keseharian.",
+      text: "Satu per satu, semuanya terlihat sederhana. Tetapi jika dilihat bersama, kebiasaan-kebiasaan itu membentuk gambaran yang lebih utuh tentang cara kita menjalani hari.",
     },
     {
       num: "03",
-      lead: "Pola tersebut dapat memberi kita gambaran yang lebih personal tentang kondisi kesehatan.",
-      body: "Bukan hanya melihat satu kebiasaan, tetapi memahami bagaimana berbagai faktor lifestyle saling berhubungan dengan estimasi risiko.",
+      text: "Seiring waktu, perubahan kecil bisa memperlihatkan hal baru tentang kesehatan kita: bagaimana kondisinya hari ini, dan apa yang mungkin terjadi ke depannya.",
     },
     {
       num: "04",
-      lead: "Dan ketika pola itu berubah, kita dapat mengeksplorasi kemungkinan yang berbeda.",
-      body: "Melihat bagaimana perubahan lifestyle dapat memengaruhi estimasi risiko dari waktu ke waktu.",
+      text: "Dengan memahami bagaimana kebiasaan itu saling terkait, kita bisa melihat kesehatan dengan cara yang lebih personal, lalu mulai mempertimbangkan perubahan sebelum kita benar-benar membutuhkannya.",
     },
   ];
 
@@ -104,22 +100,17 @@ function SectionLifestyleNarrative() {
               whileInView="visible"
               viewport={{ once: true, amount: 0.2 }}
               variants={fadeUpVariants}
-              className="bg-white/80 backdrop-blur-xl rounded-[2.25rem] p-8 sm:p-10 border border-brand-900/10 shadow-sm hover:shadow-md transition-all flex flex-col justify-between space-y-5"
+              className="bg-white/80 backdrop-blur-xl rounded-[2.25rem] p-8 sm:p-10 border border-brand-900/10 shadow-sm hover:shadow-md transition-all flex flex-col justify-between space-y-6"
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs font-mono font-bold text-brand-900/40 uppercase tracking-wider">
-                  Pola {block.num}
+                <span className="text-xs font-mono font-bold text-brand-900/40 uppercase tracking-widest">
+                  {block.num}
                 </span>
-                <div className="w-2 h-2 rounded-full bg-emerald-600/60" />
+                <div className="w-2 h-2 rounded-full bg-emerald-600/50" />
               </div>
-              <div className="space-y-3">
-                <h3 className="text-xl sm:text-2xl font-bold text-brand-900 tracking-tight leading-snug">
-                  {block.lead}
-                </h3>
-                <p className="text-sm sm:text-base text-brand-900/70 font-normal leading-relaxed">
-                  {block.body}
-                </p>
-              </div>
+              <p className="text-base sm:text-lg text-brand-900/85 font-normal leading-relaxed">
+                {block.text}
+              </p>
             </motion.div>
           ))}
         </div>
