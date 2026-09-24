@@ -1,22 +1,22 @@
 "use client";
 
-import React, { useRef, useState } from "react";
-import Image from "next/image";
+import React, { useEffect, useRef, useState } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
 
 export function LayeredHealthPicture() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isHovered, setIsHovered] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   // Mouse position state for subtle 3D tilt
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
   // Smooth spring physics for tilt
-  const springConfig = { stiffness: 80, damping: 20 };
-  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [6, -6]), springConfig);
-  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-8, 8]), springConfig);
-  const brightness = useSpring(useTransform(mouseY, [-0.5, 0.5], [1.05, 0.95]), springConfig);
+  const springConfig = { stiffness: 70, damping: 20 };
+  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [5, -5]), springConfig);
+  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-7, 7]), springConfig);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!containerRef.current) return;
@@ -33,31 +33,77 @@ export function LayeredHealthPicture() {
     setIsHovered(false);
   };
 
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+    if (!ctx) return;
+
+    const img = new window.Image();
+    img.src = "/images/layered-health-picture.png";
+
+    img.onload = () => {
+      const width = img.naturalWidth || 1376;
+      const height = img.naturalHeight || 768;
+
+      canvas.width = width;
+      canvas.height = height;
+
+      ctx.drawImage(img, 0, 0, width, height);
+
+      try {
+        const imgData = ctx.getImageData(0, 0, width, height);
+        const data = imgData.data;
+
+        // Sample background color from corner
+        const bgR = data[0];
+        const bgG = data[1];
+        const bgB = data[2];
+
+        // Process pixels to remove dark background cleanly and retain only the glass layers
+        for (let i = 0; i < data.length; i += 4) {
+          const r = data[i];
+          const g = data[i + 1];
+          const b = data[i + 2];
+
+          const diffR = r - bgR;
+          const diffG = g - bgG;
+          const diffB = b - bgB;
+          const dist = Math.sqrt(diffR * diffR + diffG * diffG + diffB * diffB);
+
+          if (dist < 8) {
+            data[i + 3] = 0;
+          } else if (dist < 32) {
+            const alpha = (dist - 8) / 24;
+            data[i + 3] = Math.round(data[i + 3] * alpha);
+          }
+        }
+
+        ctx.putImageData(imgData, 0, 0);
+        setImageLoaded(true);
+      } catch {
+        setImageLoaded(true);
+      }
+    };
+  }, []);
+
   return (
     <div
       ref={containerRef}
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={handleMouseLeave}
-      className="relative w-full max-w-5xl mx-auto rounded-[2.5rem] bg-[#0A1017] border border-white/10 shadow-[0_24px_80px_rgba(0,0,0,0.6)] overflow-hidden flex flex-col items-center justify-center p-4 sm:p-8 md:p-12 select-none group perspective-1000"
+      className="relative w-full max-w-4xl mx-auto flex items-center justify-center select-none perspective-1000 py-4 sm:py-8"
     >
-      {/* Ambient Deep Radial Glows */}
-      <div className="absolute inset-0 pointer-events-none -z-10">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[450px] bg-cyan-500/10 rounded-full blur-[140px]" />
-        <div className="absolute top-1/3 left-1/4 w-[350px] h-[350px] bg-emerald-500/10 rounded-full blur-[120px]" />
-        <div className="absolute bottom-1/4 right-1/4 w-[380px] h-[380px] bg-indigo-500/10 rounded-full blur-[130px]" />
-      </div>
-
-      {/* 3D Floating Isometric Stack */}
+      {/* 3D Floating Isometric Stack - ONLY THE LAYER PLANES */}
       <motion.div
         style={{
           rotateX,
           rotateY,
-          filter: `brightness(${brightness})`,
           transformStyle: "preserve-3d",
         }}
         animate={{
-          y: isHovered ? [0, -6, 0] : [0, -10, 0],
+          y: isHovered ? [0, -6, 0] : [0, -12, 0],
         }}
         transition={{
           repeat: Infinity,
@@ -66,22 +112,21 @@ export function LayeredHealthPicture() {
         }}
         className="relative w-full max-w-3xl aspect-[16/10] sm:aspect-[16/9] flex items-center justify-center"
       >
-        <Image
-          src="/images/layered-health-picture.png"
-          alt="Layered Health Picture - Precision 4-Plane Isometric Visualization"
-          fill
-          priority
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 85vw, 900px"
-          className="object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.7)] transition-transform duration-500 group-hover:scale-[1.02]"
+        <canvas
+          ref={canvasRef}
+          className={`w-full h-full object-contain transition-opacity duration-500 ${
+            imageLoaded ? "opacity-100" : "opacity-0"
+          }`}
         />
+        {!imageLoaded && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src="/images/layered-health-picture.png"
+            alt="Layered Health Picture"
+            className="w-full h-full object-contain mix-blend-screen"
+          />
+        )}
       </motion.div>
-
-      {/* Subtle Bottom Caption / Metadata */}
-      <div className="mt-4 sm:mt-6 flex items-center justify-between w-full max-w-3xl px-4 text-[10px] sm:text-xs font-mono text-cyan-200/40 tracking-wider uppercase border-t border-white/5 pt-4">
-        <span>Layered Health Picture</span>
-        <span className="text-emerald-400/60">4-Tier Convergent Plane</span>
-        <span className="hidden sm:inline">Isometric Synthesis</span>
-      </div>
     </div>
   );
 }
