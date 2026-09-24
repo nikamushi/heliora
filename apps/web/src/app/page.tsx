@@ -192,72 +192,78 @@ export default function LandingPage() {
         <SectionLifestyleNarrative />
 
         {/* SECTION 04: AI UNTUK KESEHATAN - HELIORA (#how-it-works) */}
-        <section id="how-it-works" className="container mx-auto px-6 lg:px-12 pt-24 sm:pt-32 md:pt-40 pb-16 scroll-mt-24">
-          <div className="mb-14 max-w-4xl mx-auto text-center space-y-4">
-            <span className="text-base sm:text-lg md:text-xl font-medium tracking-normal text-brand-900/70 block">
-              AI Untuk Kesehatan
-            </span>
-            <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-brand-900 leading-[1.05]">
-              HELIORA
-            </h2>
-            <p className="text-base sm:text-lg text-brand-900/60 mt-2 font-normal max-w-xl mx-auto">
-              Tiga tahap mengolah data kesehatan Anda secara terarah.
-            </p>
-          </div>
+        <section id="how-it-works" className="w-full bg-[#13281c] text-white py-24 sm:py-32 md:py-40 my-12 relative overflow-hidden border-y border-emerald-950 scroll-mt-24">
+          {/* Subtle Ambient Glows */}
+          <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[140px] pointer-events-none" />
+          <div className="absolute bottom-0 left-1/4 w-[400px] h-[400px] bg-teal-500/10 rounded-full blur-[120px] pointer-events-none" />
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Step 1: Pengisian Mandiri */}
-            <div className="bg-white/80 backdrop-blur-xl rounded-[2rem] p-7 border border-brand-900/10 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all flex flex-col justify-between">
-              <div className="space-y-3">
-                <span className="text-xs font-mono font-bold text-brand-900/40 uppercase">
-                  Tahap 01
-                </span>
-                <h3 className="text-xl font-bold text-brand-900 tracking-tight">
-                  Pengisian Data Mandiri
-                </h3>
-                <p className="text-brand-900/65 text-sm leading-relaxed">
-                  Masukkan data kesehatan dasar seperti tekanan darah, durasi tidur, dan riwayat keluarga melalui formulir terpandu.
-                </p>
-              </div>
-              <p className="text-xs text-brand-900/50 pt-6 border-t border-brand-900/5 mt-6 font-medium">
-                Formulir Singkat & Terpandu
+          <div className="container mx-auto px-6 lg:px-12 relative z-10">
+            <div className="mb-14 max-w-4xl mx-auto text-center space-y-4">
+              <span className="text-base sm:text-lg md:text-xl font-medium tracking-normal text-emerald-300/80 block">
+                AI Untuk Kesehatan
+              </span>
+              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white leading-[1.05]">
+                HELIORA
+              </h2>
+              <p className="text-base sm:text-lg text-emerald-100/70 mt-2 font-normal max-w-xl mx-auto">
+                Tiga tahap mengolah data kesehatan Anda secara terarah.
               </p>
             </div>
 
-            {/* Step 2 */}
-            <div className="bg-white/80 backdrop-blur-xl rounded-[2rem] p-7 border border-brand-900/10 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all flex flex-col justify-between">
-              <div className="space-y-3">
-                <span className="text-xs font-mono font-bold text-brand-900/40 uppercase">
-                  Tahap 02
-                </span>
-                <h3 className="text-xl font-bold text-brand-900 tracking-tight">
-                  Analisis Pola
-                </h3>
-                <p className="text-brand-900/65 text-sm leading-relaxed">
-                  Sistem membaca tren parameter tubuh Anda berdasarkan standar acuan klinis untuk mendeteksi pergeseran lebih awal.
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Step 1: Pengisian Mandiri */}
+              <div className="bg-white/[0.04] backdrop-blur-xl rounded-[2rem] p-7 border border-white/10 shadow-lg hover:shadow-2xl hover:border-emerald-400/30 hover:-translate-y-1 transition-all flex flex-col justify-between">
+                <div className="space-y-3">
+                  <span className="text-xs font-mono font-bold text-emerald-400/80 uppercase">
+                    Tahap 01
+                  </span>
+                  <h3 className="text-xl font-bold text-white tracking-tight">
+                    Pengisian Data Mandiri
+                  </h3>
+                  <p className="text-emerald-100/75 text-sm leading-relaxed">
+                    Masukkan data kesehatan dasar seperti tekanan darah, durasi tidur, dan riwayat keluarga melalui formulir terpandu.
+                  </p>
+                </div>
+                <p className="text-xs text-emerald-200/50 pt-6 border-t border-white/10 mt-6 font-medium">
+                  Formulir Singkat & Terpandu
                 </p>
               </div>
-              <p className="text-xs text-brand-900/50 pt-6 border-t border-brand-900/5 mt-6 font-medium">
-                Standar Acuan Epidemiologi
-              </p>
-            </div>
 
-            {/* Step 3 */}
-            <div className="bg-white/80 backdrop-blur-xl rounded-[2rem] p-7 border border-brand-900/10 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all flex flex-col justify-between">
-              <div className="space-y-3">
-                <span className="text-xs font-mono font-bold text-brand-900/40 uppercase">
-                  Tahap 03
-                </span>
-                <h3 className="text-xl font-bold text-brand-900 tracking-tight">
-                  Privasi Mutlak
-                </h3>
-                <p className="text-brand-900/65 text-sm leading-relaxed">
-                  Data Anda tersimpan dengan enkripsi lokal. Tidak ada informasi pribadi yang dijual atau dibagikan ke pihak ketiga.
+              {/* Step 2 */}
+              <div className="bg-white/[0.04] backdrop-blur-xl rounded-[2rem] p-7 border border-white/10 shadow-lg hover:shadow-2xl hover:border-emerald-400/30 hover:-translate-y-1 transition-all flex flex-col justify-between">
+                <div className="space-y-3">
+                  <span className="text-xs font-mono font-bold text-emerald-400/80 uppercase">
+                    Tahap 02
+                  </span>
+                  <h3 className="text-xl font-bold text-white tracking-tight">
+                    Analisis Pola
+                  </h3>
+                  <p className="text-emerald-100/75 text-sm leading-relaxed">
+                    Sistem membaca tren parameter tubuh Anda berdasarkan standar acuan klinis untuk mendeteksi pergeseran lebih awal.
+                  </p>
+                </div>
+                <p className="text-xs text-emerald-200/50 pt-6 border-t border-white/10 mt-6 font-medium">
+                  Standar Acuan Epidemiologi
                 </p>
               </div>
-              <p className="text-xs text-brand-900/50 pt-6 border-t border-brand-900/5 mt-6 font-medium">
-                Enkripsi AES-256 GCM
-              </p>
+
+              {/* Step 3 */}
+              <div className="bg-white/[0.04] backdrop-blur-xl rounded-[2rem] p-7 border border-white/10 shadow-lg hover:shadow-2xl hover:border-emerald-400/30 hover:-translate-y-1 transition-all flex flex-col justify-between">
+                <div className="space-y-3">
+                  <span className="text-xs font-mono font-bold text-emerald-400/80 uppercase">
+                    Tahap 03
+                  </span>
+                  <h3 className="text-xl font-bold text-white tracking-tight">
+                    Privasi Mutlak
+                  </h3>
+                  <p className="text-emerald-100/75 text-sm leading-relaxed">
+                    Data Anda tersimpan dengan enkripsi lokal. Tidak ada informasi pribadi yang dijual atau dibagikan ke pihak ketiga.
+                  </p>
+                </div>
+                <p className="text-xs text-emerald-200/50 pt-6 border-t border-white/10 mt-6 font-medium">
+                  Enkripsi AES-256 GCM
+                </p>
+              </div>
             </div>
           </div>
         </section>
