@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -46,41 +46,11 @@ export function BilateralPatternFlow({ triggerRef }: BilateralPatternFlowProps =
   const bodyMeshRef = useRef<SVGGElement>(null);
   const macroDetailRef = useRef<SVGGElement>(null);
 
-  // Exact Screen-Space Anchor Position of the Central Focal Dot
-  const [dotAnchor, setDotAnchor] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-
   useGSAP(
     () => {
-      if (!cameraViewportRef.current || !sceneRef.current || !bodyRef.current) return;
+      if (!cameraViewportRef.current || !bodyRef.current) return;
 
       const trigger = triggerRef?.current || cameraViewportRef.current;
-
-      const getExactDotPosition = () => {
-        const sElem = sceneRef.current;
-        const bElem = bodyRef.current;
-        if (!sElem || !bElem) return { x: 0, y: 0 };
-
-        const sWidth = sElem.offsetWidth || window.innerWidth;
-        const sHeight = sElem.offsetHeight || window.innerHeight;
-        const bHeight = bElem.offsetHeight || 300;
-
-        // In SVG viewBox="-50 -108 100 216", the central red dot is at (0, -20)
-        // Body is centered in the scene (sWidth * 0.5, sHeight * 0.5)
-        const dotX = sWidth * 0.5;
-        const dotY = sHeight * 0.5 + (-20 / 216) * bHeight;
-
-        return { x: dotX, y: dotY };
-      };
-
-      const anchor = getExactDotPosition();
-      setDotAnchor(anchor);
-
-      if (anchor.x > 0 && anchor.y > 0) {
-        gsap.set(sceneRef.current, {
-          transformOrigin: `${anchor.x}px ${anchor.y}px`,
-          force3D: true,
-        });
-      }
 
       const tl = gsap.timeline({
         scrollTrigger: {
@@ -89,51 +59,44 @@ export function BilateralPatternFlow({ triggerRef }: BilateralPatternFlowProps =
           end: "+=2200",
           scrub: 1,
           invalidateOnRefresh: true,
-          onRefresh: () => {
-            const newAnchor = getExactDotPosition();
-            setDotAnchor(newAnchor);
-            if (sceneRef.current && newAnchor.x > 0 && newAnchor.y > 0) {
-              gsap.set(sceneRef.current, {
-                transformOrigin: `${newAnchor.x}px ${newAnchor.y}px`,
-                force3D: true,
-              });
-            }
-          },
         },
       });
 
-      // 1. Camera zooms straight into the focal dot (stationary anchor)
-      tl.to(
-        sceneRef.current,
-        {
-          scale: 6.8,
-          ease: "power2.out",
-          duration: 1,
-        },
-        0
-      );
+      // 1. ONLY the central focal dot zooms in / expands
+      if (focalDotRef.current) {
+        tl.to(
+          focalDotRef.current,
+          {
+            scale: 24,
+            transformOrigin: "0px 0px",
+            ease: "power2.out",
+            duration: 1,
+          },
+          0
+        );
+      }
 
-      // 2. Fade out bilateral flowing lines (canvas) completely during zoom
+      // 2. Fade out bilateral flowing lines (canvas) completely during zoom (unscaled)
       if (canvasRef.current) {
         tl.to(
           canvasRef.current,
           {
             opacity: 0,
             ease: "power1.inOut",
-            duration: 0.45,
+            duration: 0.4,
           },
           0.05
         );
       }
 
-      // 3. Fade out human body contour slices completely during zoom
+      // 3. Fade out human body contour slices completely during zoom (unscaled)
       if (bodyMeshRef.current) {
         tl.to(
           bodyMeshRef.current,
           {
             opacity: 0,
             ease: "power1.inOut",
-            duration: 0.45,
+            duration: 0.4,
           },
           0.05
         );
@@ -146,7 +109,7 @@ export function BilateralPatternFlow({ triggerRef }: BilateralPatternFlowProps =
           {
             opacity: 0,
             ease: "power1.inOut",
-            duration: 0.45,
+            duration: 0.4,
           },
           0.05
         );
@@ -713,7 +676,7 @@ export function BilateralPatternFlow({ triggerRef }: BilateralPatternFlowProps =
       canvas.removeEventListener("mousemove", handleMouseMove);
       canvas.removeEventListener("mouseleave", handleMouseLeave);
     };
-  }, [dotAnchor.x, dotAnchor.y]);
+  }, []);
 
   return (
     <div
@@ -889,8 +852,8 @@ export function BilateralPatternFlow({ triggerRef }: BilateralPatternFlowProps =
               </g>
             </g>
 
-            {/* Central Focal Core */}
-            <g transform="translate(0, -20)">
+            {/* Central Focal Core (The ONLY element that zooms in) */}
+            <g id="central-focal-core" ref={focalDotRef} transform="translate(0, -20)">
               {/* Macro High-Detail Telemetry Rings (revealed as you zoom in) */}
               <g ref={macroDetailRef} style={{ opacity: 0 }}>
                 {/* Outermost Telemetry Ring */}
@@ -917,7 +880,7 @@ export function BilateralPatternFlow({ triggerRef }: BilateralPatternFlowProps =
               </g>
 
               {/* Solid Core Focal Center Dot */}
-              <g id="central-focal-core" ref={focalDotRef}>
+              <g>
                 <circle cx="0" cy="0" r="4.5" fill="#2D5A43" />
                 <circle cx="0" cy="0" r="3" fill="#0F7A4E" />
                 <circle cx="-0.8" cy="-0.8" r="1.1" fill="#ffffff" opacity="0.95" />
