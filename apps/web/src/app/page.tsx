@@ -191,13 +191,17 @@ export default function LandingPage() {
         {/* SECTION 02: NARASI POLA HIDUP & EKSPLORASI RISIKO */}
         <SectionLifestyleNarrative />
 
-        {/* SECTION 04: A MORE COMPLETE PICTURE OF YOUR HEALTH (#how-it-works) */}
+        {/* SECTION 04: HELIORA - PAHAMI KESEHATAN ANDA (#how-it-works) */}
         <section id="how-it-works" className="container mx-auto px-6 lg:px-12 py-16 scroll-mt-24">
-          <div className="mb-12 max-w-3xl">
+          <div className="mb-12 max-w-3xl space-y-3">
+            <span className="text-xs font-semibold uppercase tracking-[0.28em] text-brand-900/60 bg-brand-100/60 px-4 py-1.5 rounded-full border border-brand-900/10 backdrop-blur-sm inline-block">
+              HELIORA
+            </span>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-brand-900 leading-tight">
-              A more complete picture of your health.
+              Pahami kesehatan Anda.<br />
+              <span className="italic font-light text-brand-900/80">Lebih dari hari ini.</span>
             </h2>
-            <p className="text-base sm:text-lg text-brand-900/60 mt-3 font-normal">
+            <p className="text-base sm:text-lg text-brand-900/60 mt-2 font-normal">
               Tiga tahap mengolah data kesehatan Anda secara terarah.
             </p>
           </div>
