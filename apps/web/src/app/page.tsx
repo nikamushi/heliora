@@ -9,9 +9,7 @@ import { LayeredHealthPicture } from "@/components/LayeredHealthPicture";
 import { motion, useScroll, useTransform } from "motion/react";
 import { 
   IconHeartbeat,
-  IconArrowRight,
-  IconAdjustmentsHorizontal,
-  IconHistory
+  IconArrowRight
 } from "@tabler/icons-react";
 
 // Fluid Apple HIG motion curves
@@ -223,69 +221,13 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* SECTION 03: KENAPA HARUS HELIORA & FITUR (#features & #simulation) */}
+        {/* SECTION 03: KENAPA HARUS HELIORA (#features & #simulation) */}
         <section id="features" className="container mx-auto px-6 lg:px-12 pt-20 sm:pt-28 md:pt-36 pb-16 scroll-mt-24">
           <div id="simulation" className="scroll-mt-24" />
-          <div className="mb-12 sm:mb-16 max-w-2xl mx-auto text-center">
+          <div className="max-w-2xl mx-auto text-center">
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-brand-900 leading-tight">
               Kenapa harus HELIORA?
             </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-            {/* Feature 1: Pemetaan Tren */}
-            <div className="bg-white/80 backdrop-blur-xl rounded-[2.25rem] p-8 border border-brand-900/10 shadow-sm flex flex-col justify-between space-y-6 hover:shadow-lg transition-all">
-              <div className="space-y-3">
-                <div className="w-11 h-11 rounded-xl bg-brand-50 flex items-center justify-center text-brand-900 border border-brand-900/10">
-                  <IconHistory size={22} />
-                </div>
-                <h3 className="text-2xl font-bold text-brand-900 tracking-tight">
-                  Pemetaan Tren Kebiasaan
-                </h3>
-                <p className="text-sm text-brand-900/65 leading-relaxed">
-                  Pantau bagaimana konsistensi pola tidur dan aktivitas fisik menjaga kestabilan ritme tubuh dalam rentang 30, 90, hingga 180 hari.
-                </p>
-              </div>
-
-              <div className="bg-brand-50/50 rounded-2xl p-5 border border-brand-900/5 space-y-3">
-                <div className="flex justify-between text-xs font-semibold text-brand-900">
-                  <span>30 Hari</span>
-                  <span>90 Hari</span>
-                  <span className="text-brand-900/50">180 Hari</span>
-                </div>
-                <div className="h-2 w-full bg-neutral-200/80 rounded-full overflow-hidden">
-                  <div className="h-full bg-emerald-600 rounded-full w-3/4" />
-                </div>
-                <p className="text-xs text-brand-900/60">
-                  Konsistensi istirahat tercatat stabil dengan deviasi terkontrol.
-                </p>
-              </div>
-            </div>
-
-            {/* Feature 2: Simulasi Penyesuaian */}
-            <div className="bg-white/80 backdrop-blur-xl rounded-[2.25rem] p-8 border border-brand-900/10 shadow-sm flex flex-col justify-between space-y-6 hover:shadow-lg transition-all">
-              <div className="space-y-3">
-                <div className="w-11 h-11 rounded-xl bg-brand-50 flex items-center justify-center text-brand-900 border border-brand-900/10">
-                  <IconAdjustmentsHorizontal size={22} />
-                </div>
-                <h3 className="text-2xl font-bold text-brand-900 tracking-tight">
-                  Simulasi Penyesuaian
-                </h3>
-                <p className="text-sm text-brand-900/65 leading-relaxed">
-                  Uji skenario sebelum memulai: lihat pengaruh penambahan 45 menit waktu istirahat atau aktivitas harian terhadap ritme tubuh Anda.
-                </p>
-              </div>
-
-              <div className="bg-brand-50/50 rounded-2xl p-5 border border-brand-900/5 flex items-center justify-between">
-                <div>
-                  <div className="text-xs font-bold text-brand-900">Skenario: +45 Menit Istirahat</div>
-                  <div className="text-xs text-brand-900/60 mt-0.5">Pengaruh terhadap pemulihan tubuh</div>
-                </div>
-                <span className="text-xs font-medium text-emerald-800">
-                  Pemulihan Optimal
-                </span>
-              </div>
-            </div>
           </div>
         </section>
 
