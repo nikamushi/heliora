@@ -81,7 +81,7 @@ function NarrativeItem({ content }: { content: React.ReactNode }) {
       style={{ opacity }}
       className="flex flex-col items-center text-center min-h-[40vh] sm:min-h-[50vh] justify-center px-4"
     >
-      <p className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-normal tracking-tight leading-snug sm:leading-[1.35] text-balance max-w-3xl text-brand-900">
+      <p className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-normal tracking-tight leading-snug sm:leading-[1.35] text-balance max-w-3xl">
         {content}
       </p>
     </motion.div>
@@ -89,7 +89,14 @@ function NarrativeItem({ content }: { content: React.ReactNode }) {
 }
 
 function SectionLifestyleNarrative() {
-  const narrativeContent = "Kebiasaan yang kita jalani setiap hari perlahan membentuk pola hidup, memberi kita gambaran tentang kondisi kesehatan, dan membuka kemungkinan untuk melihat perubahan ke depan.";
+  const narrativeContent = (
+    <span className="text-brand-900/80">
+      Kebiasaan yang kita jalani setiap hari perlahan membentuk{" "}
+      <span className="text-brand-900">pola</span> hidup, memberi kita gambaran tentang{" "}
+      <span className="text-brand-900">kondisi kesehatan</span>, dan membuka kemungkinan untuk melihat{" "}
+      <span className="text-brand-900">perubahan ke depan</span>.
+    </span>
+  );
 
   return (
     <section 
