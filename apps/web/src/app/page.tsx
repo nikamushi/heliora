@@ -89,7 +89,7 @@ function NarrativeItem({ content }: { content: React.ReactNode }) {
 }
 
 function SectionLifestyleNarrative() {
-  const narrativeContent = "Apa yang kita rasakan hari ini hanya sebagian dari gambaran kesehatan kita. Kebiasaan sehari-hari, kalau diamati dalam waktu lama, membentuk pola. Dari pola itu, kondisi kita jadi lebih jelas terlihat. Kita juga bisa memperkirakan arahnya ke depan dan menemukan perubahan yang mungkin berarti.";
+  const narrativeContent = "Kebiasaan sehari-hari lama-lama membentuk pola hidup. Pola itu memperlihatkan kondisi kesehatan kita sekarang, sekaligus ke mana arahnya nanti.";
 
   return (
     <section 
