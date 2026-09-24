@@ -336,15 +336,11 @@ export default function LandingPage() {
                 Alur Intelijen Kesehatan
               </span>
 
-              <div className="flex flex-wrap items-center justify-center gap-x-3 sm:gap-x-4 md:gap-x-6 gap-y-3 text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-medium tracking-tight text-brand-900">
+              <div className="flex flex-wrap items-center justify-center gap-x-6 sm:gap-x-10 md:gap-x-14 gap-y-4 text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-medium tracking-tight text-brand-900">
                 <span className="hover:text-emerald-800 transition-colors">Understand</span>
-                <span className="text-brand-900/30 font-light select-none">→</span>
                 <span className="hover:text-emerald-800 transition-colors">Explore</span>
-                <span className="text-brand-900/30 font-light select-none">→</span>
                 <span className="hover:text-emerald-800 transition-colors">Simulate</span>
-                <span className="text-brand-900/30 font-light select-none">→</span>
                 <span className="hover:text-emerald-800 transition-colors">Recommend</span>
-                <span className="text-brand-900/30 font-light select-none">→</span>
                 <span className="text-emerald-800 font-semibold">Act.</span>
               </div>
             </div>
