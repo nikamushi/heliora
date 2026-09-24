@@ -12,7 +12,12 @@ import {
   IconArrowRight,
   IconBrain,
   IconCertificate,
-  IconShieldLock
+  IconShieldLock,
+  IconEye,
+  IconCompass,
+  IconAdjustmentsHorizontal,
+  IconSparkles,
+  IconBolt
 } from "@tabler/icons-react";
 
 // Fluid Apple HIG motion curves
@@ -329,15 +334,59 @@ export default function LandingPage() {
         </section>
 
         {/* SECTION: ALUR PREVENTIF (Understand Explore Simulate Recommend Act.) */}
-        <section className="w-full bg-brand-100/60 border-y border-brand-900/10 py-10 sm:py-14 md:py-16 text-center my-4 relative overflow-hidden">
+        <section className="w-full bg-brand-100/60 border-y border-brand-900/10 py-12 sm:py-16 md:py-20 text-center my-4 relative overflow-hidden">
           <div className="container mx-auto px-4 sm:px-6 lg:px-12 relative z-10">
-            <div className="max-w-4xl mx-auto flex items-center justify-center">
-              <div className="flex items-center justify-between sm:justify-center whitespace-nowrap flex-nowrap gap-x-2 sm:gap-x-5 md:gap-x-8 lg:gap-10 text-xs sm:text-lg md:text-2xl lg:text-3xl font-medium tracking-tight text-brand-900 w-full">
-                <span className="hover:text-emerald-800 transition-colors">Understand</span>
-                <span className="hover:text-emerald-800 transition-colors">Explore</span>
-                <span className="hover:text-emerald-800 transition-colors">Simulate</span>
-                <span className="hover:text-emerald-800 transition-colors">Recommend</span>
-                <span className="text-emerald-800 font-semibold">Act.</span>
+            <div className="max-w-5xl mx-auto flex items-center justify-center">
+              <div className="flex items-center justify-between sm:justify-center whitespace-nowrap flex-nowrap gap-x-2 sm:gap-x-6 md:gap-x-10 lg:gap-x-14 w-full">
+                {/* 1. Understand */}
+                <div className="flex flex-col items-center gap-2 sm:gap-3 group cursor-default">
+                  <div className="w-8 h-8 sm:w-11 sm:h-11 md:w-13 md:h-13 rounded-xl sm:rounded-2xl bg-white/80 border border-brand-900/10 shadow-2xs flex items-center justify-center text-brand-900/70 group-hover:text-emerald-800 group-hover:bg-white transition-all">
+                    <IconEye className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" stroke={1.8} />
+                  </div>
+                  <span className="text-xs sm:text-base md:text-xl lg:text-2xl font-medium tracking-tight text-brand-900 group-hover:text-emerald-800 transition-colors">
+                    Understand
+                  </span>
+                </div>
+
+                {/* 2. Explore */}
+                <div className="flex flex-col items-center gap-2 sm:gap-3 group cursor-default">
+                  <div className="w-8 h-8 sm:w-11 sm:h-11 md:w-13 md:h-13 rounded-xl sm:rounded-2xl bg-white/80 border border-brand-900/10 shadow-2xs flex items-center justify-center text-brand-900/70 group-hover:text-emerald-800 group-hover:bg-white transition-all">
+                    <IconCompass className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" stroke={1.8} />
+                  </div>
+                  <span className="text-xs sm:text-base md:text-xl lg:text-2xl font-medium tracking-tight text-brand-900 group-hover:text-emerald-800 transition-colors">
+                    Explore
+                  </span>
+                </div>
+
+                {/* 3. Simulate */}
+                <div className="flex flex-col items-center gap-2 sm:gap-3 group cursor-default">
+                  <div className="w-8 h-8 sm:w-11 sm:h-11 md:w-13 md:h-13 rounded-xl sm:rounded-2xl bg-white/80 border border-brand-900/10 shadow-2xs flex items-center justify-center text-brand-900/70 group-hover:text-emerald-800 group-hover:bg-white transition-all">
+                    <IconAdjustmentsHorizontal className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" stroke={1.8} />
+                  </div>
+                  <span className="text-xs sm:text-base md:text-xl lg:text-2xl font-medium tracking-tight text-brand-900 group-hover:text-emerald-800 transition-colors">
+                    Simulate
+                  </span>
+                </div>
+
+                {/* 4. Recommend */}
+                <div className="flex flex-col items-center gap-2 sm:gap-3 group cursor-default">
+                  <div className="w-8 h-8 sm:w-11 sm:h-11 md:w-13 md:h-13 rounded-xl sm:rounded-2xl bg-white/80 border border-brand-900/10 shadow-2xs flex items-center justify-center text-brand-900/70 group-hover:text-emerald-800 group-hover:bg-white transition-all">
+                    <IconSparkles className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" stroke={1.8} />
+                  </div>
+                  <span className="text-xs sm:text-base md:text-xl lg:text-2xl font-medium tracking-tight text-brand-900 group-hover:text-emerald-800 transition-colors">
+                    Recommend
+                  </span>
+                </div>
+
+                {/* 5. Act. */}
+                <div className="flex flex-col items-center gap-2 sm:gap-3 group cursor-default">
+                  <div className="w-8 h-8 sm:w-11 sm:h-11 md:w-13 md:h-13 rounded-xl sm:rounded-2xl bg-emerald-800 text-white shadow-xs border border-emerald-900/20 flex items-center justify-center group-hover:bg-emerald-900 transition-all">
+                    <IconBolt className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" stroke={1.8} />
+                  </div>
+                  <span className="text-xs sm:text-base md:text-xl lg:text-2xl font-semibold tracking-tight text-emerald-800">
+                    Act.
+                  </span>
+                </div>
               </div>
             </div>
           </div>
