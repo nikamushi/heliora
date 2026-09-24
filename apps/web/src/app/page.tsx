@@ -198,8 +198,7 @@ export default function LandingPage() {
               HELIORA
             </span>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-brand-900 leading-tight">
-              Pahami kesehatan Anda.<br />
-              <span className="italic font-light text-brand-900/80">Lebih dari hari ini.</span>
+              Pahami kesehatan Anda hari ini dan bagaimana ia berubah.
             </h2>
             <p className="text-base sm:text-lg text-brand-900/60 mt-2 font-normal">
               Tiga tahap mengolah data kesehatan Anda secara terarah.
