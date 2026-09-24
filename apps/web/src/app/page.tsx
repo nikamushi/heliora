@@ -73,7 +73,7 @@ function NarrativeItem({ content }: { content: React.ReactNode }) {
   });
 
   // Pure clean scroll-linked opacity fade
-  const opacity = useTransform(scrollYProgress, [0, 0.35, 0.65, 1], [0, 1, 1, 0]);
+  const opacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0, 1, 1, 0]);
 
   return (
     <motion.div
@@ -91,27 +91,27 @@ function NarrativeItem({ content }: { content: React.ReactNode }) {
 function SectionLifestyleNarrative() {
   const narrativeItems: React.ReactNode[] = [
     (
-      <span className="text-brand-900/80">
+      <span className="text-brand-900/50">
         Setiap hari, kita menjalani{" "}
         <span className="text-brand-900">pola hidup masing-masing</span>, dari
         kebiasaan kecil sampai keputusan yang sering kita ambil tanpa sadar.
       </span>
     ),
     (
-      <span className="text-brand-900/80">
+      <span className="text-brand-900/50">
         Satu per satu, semuanya terlihat sederhana. Tetapi jika dilihat bersama, kebiasaan-kebiasaan itu membentuk{" "}
         <span className="text-brand-900">gambaran yang lebih utuh</span> tentang cara kita menjalani hari.
       </span>
     ),
     (
-      <span className="text-brand-900/80">
+      <span className="text-brand-900/50">
         Seiring waktu,{" "}
         <span className="text-brand-900">perubahan kecil</span> bisa memperlihatkan hal baru tentang kesehatan kita:
         {" "}bagaimana kondisinya hari ini, dan apa yang mungkin terjadi ke depannya.
       </span>
     ),
     (
-      <span className="text-brand-900/80">
+      <span className="text-brand-900/50">
         Dengan memahami bagaimana kebiasaan itu saling terkait, kita bisa{" "}
         <span className="text-brand-900">melihat kesehatan dengan cara yang lebih personal</span>, lalu
         mulai mempertimbangkan perubahan sebelum kita benar-benar membutuhkannya.
