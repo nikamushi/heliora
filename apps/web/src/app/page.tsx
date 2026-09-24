@@ -39,6 +39,7 @@ function SectionPatternsPinned() {
   const pinContainerRef = React.useRef<HTMLDivElement>(null);
   const headlineRef = React.useRef<HTMLDivElement>(null);
   const bridgeRef = React.useRef<HTMLDivElement>(null);
+  const glowsRef = React.useRef<HTMLDivElement>(null);
 
   useGSAP(
     () => {
@@ -56,12 +57,26 @@ function SectionPatternsPinned() {
         },
       });
 
+      // 1. Fade out headline text ("Setiap hari, kita melakukan...")
       if (headlineRef.current) {
         tl.to(
           headlineRef.current,
           {
             opacity: 0,
             y: -28,
+            duration: 0.28,
+            ease: "power1.out",
+          },
+          0
+        );
+      }
+
+      // 2. Fade out editorial bridge button
+      if (bridgeRef.current) {
+        tl.to(
+          bridgeRef.current,
+          {
+            opacity: 0,
             duration: 0.25,
             ease: "power1.out",
           },
@@ -69,12 +84,13 @@ function SectionPatternsPinned() {
         );
       }
 
-      if (bridgeRef.current) {
+      // 3. Fade out ambient background glows
+      if (glowsRef.current) {
         tl.to(
-          bridgeRef.current,
+          glowsRef.current,
           {
             opacity: 0,
-            duration: 0.22,
+            duration: 0.35,
             ease: "power1.out",
           },
           0
@@ -117,9 +133,11 @@ function SectionPatternsPinned() {
         {/* Dedicated Camera Viewport for Visualization (In-flow flex-1 with clean vertical clearance) */}
         <div className="relative w-full flex-1 min-h-0 overflow-hidden flex items-center justify-center pointer-events-none z-10 my-auto">
           {/* Soft Ambient Radial Glows */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[450px] bg-emerald-300/15 rounded-full blur-[140px] -z-10" />
-          <div className="absolute top-1/3 left-12 w-[350px] h-[280px] bg-[#d97757]/10 rounded-full blur-[110px] -z-10" />
-          <div className="absolute bottom-1/4 right-12 w-[380px] h-[300px] bg-[#64748b]/10 rounded-full blur-[110px] -z-10" />
+          <div ref={glowsRef} className="absolute inset-0 pointer-events-none -z-10">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[450px] bg-emerald-300/15 rounded-full blur-[140px]" />
+            <div className="absolute top-1/3 left-12 w-[350px] h-[280px] bg-[#d97757]/10 rounded-full blur-[110px]" />
+            <div className="absolute bottom-1/4 right-12 w-[380px] h-[300px] bg-[#64748b]/10 rounded-full blur-[110px]" />
+          </div>
 
           <BilateralPatternFlow triggerRef={sectionRef} />
         </div>

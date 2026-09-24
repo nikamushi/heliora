@@ -41,11 +41,12 @@ export function BilateralPatternFlow({ triggerRef }: BilateralPatternFlowProps =
   const sceneRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
+  const bodyGlowRef = useRef<HTMLDivElement>(null);
   const focalDotRef = useRef<SVGGElement>(null);
   const bodyMeshRef = useRef<SVGGElement>(null);
   const macroDetailRef = useRef<SVGGElement>(null);
 
-  // Exact Screen-Space Anchor Position of the Red Dot
+  // Exact Screen-Space Anchor Position of the Central Focal Dot
   const [dotAnchor, setDotAnchor] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
 
   useGSAP(
@@ -101,7 +102,7 @@ export function BilateralPatternFlow({ triggerRef }: BilateralPatternFlowProps =
         },
       });
 
-      // Camera zooms straight into the red dot (stationary anchor)
+      // 1. Camera zooms straight into the focal dot (stationary anchor)
       tl.to(
         sceneRef.current,
         {
@@ -112,20 +113,46 @@ export function BilateralPatternFlow({ triggerRef }: BilateralPatternFlowProps =
         0
       );
 
-      // Fade out outer human body contour during close approach
+      // 2. Fade out bilateral flowing lines (canvas) completely during zoom
+      if (canvasRef.current) {
+        tl.to(
+          canvasRef.current,
+          {
+            opacity: 0,
+            ease: "power1.inOut",
+            duration: 0.45,
+          },
+          0.05
+        );
+      }
+
+      // 3. Fade out human body contour slices completely during zoom
       if (bodyMeshRef.current) {
         tl.to(
           bodyMeshRef.current,
           {
-            opacity: 0.12,
+            opacity: 0,
             ease: "power1.inOut",
-            duration: 0.5,
+            duration: 0.45,
           },
-          0.35
+          0.05
         );
       }
 
-      // Reveal high-resolution macro telemetry rings
+      // 4. Fade out body background ambient glow
+      if (bodyGlowRef.current) {
+        tl.to(
+          bodyGlowRef.current,
+          {
+            opacity: 0,
+            ease: "power1.inOut",
+            duration: 0.45,
+          },
+          0.05
+        );
+      }
+
+      // 5. Reveal high-resolution macro telemetry rings around focal dot
       if (macroDetailRef.current) {
         tl.fromTo(
           macroDetailRef.current,
@@ -135,7 +162,7 @@ export function BilateralPatternFlow({ triggerRef }: BilateralPatternFlowProps =
             ease: "power1.inOut",
             duration: 0.4,
           },
-          0.25
+          0.2
         );
       }
     },
@@ -709,7 +736,10 @@ export function BilateralPatternFlow({ triggerRef }: BilateralPatternFlowProps =
           className="relative w-32 h-56 sm:w-36 sm:h-64 md:w-40 md:h-72 flex items-center justify-center pointer-events-none select-none"
         >
           {/* Subtle Ambient Radial Glow behind the body */}
-          <div className="absolute inset-0 bg-gradient-to-b from-emerald-400/20 via-emerald-600/25 to-transparent rounded-full blur-3xl -z-10" />
+          <div 
+            ref={bodyGlowRef}
+            className="absolute inset-0 bg-gradient-to-b from-emerald-400/20 via-emerald-600/25 to-transparent rounded-full blur-3xl -z-10" 
+          />
 
           {/* Topographic Bio-Wave Mesh Human Figure */}
           <svg
