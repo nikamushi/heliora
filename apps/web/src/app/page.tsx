@@ -11,7 +11,8 @@ import {
   IconHeartbeat,
   IconArrowRight,
   IconBrain,
-  IconCertificate
+  IconCertificate,
+  IconShieldLock
 } from "@tabler/icons-react";
 
 // Fluid Apple HIG motion curves
@@ -269,6 +270,57 @@ export default function LandingPage() {
                   <div className="flex items-start gap-2.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-teal-600 mt-2 shrink-0" />
                     <span>Explainable AI yang transparan tanpa black-box tanpa keraguan medis.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Full-Width Pillar 3: Privasi Data */}
+            <div className="mt-14 sm:mt-18 pt-12 sm:pt-16 border-t border-brand-900/10 max-w-6xl mx-auto">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-start">
+                <div className="lg:col-span-5 flex flex-col space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-brand-100/70 border border-brand-900/10 flex items-center justify-center text-brand-900">
+                      <IconShieldLock size={22} stroke={1.8} />
+                    </div>
+                    <span className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-900/50 font-mono">
+                      Pilar 03
+                    </span>
+                  </div>
+                  <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-brand-900 tracking-tight">
+                    Privasi Data
+                  </h3>
+                  <p className="text-base sm:text-lg text-brand-900/75 leading-relaxed font-normal">
+                    Kesehatan adalah informasi paling personal Anda. HELIORA dirancang dengan prinsip *privacy-by-design*, memastikan data Anda terlindungi seutuhnya tanpa kompromi.
+                  </p>
+                </div>
+
+                <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-3 gap-6 pt-2 lg:pt-4">
+                  <div className="space-y-2">
+                    <h4 className="text-base font-semibold text-brand-900">
+                      Kedaulatan Penuh
+                    </h4>
+                    <p className="text-xs sm:text-sm text-brand-900/65 leading-relaxed">
+                      Anda memiliki kendali mutlak atas data Anda, termasuk hak ekspor dan penghapusan riwayat kapan saja.
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <h4 className="text-base font-semibold text-brand-900">
+                      Enkripsi Berlapis
+                    </h4>
+                    <p className="text-xs sm:text-sm text-brand-900/65 leading-relaxed">
+                      Protokol keamanan tingkat tinggi mengamankan seluruh rekaman parameter vital saat disimpan maupun dikirim.
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <h4 className="text-base font-semibold text-brand-900">
+                      Tanpa Komersialisasi
+                    </h4>
+                    <p className="text-xs sm:text-sm text-brand-900/65 leading-relaxed">
+                      HELIORA tidak pernah menjual atau membagikan data profil kesehatan Anda kepada pihak ketiga atau pengiklan.
+                    </p>
                   </div>
                 </div>
               </div>
