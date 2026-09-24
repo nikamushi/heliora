@@ -4,7 +4,6 @@ import React from "react";
 import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
-import { BilateralPatternFlow } from "@/components/BilateralPatternFlow";
 import { motion } from "motion/react";
 import { 
   IconHeartbeat,
@@ -31,56 +30,37 @@ function SectionPatterns() {
   return (
     <section 
       id="patterns" 
-      className="min-h-[100dvh] w-full border-t border-brand-900/5 overflow-hidden flex flex-col justify-between pt-24 md:pt-28 pb-8 px-6 lg:px-12 relative"
+      className="container mx-auto px-6 lg:px-12 py-20 md:py-28 scroll-mt-24 border-t border-brand-900/5 flex flex-col justify-center items-start"
     >
-      {/* Top Typographic Header (Clean spacing below navbar) */}
-      <div className="container mx-auto max-w-6xl w-full z-20 pointer-events-none mb-3 md:mb-5">
-        <div className="max-w-4xl pointer-events-auto">
-          <motion.h2 
-            custom={1}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.25 }}
-            variants={fadeUpVariants}
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-normal tracking-tight text-brand-900 leading-[1.08]"
+      <div className="max-w-4xl">
+        <motion.h2 
+          custom={1}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.25 }}
+          variants={fadeUpVariants}
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-normal tracking-tight text-brand-900 leading-[1.08]"
+        >
+          Setiap hari, kita melakukan <br className="hidden sm:inline" />
+          <span className="italic font-light text-brand-900/80">lebih dari yang kita sadari.</span>
+        </motion.h2>
+
+        <motion.div
+          custom={2}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.25 }}
+          variants={fadeUpVariants}
+          className="mt-8 md:mt-10"
+        >
+          <Link 
+            href="#how-it-works"
+            className="group inline-flex items-center gap-2 text-sm md:text-base font-medium text-brand-900/80 hover:text-brand-900 transition-colors tracking-wide"
           >
-            Setiap hari, kita melakukan <br className="hidden sm:inline" />
-            <span className="italic font-light text-brand-900/80">lebih dari yang kita sadari.</span>
-          </motion.h2>
-        </div>
-      </div>
-
-      {/* Dedicated Camera Viewport for Visualization (In-flow flex-1 with clean vertical clearance) */}
-      <div className="relative w-full flex-1 min-h-0 overflow-hidden flex items-center justify-center pointer-events-none z-10 my-auto">
-        {/* Soft Ambient Radial Glows */}
-        <div className="absolute inset-0 pointer-events-none -z-10">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[450px] bg-emerald-300/15 rounded-full blur-[140px]" />
-          <div className="absolute top-1/3 left-12 w-[350px] h-[280px] bg-[#d97757]/10 rounded-full blur-[110px]" />
-          <div className="absolute bottom-1/4 right-12 w-[380px] h-[300px] bg-[#64748b]/10 rounded-full blur-[110px]" />
-        </div>
-
-        <BilateralPatternFlow />
-      </div>
-
-      {/* Editorial Conceptual Forward Bridge */}
-      <div className="container mx-auto max-w-6xl w-full flex justify-center z-20 pointer-events-none mt-3 md:mt-5">
-        <div className="flex justify-center pointer-events-auto">
-          <motion.div
-            custom={2}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.25 }}
-            variants={fadeUpVariants}
-          >
-            <Link 
-              href="#how-it-works"
-              className="group inline-flex items-center gap-2 text-sm md:text-base font-medium text-brand-900/80 hover:text-brand-900 transition-colors tracking-wide"
-            >
-              <span>Bagaimana HELIORA membaca pola</span>
-              <IconArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-300" />
-            </Link>
-          </motion.div>
-        </div>
+            <span>Bagaimana HELIORA membaca pola</span>
+            <IconArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-300" />
+          </Link>
+        </motion.div>
       </div>
     </section>
   );
