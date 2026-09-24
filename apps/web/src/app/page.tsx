@@ -40,10 +40,14 @@ export default function LandingPage() {
 
       <Navbar />
 
-      <main className="pt-28 pb-16">
-        {/* HERO SECTION: Centered Minimal Editorial (Stitch Final Hero + Design.md) */}
-        <section className="container mx-auto px-6 lg:px-12 pt-12 sm:pt-16 lg:pt-24 pb-20 relative">
-          <div className="flex flex-col items-center text-center max-w-4xl mx-auto space-y-8">
+      <main className="pb-16">
+        {/* HERO SECTION: 1 Full Viewport (Centered Editorial Experience) */}
+        <section id="hero" className="min-h-[100dvh] w-full flex flex-col justify-between items-center relative px-6 lg:px-12 pt-28 pb-10">
+          {/* Top spacer for optical centering */}
+          <div className="w-full" />
+
+          {/* Centered Hero Typography & Action Buttons */}
+          <div className="flex flex-col items-center text-center max-w-4xl mx-auto space-y-8 my-auto">
             <motion.span 
               custom={0} initial="hidden" animate="visible" variants={fadeUpVariants}
               className="text-xs font-semibold uppercase tracking-[0.28em] text-brand-900/60 bg-brand-100/60 px-4 py-1.5 rounded-full border border-brand-900/10 backdrop-blur-sm"
@@ -78,10 +82,24 @@ export default function LandingPage() {
               </Link>
             </motion.div>
           </div>
+
+          {/* Bottom Scroll Cue to Section 01 */}
+          <motion.div 
+            custom={3} initial="hidden" animate="visible" variants={fadeUpVariants}
+            className="flex flex-col items-center pt-6"
+          >
+            <Link 
+              href="#patterns" 
+              className="flex flex-col items-center gap-1.5 text-brand-900/40 hover:text-brand-900/80 transition-colors group cursor-pointer"
+            >
+              <span className="text-[10px] font-semibold tracking-[0.2em] uppercase">Eksplorasi Pola</span>
+              <span className="animate-bounce text-sm opacity-70 group-hover:opacity-100 transition-opacity">↓</span>
+            </Link>
+          </motion.div>
         </section>
 
         {/* SECTION 01 (STITCH SECTION 2: FINAL - BILATERAL CONVERGENCE): KESEHATAN BUKAN SEKADAR ANGKA */}
-        <section className="relative w-full overflow-hidden py-20 md:py-32 border-t border-brand-900/5">
+        <section id="patterns" className="relative w-full overflow-hidden py-20 md:py-32 border-t border-brand-900/5 scroll-mt-20">
           <div className="container mx-auto px-6 lg:px-12 max-w-6xl">
             {/* Typographic Header: Editorial Hierarchy */}
             <div className="max-w-4xl mb-12 md:mb-16">
