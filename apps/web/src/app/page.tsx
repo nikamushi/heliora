@@ -79,9 +79,9 @@ function NarrativeItem({ content }: { content: React.ReactNode }) {
     <motion.div
       ref={ref}
       style={{ opacity }}
-      className="flex flex-col items-center text-center min-h-[50vh] sm:min-h-[60vh] justify-center px-4"
+      className="flex flex-col items-center text-center min-h-[40vh] sm:min-h-[50vh] justify-center px-4"
     >
-      <p className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-normal tracking-tight leading-snug sm:leading-[1.35] text-balance max-w-3xl">
+      <p className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-normal tracking-tight leading-snug sm:leading-[1.35] text-balance max-w-3xl text-brand-900">
         {content}
       </p>
     </motion.div>
@@ -89,45 +89,15 @@ function NarrativeItem({ content }: { content: React.ReactNode }) {
 }
 
 function SectionLifestyleNarrative() {
-  const narrativeItems: React.ReactNode[] = [
-    (
-      <span className="text-brand-900/80">
-        Setiap hari, kita menjalani{" "}
-        <span className="text-brand-900">pola hidup masing-masing</span>, dari
-        kebiasaan kecil sampai keputusan yang sering kita ambil tanpa sadar.
-      </span>
-    ),
-    (
-      <span className="text-brand-900/80">
-        Satu per satu, semuanya terlihat sederhana. Tetapi jika dilihat bersama, kebiasaan-kebiasaan itu membentuk{" "}
-        <span className="text-brand-900">gambaran yang lebih utuh</span> tentang cara kita menjalani hari.
-      </span>
-    ),
-    (
-      <span className="text-brand-900/80">
-        Seiring waktu,{" "}
-        <span className="text-brand-900">perubahan kecil</span> bisa memperlihatkan hal baru tentang kesehatan kita:
-        {" "}bagaimana kondisinya hari ini, dan apa yang mungkin terjadi ke depannya.
-      </span>
-    ),
-    (
-      <span className="text-brand-900/80">
-        Dengan memahami bagaimana kebiasaan itu saling terkait, kita bisa{" "}
-        <span className="text-brand-900">melihat kesehatan dengan cara yang lebih personal</span>, lalu
-        mulai mempertimbangkan perubahan sebelum kita benar-benar membutuhkannya.
-      </span>
-    ),
-  ];
+  const narrativeContent = "Apa yang kita rasakan hari ini hanya sebagian dari gambaran kesehatan kita. Kebiasaan sehari-hari, kalau diamati dalam waktu lama, membentuk pola. Dari pola itu, kondisi kita jadi lebih jelas terlihat. Kita juga bisa memperkirakan arahnya ke depan dan menemukan perubahan yang mungkin berarti.";
 
   return (
     <section 
       id="narrative" 
-      className="container mx-auto px-6 lg:px-12 py-16 sm:py-24 scroll-mt-24"
+      className="container mx-auto px-6 lg:px-12 py-24 sm:py-36 md:py-44 scroll-mt-24"
     >
       <div className="max-w-4xl mx-auto flex flex-col items-center">
-        {narrativeItems.map((item, idx) => (
-          <NarrativeItem key={idx} content={item} />
-        ))}
+        <NarrativeItem content={narrativeContent} />
       </div>
     </section>
   );
