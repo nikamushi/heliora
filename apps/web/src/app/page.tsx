@@ -5,13 +5,20 @@ import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { BilateralPatternFlow } from "@/components/BilateralPatternFlow";
-import { motion, useScroll, useTransform } from "motion/react";
+import { motion } from "motion/react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
 import { 
   IconHeartbeat,
   IconArrowRight,
   IconAdjustmentsHorizontal,
   IconHistory
 } from "@tabler/icons-react";
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger, useGSAP);
+}
 
 // Fluid Apple HIG motion curves
 const fadeUpVariants = {
@@ -29,34 +36,75 @@ const fadeUpVariants = {
 
 function SectionPatternsPinned() {
   const sectionRef = React.useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start start", "end end"],
-  });
+  const pinContainerRef = React.useRef<HTMLDivElement>(null);
+  const headlineRef = React.useRef<HTMLDivElement>(null);
+  const bridgeRef = React.useRef<HTMLDivElement>(null);
 
-  // Fade out headline and bridge as we zoom in (between progress 0.06 and 0.28)
-  const headlineOpacity = useTransform(scrollYProgress, [0.0, 0.06, 0.28], [1, 1, 0]);
-  const headlineY = useTransform(scrollYProgress, [0.06, 0.28], [0, -28]);
-  const bridgeOpacity = useTransform(scrollYProgress, [0.0, 0.06, 0.26], [1, 1, 0]);
+  useGSAP(
+    () => {
+      if (!sectionRef.current || !pinContainerRef.current) return;
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top top",
+          end: "+=2200",
+          pin: pinContainerRef.current,
+          scrub: 1,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+        },
+      });
+
+      if (headlineRef.current) {
+        tl.to(
+          headlineRef.current,
+          {
+            opacity: 0,
+            y: -28,
+            duration: 0.25,
+            ease: "power1.out",
+          },
+          0
+        );
+      }
+
+      if (bridgeRef.current) {
+        tl.to(
+          bridgeRef.current,
+          {
+            opacity: 0,
+            duration: 0.22,
+            ease: "power1.out",
+          },
+          0
+        );
+      }
+    },
+    { scope: sectionRef }
+  );
 
   return (
     <section 
       ref={sectionRef} 
       id="patterns" 
-      className="relative w-full h-[260vh] border-t border-brand-900/5"
+      className="relative w-full border-t border-brand-900/5"
     >
-      <div className="sticky top-0 h-[100dvh] w-full overflow-hidden flex flex-col justify-between pt-24 md:pt-28 pb-8 px-6 lg:px-12">
+      <div 
+        ref={pinContainerRef}
+        className="h-[100dvh] w-full overflow-hidden flex flex-col justify-between pt-24 md:pt-28 pb-8 px-6 lg:px-12 relative"
+      >
         {/* Top Typographic Header (Clean spacing below navbar, fades out on camera zoom) */}
         <div className="container mx-auto max-w-6xl w-full z-20 pointer-events-none">
-          <motion.div 
-            style={{ opacity: headlineOpacity, y: headlineY }}
+          <div 
+            ref={headlineRef}
             className="max-w-4xl pointer-events-auto"
           >
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-normal tracking-tight text-brand-900 leading-[1.08]">
               Setiap hari, kita melakukan <br className="hidden sm:inline" />
               <span className="italic font-light text-brand-900/80">lebih dari yang kita sadari.</span>
             </h2>
-          </motion.div>
+          </div>
         </div>
 
         {/* Dedicated Camera Viewport for Visualization (Full Sticky Viewport Scene) */}
@@ -66,13 +114,13 @@ function SectionPatternsPinned() {
           <div className="absolute top-1/3 left-12 w-[350px] h-[280px] bg-[#d97757]/10 rounded-full blur-[110px] -z-10" />
           <div className="absolute bottom-1/4 right-12 w-[380px] h-[300px] bg-[#64748b]/10 rounded-full blur-[110px] -z-10" />
 
-          <BilateralPatternFlow progress={scrollYProgress} />
+          <BilateralPatternFlow triggerRef={sectionRef} />
         </div>
 
         {/* Editorial Conceptual Forward Bridge */}
         <div className="container mx-auto max-w-6xl w-full flex justify-center z-20 pointer-events-none">
-          <motion.div 
-            style={{ opacity: bridgeOpacity }}
+          <div 
+            ref={bridgeRef}
             className="flex justify-center pointer-events-auto"
           >
             <Link 
@@ -82,7 +130,7 @@ function SectionPatternsPinned() {
               <span>Bagaimana HELIORA membaca pola</span>
               <IconArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-300" />
             </Link>
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>

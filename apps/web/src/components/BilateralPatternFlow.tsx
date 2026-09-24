@@ -1,7 +1,13 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
-import { motion, useScroll, useTransform, type MotionValue } from "motion/react";
+import React, { useEffect, useRef, useState } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger, useGSAP);
+}
 
 interface StreamConfig {
   side: "left" | "right";
@@ -27,70 +33,114 @@ interface Particle {
 }
 
 interface BilateralPatternFlowProps {
-  progress?: MotionValue<number>;
+  triggerRef?: React.RefObject<HTMLElement | null>;
 }
 
-export function BilateralPatternFlow({ progress }: BilateralPatternFlowProps = {}) {
+export function BilateralPatternFlow({ triggerRef }: BilateralPatternFlowProps = {}) {
   const cameraViewportRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
   const focalDotRef = useRef<SVGGElement>(null);
+  const bodyMeshRef = useRef<SVGGElement>(null);
+  const macroDetailRef = useRef<SVGGElement>(null);
 
-  // Immutable Initial Red Dot Screen-Space Anchor
-  const [initialDot, setInitialDot] = React.useState({ x: 0, y: 0 });
+  // Exact Screen-Space Anchor Position of the Red Dot
+  const [dotAnchor, setDotAnchor] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
 
-  const internalScroll = useScroll({
-    target: cameraViewportRef,
-    offset: ["start 90%", "end 10%"],
-  });
+  useGSAP(
+    () => {
+      if (!cameraViewportRef.current || !sceneRef.current || !bodyRef.current) return;
 
-  const activeProgress = progress || internalScroll.scrollYProgress;
-  
-  // Controlled ease-out camera zoom curve into the central red dot
-  const zoomScale = useTransform(
-    activeProgress,
-    [0.0, 0.20, 0.55, 0.85, 1.0],
-    [1.0, 1.45, 3.2, 5.5, 6.8]
+      const trigger = triggerRef?.current || cameraViewportRef.current;
+
+      const getExactDotPosition = () => {
+        const sElem = sceneRef.current;
+        const bElem = bodyRef.current;
+        if (!sElem || !bElem) return { x: 0, y: 0 };
+
+        const sWidth = sElem.offsetWidth || window.innerWidth;
+        const sHeight = sElem.offsetHeight || window.innerHeight;
+        const bHeight = bElem.offsetHeight || 300;
+
+        // In SVG viewBox="-50 -108 100 216", the central red dot is at (0, -20)
+        // Body is centered in the scene (sWidth * 0.5, sHeight * 0.5)
+        const dotX = sWidth * 0.5;
+        const dotY = sHeight * 0.5 + (-20 / 216) * bHeight;
+
+        return { x: dotX, y: dotY };
+      };
+
+      const anchor = getExactDotPosition();
+      setDotAnchor(anchor);
+
+      if (anchor.x > 0 && anchor.y > 0) {
+        gsap.set(sceneRef.current, {
+          transformOrigin: `${anchor.x}px ${anchor.y}px`,
+          force3D: true,
+        });
+      }
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: trigger,
+          start: "top top",
+          end: "+=2200",
+          scrub: 1,
+          invalidateOnRefresh: true,
+          onRefresh: () => {
+            const newAnchor = getExactDotPosition();
+            setDotAnchor(newAnchor);
+            if (sceneRef.current && newAnchor.x > 0 && newAnchor.y > 0) {
+              gsap.set(sceneRef.current, {
+                transformOrigin: `${newAnchor.x}px ${newAnchor.y}px`,
+                force3D: true,
+              });
+            }
+          },
+        },
+      });
+
+      // Camera zooms straight into the red dot (stationary anchor)
+      tl.to(
+        sceneRef.current,
+        {
+          scale: 6.8,
+          ease: "power2.out",
+          duration: 1,
+        },
+        0
+      );
+
+      // Fade out outer human body contour during close approach
+      if (bodyMeshRef.current) {
+        tl.to(
+          bodyMeshRef.current,
+          {
+            opacity: 0.12,
+            ease: "power1.inOut",
+            duration: 0.5,
+          },
+          0.35
+        );
+      }
+
+      // Reveal high-resolution macro telemetry rings
+      if (macroDetailRef.current) {
+        tl.fromTo(
+          macroDetailRef.current,
+          { opacity: 0 },
+          {
+            opacity: 1,
+            ease: "power1.inOut",
+            duration: 0.4,
+          },
+          0.25
+        );
+      }
+    },
+    { scope: cameraViewportRef, dependencies: [triggerRef] }
   );
-  
-  // GOLDEN RULE CAMERA INVARIANT:
-  // translateX = (1 - s) * initialDot.x
-  // translateY = (1 - s) * initialDot.y
-  //
-  // Proof: For any scale s:
-  // screenDotX = translateX + s * dotX = (1 - s) * dotX + s * dotX = dotX (CONSTANT)
-  // screenDotY = translateY + s * dotY = (1 - s) * dotY + s * dotY = dotY (CONSTANT)
-  const translateX = useTransform(zoomScale, (s) => (1 - s) * initialDot.x);
-  const translateY = useTransform(zoomScale, (s) => (1 - s) * initialDot.y);
-
-  const bodyMeshOpacity = useTransform(activeProgress, [0.35, 0.75], [1.0, 0.12]);
-  const macroDetailOpacity = useTransform(activeProgress, [0.25, 0.65], [0.0, 1.0]);
-
-  // Capture the unscaled red dot position in the initial state as the permanent camera anchor
-  const updateInitialAnchor = React.useCallback(() => {
-    if (!cameraViewportRef.current || !bodyRef.current) return;
-    const vRect = cameraViewportRef.current.getBoundingClientRect();
-    const bElem = bodyRef.current;
-
-    if (vRect.width > 0 && vRect.height > 0) {
-      const width = vRect.width;
-      const height = vRect.height;
-      const bHeight = bElem.offsetHeight || 300;
-
-      // Exact red dot coordinate in the untransformed scene (centered body with cy = -20 in 216h viewBox)
-      const dotX = width * 0.5;
-      const dotY = height * 0.5 + (-20 / 216) * bHeight;
-
-      setInitialDot({ x: dotX, y: dotY });
-    }
-  }, []);
-
-  useEffect(() => {
-    updateInitialAnchor();
-    window.addEventListener("resize", updateInitialAnchor);
-    return () => window.removeEventListener("resize", updateInitialAnchor);
-  }, [updateInitialAnchor]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -749,19 +799,19 @@ export function BilateralPatternFlow({ progress }: BilateralPatternFlowProps = {
       canvas.removeEventListener("mousemove", handleMouseMove);
       canvas.removeEventListener("mouseleave", handleMouseLeave);
     };
-  }, [initialDot.x, initialDot.y]);
+  }, [dotAnchor.x, dotAnchor.y]);
 
   return (
     <div
       ref={cameraViewportRef}
       className="relative w-full h-full min-h-[480px] z-10 cursor-crosshair flex items-center justify-center overflow-hidden"
     >
-      {/* Debug Acceptance Crosshair (Verifies the Red Dot stays locked at initialDot) */}
-      {process.env.NODE_ENV === "development" && initialDot.x > 0 && (
+      {/* Debug Acceptance Crosshair (Verifies the Red Dot stays locked at dotAnchor) */}
+      {process.env.NODE_ENV === "development" && dotAnchor.x > 0 && (
         <div
           style={{
-            left: `${initialDot.x}px`,
-            top: `${initialDot.y}px`,
+            left: `${dotAnchor.x}px`,
+            top: `${dotAnchor.y}px`,
           }}
           className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none z-50 flex items-center justify-center opacity-80"
         >
@@ -771,15 +821,9 @@ export function BilateralPatternFlow({ progress }: BilateralPatternFlowProps = {
         </div>
       )}
 
-      {/* Unified Composed Visualization Scene: Exact Affine Camera Scale & Translation around the Red Dot */}
-      <motion.div 
+      {/* Unified Composed Visualization Scene: GSAP Camera Zoom into the Central Red Dot */}
+      <div 
         ref={sceneRef}
-        style={{ 
-          x: translateX,
-          y: translateY,
-          scale: zoomScale, 
-          transformOrigin: "0px 0px" 
-        }}
         className="w-full h-full absolute inset-0 flex items-center justify-center will-change-transform pointer-events-none"
       >
         <canvas 
@@ -826,7 +870,7 @@ export function BilateralPatternFlow({ progress }: BilateralPatternFlowProps = {
             </defs>
 
             {/* Fading Outer Body Mesh Silhouette on Zoom */}
-            <motion.g style={{ opacity: bodyMeshOpacity }}>
+            <g ref={bodyMeshRef}>
               {/* Subtle Outer Human Silhouette Contour Reference */}
               <path
                 d="M 0 -96
@@ -942,7 +986,7 @@ export function BilateralPatternFlow({ progress }: BilateralPatternFlowProps = {
                 <path d="M -8 100 Q -5.5 97.5 -3 100 M 3 100 Q 5.5 97.5 8 100" />
                 <path d="M -7.5 105 Q -5 102.5 -2.5 105 M 2.5 105 Q 5 102.5 7.5 105" />
               </g>
-            </motion.g>
+            </g>
 
             {/* Central Focal Core: Revolving Bio-Orbital Rings and PRIMARY Central Red Dot */}
             <g transform="translate(0, -20)">
@@ -950,7 +994,7 @@ export function BilateralPatternFlow({ progress }: BilateralPatternFlowProps = {
               <circle cx="0" cy="0" r="26" fill="url(#coreAura)" />
 
               {/* Macro High-Detail Telemetry Rings (revealed as you zoom in) */}
-              <motion.g style={{ opacity: macroDetailOpacity }}>
+              <g ref={macroDetailRef} style={{ opacity: 0 }}>
                 {/* Outermost Telemetry Ring */}
                 <circle
                   cx="0"
@@ -972,7 +1016,7 @@ export function BilateralPatternFlow({ progress }: BilateralPatternFlowProps = {
                   strokeOpacity="0.45"
                   fill="none"
                 />
-              </motion.g>
+              </g>
 
               {/* Outer Clockwise Revolving Orbital Ring */}
               <g>
@@ -1064,7 +1108,7 @@ export function BilateralPatternFlow({ progress }: BilateralPatternFlowProps = {
             </g>
           </svg>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }
