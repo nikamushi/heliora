@@ -34,10 +34,10 @@ function SectionPatternsPinned() {
     offset: ["start start", "end end"],
   });
 
-  // Fade out headline and bridge as we zoom in (between progress 0.20 and 0.45)
-  const headlineOpacity = useTransform(scrollYProgress, [0.0, 0.20, 0.45], [1, 1, 0]);
-  const headlineY = useTransform(scrollYProgress, [0.20, 0.45], [0, -32]);
-  const bridgeOpacity = useTransform(scrollYProgress, [0.0, 0.20, 0.42], [1, 1, 0]);
+  // Fade out headline and bridge as we zoom in (between progress 0.06 and 0.28)
+  const headlineOpacity = useTransform(scrollYProgress, [0.0, 0.06, 0.28], [1, 1, 0]);
+  const headlineY = useTransform(scrollYProgress, [0.06, 0.28], [0, -28]);
+  const bridgeOpacity = useTransform(scrollYProgress, [0.0, 0.06, 0.26], [1, 1, 0]);
 
   return (
     <section 
@@ -47,10 +47,10 @@ function SectionPatternsPinned() {
     >
       <div className="sticky top-0 h-[100dvh] w-full overflow-hidden flex flex-col justify-between pt-24 md:pt-28 pb-8 px-6 lg:px-12">
         {/* Top Typographic Header (Clean spacing below navbar, fades out on camera zoom) */}
-        <div className="container mx-auto max-w-6xl w-full z-20">
+        <div className="container mx-auto max-w-6xl w-full z-20 pointer-events-none">
           <motion.div 
             style={{ opacity: headlineOpacity, y: headlineY }}
-            className="max-w-4xl"
+            className="max-w-4xl pointer-events-auto"
           >
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-normal tracking-tight text-brand-900 leading-[1.08]">
               Setiap hari, kita melakukan <br className="hidden sm:inline" />
@@ -59,21 +59,21 @@ function SectionPatternsPinned() {
           </motion.div>
         </div>
 
-        {/* Biological Canvas & Figure (Generous full-viewport camera canvas) */}
-        <div className="relative w-full flex-1 flex items-center justify-center select-none my-auto">
+        {/* Dedicated Camera Viewport for Visualization (Full Sticky Viewport Scene) */}
+        <div className="absolute inset-0 w-full h-full overflow-hidden flex items-center justify-center pointer-events-none z-10">
           {/* Soft Ambient Radial Glows */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[450px] bg-emerald-300/15 rounded-full blur-[140px] pointer-events-none -z-10" />
-          <div className="absolute top-1/3 left-12 w-[350px] h-[280px] bg-[#d97757]/10 rounded-full blur-[110px] pointer-events-none -z-10" />
-          <div className="absolute bottom-1/4 right-12 w-[380px] h-[300px] bg-[#64748b]/10 rounded-full blur-[110px] pointer-events-none -z-10" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[450px] bg-emerald-300/15 rounded-full blur-[140px] -z-10" />
+          <div className="absolute top-1/3 left-12 w-[350px] h-[280px] bg-[#d97757]/10 rounded-full blur-[110px] -z-10" />
+          <div className="absolute bottom-1/4 right-12 w-[380px] h-[300px] bg-[#64748b]/10 rounded-full blur-[110px] -z-10" />
 
           <BilateralPatternFlow progress={scrollYProgress} />
         </div>
 
         {/* Editorial Conceptual Forward Bridge */}
-        <div className="container mx-auto max-w-6xl w-full flex justify-center z-20">
+        <div className="container mx-auto max-w-6xl w-full flex justify-center z-20 pointer-events-none">
           <motion.div 
             style={{ opacity: bridgeOpacity }}
-            className="flex justify-center"
+            className="flex justify-center pointer-events-auto"
           >
             <Link 
               href="#how-it-works"

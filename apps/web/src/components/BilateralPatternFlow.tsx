@@ -31,57 +31,86 @@ interface BilateralPatternFlowProps {
 }
 
 export function BilateralPatternFlow({ progress }: BilateralPatternFlowProps = {}) {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const cameraViewportRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
   const focalDotRef = useRef<SVGGElement>(null);
 
-  const [transformOrigin, setTransformOrigin] = React.useState<string>("50% 45.6%");
+  const [metrics, setMetrics] = React.useState({
+    targetX: 0,
+    targetY: 0,
+    anchorX: 0,
+    anchorY: 0,
+    width: 0,
+    height: 0,
+  });
 
   const internalScroll = useScroll({
-    target: containerRef,
+    target: cameraViewportRef,
     offset: ["start 90%", "end 10%"],
   });
 
   const activeProgress = progress || internalScroll.scrollYProgress;
-  // Responsive ease-out camera zoom focused directly on the central red dot
+  
+  // Controlled ease-out camera zoom curve into the central red dot
   const zoomScale = useTransform(
     activeProgress,
-    [0.0, 0.15, 0.45, 0.8, 1.0],
-    [1.0, 1.35, 3.2, 5.6, 6.8]
+    [0.0, 0.20, 0.55, 0.85, 1.0],
+    [1.0, 1.45, 3.2, 5.5, 6.8]
   );
-  const bodyMeshOpacity = useTransform(activeProgress, [0.35, 0.75], [1.0, 0.15]);
+  
+  // Dual-translation affine transform: translate(anchor) * scale(s) * translate(-target)
+  // In CSS with transformOrigin: "0 0":
+  // x' = anchorX - s * targetX + s * x
+  // y' = anchorY - s * targetY + s * y
+  // At red dot (x = targetX, y = targetY):
+  // x'(dot) = anchorX = 50% viewport width, y'(dot) = anchorY = 45% viewport height (100% LOCKED!)
+  const translateX = useTransform(zoomScale, (s) => metrics.anchorX - s * metrics.targetX);
+  const translateY = useTransform(zoomScale, (s) => metrics.anchorY - s * metrics.targetY);
+
+  const bodyMeshOpacity = useTransform(activeProgress, [0.35, 0.75], [1.0, 0.12]);
   const macroDetailOpacity = useTransform(activeProgress, [0.25, 0.65], [0.0, 1.0]);
 
-  // Dynamically compute exact central red dot screen-space anchor relative to the scene container
-  useEffect(() => {
-    const updateTransformOrigin = () => {
-      if (!sceneRef.current || !focalDotRef.current) return;
-      const sceneRect = sceneRef.current.getBoundingClientRect();
-      const dotRect = focalDotRef.current.getBoundingClientRect();
+  // Measure exact untransformed target coordinate and desired screen anchor
+  const updateMetrics = React.useCallback(() => {
+    if (!cameraViewportRef.current || !bodyRef.current) return;
+    const vRect = cameraViewportRef.current.getBoundingClientRect();
+    const bElem = bodyRef.current;
 
-      if (sceneRect.width > 0 && sceneRect.height > 0) {
-        const dotCenterX = dotRect.left + dotRect.width / 2 - sceneRect.left;
-        const dotCenterY = dotRect.top + dotRect.height / 2 - sceneRect.top;
+    if (vRect.width > 0 && vRect.height > 0) {
+      const width = vRect.width;
+      const height = vRect.height;
+      const bHeight = bElem.offsetHeight || 300;
 
-        const originXPercent = (dotCenterX / sceneRect.width) * 100;
-        const originYPercent = (dotCenterY / sceneRect.height) * 100;
+      // target: exact untransformed position of the central red dot in the scene
+      const targetX = width * 0.5;
+      const targetY = height * 0.5 + (-20 / 216) * bHeight;
 
-        if (originXPercent > 0 && originYPercent > 0) {
-          setTransformOrigin(`${originXPercent.toFixed(4)}% ${originYPercent.toFixed(4)}%`);
-        }
-      }
-    };
+      // anchor: deliberate stable camera focal target position in viewport coordinates (50% W, 45% H)
+      const anchorX = width * 0.5;
+      const anchorY = height * 0.45;
 
-    updateTransformOrigin();
-    window.addEventListener("resize", updateTransformOrigin);
-    return () => window.removeEventListener("resize", updateTransformOrigin);
+      setMetrics({
+        targetX,
+        targetY,
+        anchorX,
+        anchorY,
+        width,
+        height,
+      });
+    }
   }, []);
 
   useEffect(() => {
+    updateMetrics();
+    window.addEventListener("resize", updateMetrics);
+    return () => window.removeEventListener("resize", updateMetrics);
+  }, [updateMetrics]);
+
+  useEffect(() => {
     const canvas = canvasRef.current;
-    const container = containerRef.current;
+    const container = cameraViewportRef.current;
     if (!canvas || !container) return;
 
     const ctx = canvas.getContext("2d");
@@ -521,21 +550,11 @@ export function BilateralPatternFlow({ progress }: BilateralPatternFlowProps = {
 
       context.clearRect(0, 0, width, height);
 
-      // Dynamically compute exact focal dot center in canvas pixel coordinates
-      const containerElem = containerRef.current;
-      const bodyElem = bodyRef.current;
-      let focalX = width * 0.5;
-      let focalY = height * 0.5;
-
-      if (containerElem && bodyElem) {
-        const cRect = containerElem.getBoundingClientRect();
-        const bRect = bodyElem.getBoundingClientRect();
-        if (cRect.width > 0 && bRect.height > 0) {
-          focalX = bRect.left - cRect.left + bRect.width * 0.5;
-          // SVG viewBox is "-50 -108 100 216", dot is at cy = -20
-          focalY = bRect.top - cRect.top + bRect.height * (0.5 + (-20) / 216);
-        }
-      }
+      // Untransformed focal dot center in canvas pixel coordinates
+      const bElem = bodyRef.current;
+      const bHeight = bElem ? bElem.offsetHeight : 300;
+      const focalX = width * 0.5;
+      const focalY = height * 0.5 + (-20 / 216) * bHeight;
 
       // 1. Central Convergence Aura
       const breathe = Math.sin(timestamp * 0.0018) * 0.5 + 0.5;
@@ -746,21 +765,23 @@ export function BilateralPatternFlow({ progress }: BilateralPatternFlowProps = {
       canvas.removeEventListener("mousemove", handleMouseMove);
       canvas.removeEventListener("mouseleave", handleMouseLeave);
     };
-  }, []);
+  }, [metrics.targetX, metrics.targetY]);
 
   return (
     <div
-      ref={containerRef}
-      className="relative w-full h-full min-h-[460px] md:min-h-[540px] max-h-[640px] z-10 cursor-crosshair flex items-center justify-center overflow-hidden"
+      ref={cameraViewportRef}
+      className="relative w-full h-full min-h-[480px] z-10 cursor-crosshair flex items-center justify-center overflow-hidden"
     >
-      {/* Unified Composed Visualization Scene: Centered precisely on the Central Red Dot */}
+      {/* Unified Composed Visualization Scene: Exact Affine Camera Scale & Translation around the Red Dot */}
       <motion.div 
         ref={sceneRef}
         style={{ 
+          x: translateX,
+          y: translateY,
           scale: zoomScale, 
-          transformOrigin: transformOrigin 
+          transformOrigin: "0px 0px" 
         }}
-        className="relative w-full h-full flex items-center justify-center will-change-transform"
+        className="w-full h-full absolute inset-0 flex items-center justify-center will-change-transform pointer-events-none"
       >
         <canvas 
           ref={canvasRef} 
