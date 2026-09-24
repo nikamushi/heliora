@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { BilateralPatternFlow } from "@/components/BilateralPatternFlow";
+import { LayeredHealthPicture } from "@/components/LayeredHealthPicture";
 import { motion, useScroll, useTransform } from "motion/react";
 import { 
   IconHeartbeat,
@@ -205,6 +206,11 @@ export default function LandingPage() {
               <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white leading-[1.05]">
                 HELIORA
               </h2>
+            </div>
+
+            {/* Generative Abstract Layered Health Visual */}
+            <div className="mt-12 sm:mt-16 md:mt-20">
+              <LayeredHealthPicture />
             </div>
           </div>
         </section>
