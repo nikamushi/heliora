@@ -41,16 +41,18 @@ export function BilateralPatternFlow({ timeline }: BilateralPatternFlowProps = {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const visualizationContentRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
-  const redDotRef = useRef<HTMLDivElement>(null);
+  const focalPointRef = useRef<HTMLDivElement>(null);
+  const questionMarkRef = useRef<SVGGElement>(null);
+  const loopIconRef = useRef<SVGGElement>(null);
 
   useEffect(() => {
-    if (!timeline || !redDotRef.current) return;
+    if (!timeline || !focalPointRef.current) return;
 
-    // 1. Isolated Red Dot scales up cleanly from its own center
+    // 1. Isolated Focal Point scales up cleanly from its own center
     timeline.to(
-      redDotRef.current,
+      focalPointRef.current,
       {
-        scale: 9,
+        scale: 5.5,
         transformOrigin: "50% 50%",
         ease: "none",
         duration: 1,
@@ -67,7 +69,7 @@ export function BilateralPatternFlow({ timeline }: BilateralPatternFlowProps = {
           ease: "none",
           duration: 0.55,
         },
-        0.35
+        0.3
       );
     }
 
@@ -80,7 +82,43 @@ export function BilateralPatternFlow({ timeline }: BilateralPatternFlowProps = {
           ease: "none",
           duration: 0.55,
         },
-        0.35
+        0.3
+      );
+    }
+
+    // 4. Staged Focal Icon Morph: Question Mark (?) -> Loop / Cycle Icon (⟳)
+    if (questionMarkRef.current) {
+      timeline.to(
+        questionMarkRef.current,
+        {
+          opacity: 0,
+          scale: 0.7,
+          transformOrigin: "50% 50%",
+          ease: "power2.inOut",
+          duration: 0.22,
+        },
+        0.72
+      );
+    }
+
+    if (loopIconRef.current) {
+      timeline.fromTo(
+        loopIconRef.current,
+        {
+          opacity: 0,
+          scale: 0.7,
+          rotation: -45,
+          transformOrigin: "50% 50%",
+        },
+        {
+          opacity: 1,
+          scale: 1,
+          rotation: 0,
+          transformOrigin: "50% 50%",
+          ease: "power2.out",
+          duration: 0.26,
+        },
+        0.74
       );
     }
   }, [timeline]);
@@ -798,9 +836,9 @@ export function BilateralPatternFlow({ timeline }: BilateralPatternFlowProps = {
             </svg>
           </div>
 
-          {/* Isolated Central Red Focal Dot (PRIMARY FOCAL TARGET - Scales pure from center without drift) */}
+          {/* Isolated Central Focal Point (Transitions: Question Mark '?' -> Loop Icon '⟳') */}
           <div 
-            ref={redDotRef}
+            ref={focalPointRef}
             style={{ 
               top: "40.74%", 
               left: "50%",
@@ -809,12 +847,70 @@ export function BilateralPatternFlow({ timeline }: BilateralPatternFlowProps = {
             className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none z-30 flex items-center justify-center w-8 h-8"
           >
             <svg viewBox="-16 -16 32 32" className="w-8 h-8 overflow-visible">
-              <circle cx="0" cy="0" r="10" fill="#D97757" fillOpacity="0.25" />
-              <circle cx="0" cy="0" r="6.5" fill="#D97757" fillOpacity="0.5" />
-              <circle cx="0" cy="0" r="4.2" fill="#D97757" />
-              <circle cx="0" cy="0" r="3.0" fill="#C53030" />
-              <circle cx="0" cy="0" r="2.0" fill="#E53E3E" />
-              <circle cx="-0.8" cy="-0.8" r="0.9" fill="#FFFFFF" opacity="0.95" />
+              <defs>
+                <radialGradient id="focalGlow" cx="0%" cy="0%" r="100%">
+                  <stop offset="0%" stopColor="#E53E3E" stopOpacity="0.9" />
+                  <stop offset="40%" stopColor="#D97757" stopOpacity="0.8" />
+                  <stop offset="70%" stopColor="#C53030" stopOpacity="0.4" />
+                  <stop offset="100%" stopColor="#D97757" stopOpacity="0" />
+                </radialGradient>
+              </defs>
+
+              {/* Concentric Halo and Core Disc */}
+              <circle cx="0" cy="0" r="14" fill="#D97757" fillOpacity="0.2" />
+              <circle cx="0" cy="0" r="11" fill="#D97757" fillOpacity="0.38" />
+              <circle cx="0" cy="0" r="8.5" fill="#D97757" />
+              <circle cx="0" cy="0" r="7.5" fill="#C53030" />
+
+              {/* State 1: Question Mark '?' (Initial uncertainty / observation) */}
+              <g ref={questionMarkRef} style={{ transformOrigin: "0px 0px" }}>
+                <path
+                  d="M -3.8 -4.2 C -3.8 -7.8, 3.8 -7.8, 3.8 -4.2 C 3.8 -1.8, 0 -0.8, 0 2.2"
+                  fill="none"
+                  stroke="#FFFFFF"
+                  strokeWidth="1.9"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <circle cx="0" cy="5.8" r="1.05" fill="#FFFFFF" />
+              </g>
+
+              {/* State 2: Loop / Cycle Icon '⟳' (Discovered pattern / continuous feedback cycle) */}
+              <g ref={loopIconRef} style={{ transformOrigin: "0px 0px", opacity: 0 }}>
+                {/* Top Clockwise Arc with Arrowhead */}
+                <path
+                  d="M -5.6 -3.2 A 6.4 6.4 0 0 1 5.6 -3.2"
+                  fill="none"
+                  stroke="#FFFFFF"
+                  strokeWidth="1.75"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M 6.4 -6.2 L 5.6 -3.2 L 2.6 -3.6"
+                  fill="none"
+                  stroke="#FFFFFF"
+                  strokeWidth="1.75"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+
+                {/* Bottom Clockwise Arc with Arrowhead */}
+                <path
+                  d="M 5.6 3.2 A 6.4 6.4 0 0 1 -5.6 3.2"
+                  fill="none"
+                  stroke="#FFFFFF"
+                  strokeWidth="1.75"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M -6.4 6.2 L -5.6 3.2 L -2.6 3.6"
+                  fill="none"
+                  stroke="#FFFFFF"
+                  strokeWidth="1.75"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </g>
             </svg>
           </div>
         </div>
