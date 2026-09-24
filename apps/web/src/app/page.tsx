@@ -230,9 +230,6 @@ export default function LandingPage() {
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-brand-900 leading-tight">
               Kenapa harus HELIORA?
             </h2>
-            <p className="text-base sm:text-lg text-brand-900/60 mt-3 font-normal text-balance">
-              Pendekatan cerdas, transparan, dan berbasis bukti untuk memahami serta memproyeksikan arah kesehatan Anda.
-            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
