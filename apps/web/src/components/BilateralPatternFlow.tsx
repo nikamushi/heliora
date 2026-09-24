@@ -48,11 +48,11 @@ export function BilateralPatternFlow({ timeline }: BilateralPatternFlowProps = {
   useEffect(() => {
     if (!timeline || !focalPointRef.current) return;
 
-    // 1. Subtle, restrained scale for the focal indicator (no giant ballooning)
+    // 1. Focal Point zooms up progressively across the entire scroll range (Scale 1 -> 5)
     timeline.to(
       focalPointRef.current,
       {
-        scale: 1.25,
+        scale: 5,
         transformOrigin: "50% 50%",
         ease: "none",
         duration: 1,
@@ -67,7 +67,7 @@ export function BilateralPatternFlow({ timeline }: BilateralPatternFlowProps = {
         {
           opacity: 0,
           ease: "none",
-          duration: 0.5,
+          duration: 0.45,
         },
         0.3
       );
@@ -80,35 +80,34 @@ export function BilateralPatternFlow({ timeline }: BilateralPatternFlowProps = {
         {
           opacity: 0,
           ease: "none",
-          duration: 0.5,
+          duration: 0.45,
         },
         0.3
       );
     }
 
-    // 4. Subtle, minimal icon transition: Question Mark (?) -> Loop Icon (⟳)
-    // Phase 2: Question mark gently dissolves
+    // 4. Question mark fades out near the end of scroll
     if (questionMarkRef.current) {
       timeline.to(
         questionMarkRef.current,
         {
           opacity: 0,
-          scale: 0.92,
+          scale: 0.85,
           transformOrigin: "50% 50%",
-          ease: "power2.inOut",
-          duration: 0.15,
+          ease: "none",
+          duration: 0.18,
         },
-        0.70
+        0.72
       );
     }
 
-    // Phase 3: Loop icon emerges with a tiny -15° -> 0° settling motion (no continuous 360° spin)
+    // 5. Loop icon appears and settles cleanly at the end state
     if (loopIconRef.current) {
       timeline.fromTo(
         loopIconRef.current,
         {
           opacity: 0,
-          scale: 0.92,
+          scale: 0.85,
           rotation: -15,
           transformOrigin: "50% 50%",
         },
@@ -117,10 +116,10 @@ export function BilateralPatternFlow({ timeline }: BilateralPatternFlowProps = {
           scale: 1,
           rotation: 0,
           transformOrigin: "50% 50%",
-          ease: "power2.out",
-          duration: 0.20,
+          ease: "none",
+          duration: 0.22,
         },
-        0.80
+        0.72
       );
     }
   }, [timeline]);

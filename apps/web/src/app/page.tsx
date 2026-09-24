@@ -64,9 +64,9 @@ function SectionPatternsPinned() {
           {
             opacity: 0,
             ease: "none",
-            duration: 0.5,
+            duration: 0.45,
           },
-          0.3
+          0.25
         );
       }
 
@@ -77,9 +77,9 @@ function SectionPatternsPinned() {
           {
             opacity: 0,
             ease: "none",
-            duration: 0.5,
+            duration: 0.45,
           },
-          0.3
+          0.25
         );
       }
 
