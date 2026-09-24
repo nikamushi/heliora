@@ -62,13 +62,13 @@ export function BilateralPatternFlow({ triggerRef }: BilateralPatternFlowProps =
         },
       });
 
-      // 1. ONLY the central focal dot zooms in / expands
+      // 1. ONLY the central focal dot zooms in / expands right at its center
       if (focalDotRef.current) {
         tl.to(
           focalDotRef.current,
           {
-            scale: 24,
-            transformOrigin: "0px 0px",
+            scale: 22,
+            transformOrigin: "50% 50%",
             ease: "power2.out",
             duration: 1,
           },
@@ -853,34 +853,38 @@ export function BilateralPatternFlow({ triggerRef }: BilateralPatternFlowProps =
             </g>
 
             {/* Central Focal Core (The ONLY element that zooms in) */}
-            <g id="central-focal-core" ref={focalDotRef} transform="translate(0, -20)">
-              {/* Macro High-Detail Telemetry Rings (revealed as you zoom in) */}
-              <g ref={macroDetailRef} style={{ opacity: 0 }}>
-                {/* Outermost Telemetry Ring */}
-                <circle
-                  cx="0"
-                  cy="0"
-                  r="30"
-                  stroke="#0F7A4E"
-                  strokeWidth="0.5"
-                  strokeDasharray="1 3"
-                  strokeOpacity="0.4"
-                  fill="none"
-                />
-                <circle
-                  cx="0"
-                  cy="0"
-                  r="24"
-                  stroke="#2D5A43"
-                  strokeWidth="0.6"
-                  strokeDasharray="2 4"
-                  strokeOpacity="0.45"
-                  fill="none"
-                />
-              </g>
+            <g transform="translate(0, -20)">
+              <g 
+                id="central-focal-core" 
+                ref={focalDotRef}
+                style={{ transformBox: "fill-box", transformOrigin: "center" }}
+              >
+                {/* Macro High-Detail Telemetry Rings (revealed as you zoom in) */}
+                <g ref={macroDetailRef} style={{ opacity: 0 }}>
+                  {/* Outermost Telemetry Ring */}
+                  <circle
+                    cx="0"
+                    cy="0"
+                    r="30"
+                    stroke="#0F7A4E"
+                    strokeWidth="0.5"
+                    strokeDasharray="1 3"
+                    strokeOpacity="0.4"
+                    fill="none"
+                  />
+                  <circle
+                    cx="0"
+                    cy="0"
+                    r="24"
+                    stroke="#2D5A43"
+                    strokeWidth="0.6"
+                    strokeDasharray="2 4"
+                    strokeOpacity="0.45"
+                    fill="none"
+                  />
+                </g>
 
-              {/* Solid Core Focal Center Dot */}
-              <g>
+                {/* Solid Core Focal Center Dot */}
                 <circle cx="0" cy="0" r="4.5" fill="#2D5A43" />
                 <circle cx="0" cy="0" r="3" fill="#0F7A4E" />
                 <circle cx="-0.8" cy="-0.8" r="1.1" fill="#ffffff" opacity="0.95" />
