@@ -1,33 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
-import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
+import React from "react";
 
 export function LayeredHealthPicture() {
-  const [isHovered, setIsHovered] = useState(false);
-
-  // Mouse position state for subtle 3D tilt
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-
-  const springConfig = { stiffness: 60, damping: 18 };
-  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [6, -6]), springConfig);
-  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-8, 8]), springConfig);
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
-    mouseX.set(x);
-    mouseY.set(y);
-  };
-
-  const handleMouseLeave = () => {
-    mouseX.set(0);
-    mouseY.set(0);
-    setIsHovered(false);
-  };
-
   // 4 Isometric Rounded Rhombus Planes
   // Width: 380, Height: 190
   const renderPlanePath = (cx: number, cy: number, w: number = 380, h: number = 190, r: number = 22) => {
@@ -47,35 +22,15 @@ export function LayeredHealthPicture() {
   };
 
   return (
-    <div
-      onMouseMove={handleMouseMove}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={handleMouseLeave}
-      className="relative w-full max-w-4xl mx-auto flex items-center justify-center select-none perspective-1000 py-6 sm:py-10"
-    >
+    <div className="relative w-full max-w-4xl mx-auto flex items-center justify-center select-none py-6 sm:py-10">
       {/* Ambient Radial Lighting Behind SVG */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none -z-10">
         <div className="w-[450px] h-[350px] bg-emerald-500/15 rounded-full blur-[110px]" />
         <div className="w-[300px] h-[250px] bg-teal-400/10 rounded-full blur-[90px]" />
       </div>
 
-      {/* 3D Floating Isometric SVG Stack */}
-      <motion.div
-        style={{
-          rotateX,
-          rotateY,
-          transformStyle: "preserve-3d",
-        }}
-        animate={{
-          y: isHovered ? [0, -6, 0] : [0, -12, 0],
-        }}
-        transition={{
-          repeat: Infinity,
-          duration: 6,
-          ease: "easeInOut",
-        }}
-        className="relative w-full max-w-2xl aspect-[4/3] sm:aspect-[16/11] flex items-center justify-center"
-      >
+      {/* Static Isometric SVG Stack */}
+      <div className="relative w-full max-w-2xl aspect-[4/3] sm:aspect-[16/11] flex items-center justify-center">
         <svg
           viewBox="0 0 600 480"
           className="w-full h-full overflow-visible drop-shadow-[0_20px_40px_rgba(0,0,0,0.6)]"
@@ -144,12 +99,7 @@ export function LayeredHealthPicture() {
           {/* ======================================================== */}
           {/* LAYER 4 (BOTTOM): Coordinate Grid & Base Baseline        */}
           {/* ======================================================== */}
-          <motion.g
-            animate={{
-              y: isHovered ? [0, 4, 0] : [0, 2, 0],
-            }}
-            transition={{ repeat: Infinity, duration: 5, ease: "easeInOut", delay: 0.6 }}
-          >
+          <g>
             <path
               d={renderPlanePath(300, 350, 360, 175, 20)}
               fill="url(#glassBase)"
@@ -167,17 +117,12 @@ export function LayeredHealthPicture() {
             <circle cx="300" cy="350" r="2" fill="#34d399" opacity="0.6" />
             <circle cx="250" cy="325" r="1.5" fill="#a7f3d0" opacity="0.4" />
             <circle cx="350" cy="375" r="1.5" fill="#a7f3d0" opacity="0.4" />
-          </motion.g>
+          </g>
 
           {/* ======================================================== */}
           {/* LAYER 3 (MID-LOWER): Topographical Biometric Contours     */}
           {/* ======================================================== */}
-          <motion.g
-            animate={{
-              y: isHovered ? [0, 2, 0] : [0, 1, 0],
-            }}
-            transition={{ repeat: Infinity, duration: 5, ease: "easeInOut", delay: 0.4 }}
-          >
+          <g>
             <path
               d={renderPlanePath(300, 270, 360, 175, 20)}
               fill="url(#glassMid2)"
@@ -191,17 +136,12 @@ export function LayeredHealthPicture() {
               <path d="M 240 260 Q 280 245, 300 270 T 360 280" opacity="0.5" />
             </g>
             <circle cx="300" cy="270" r="2.5" fill="#38bdf8" opacity="0.8" filter="url(#glow)" />
-          </motion.g>
+          </g>
 
           {/* ======================================================== */}
           {/* LAYER 2 (MID-UPPER): Geometric Constellation Filaments   */}
           {/* ======================================================== */}
-          <motion.g
-            animate={{
-              y: isHovered ? [0, -2, 0] : [0, -1, 0],
-            }}
-            transition={{ repeat: Infinity, duration: 5, ease: "easeInOut", delay: 0.2 }}
-          >
+          <g>
             <path
               d={renderPlanePath(300, 190, 360, 175, 20)}
               fill="url(#glassMid1)"
@@ -222,17 +162,12 @@ export function LayeredHealthPicture() {
             <circle cx="270" cy="215" r="2" fill="#a7f3d0" />
             <circle cx="330" cy="225" r="2.5" fill="#2dd4bf" />
             <circle cx="300" cy="190" r="3.5" fill="#ffffff" filter="url(#glow)" />
-          </motion.g>
+          </g>
 
           {/* ======================================================== */}
           {/* LAYER 1 (TOP): Discrete Micro-Nodes & Habit Points       */}
           {/* ======================================================== */}
-          <motion.g
-            animate={{
-              y: isHovered ? [0, -5, 0] : [0, -3, 0],
-            }}
-            transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
-          >
+          <g>
             <path
               d={renderPlanePath(300, 110, 360, 175, 20)}
               fill="url(#glassTop)"
@@ -262,9 +197,9 @@ export function LayeredHealthPicture() {
             {/* Central Emergent Synthesis Node */}
             <circle cx="300" cy="110" r="5" fill="#ffffff" filter="url(#glow)" />
             <circle cx="300" cy="110" r="9" fill="none" stroke="#34d399" strokeWidth="1" strokeDasharray="2 4" />
-          </motion.g>
+          </g>
         </svg>
-      </motion.div>
+      </div>
     </div>
   );
 }
