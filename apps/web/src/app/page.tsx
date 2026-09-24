@@ -9,7 +9,9 @@ import { LayeredHealthPicture } from "@/components/LayeredHealthPicture";
 import { motion, useScroll, useTransform } from "motion/react";
 import { 
   IconHeartbeat,
-  IconArrowRight
+  IconArrowRight,
+  IconBrain,
+  IconCertificate
 } from "@tabler/icons-react";
 
 // Fluid Apple HIG motion curves
@@ -229,6 +231,63 @@ export default function LandingPage() {
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-brand-900 leading-tight">
                 Kenapa harus HELIORA?
               </h2>
+            </div>
+
+            {/* 2 Side-by-Side Columns */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 lg:gap-10 mt-12 sm:mt-16 max-w-5xl mx-auto">
+              {/* Column 1: Berbasis AI */}
+              <div className="bg-brand-50/40 rounded-[2rem] p-8 sm:p-10 border border-brand-900/10 shadow-xs flex flex-col justify-between space-y-6 hover:shadow-md transition-all">
+                <div className="space-y-4">
+                  <div className="w-12 h-12 rounded-2xl bg-white shadow-xs border border-brand-900/10 flex items-center justify-center text-emerald-800">
+                    <IconBrain size={24} stroke={1.75} />
+                  </div>
+                  <h3 className="text-2xl sm:text-3xl font-bold text-brand-900 tracking-tight">
+                    Berbasis AI
+                  </h3>
+                  <p className="text-sm sm:text-base text-brand-900/70 leading-relaxed font-normal">
+                    Mengolah keterkaitan kompleks antara pola tidur, aktivitas harian, dan biomarker tubuh untuk memetakan dinamika kesehatan secara menyeluruh dan memproyeksikan arah perubahan ke depan.
+                  </p>
+                </div>
+
+                <div className="pt-4 border-t border-brand-900/5 flex flex-wrap gap-2">
+                  <span className="text-xs px-3 py-1.5 rounded-full bg-white/80 border border-brand-900/10 text-brand-900/80 font-medium">
+                    Analisis Pola Multimodal
+                  </span>
+                  <span className="text-xs px-3 py-1.5 rounded-full bg-white/80 border border-brand-900/10 text-brand-900/80 font-medium">
+                    Simulasi Skenario Kebiasaan
+                  </span>
+                  <span className="text-xs px-3 py-1.5 rounded-full bg-white/80 border border-brand-900/10 text-brand-900/80 font-medium">
+                    Insight yang Dipersonalisasi
+                  </span>
+                </div>
+              </div>
+
+              {/* Column 2: Bukti ilmiah */}
+              <div className="bg-brand-50/40 rounded-[2rem] p-8 sm:p-10 border border-brand-900/10 shadow-xs flex flex-col justify-between space-y-6 hover:shadow-md transition-all">
+                <div className="space-y-4">
+                  <div className="w-12 h-12 rounded-2xl bg-white shadow-xs border border-brand-900/10 flex items-center justify-center text-teal-800">
+                    <IconCertificate size={24} stroke={1.75} />
+                  </div>
+                  <h3 className="text-2xl sm:text-3xl font-bold text-brand-900 tracking-tight">
+                    Bukti ilmiah
+                  </h3>
+                  <p className="text-sm sm:text-base text-brand-900/70 leading-relaxed font-normal">
+                    Setiap pemodelan kalkulasi dan rekomendasi berlandaskan pada konsensus klinis terkemuka dan riset epidemiologi terverifikasi yang transparan dan dapat dipertanggungjawabkan.
+                  </p>
+                </div>
+
+                <div className="pt-4 border-t border-brand-900/5 flex flex-wrap gap-2">
+                  <span className="text-xs px-3 py-1.5 rounded-full bg-white/80 border border-brand-900/10 text-brand-900/80 font-medium">
+                    Rujukan CDC BRFSS & WHO
+                  </span>
+                  <span className="text-xs px-3 py-1.5 rounded-full bg-white/80 border border-brand-900/10 text-brand-900/80 font-medium">
+                    Konsensus Medis Nasional (PERKENI/PERKI)
+                  </span>
+                  <span className="text-xs px-3 py-1.5 rounded-full bg-white/80 border border-brand-900/10 text-brand-900/80 font-medium">
+                    Kalkulasi Risiko Transparan
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </section>
