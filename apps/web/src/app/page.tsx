@@ -23,7 +23,9 @@ import {
   IconDeviceAnalytics,
   IconFileCheck,
   IconShieldCheck,
-  IconLayersSubtract
+  IconLayersSubtract,
+  IconActivity,
+  IconTrendingUp
 } from "@tabler/icons-react";
 
 // Fluid Apple HIG motion curves
@@ -402,96 +404,119 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Feature 1: Multi-Disease Risk Assessment */}
-            <div className="group bg-white border border-brand-900/10 rounded-3xl p-6 sm:p-7 shadow-xs hover:shadow-md hover:border-emerald-800/30 transition-all flex flex-col justify-between">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            {/* Feature 1: Personal Health Profile */}
+            <div className="group bg-white border border-brand-900/10 rounded-3xl p-7 sm:p-8 shadow-xs hover:shadow-md hover:border-emerald-800/30 transition-all flex flex-col justify-between">
               <div>
-                <div className="w-12 h-12 rounded-2xl bg-brand-100/70 border border-brand-900/10 flex items-center justify-center text-emerald-800 mb-5 group-hover:scale-105 group-hover:bg-emerald-800 group-hover:text-white transition-all">
+                <div className="w-12 h-12 rounded-2xl bg-brand-100/70 border border-brand-900/10 flex items-center justify-center text-emerald-800 mb-6 group-hover:scale-105 group-hover:bg-emerald-800 group-hover:text-white transition-all">
                   <IconHeartbeat className="w-6 h-6" stroke={1.75} />
                 </div>
                 <div className="space-y-2">
-                  <span className="text-[11px] font-mono font-bold text-brand-900/40 uppercase tracking-wide">
-                    Skrining Holistik
-                  </span>
-                  <h3 className="text-lg font-bold text-brand-900 tracking-tight">
-                    Multi-Disease Risk Assessment
+                  <h3 className="text-xl font-bold text-brand-900 tracking-tight">
+                    Personal Health Profile
                   </h3>
-                  <p className="text-xs sm:text-sm text-brand-900/65 leading-relaxed">
-                    Evaluasi simultan untuk 4 risiko kardiometabolik utama: Hipertensi, Diabetes Tipe 2, Jantung, dan Stroke dalam satu alur terpadu.
+                  <p className="text-sm font-semibold text-emerald-800">
+                    Know yourself.
+                  </p>
+                  <p className="text-xs sm:text-sm text-brand-900/65 leading-relaxed pt-1">
+                    Pemetaan menyeluruh data biometrik, riwayat klinis, dan ritme sirkadian harian untuk membentuk fondasi profil kesehatan personal Anda.
                   </p>
                 </div>
               </div>
-              <div className="pt-4 mt-5 border-t border-brand-900/5 text-xs text-emerald-800 font-medium">
-                4 Kondisi Kronis · Real-Time
+              <div className="pt-5 mt-6 border-t border-brand-900/5 text-xs text-brand-900/45 font-mono">
+                Biometrik & Riwayat Gaya Hidup
               </div>
             </div>
 
-            {/* Feature 2: What-If Scenario Simulator */}
-            <div className="group bg-white border border-brand-900/10 rounded-3xl p-6 sm:p-7 shadow-xs hover:shadow-md hover:border-emerald-800/30 transition-all flex flex-col justify-between">
+            {/* Feature 2: Health & Risk Insights */}
+            <div className="group bg-white border border-brand-900/10 rounded-3xl p-7 sm:p-8 shadow-xs hover:shadow-md hover:border-emerald-800/30 transition-all flex flex-col justify-between">
               <div>
-                <div className="w-12 h-12 rounded-2xl bg-brand-100/70 border border-brand-900/10 flex items-center justify-center text-emerald-800 mb-5 group-hover:scale-105 group-hover:bg-emerald-800 group-hover:text-white transition-all">
-                  <IconArrowsShuffle className="w-6 h-6" stroke={1.75} />
+                <div className="w-12 h-12 rounded-2xl bg-brand-100/70 border border-brand-900/10 flex items-center justify-center text-emerald-800 mb-6 group-hover:scale-105 group-hover:bg-emerald-800 group-hover:text-white transition-all">
+                  <IconActivity className="w-6 h-6" stroke={1.75} />
                 </div>
                 <div className="space-y-2">
-                  <span className="text-[11px] font-mono font-bold text-brand-900/40 uppercase tracking-wide">
-                    Simulasi Kausal
-                  </span>
-                  <h3 className="text-lg font-bold text-brand-900 tracking-tight">
-                    What-If Scenario Simulator
+                  <h3 className="text-xl font-bold text-brand-900 tracking-tight">
+                    Health & Risk Insights
                   </h3>
-                  <p className="text-xs sm:text-sm text-brand-900/65 leading-relaxed">
-                    Eksplorasi dinamis yang memperlihatkan proyeksi perubahan skor risiko saat mengubah kebiasaan tidur, BMI, aktivitas, atau nutrisi.
+                  <p className="text-sm font-semibold text-emerald-800">
+                    Understand what&apos;s shaping your health.
+                  </p>
+                  <p className="text-xs sm:text-sm text-brand-900/65 leading-relaxed pt-1">
+                    Pemahaman mendalam mengenai pola risiko kardiometabolik dan faktor kebiasaan yang memengaruhi dinamika kesehatan Anda secara berkelanjutan.
                   </p>
                 </div>
               </div>
-              <div className="pt-4 mt-5 border-t border-brand-900/5 text-xs text-emerald-800 font-medium">
-                Intervensi Terukur · Proyeksi Delta
+              <div className="pt-5 mt-6 border-t border-brand-900/5 text-xs text-brand-900/45 font-mono">
+                4 Risiko Kardiometabolik Utama
               </div>
             </div>
 
-            {/* Feature 3: Evidence-Based Action Plans */}
-            <div className="group bg-white border border-brand-900/10 rounded-3xl p-6 sm:p-7 shadow-xs hover:shadow-md hover:border-emerald-800/30 transition-all flex flex-col justify-between">
+            {/* Feature 3: Explainable Intelligence */}
+            <div className="group bg-white border border-brand-900/10 rounded-3xl p-7 sm:p-8 shadow-xs hover:shadow-md hover:border-emerald-800/30 transition-all flex flex-col justify-between">
               <div>
-                <div className="w-12 h-12 rounded-2xl bg-brand-100/70 border border-brand-900/10 flex items-center justify-center text-emerald-800 mb-5 group-hover:scale-105 group-hover:bg-emerald-800 group-hover:text-white transition-all">
-                  <IconFileCheck className="w-6 h-6" stroke={1.75} />
+                <div className="w-12 h-12 rounded-2xl bg-brand-100/70 border border-brand-900/10 flex items-center justify-center text-emerald-800 mb-6 group-hover:scale-105 group-hover:bg-emerald-800 group-hover:text-white transition-all">
+                  <IconBrain className="w-6 h-6" stroke={1.75} />
                 </div>
                 <div className="space-y-2">
-                  <span className="text-[11px] font-mono font-bold text-brand-900/40 uppercase tracking-wide">
-                    Panduan Klinis
-                  </span>
-                  <h3 className="text-lg font-bold text-brand-900 tracking-tight">
-                    Personalized Action Plans
+                  <h3 className="text-xl font-bold text-brand-900 tracking-tight">
+                    Explainable Intelligence
                   </h3>
-                  <p className="text-xs sm:text-sm text-brand-900/65 leading-relaxed">
-                    Rekomendasi tindakan bertingkat yang dipersonalisasi sesuai profil individu dan dirujuk langsung ke konsensus medis terstandar.
+                  <p className="text-sm font-semibold text-emerald-800">
+                    Know why.
+                  </p>
+                  <p className="text-xs sm:text-sm text-brand-900/65 leading-relaxed pt-1">
+                    Transparansi penuh tanpa kotak hitam AI. Dekonstruksi faktor protektif dan pemberat risiko agar Anda mengerti alasan di balik tiap analisis.
                   </p>
                 </div>
               </div>
-              <div className="pt-4 mt-5 border-t border-brand-900/5 text-xs text-emerald-800 font-medium">
-                Tindakan Bertahap · Rekomendasi Valid
+              <div className="pt-5 mt-6 border-t border-brand-900/5 text-xs text-brand-900/45 font-mono">
+                Transparansi & SHAP Attribution
               </div>
             </div>
 
-            {/* Feature 4: Unified Health Canvas */}
-            <div className="group bg-white border border-brand-900/10 rounded-3xl p-6 sm:p-7 shadow-xs hover:shadow-md hover:border-emerald-800/30 transition-all flex flex-col justify-between">
+            {/* Feature 4: Future Health Simulation */}
+            <div className="group bg-white border border-brand-900/10 rounded-3xl p-7 sm:p-8 shadow-xs hover:shadow-md hover:border-emerald-800/30 transition-all flex flex-col justify-between">
               <div>
-                <div className="w-12 h-12 rounded-2xl bg-brand-100/70 border border-brand-900/10 flex items-center justify-center text-emerald-800 mb-5 group-hover:scale-105 group-hover:bg-emerald-800 group-hover:text-white transition-all">
-                  <IconLayersSubtract className="w-6 h-6" stroke={1.75} />
+                <div className="w-12 h-12 rounded-2xl bg-brand-100/70 border border-brand-900/10 flex items-center justify-center text-emerald-800 mb-6 group-hover:scale-105 group-hover:bg-emerald-800 group-hover:text-white transition-all">
+                  <IconTrendingUp className="w-6 h-6" stroke={1.75} />
                 </div>
                 <div className="space-y-2">
-                  <span className="text-[11px] font-mono font-bold text-brand-900/40 uppercase tracking-wide">
-                    Visualisasi Berlapis
-                  </span>
-                  <h3 className="text-lg font-bold text-brand-900 tracking-tight">
-                    Unified Health Canvas
+                  <h3 className="text-xl font-bold text-brand-900 tracking-tight">
+                    Future Health Simulation
                   </h3>
-                  <p className="text-xs sm:text-sm text-brand-900/65 leading-relaxed">
-                    Integrasi seluruh parameter gaya hidup, biomarker metabolik, dan riwayat dalam visualisasi multi-layer yang intuitif.
+                  <p className="text-sm font-semibold text-emerald-800">
+                    See what&apos;s possible.
+                  </p>
+                  <p className="text-xs sm:text-sm text-brand-900/65 leading-relaxed pt-1">
+                    Proyeksi kesehatan jangka panjang untuk melihat lintasan risiko di masa depan berdasarkan tren kebiasaan dan profil biologis Anda hari ini.
                   </p>
                 </div>
               </div>
-              <div className="pt-4 mt-5 border-t border-brand-900/5 text-xs text-emerald-800 font-medium">
-                Living Dashboard · Data Terpadu
+              <div className="pt-5 mt-6 border-t border-brand-900/5 text-xs text-brand-900/45 font-mono">
+                Proyeksi Lintasan Risiko Masa Depan
+              </div>
+            </div>
+
+            {/* Feature 5: What-if Simulation */}
+            <div className="group bg-white border border-brand-900/10 rounded-3xl p-7 sm:p-8 shadow-xs hover:shadow-md hover:border-emerald-800/30 transition-all flex flex-col justify-between md:col-span-2 lg:col-span-1">
+              <div>
+                <div className="w-12 h-12 rounded-2xl bg-brand-100/70 border border-brand-900/10 flex items-center justify-center text-emerald-800 mb-6 group-hover:scale-105 group-hover:bg-emerald-800 group-hover:text-white transition-all">
+                  <IconAdjustmentsHorizontal className="w-6 h-6" stroke={1.75} />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-xl font-bold text-brand-900 tracking-tight">
+                    What-if Simulation
+                  </h3>
+                  <p className="text-sm font-semibold text-emerald-800">
+                    Explore what could change.
+                  </p>
+                  <p className="text-xs sm:text-sm text-brand-900/65 leading-relaxed pt-1">
+                    Eksplorasi interaktif bagaimana modifikasi gaya hidup nyata—seperti durasi tidur, target BMI, atau aktivitas fisik—dapat mengubah skor risiko seketika.
+                  </p>
+                </div>
+              </div>
+              <div className="pt-5 mt-6 border-t border-brand-900/5 text-xs text-brand-900/45 font-mono">
+                Simulasi Kontrafaktual Real-Time
               </div>
             </div>
           </div>
