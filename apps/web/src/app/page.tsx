@@ -212,8 +212,12 @@ export default function LandingPage() {
 
             {/* Editorial Description Text */}
             <div className="mt-10 sm:mt-14 max-w-3xl mx-auto text-center">
-              <p className="text-base sm:text-lg md:text-xl text-emerald-100/75 font-normal leading-relaxed text-balance">
-                Kesehatan bukan sekadar angka. HELIORA membantu Anda memahami apa yang membentuk kesehatan, mengeksplorasi apa yang mungkin, dan melihat bagaimana perubahan kecil dapat membawa arah yang berbeda. Dengan insight yang dipersonalisasi dan didukung evidence ilmiah, Anda dapat menemukan langkah yang lebih tepat untuk diri Anda.
+              <p className="text-base sm:text-lg md:text-xl text-emerald-100/65 font-normal leading-relaxed text-balance">
+                Kesehatan bukan sekadar angka. HELIORA membantu Anda{" "}
+                <span className="text-white">memahami</span> apa yang membentuk kesehatan,{" "}
+                <span className="text-white">mengeksplorasi</span> apa yang mungkin, dan melihat bagaimana{" "}
+                <span className="text-white">perubahan kecil</span> dapat membawa arah yang berbeda. Dengan insight yang dipersonalisasi dan didukung evidence ilmiah, Anda dapat menemukan{" "}
+                <span className="text-white">langkah yang lebih tepat</span> untuk diri Anda.
               </p>
             </div>
           </div>
