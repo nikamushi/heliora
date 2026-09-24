@@ -15,13 +15,13 @@ import {
 
 // Fluid Apple HIG motion curves
 const fadeUpVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 28 },
   visible: (i: number = 0) => ({
     opacity: 1,
     y: 0,
     transition: {
       delay: i * 0.08,
-      duration: 0.6,
+      duration: 0.65,
       ease: [0.21, 0.47, 0.32, 0.98] as const,
     }
   })
@@ -106,7 +106,7 @@ export default function LandingPage() {
               <motion.h2 
                 initial="hidden"
                 whileInView="visible"
-                viewport={{ once: true, amount: 0.3 }}
+                viewport={{ once: true, margin: "0px 0px -150px 0px" }}
                 variants={fadeUpVariants}
                 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-normal tracking-tight text-brand-900 leading-[1.08]"
               >
