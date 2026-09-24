@@ -69,19 +69,17 @@ function NarrativeItem({ block }: { block: { num: string; text: string } }) {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ["start 95%", "center 50%", "end 10%"],
+    offset: ["start 90%", "center 50%", "end 10%"],
   });
 
-  // Active scroll-to-reveal: only visible when scrolled into focal range
+  // Pure clean scroll-linked opacity fade
   const opacity = useTransform(scrollYProgress, [0, 0.35, 0.65, 1], [0, 1, 1, 0]);
-  const y = useTransform(scrollYProgress, [0, 0.35, 0.65, 1], [70, 0, 0, -50]);
-  const scale = useTransform(scrollYProgress, [0, 0.35, 0.65, 1], [0.92, 1, 1, 0.95]);
 
   return (
     <motion.div
       ref={ref}
-      style={{ opacity, y, scale }}
-      className="flex flex-col items-center text-center space-y-6 min-h-[55vh] sm:min-h-[65vh] justify-center px-4"
+      style={{ opacity }}
+      className="flex flex-col items-center text-center space-y-5 min-h-[50vh] sm:min-h-[60vh] justify-center px-4"
     >
       <span className="text-xs sm:text-sm font-mono font-bold text-emerald-800/70 uppercase tracking-[0.3em]">
         {block.num}
