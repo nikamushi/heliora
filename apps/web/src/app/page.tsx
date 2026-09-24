@@ -37,6 +37,8 @@ const fadeUpVariants = {
 function SectionPatternsPinned() {
   const sectionRef = React.useRef<HTMLElement>(null);
   const pinContainerRef = React.useRef<HTMLDivElement>(null);
+  const heroCopyRef = React.useRef<HTMLDivElement>(null);
+  const bridgeRef = React.useRef<HTMLDivElement>(null);
   const [timeline, setTimeline] = React.useState<gsap.core.Timeline | null>(null);
 
   useGSAP(
@@ -55,6 +57,32 @@ function SectionPatternsPinned() {
         },
       });
 
+      // Hero headline copy fades out gently during scroll
+      if (heroCopyRef.current) {
+        tl.to(
+          heroCopyRef.current,
+          {
+            opacity: 0,
+            ease: "none",
+            duration: 0.5,
+          },
+          0.3
+        );
+      }
+
+      // CTA bridge button fades out gently during scroll
+      if (bridgeRef.current) {
+        tl.to(
+          bridgeRef.current,
+          {
+            opacity: 0,
+            ease: "none",
+            duration: 0.5,
+          },
+          0.3
+        );
+      }
+
       setTimeline(tl);
     },
     { scope: sectionRef }
@@ -70,8 +98,8 @@ function SectionPatternsPinned() {
         ref={pinContainerRef}
         className="h-[100dvh] w-full overflow-hidden flex flex-col justify-between pt-24 md:pt-28 pb-8 px-6 lg:px-12 relative"
       >
-        {/* Top Typographic Header (Clean spacing below navbar) */}
-        <div className="container mx-auto max-w-6xl w-full z-20 pointer-events-none mb-3 md:mb-5">
+        {/* Top Typographic Header (Clean spacing below navbar, fades out on transition to focal state) */}
+        <div ref={heroCopyRef} className="container mx-auto max-w-6xl w-full z-20 pointer-events-none mb-3 md:mb-5">
           <div className="max-w-4xl pointer-events-auto">
             <motion.h2 
               custom={1}
@@ -99,8 +127,8 @@ function SectionPatternsPinned() {
           <BilateralPatternFlow timeline={timeline} />
         </div>
 
-        {/* Editorial Conceptual Forward Bridge */}
-        <div className="container mx-auto max-w-6xl w-full flex justify-center z-20 pointer-events-none mt-3 md:mt-5">
+        {/* Editorial Conceptual Forward Bridge (Fades out on transition to focal state) */}
+        <div ref={bridgeRef} className="container mx-auto max-w-6xl w-full flex justify-center z-20 pointer-events-none mt-3 md:mt-5">
           <div className="flex justify-center pointer-events-auto">
             <motion.div
               custom={2}
