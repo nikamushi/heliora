@@ -590,29 +590,7 @@ export function BilateralPatternFlow({ triggerRef }: BilateralPatternFlowProps =
       const focalX = width * 0.5;
       const focalY = height * 0.5 + (-20 / 216) * bHeight;
 
-      // 1. Central Convergence Aura
-      const breathe = Math.sin(timestamp * 0.0018) * 0.5 + 0.5;
-      const haloRadius = 46 + breathe * 22;
-      const auraGrad = context.createRadialGradient(
-        focalX,
-        focalY,
-        0,
-        focalX,
-        focalY,
-        haloRadius
-      );
-      auraGrad.addColorStop(0, "rgba(45, 90, 67, 0.24)");
-      auraGrad.addColorStop(0.45, "rgba(188, 238, 211, 0.14)");
-      auraGrad.addColorStop(1, "rgba(250, 249, 246, 0)");
-
-      context.save();
-      context.fillStyle = auraGrad;
-      context.beginPath();
-      context.arc(focalX, focalY, haloRadius, 0, Math.PI * 2);
-      context.fill();
-      context.restore();
-
-      // 2. Translucent Biological Stream Ribbons
+      // 1. Translucent Biological Stream Ribbons (Bilateral Flow Lines)
       streams.forEach((stream) => {
         const steps = 64;
         const points = [];
@@ -650,21 +628,10 @@ export function BilateralPatternFlow({ triggerRef }: BilateralPatternFlowProps =
         context.lineWidth = stream.width * 2.5;
         context.globalAlpha = 0.14;
         context.stroke();
-
-        // Terminal anchor glow right at the body dot connection point
-        const isWarm =
-          stream.name.includes("vitality") ||
-          stream.name.includes("metabolic") ||
-          stream.name.includes("hemodynamic");
-        const dotColor = isWarm ? "217, 119, 87" : "15, 122, 78";
-        context.fillStyle = `rgba(${dotColor}, 0.5)`;
-        context.beginPath();
-        context.arc(lastPt.x, lastPt.y, 3.5, 0, Math.PI * 2);
-        context.fill();
         context.restore();
       });
 
-      // 3. Biometric Signal Particles
+      // 2. Biometric Signal Particles along Bilateral Streams
       particles.forEach((p) => {
         p.progress += p.speed;
         if (p.progress > 0.99) {
@@ -708,86 +675,6 @@ export function BilateralPatternFlow({ triggerRef }: BilateralPatternFlowProps =
         context.restore();
       });
 
-      // 4. Continuously Revolving Bio-Orbital Rings around the focal core
-      const spinAngle1 = timestamp * 0.0006;
-      const spinAngle2 = -timestamp * 0.001;
-      const spinAngle3 = timestamp * 0.0018;
-
-      // Outer Orbital Ring (Clockwise segmented)
-      context.save();
-      context.translate(focalX, focalY);
-      context.rotate(spinAngle1);
-      context.strokeStyle = "rgba(15, 122, 78, 0.45)";
-      context.lineWidth = 1.2;
-      context.setLineDash([7, 9, 3, 9]);
-      context.beginPath();
-      context.arc(0, 0, 36, 0, Math.PI * 2);
-      context.stroke();
-
-      // Satellite orbiting beacon dots on Ring 1
-      context.fillStyle = "rgba(15, 122, 78, 0.85)";
-      context.beginPath();
-      context.arc(36, 0, 2.5, 0, Math.PI * 2);
-      context.arc(-36, 0, 2.5, 0, Math.PI * 2);
-      context.fill();
-      context.restore();
-
-      // Middle Orbital Ring (Counter-clockwise with terracotta nodes)
-      context.save();
-      context.translate(focalX, focalY);
-      context.rotate(spinAngle2);
-      context.strokeStyle = "rgba(217, 119, 87, 0.55)";
-      context.lineWidth = 1.0;
-      context.setLineDash([5, 7, 2, 7]);
-      context.beginPath();
-      context.arc(0, 0, 23, 0, Math.PI * 2);
-      context.stroke();
-
-      // Satellite terracotta nodes on Ring 2
-      context.fillStyle = "rgba(217, 119, 87, 0.95)";
-      context.beginPath();
-      context.arc(0, 23, 2.2, 0, Math.PI * 2);
-      context.arc(0, -23, 2.2, 0, Math.PI * 2);
-      context.fill();
-      context.restore();
-
-      // Inner Fast Calibrated Ring
-      context.save();
-      context.translate(focalX, focalY);
-      context.rotate(spinAngle3);
-      context.strokeStyle = "rgba(45, 90, 67, 0.7)";
-      context.lineWidth = 0.9;
-      context.setLineDash([3, 4]);
-      context.beginPath();
-      context.arc(0, 0, 14, 0, Math.PI * 2);
-      context.stroke();
-      context.restore();
-
-      // Expanding Bio-Radar Ripple Pulse
-      const rippleProgress = (timestamp % 2400) / 2400;
-      const rippleRadius = 16 + rippleProgress * 38;
-      const rippleAlpha = (1 - rippleProgress) * 0.35;
-      context.save();
-      context.strokeStyle = `rgba(15, 122, 78, ${rippleAlpha})`;
-      context.lineWidth = 1;
-      context.beginPath();
-      context.arc(focalX, focalY, rippleRadius, 0, Math.PI * 2);
-      context.stroke();
-      context.restore();
-
-      // 5. Pola Kesehatan Center Organic Bio-pulse
-      context.save();
-      const pulseScale = 1 + breathe * 0.22;
-      const coreGrad = context.createRadialGradient(focalX, focalY, 0, focalX, focalY, 38 * pulseScale);
-      coreGrad.addColorStop(0, "rgba(45, 90, 67, 0.22)");
-      coreGrad.addColorStop(0.55, "rgba(15, 122, 78, 0.06)");
-      coreGrad.addColorStop(1, "rgba(45, 90, 67, 0)");
-      context.fillStyle = coreGrad;
-      context.beginPath();
-      context.arc(focalX, focalY, 38 * pulseScale, 0, Math.PI * 2);
-      context.fill();
-      context.restore();
-
       animationFrameId = requestAnimationFrame(render);
     }
 
@@ -804,24 +691,9 @@ export function BilateralPatternFlow({ triggerRef }: BilateralPatternFlowProps =
   return (
     <div
       ref={cameraViewportRef}
-      className="relative w-full h-full z-10 cursor-crosshair flex items-center justify-center overflow-hidden"
+      className="relative w-full h-full z-10 flex items-center justify-center overflow-hidden"
     >
-      {/* Debug Acceptance Crosshair (Verifies the Red Dot stays locked at dotAnchor) */}
-      {process.env.NODE_ENV === "development" && dotAnchor.x > 0 && (
-        <div
-          style={{
-            left: `${dotAnchor.x}px`,
-            top: `${dotAnchor.y}px`,
-          }}
-          className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none z-50 flex items-center justify-center opacity-80"
-        >
-          <div className="w-8 h-[1px] bg-red-500/80 absolute" />
-          <div className="h-8 w-[1px] bg-red-500/80 absolute" />
-          <div className="w-4 h-4 rounded-full border border-red-500/80 absolute" />
-        </div>
-      )}
-
-      {/* Unified Composed Visualization Scene: GSAP Camera Zoom into the Central Red Dot */}
+      {/* Unified Composed Visualization Scene: GSAP Camera Zoom into the Central Focal Dot */}
       <div 
         ref={sceneRef}
         className="w-full h-full absolute inset-0 flex items-center justify-center will-change-transform pointer-events-none"
