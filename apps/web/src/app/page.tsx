@@ -98,8 +98,9 @@ function SectionLifestyleNarrative() {
       </span>
     ),
     (
-      <span className="text-brand-900">
-        Satu per satu, semuanya terlihat sederhana. Tetapi jika dilihat bersama, kebiasaan-kebiasaan itu membentuk gambaran yang lebih utuh tentang cara kita menjalani hari.
+      <span className="text-brand-900/80">
+        Satu per satu, semuanya terlihat sederhana. Tetapi jika dilihat bersama, kebiasaan-kebiasaan itu membentuk{" "}
+        <span className="text-brand-900">gambaran yang lebih utuh</span> tentang cara kita menjalani hari.
       </span>
     ),
     (
