@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { BilateralPatternFlow } from "@/components/BilateralPatternFlow";
-import { motion } from "motion/react";
+import { motion, useScroll, useTransform, type MotionValue } from "motion/react";
 import { 
   IconHeartbeat,
   IconArrowRight,
@@ -26,6 +26,86 @@ const fadeUpVariants = {
     }
   })
 };
+
+function ScrollRevealWord({
+  children,
+  progress,
+  range,
+}: {
+  children: React.ReactNode;
+  progress: MotionValue<number>;
+  range: [number, number];
+}) {
+  const opacity = useTransform(progress, range, [0.15, 1]);
+  const y = useTransform(progress, range, [10, 0]);
+  const filter = useTransform(progress, range, ["blur(3px)", "blur(0px)"]);
+
+  return (
+    <motion.span
+      style={{ opacity, y, filter }}
+      className="inline-block mr-[0.25em] will-change-transform will-change-[opacity,filter]"
+    >
+      {children}
+    </motion.span>
+  );
+}
+
+function ScrollRevealHeadline({
+  line1,
+  line2,
+}: {
+  line1: string;
+  line2: string;
+}) {
+  const containerRef = React.useRef<HTMLHeadingElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start 88%", "start 42%"],
+  });
+
+  const words1 = line1.split(" ");
+  const words2 = line2.split(" ");
+  const total = words1.length + words2.length;
+
+  return (
+    <h2
+      ref={containerRef}
+      className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-normal tracking-tight text-brand-900 leading-[1.12]"
+    >
+      <span className="block">
+        {words1.map((word, i) => {
+          const start = i / total;
+          const end = (i + 1) / total;
+          return (
+            <ScrollRevealWord
+              key={`w1-${i}`}
+              progress={scrollYProgress}
+              range={[start, end]}
+            >
+              {word}
+            </ScrollRevealWord>
+          );
+        })}
+      </span>
+      <span className="block mt-1 sm:mt-2 italic font-light text-brand-900/90">
+        {words2.map((word, i) => {
+          const globalIdx = words1.length + i;
+          const start = globalIdx / total;
+          const end = (globalIdx + 1) / total;
+          return (
+            <ScrollRevealWord
+              key={`w2-${i}`}
+              progress={scrollYProgress}
+              range={[start, end]}
+            >
+              {word}
+            </ScrollRevealWord>
+          );
+        })}
+      </span>
+    </h2>
+  );
+}
 
 export default function LandingPage() {
   return (
@@ -101,12 +181,12 @@ export default function LandingPage() {
         {/* SECTION 01 (STITCH SECTION 2: FINAL - BILATERAL CONVERGENCE): KESEHATAN BUKAN SEKADAR ANGKA */}
         <section id="patterns" className="relative w-full overflow-hidden py-20 md:py-32 border-t border-brand-900/5 scroll-mt-20">
           <div className="container mx-auto px-6 lg:px-12 max-w-6xl">
-            {/* Typographic Header: Editorial Hierarchy */}
+            {/* Typographic Header: Editorial Hierarchy with Scroll to Reveal Animation */}
             <div className="max-w-4xl mb-12 md:mb-16">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-normal tracking-tight text-brand-900 leading-[1.08]">
-                Setiap hari, kita melakukan <br className="hidden sm:inline" />
-                <span className="italic font-light text-brand-900/80">lebih dari yang kita sadari.</span>
-              </h2>
+              <ScrollRevealHeadline 
+                line1="Setiap hari, kita melakukan" 
+                line2="lebih dari yang kita sadari." 
+              />
             </div>
 
             {/* BiologicalPatternFlow Component: Bilateral Convergence to Exact Center */}
