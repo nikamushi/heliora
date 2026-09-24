@@ -191,14 +191,14 @@ export default function LandingPage() {
         {/* SECTION 02: NARASI POLA HIDUP & EKSPLORASI RISIKO */}
         <SectionLifestyleNarrative />
 
-        {/* SECTION 04: HELIORA - PAHAMI KESEHATAN ANDA (#how-it-works) */}
+        {/* SECTION 04: AI UNTUK KESEHATAN - HELIORA (#how-it-works) */}
         <section id="how-it-works" className="container mx-auto px-6 lg:px-12 py-16 scroll-mt-24">
           <div className="mb-12 max-w-3xl space-y-2">
             <span className="text-xs font-semibold uppercase tracking-[0.28em] text-brand-900/60 block">
-              HELIORA
+              AI UNTUK KESEHATAN
             </span>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-brand-900 leading-tight">
-              Pahami kesehatan Anda hari ini dan bagaimana ia berubah.
+              HELIORA
             </h2>
             <p className="text-base sm:text-lg text-brand-900/60 mt-2 font-normal">
               Tiga tahap mengolah data kesehatan Anda secara terarah.
