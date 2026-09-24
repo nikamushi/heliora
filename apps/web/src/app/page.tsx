@@ -537,99 +537,99 @@ export default function LandingPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Tech 1: Calibrated ML Ensembles */}
+            {/* Tech 1: AI & Machine Learning */}
             <div className="group bg-white border border-brand-900/10 rounded-3xl p-6 sm:p-7 shadow-xs hover:shadow-md hover:border-emerald-800/30 transition-all flex flex-col justify-between">
               <div>
                 <div className="w-12 h-12 rounded-2xl bg-brand-100/70 border border-brand-900/10 flex items-center justify-center text-emerald-800 mb-5 group-hover:scale-105 group-hover:bg-emerald-800 group-hover:text-white transition-all">
                   <IconCpu className="w-6 h-6" stroke={1.75} />
                 </div>
                 <div className="space-y-2">
-                  <span className="text-[11px] font-mono font-bold text-brand-900/40 uppercase tracking-wide">
-                    Machine Learning
-                  </span>
                   <h3 className="text-lg font-bold text-brand-900 tracking-tight">
-                    Calibrated ML Ensembles
+                    AI & Machine Learning
                   </h3>
-                  <p className="text-xs sm:text-sm text-brand-900/65 leading-relaxed">
-                    Model gradient boosting (CatBoost & LightGBM) terkalibrasi untuk menghasilkan probabilitas risiko yang objektif dan akurat.
+                  <p className="text-xs sm:text-sm font-semibold text-emerald-800">
+                    Intelligence behind every estimate.
+                  </p>
+                  <p className="text-xs sm:text-sm text-brand-900/65 leading-relaxed pt-1">
+                    Model ensemble prediktif yang dilatih dan dikalibrasi untuk menghitung estimasi probabilitas risiko kardiometabolik secara objektif dan presisi.
                   </p>
                 </div>
               </div>
               <div className="pt-4 mt-5 border-t border-brand-900/5 flex items-center justify-between text-xs text-brand-900/50 font-mono">
-                <span>CatBoost & LightGBM</span>
+                <span>Ensemble Models</span>
                 <span className="text-emerald-800 font-semibold">Calibrated</span>
               </div>
             </div>
 
-            {/* Tech 2: Explainable AI & SHAP */}
+            {/* Tech 2: Explainable AI */}
             <div className="group bg-white border border-brand-900/10 rounded-3xl p-6 sm:p-7 shadow-xs hover:shadow-md hover:border-emerald-800/30 transition-all flex flex-col justify-between">
               <div>
                 <div className="w-12 h-12 rounded-2xl bg-brand-100/70 border border-brand-900/10 flex items-center justify-center text-emerald-800 mb-5 group-hover:scale-105 group-hover:bg-emerald-800 group-hover:text-white transition-all">
                   <IconDeviceAnalytics className="w-6 h-6" stroke={1.75} />
                 </div>
                 <div className="space-y-2">
-                  <span className="text-[11px] font-mono font-bold text-brand-900/40 uppercase tracking-wide">
-                    Explainability
-                  </span>
                   <h3 className="text-lg font-bold text-brand-900 tracking-tight">
-                    SHAP Factor Attribution
+                    Explainable AI
                   </h3>
-                  <p className="text-xs sm:text-sm text-brand-900/65 leading-relaxed">
-                    Dekonstruksi nilai Shapley (SHAP) untuk transparansi penuh mengenai faktor protektif dan pemicu risiko tanpa kotak hitam AI.
+                  <p className="text-xs sm:text-sm font-semibold text-emerald-800">
+                    Nothing important should feel like a black box.
+                  </p>
+                  <p className="text-xs sm:text-sm text-brand-900/65 leading-relaxed pt-1">
+                    Dekonstruksi faktor risiko berbasis nilai atribusi SHAP, membuka logika model sehingga Anda memahami setiap variabel yang memengaruhi hasil.
                   </p>
                 </div>
               </div>
               <div className="pt-4 mt-5 border-t border-brand-900/5 flex items-center justify-between text-xs text-brand-900/50 font-mono">
-                <span>SHAP Values</span>
+                <span>SHAP Attribution</span>
                 <span className="text-emerald-800 font-semibold">Zero Black-Box</span>
               </div>
             </div>
 
-            {/* Tech 3: Clinical Protocol Integration */}
+            {/* Tech 3: Simulation Engine */}
+            <div className="group bg-white border border-brand-900/10 rounded-3xl p-6 sm:p-7 shadow-xs hover:shadow-md hover:border-emerald-800/30 transition-all flex flex-col justify-between">
+              <div>
+                <div className="w-12 h-12 rounded-2xl bg-brand-100/70 border border-brand-900/10 flex items-center justify-center text-emerald-800 mb-5 group-hover:scale-105 group-hover:bg-emerald-800 group-hover:text-white transition-all">
+                  <IconArrowsShuffle className="w-6 h-6" stroke={1.75} />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-lg font-bold text-brand-900 tracking-tight">
+                    Simulation Engine
+                  </h3>
+                  <p className="text-xs sm:text-sm font-semibold text-emerald-800">
+                    Explore possible outcomes through model-based scenarios.
+                  </p>
+                  <p className="text-xs sm:text-sm text-brand-900/65 leading-relaxed pt-1">
+                    Mesin simulasi kontrafaktual yang memetakan dampak proyeksi intervensi gaya hidup harian terhadap dinamika risiko secara interaktif.
+                  </p>
+                </div>
+              </div>
+              <div className="pt-4 mt-5 border-t border-brand-900/5 flex items-center justify-between text-xs text-brand-900/50 font-mono">
+                <span>Scenario Engine</span>
+                <span className="text-emerald-800 font-semibold">Dynamic Delta</span>
+              </div>
+            </div>
+
+            {/* Tech 4: Evidence & RAG */}
             <div className="group bg-white border border-brand-900/10 rounded-3xl p-6 sm:p-7 shadow-xs hover:shadow-md hover:border-emerald-800/30 transition-all flex flex-col justify-between">
               <div>
                 <div className="w-12 h-12 rounded-2xl bg-brand-100/70 border border-brand-900/10 flex items-center justify-center text-emerald-800 mb-5 group-hover:scale-105 group-hover:bg-emerald-800 group-hover:text-white transition-all">
                   <IconCertificate className="w-6 h-6" stroke={1.75} />
                 </div>
                 <div className="space-y-2">
-                  <span className="text-[11px] font-mono font-bold text-brand-900/40 uppercase tracking-wide">
-                    Evidence Engine
-                  </span>
                   <h3 className="text-lg font-bold text-brand-900 tracking-tight">
-                    Clinical Protocol Engine
+                    Evidence &amp; RAG
                   </h3>
-                  <p className="text-xs sm:text-sm text-brand-900/65 leading-relaxed">
-                    Pemetaan otomatis ke panduan klinis global & nasional (CDC BRFSS, WHO, PERKENI, PERKI) untuk validitas rekomendasi medis.
+                  <p className="text-xs sm:text-sm font-semibold text-emerald-800">
+                    Ground insights in scientific evidence.
+                  </p>
+                  <p className="text-xs sm:text-sm text-brand-900/65 leading-relaxed pt-1">
+                    Integrasi basis pengetahuan klinis dan Retrieval-Augmented Generation untuk menyelaraskan setiap insight dengan pedoman ilmiah (CDC, WHO, PERKENI/PERKI).
                   </p>
                 </div>
               </div>
               <div className="pt-4 mt-5 border-t border-brand-900/5 flex items-center justify-between text-xs text-brand-900/50 font-mono">
-                <span>CDC, WHO & PERKENI</span>
-                <span className="text-emerald-800 font-semibold">Verified</span>
-              </div>
-            </div>
-
-            {/* Tech 4: Zero-Knowledge Privacy */}
-            <div className="group bg-white border border-brand-900/10 rounded-3xl p-6 sm:p-7 shadow-xs hover:shadow-md hover:border-emerald-800/30 transition-all flex flex-col justify-between">
-              <div>
-                <div className="w-12 h-12 rounded-2xl bg-brand-100/70 border border-brand-900/10 flex items-center justify-center text-emerald-800 mb-5 group-hover:scale-105 group-hover:bg-emerald-800 group-hover:text-white transition-all">
-                  <IconShieldCheck className="w-6 h-6" stroke={1.75} />
-                </div>
-                <div className="space-y-2">
-                  <span className="text-[11px] font-mono font-bold text-brand-900/40 uppercase tracking-wide">
-                    Data Sovereignty
-                  </span>
-                  <h3 className="text-lg font-bold text-brand-900 tracking-tight">
-                    Zero-Knowledge Privacy
-                  </h3>
-                  <p className="text-xs sm:text-sm text-brand-900/65 leading-relaxed">
-                    Enkripsi data berlapis saat disimpan dan dikirim, kontrol penuh atas penghapusan riwayat, dan zero tracking komersial.
-                  </p>
-                </div>
-              </div>
-              <div className="pt-4 mt-5 border-t border-brand-900/5 flex items-center justify-between text-xs text-brand-900/50 font-mono">
-                <span>AES-256 Encryption</span>
-                <span className="text-emerald-800 font-semibold">100% Private</span>
+                <span>CDC, WHO &amp; PERKENI</span>
+                <span className="text-emerald-800 font-semibold">Scientific RAG</span>
               </div>
             </div>
           </div>
