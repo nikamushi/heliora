@@ -79,9 +79,9 @@ function NarrativeItem({ content }: { content: React.ReactNode }) {
     <motion.div
       ref={ref}
       style={{ opacity }}
-      className="flex flex-col items-center text-center min-h-[38vh] sm:min-h-[48vh] justify-center px-4"
+      className="flex flex-col items-center text-center min-h-[40vh] sm:min-h-[50vh] justify-center px-4"
     >
-      <p className="text-2xl sm:text-3xl md:text-4xl font-normal tracking-tight leading-snug sm:leading-[1.4] text-balance max-w-3xl">
+      <p className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-normal tracking-tight leading-snug sm:leading-[1.35] text-balance max-w-3xl">
         {content}
       </p>
     </motion.div>
