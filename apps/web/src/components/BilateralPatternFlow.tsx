@@ -38,106 +38,24 @@ interface BilateralPatternFlowProps {
 
 export function BilateralPatternFlow({ timeline }: BilateralPatternFlowProps = {}) {
   const cameraViewportRef = useRef<HTMLDivElement>(null);
-  const sceneRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
-  const bodyGlowRef = useRef<HTMLDivElement>(null);
   const focalDotRef = useRef<SVGGElement>(null);
-  const bodyMeshRef = useRef<SVGGElement>(null);
-  const macroDetailRef = useRef<SVGGElement>(null);
 
   useEffect(() => {
-    if (!timeline || !sceneRef.current || !focalDotRef.current) return;
+    if (!timeline || !focalDotRef.current) return;
 
-    const dotElem = focalDotRef.current;
-    const sceneElem = sceneRef.current;
-
-    const updateTransformOrigin = () => {
-      const dotRect = dotElem.getBoundingClientRect();
-      const sceneRect = sceneElem.getBoundingClientRect();
-
-      // Exact scene-local coordinates of the red dot (not viewport coordinates)
-      const dotLocalX = dotRect.left + dotRect.width / 2 - sceneRect.left;
-      const dotLocalY = dotRect.top + dotRect.height / 2 - sceneRect.top;
-
-      if (dotLocalX > 0 && dotLocalY > 0) {
-        gsap.set(sceneElem, {
-          transformOrigin: `${dotLocalX}px ${dotLocalY}px`,
-          force3D: true,
-        });
-      }
-    };
-
-    updateTransformOrigin();
-
-    // 1. Camera zooms straight into the central red dot (pinned stationary in screen space)
+    // Scale ONLY the central red dot as the user scrolls (all other elements remain static)
     timeline.to(
-      sceneElem,
+      focalDotRef.current,
       {
-        scale: 6.8,
+        scale: 6.5,
+        transformOrigin: "center center",
         ease: "none",
         duration: 1,
       },
       0
     );
-
-    // 2. Fade out bilateral flowing lines (canvas) smoothly during zoom approach
-    if (canvasRef.current) {
-      timeline.to(
-        canvasRef.current,
-        {
-          opacity: 0,
-          ease: "power1.inOut",
-          duration: 0.35,
-        },
-        0.05
-      );
-    }
-
-    // 3. Fade out human body contour slices smoothly during zoom approach
-    if (bodyMeshRef.current) {
-      timeline.to(
-        bodyMeshRef.current,
-        {
-          opacity: 0,
-          ease: "power1.inOut",
-          duration: 0.35,
-        },
-        0.05
-      );
-    }
-
-    // 4. Fade out body background ambient glow
-    if (bodyGlowRef.current) {
-      timeline.to(
-        bodyGlowRef.current,
-        {
-          opacity: 0,
-          ease: "power1.inOut",
-          duration: 0.35,
-        },
-        0.05
-      );
-    }
-
-    // 5. Reveal high-resolution macro telemetry rings around the central red dot
-    if (macroDetailRef.current) {
-      timeline.fromTo(
-        macroDetailRef.current,
-        { opacity: 0 },
-        {
-          opacity: 1,
-          ease: "power1.inOut",
-          duration: 0.4,
-        },
-        0.2
-      );
-    }
-
-    ScrollTrigger.addEventListener("refresh", updateTransformOrigin);
-    return () => {
-      ScrollTrigger.removeEventListener("refresh", updateTransformOrigin);
-    };
   }, [timeline]);
 
   useEffect(() => {
@@ -691,11 +609,8 @@ export function BilateralPatternFlow({ timeline }: BilateralPatternFlowProps = {
       ref={cameraViewportRef}
       className="relative w-full h-full z-10 flex items-center justify-center overflow-hidden"
     >
-      {/* Unified Composed Visualization Scene: GSAP Camera Zoom into the Central Focal Dot */}
-      <div 
-        ref={sceneRef}
-        className="w-full h-full absolute inset-0 flex items-center justify-center will-change-transform pointer-events-none"
-      >
+      {/* Visualization Scene (Static composition) */}
+      <div className="w-full h-full absolute inset-0 flex items-center justify-center pointer-events-none">
         <canvas 
           ref={canvasRef} 
           className="w-full h-full block absolute inset-0 pointer-events-none" 
@@ -707,10 +622,7 @@ export function BilateralPatternFlow({ timeline }: BilateralPatternFlowProps = {
           className="relative w-32 h-56 sm:w-36 sm:h-64 md:w-40 md:h-72 flex items-center justify-center pointer-events-none select-none"
         >
           {/* Subtle Ambient Radial Glow behind the body */}
-          <div 
-            ref={bodyGlowRef}
-            className="absolute inset-0 bg-gradient-to-b from-emerald-400/20 via-emerald-600/25 to-transparent rounded-full blur-3xl -z-10" 
-          />
+          <div className="absolute inset-0 bg-gradient-to-b from-emerald-400/20 via-emerald-600/25 to-transparent rounded-full blur-3xl -z-10" />
 
           {/* Topographic Bio-Wave Mesh Human Figure */}
           <svg
@@ -741,8 +653,8 @@ export function BilateralPatternFlow({ timeline }: BilateralPatternFlowProps = {
               </radialGradient>
             </defs>
 
-            {/* Fading Outer Body Mesh Silhouette on Zoom */}
-            <g ref={bodyMeshRef}>
+            {/* Outer Body Mesh Silhouette */}
+            <g>
               {/* Subtle Outer Human Silhouette Contour Reference */}
               <path
                 d="M 0 -96
@@ -860,35 +772,14 @@ export function BilateralPatternFlow({ timeline }: BilateralPatternFlowProps = {
               </g>
             </g>
 
-            {/* Central Focal Core: Pinned Red Dot (PRIMARY CAMERA TARGET) */}
+            {/* Central Focal Core: Pinned Red Dot */}
             <g transform="translate(0, -20)">
-              {/* Macro High-Detail Telemetry Rings (revealed as you zoom in) */}
-              <g ref={macroDetailRef} style={{ opacity: 0 }}>
-                {/* Outermost Telemetry Ring */}
-                <circle
-                  cx="0"
-                  cy="0"
-                  r="30"
-                  stroke="#D97757"
-                  strokeWidth="0.5"
-                  strokeDasharray="1 3"
-                  strokeOpacity="0.5"
-                  fill="none"
-                />
-                <circle
-                  cx="0"
-                  cy="0"
-                  r="22"
-                  stroke="#C53030"
-                  strokeWidth="0.6"
-                  strokeDasharray="2 4"
-                  strokeOpacity="0.5"
-                  fill="none"
-                />
-              </g>
-
-              {/* Solid Core Vivid Red Focal Dot */}
-              <g id="central-red-dot" ref={focalDotRef}>
+              {/* Solid Core Vivid Red Focal Dot (Scales cleanly on scroll from its own center) */}
+              <g 
+                id="central-red-dot" 
+                ref={focalDotRef}
+                style={{ transformBox: "fill-box", transformOrigin: "center" }}
+              >
                 <circle cx="0" cy="0" r="8" fill="#D97757" fillOpacity="0.25" />
                 <circle cx="0" cy="0" r="5" fill="#D97757" fillOpacity="0.5" />
                 <circle cx="0" cy="0" r="4.2" fill="#D97757" />
