@@ -1,11 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { useRef } from "react";
 import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { BilateralPatternFlow } from "@/components/BilateralPatternFlow";
-import { motion } from "motion/react";
+import { motion, useScroll, useTransform } from "motion/react";
 import { 
   IconHeartbeat,
   IconArrowRight,
@@ -65,6 +65,34 @@ function SectionPatterns() {
   );
 }
 
+function NarrativeItem({ block }: { block: { num: string; text: string } }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start 95%", "center 50%", "end 10%"],
+  });
+
+  // Active scroll-to-reveal: only visible when scrolled into focal range
+  const opacity = useTransform(scrollYProgress, [0, 0.35, 0.65, 1], [0, 1, 1, 0]);
+  const y = useTransform(scrollYProgress, [0, 0.35, 0.65, 1], [70, 0, 0, -50]);
+  const scale = useTransform(scrollYProgress, [0, 0.35, 0.65, 1], [0.92, 1, 1, 0.95]);
+
+  return (
+    <motion.div
+      ref={ref}
+      style={{ opacity, y, scale }}
+      className="flex flex-col items-center text-center space-y-6 min-h-[55vh] sm:min-h-[65vh] justify-center px-4"
+    >
+      <span className="text-xs sm:text-sm font-mono font-bold text-emerald-800/70 uppercase tracking-[0.3em]">
+        {block.num}
+      </span>
+      <p className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-brand-900 font-normal tracking-tight leading-snug sm:leading-[1.35] text-balance max-w-3xl">
+        {block.text}
+      </p>
+    </motion.div>
+  );
+}
+
 function SectionLifestyleNarrative() {
   const narrativeBlocks = [
     {
@@ -88,25 +116,11 @@ function SectionLifestyleNarrative() {
   return (
     <section 
       id="narrative" 
-      className="container mx-auto px-6 lg:px-12 py-24 sm:py-36 md:py-44 scroll-mt-24"
+      className="container mx-auto px-6 lg:px-12 py-16 sm:py-24 scroll-mt-24"
     >
-      <div className="max-w-3xl mx-auto flex flex-col items-center space-y-28 sm:space-y-36 md:space-y-44">
+      <div className="max-w-4xl mx-auto flex flex-col items-center">
         {narrativeBlocks.map((block, idx) => (
-          <motion.div
-            key={idx}
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.35, margin: "-40px" }}
-            transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
-            className="flex flex-col items-center text-center space-y-5"
-          >
-            <span className="text-xs font-mono font-semibold text-emerald-800/60 uppercase tracking-[0.3em]">
-              {block.num}
-            </span>
-            <p className="text-2xl sm:text-3xl md:text-4xl text-brand-900 font-normal tracking-tight leading-snug sm:leading-[1.4] text-balance">
-              {block.text}
-            </p>
-          </motion.div>
+          <NarrativeItem key={idx} block={block} />
         ))}
       </div>
     </section>
