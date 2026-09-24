@@ -37,14 +37,8 @@ export function BilateralPatternFlow({ progress }: BilateralPatternFlowProps = {
   const bodyRef = useRef<HTMLDivElement>(null);
   const focalDotRef = useRef<SVGGElement>(null);
 
-  const [metrics, setMetrics] = React.useState({
-    targetX: 0,
-    targetY: 0,
-    anchorX: 0,
-    anchorY: 0,
-    width: 0,
-    height: 0,
-  });
+  // Immutable Initial Red Dot Screen-Space Anchor
+  const [initialDot, setInitialDot] = React.useState({ x: 0, y: 0 });
 
   const internalScroll = useScroll({
     target: cameraViewportRef,
@@ -60,20 +54,21 @@ export function BilateralPatternFlow({ progress }: BilateralPatternFlowProps = {
     [1.0, 1.45, 3.2, 5.5, 6.8]
   );
   
-  // Dual-translation affine transform: translate(anchor) * scale(s) * translate(-target)
-  // In CSS with transformOrigin: "0 0":
-  // x' = anchorX - s * targetX + s * x
-  // y' = anchorY - s * targetY + s * y
-  // At red dot (x = targetX, y = targetY):
-  // x'(dot) = anchorX = 50% viewport width, y'(dot) = anchorY = 45% viewport height (100% LOCKED!)
-  const translateX = useTransform(zoomScale, (s) => metrics.anchorX - s * metrics.targetX);
-  const translateY = useTransform(zoomScale, (s) => metrics.anchorY - s * metrics.targetY);
+  // GOLDEN RULE CAMERA INVARIANT:
+  // translateX = (1 - s) * initialDot.x
+  // translateY = (1 - s) * initialDot.y
+  //
+  // Proof: For any scale s:
+  // screenDotX = translateX + s * dotX = (1 - s) * dotX + s * dotX = dotX (CONSTANT)
+  // screenDotY = translateY + s * dotY = (1 - s) * dotY + s * dotY = dotY (CONSTANT)
+  const translateX = useTransform(zoomScale, (s) => (1 - s) * initialDot.x);
+  const translateY = useTransform(zoomScale, (s) => (1 - s) * initialDot.y);
 
   const bodyMeshOpacity = useTransform(activeProgress, [0.35, 0.75], [1.0, 0.12]);
   const macroDetailOpacity = useTransform(activeProgress, [0.25, 0.65], [0.0, 1.0]);
 
-  // Measure exact untransformed target coordinate and desired screen anchor
-  const updateMetrics = React.useCallback(() => {
+  // Capture the unscaled red dot position in the initial state as the permanent camera anchor
+  const updateInitialAnchor = React.useCallback(() => {
     if (!cameraViewportRef.current || !bodyRef.current) return;
     const vRect = cameraViewportRef.current.getBoundingClientRect();
     const bElem = bodyRef.current;
@@ -83,30 +78,19 @@ export function BilateralPatternFlow({ progress }: BilateralPatternFlowProps = {
       const height = vRect.height;
       const bHeight = bElem.offsetHeight || 300;
 
-      // target: exact untransformed position of the central red dot in the scene
-      const targetX = width * 0.5;
-      const targetY = height * 0.5 + (-20 / 216) * bHeight;
+      // Exact red dot coordinate in the untransformed scene (centered body with cy = -20 in 216h viewBox)
+      const dotX = width * 0.5;
+      const dotY = height * 0.5 + (-20 / 216) * bHeight;
 
-      // anchor: deliberate stable camera focal target position in viewport coordinates (50% W, 45% H)
-      const anchorX = width * 0.5;
-      const anchorY = height * 0.45;
-
-      setMetrics({
-        targetX,
-        targetY,
-        anchorX,
-        anchorY,
-        width,
-        height,
-      });
+      setInitialDot({ x: dotX, y: dotY });
     }
   }, []);
 
   useEffect(() => {
-    updateMetrics();
-    window.addEventListener("resize", updateMetrics);
-    return () => window.removeEventListener("resize", updateMetrics);
-  }, [updateMetrics]);
+    updateInitialAnchor();
+    window.addEventListener("resize", updateInitialAnchor);
+    return () => window.removeEventListener("resize", updateInitialAnchor);
+  }, [updateInitialAnchor]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -765,13 +749,28 @@ export function BilateralPatternFlow({ progress }: BilateralPatternFlowProps = {
       canvas.removeEventListener("mousemove", handleMouseMove);
       canvas.removeEventListener("mouseleave", handleMouseLeave);
     };
-  }, [metrics.targetX, metrics.targetY]);
+  }, [initialDot.x, initialDot.y]);
 
   return (
     <div
       ref={cameraViewportRef}
       className="relative w-full h-full min-h-[480px] z-10 cursor-crosshair flex items-center justify-center overflow-hidden"
     >
+      {/* Debug Acceptance Crosshair (Verifies the Red Dot stays locked at initialDot) */}
+      {process.env.NODE_ENV === "development" && initialDot.x > 0 && (
+        <div
+          style={{
+            left: `${initialDot.x}px`,
+            top: `${initialDot.y}px`,
+          }}
+          className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none z-50 flex items-center justify-center opacity-80"
+        >
+          <div className="w-8 h-[1px] bg-red-500/80 absolute" />
+          <div className="h-8 w-[1px] bg-red-500/80 absolute" />
+          <div className="w-4 h-4 rounded-full border border-red-500/80 absolute" />
+        </div>
+      )}
+
       {/* Unified Composed Visualization Scene: Exact Affine Camera Scale & Translation around the Red Dot */}
       <motion.div 
         ref={sceneRef}
