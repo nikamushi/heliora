@@ -226,11 +226,11 @@ export default function LandingPage() {
         {/* SECTION 03: KENAPA HARUS HELIORA & FITUR (#features & #simulation) */}
         <section id="features" className="container mx-auto px-6 lg:px-12 pt-20 sm:pt-28 md:pt-36 pb-16 scroll-mt-24">
           <div id="simulation" className="scroll-mt-24" />
-          <div className="mb-12 max-w-2xl">
+          <div className="mb-12 sm:mb-16 max-w-2xl mx-auto text-center">
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-brand-900 leading-tight">
               Kenapa harus HELIORA?
             </h2>
-            <p className="text-base text-brand-900/60 mt-2 font-normal">
+            <p className="text-base sm:text-lg text-brand-900/60 mt-3 font-normal text-balance">
               Pendekatan cerdas, transparan, dan berbasis bukti untuk memahami serta memproyeksikan arah kesehatan Anda.
             </p>
           </div>
