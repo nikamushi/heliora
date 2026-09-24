@@ -65,6 +65,69 @@ function SectionPatterns() {
   );
 }
 
+function SectionLifestyleNarrative() {
+  const narrativeBlocks = [
+    {
+      num: "01",
+      lead: "Kita menjalani banyak kebiasaan setiap hari.",
+      body: "Aktivitas fisik, pola tidur, cara beristirahat, hingga kebiasaan kecil yang sering berjalan tanpa kita sadari.",
+    },
+    {
+      num: "02",
+      lead: "Masing-masing mungkin terasa sederhana.",
+      body: "Namun ketika dilakukan berulang, semuanya mulai membentuk pola yang menggambarkan bagaimana kita menjalani keseharian.",
+    },
+    {
+      num: "03",
+      lead: "Pola tersebut dapat memberi kita gambaran yang lebih personal tentang kondisi kesehatan.",
+      body: "Bukan hanya melihat satu kebiasaan, tetapi memahami bagaimana berbagai faktor lifestyle saling berhubungan dengan estimasi risiko.",
+    },
+    {
+      num: "04",
+      lead: "Dan ketika pola itu berubah, kita dapat mengeksplorasi kemungkinan yang berbeda.",
+      body: "Melihat bagaimana perubahan lifestyle dapat memengaruhi estimasi risiko dari waktu ke waktu.",
+    },
+  ];
+
+  return (
+    <section 
+      id="narrative" 
+      className="container mx-auto px-6 lg:px-12 py-20 md:py-28 scroll-mt-24 border-t border-brand-900/5"
+    >
+      <div className="max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+          {narrativeBlocks.map((block, idx) => (
+            <motion.div
+              key={idx}
+              custom={idx}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.2 }}
+              variants={fadeUpVariants}
+              className="bg-white/80 backdrop-blur-xl rounded-[2.25rem] p-8 sm:p-10 border border-brand-900/10 shadow-sm hover:shadow-md transition-all flex flex-col justify-between space-y-5"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-mono font-bold text-brand-900/40 uppercase tracking-wider">
+                  Pola {block.num}
+                </span>
+                <div className="w-2 h-2 rounded-full bg-emerald-600/60" />
+              </div>
+              <div className="space-y-3">
+                <h3 className="text-xl sm:text-2xl font-bold text-brand-900 tracking-tight leading-snug">
+                  {block.lead}
+                </h3>
+                <p className="text-sm sm:text-base text-brand-900/70 font-normal leading-relaxed">
+                  {block.body}
+                </p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-brand-50/20 text-brand-900 selection:bg-brand-200 relative overflow-hidden">
@@ -143,7 +206,10 @@ export default function LandingPage() {
         {/* SECTION 01 (STITCH SECTION 2: BILATERAL CONVERGENCE): KESEHATAN BUKAN SEKADAR ANGKA */}
         <SectionPatterns />
 
-        {/* SECTION 02: ALUR KERJA (#how-it-works) */}
+        {/* SECTION 02: NARASI POLA HIDUP & EKSPLORASI RISIKO */}
+        <SectionLifestyleNarrative />
+
+        {/* SECTION 03: ALUR KERJA (#how-it-works) */}
         <section id="how-it-works" className="container mx-auto px-6 lg:px-12 py-16 scroll-mt-24">
           <div className="mb-12 max-w-2xl">
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-brand-900 leading-tight">
