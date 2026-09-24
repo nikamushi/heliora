@@ -79,7 +79,7 @@ function NarrativeItem({ content }: { content: React.ReactNode }) {
     <motion.div
       ref={ref}
       style={{ opacity }}
-      className="flex flex-col items-center text-center min-h-[40vh] sm:min-h-[50vh] justify-center px-4 w-full"
+      className="flex flex-col items-center text-center min-h-[30vh] sm:min-h-[36vh] justify-center px-4 w-full"
     >
       <p className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-normal tracking-tight leading-snug sm:leading-[1.35] text-balance max-w-4xl sm:max-w-5xl">
         {content}
@@ -101,7 +101,7 @@ function SectionLifestyleNarrative() {
   return (
     <section 
       id="narrative" 
-      className="container mx-auto px-6 lg:px-12 py-24 sm:py-36 md:py-44 scroll-mt-24"
+      className="container mx-auto px-6 lg:px-12 pt-8 sm:pt-12 md:pt-16 pb-20 sm:pb-28 md:pb-36 scroll-mt-24"
     >
       <div className="max-w-5xl mx-auto flex flex-col items-center">
         <NarrativeItem content={narrativeContent} />
