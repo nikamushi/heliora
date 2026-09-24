@@ -3,9 +3,9 @@
 import React from "react";
 
 export function LayeredHealthPicture() {
-  // 5 Isometric Rounded Rhombus Planes
-  // Width: 360, Height: 175
-  const renderPlanePath = (cx: number, cy: number, w: number = 360, h: number = 175, r: number = 20) => {
+  // 5 Isometric Rounded Rhombus Planes (Flatter isometric profile)
+  // Width: 380, Height: 130
+  const renderPlanePath = (cx: number, cy: number, w: number = 380, h: number = 130, r: number = 18) => {
     const hw = w / 2;
     const hh = h / 2;
     return `
@@ -22,17 +22,17 @@ export function LayeredHealthPicture() {
   };
 
   return (
-    <div className="relative w-full max-w-4xl mx-auto flex items-center justify-center select-none py-6 sm:py-10">
+    <div className="relative w-full max-w-3xl mx-auto flex items-center justify-center select-none py-2 sm:py-4">
       {/* Ambient Radial Lighting Behind SVG */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none -z-10">
-        <div className="w-[500px] h-[400px] bg-emerald-500/15 rounded-full blur-[120px]" />
-        <div className="w-[350px] h-[300px] bg-teal-400/10 rounded-full blur-[90px]" />
+        <div className="w-[460px] h-[320px] bg-emerald-500/15 rounded-full blur-[110px]" />
+        <div className="w-[320px] h-[240px] bg-teal-400/10 rounded-full blur-[80px]" />
       </div>
 
-      {/* Static Isometric SVG Stack (5 Layers) */}
-      <div className="relative w-full max-w-2xl aspect-[4/3] sm:aspect-[16/11] flex items-center justify-center">
+      {/* Static Isometric SVG Stack (5 Compact Layers) */}
+      <div className="relative w-full max-w-xl aspect-[16/10] flex items-center justify-center">
         <svg
-          viewBox="0 0 600 500"
+          viewBox="0 0 600 390"
           className="w-full h-full overflow-visible drop-shadow-[0_20px_40px_rgba(0,0,0,0.6)]"
         >
           <defs>
@@ -94,9 +94,9 @@ export function LayeredHealthPicture() {
           {/* Central Vertical Optical Axis */}
           <line
             x1="300"
-            y1="75"
+            y1="70"
             x2="300"
-            y2="410"
+            y2="340"
             stroke="url(#centerRay)"
             strokeWidth="1.5"
             strokeDasharray="4 8"
@@ -107,22 +107,22 @@ export function LayeredHealthPicture() {
           {/* ======================================================== */}
           <g>
             <path
-              d={renderPlanePath(300, 360, 360, 175, 20)}
+              d={renderPlanePath(300, 295, 380, 130, 18)}
               fill="url(#glassLayer5)"
               stroke="rgba(255, 255, 255, 0.16)"
               strokeWidth="1.2"
             />
             {/* Coordinate Grid on Plane 5 */}
             <g stroke="rgba(167, 243, 208, 0.18)" strokeWidth="0.75" strokeDasharray="3 6">
-              <line x1="220" y1="320" x2="380" y2="400" />
-              <line x1="160" y1="350" x2="320" y2="430" />
-              <line x1="240" y1="400" x2="400" y2="320" />
-              <line x1="180" y1="370" x2="340" y2="290" />
+              <line x1="220" y1="265" x2="380" y2="325" />
+              <line x1="160" y1="288" x2="320" y2="348" />
+              <line x1="240" y1="325" x2="400" y2="265" />
+              <line x1="180" y1="302" x2="340" y2="242" />
             </g>
             {/* Axis Tick Crosshairs */}
-            <circle cx="300" cy="360" r="2" fill="#34d399" opacity="0.6" />
-            <circle cx="250" cy="335" r="1.5" fill="#a7f3d0" opacity="0.4" />
-            <circle cx="350" cy="385" r="1.5" fill="#a7f3d0" opacity="0.4" />
+            <circle cx="300" cy="295" r="2" fill="#34d399" opacity="0.6" />
+            <circle cx="250" cy="275" r="1.5" fill="#a7f3d0" opacity="0.4" />
+            <circle cx="350" cy="315" r="1.5" fill="#a7f3d0" opacity="0.4" />
           </g>
 
           {/* ======================================================== */}
@@ -130,18 +130,18 @@ export function LayeredHealthPicture() {
           {/* ======================================================== */}
           <g>
             <path
-              d={renderPlanePath(300, 295, 360, 175, 20)}
+              d={renderPlanePath(300, 245, 380, 130, 18)}
               fill="url(#glassLayer4)"
               stroke="rgba(255, 255, 255, 0.20)"
               strokeWidth="1.2"
             />
             {/* Organic Biometric Contour Waves */}
             <g fill="none" stroke="rgba(34, 211, 238, 0.35)" strokeWidth="1">
-              <path d="M 200 295 Q 250 275, 300 295 T 400 295" />
-              <path d="M 220 305 Q 270 285, 300 295 T 380 285" opacity="0.7" />
-              <path d="M 240 285 Q 280 270, 300 295 T 360 305" opacity="0.5" />
+              <path d="M 200 245 Q 250 230, 300 245 T 400 245" />
+              <path d="M 220 253 Q 270 238, 300 245 T 380 238" opacity="0.7" />
+              <path d="M 240 238 Q 280 226, 300 245 T 360 253" opacity="0.5" />
             </g>
-            <circle cx="300" cy="295" r="2.5" fill="#22d3ee" opacity="0.8" filter="url(#glow)" />
+            <circle cx="300" cy="245" r="2.5" fill="#22d3ee" opacity="0.8" filter="url(#glow)" />
           </g>
 
           {/* ======================================================== */}
@@ -149,7 +149,7 @@ export function LayeredHealthPicture() {
           {/* ======================================================== */}
           <g>
             <path
-              d={renderPlanePath(300, 230, 360, 175, 20)}
+              d={renderPlanePath(300, 195, 380, 130, 18)}
               fill="url(#glassLayer3)"
               stroke="rgba(255, 255, 255, 0.22)"
               strokeWidth="1.2"
@@ -157,21 +157,21 @@ export function LayeredHealthPicture() {
             {/* Health Trajectory Arc */}
             <g fill="none" strokeWidth="1.2">
               <path
-                d="M 190 245 Q 245 210, 300 230"
+                d="M 190 207 Q 245 180, 300 195"
                 stroke="rgba(56, 189, 248, 0.6)"
               />
               <path
-                d="M 300 230 Q 355 250, 410 215"
+                d="M 300 195 Q 355 210, 410 183"
                 stroke="rgba(56, 189, 248, 0.4)"
                 strokeDasharray="3 4"
               />
             </g>
             {/* Trajectory Milestone Points */}
-            <circle cx="190" cy="245" r="2" fill="#38bdf8" opacity="0.7" />
-            <circle cx="245" cy="215" r="2.5" fill="#38bdf8" opacity="0.85" />
-            <circle cx="300" cy="230" r="3" fill="#ffffff" filter="url(#glow)" />
-            <circle cx="355" cy="240" r="2" fill="#38bdf8" opacity="0.6" />
-            <circle cx="410" cy="215" r="2.5" fill="#38bdf8" opacity="0.9" />
+            <circle cx="190" cy="207" r="2" fill="#38bdf8" opacity="0.7" />
+            <circle cx="245" cy="184" r="2.5" fill="#38bdf8" opacity="0.85" />
+            <circle cx="300" cy="195" r="3" fill="#ffffff" filter="url(#glow)" />
+            <circle cx="355" cy="203" r="2" fill="#38bdf8" opacity="0.6" />
+            <circle cx="410" cy="183" r="2.5" fill="#38bdf8" opacity="0.9" />
           </g>
 
           {/* ======================================================== */}
@@ -179,25 +179,25 @@ export function LayeredHealthPicture() {
           {/* ======================================================== */}
           <g>
             <path
-              d={renderPlanePath(300, 165, 360, 175, 20)}
+              d={renderPlanePath(300, 145, 380, 130, 18)}
               fill="url(#glassLayer2)"
               stroke="rgba(255, 255, 255, 0.26)"
               strokeWidth="1.2"
             />
             {/* Connecting Constellation Filaments */}
             <g stroke="rgba(45, 212, 191, 0.45)" strokeWidth="1" fill="none">
-              <line x1="240" y1="155" x2="300" y2="165" />
-              <line x1="300" y1="165" x2="360" y2="145" />
-              <line x1="300" y1="165" x2="330" y2="200" />
-              <line x1="240" y1="155" x2="270" y2="190" />
-              <line x1="270" y1="190" x2="330" y2="200" />
+              <line x1="240" y1="137" x2="300" y2="145" />
+              <line x1="300" y1="145" x2="360" y2="130" />
+              <line x1="300" y1="145" x2="330" y2="171" />
+              <line x1="240" y1="137" x2="270" y2="164" />
+              <line x1="270" y1="164" x2="330" y2="171" />
             </g>
             {/* Constellation Biomarker Nodes */}
-            <circle cx="240" cy="155" r="2.5" fill="#2dd4bf" />
-            <circle cx="360" cy="145" r="2.5" fill="#2dd4bf" />
-            <circle cx="270" cy="190" r="2" fill="#a7f3d0" />
-            <circle cx="330" cy="200" r="2.5" fill="#2dd4bf" />
-            <circle cx="300" cy="165" r="3.5" fill="#ffffff" filter="url(#glow)" />
+            <circle cx="240" cy="137" r="2.5" fill="#2dd4bf" />
+            <circle cx="360" cy="130" r="2.5" fill="#2dd4bf" />
+            <circle cx="270" cy="164" r="2" fill="#a7f3d0" />
+            <circle cx="330" cy="171" r="2.5" fill="#2dd4bf" />
+            <circle cx="300" cy="145" r="3.5" fill="#ffffff" filter="url(#glow)" />
           </g>
 
           {/* ======================================================== */}
@@ -205,38 +205,39 @@ export function LayeredHealthPicture() {
           {/* ======================================================== */}
           <g>
             <path
-              d={renderPlanePath(300, 100, 360, 175, 20)}
+              d={renderPlanePath(300, 95, 380, 130, 18)}
               fill="url(#glassLayer1)"
               stroke="url(#topEdgeGlow)"
               strokeWidth="1.5"
             />
             {/* Scattered Discrete Micro-Dots on Top Plane */}
             <g fill="#34d399">
-              <circle cx="230" cy="85" r="2" opacity="0.6" />
-              <circle cx="260" cy="75" r="2.5" opacity="0.8" />
-              <circle cx="290" cy="65" r="1.8" opacity="0.5" />
-              <circle cx="340" cy="75" r="2.2" opacity="0.7" />
-              <circle cx="370" cy="90" r="1.8" opacity="0.6" />
+              <circle cx="230" cy="84" r="2" opacity="0.6" />
+              <circle cx="260" cy="76" r="2.5" opacity="0.8" />
+              <circle cx="290" cy="68" r="1.8" opacity="0.5" />
+              <circle cx="340" cy="76" r="2.2" opacity="0.7" />
+              <circle cx="370" cy="87" r="1.8" opacity="0.6" />
               
-              <circle cx="210" cy="110" r="2" opacity="0.5" />
-              <circle cx="250" cy="105" r="2.5" opacity="0.85" />
-              <circle cx="280" cy="95" r="2.2" opacity="0.7" />
-              <circle cx="320" cy="100" r="2.8" opacity="0.9" />
-              <circle cx="360" cy="115" r="2" opacity="0.6" />
+              <circle cx="210" cy="102" r="2" opacity="0.5" />
+              <circle cx="250" cy="99" r="2.5" opacity="0.85" />
+              <circle cx="280" cy="91" r="2.2" opacity="0.7" />
+              <circle cx="320" cy="95" r="2.8" opacity="0.9" />
+              <circle cx="360" cy="106" r="2" opacity="0.6" />
 
-              <circle cx="240" cy="130" r="2.2" opacity="0.75" />
-              <circle cx="275" cy="125" r="2" opacity="0.6" />
-              <circle cx="315" cy="120" r="2.5" opacity="0.8" />
-              <circle cx="350" cy="135" r="1.8" opacity="0.5" />
+              <circle cx="240" cy="117" r="2.2" opacity="0.75" />
+              <circle cx="275" cy="114" r="2" opacity="0.6" />
+              <circle cx="315" cy="110" r="2.5" opacity="0.8" />
+              <circle cx="350" cy="121" r="1.8" opacity="0.5" />
             </g>
 
             {/* Central Emergent Synthesis Node */}
-            <circle cx="300" cy="100" r="5" fill="#ffffff" filter="url(#glow)" />
-            <circle cx="300" cy="100" r="9" fill="none" stroke="#34d399" strokeWidth="1" strokeDasharray="2 4" />
+            <circle cx="300" cy="95" r="4.5" fill="#ffffff" filter="url(#glow)" />
+            <circle cx="300" cy="95" r="8" fill="none" stroke="#34d399" strokeWidth="1" strokeDasharray="2 4" />
           </g>
         </svg>
       </div>
     </div>
   );
 }
+
 
