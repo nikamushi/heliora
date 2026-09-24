@@ -91,7 +91,7 @@ function NarrativeItem({ content }: { content: React.ReactNode }) {
 function SectionLifestyleNarrative() {
   const narrativeItems: React.ReactNode[] = [
     (
-      <span className="text-brand-900/40">
+      <span className="text-brand-900/65">
         Setiap hari, kita menjalani{" "}
         <span className="text-brand-900">pola hidup masing-masing</span>, dari
         kebiasaan kecil sampai keputusan yang sering kita ambil tanpa sadar.
