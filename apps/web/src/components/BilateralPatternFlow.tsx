@@ -48,9 +48,31 @@ export function BilateralPatternFlow({ triggerRef }: BilateralPatternFlowProps =
 
   useGSAP(
     () => {
-      if (!cameraViewportRef.current || !bodyRef.current) return;
+      if (!cameraViewportRef.current || !sceneRef.current || !focalDotRef.current) return;
 
       const trigger = triggerRef?.current || cameraViewportRef.current;
+
+      const updateTransformOrigin = () => {
+        const dotElem = focalDotRef.current;
+        const sceneElem = sceneRef.current;
+        if (!dotElem || !sceneElem) return;
+
+        const dotRect = dotElem.getBoundingClientRect();
+        const sceneRect = sceneElem.getBoundingClientRect();
+
+        // Exact scene-local coordinates of the red dot (not viewport coordinates)
+        const dotLocalX = dotRect.left + dotRect.width / 2 - sceneRect.left;
+        const dotLocalY = dotRect.top + dotRect.height / 2 - sceneRect.top;
+
+        if (dotLocalX > 0 && dotLocalY > 0) {
+          gsap.set(sceneRef.current, {
+            transformOrigin: `${dotLocalX}px ${dotLocalY}px`,
+            force3D: true,
+          });
+        }
+      };
+
+      updateTransformOrigin();
 
       const tl = gsap.timeline({
         scrollTrigger: {
@@ -59,44 +81,44 @@ export function BilateralPatternFlow({ triggerRef }: BilateralPatternFlowProps =
           end: "+=2200",
           scrub: 1,
           invalidateOnRefresh: true,
+          onRefresh: () => {
+            updateTransformOrigin();
+          },
         },
       });
 
-      // 1. ONLY the central focal dot zooms in / expands right at its center
-      if (focalDotRef.current) {
-        tl.to(
-          focalDotRef.current,
-          {
-            scale: 22,
-            transformOrigin: "50% 50%",
-            ease: "power2.out",
-            duration: 1,
-          },
-          0
-        );
-      }
+      // 1. Camera zooms straight into the central red dot (pinned stationary in screen space)
+      tl.to(
+        sceneRef.current,
+        {
+          scale: 6.8,
+          ease: "power2.out",
+          duration: 1,
+        },
+        0
+      );
 
-      // 2. Fade out bilateral flowing lines (canvas) completely during zoom (unscaled)
+      // 2. Fade out bilateral flowing lines (canvas) smoothly during zoom approach
       if (canvasRef.current) {
         tl.to(
           canvasRef.current,
           {
             opacity: 0,
             ease: "power1.inOut",
-            duration: 0.4,
+            duration: 0.35,
           },
           0.05
         );
       }
 
-      // 3. Fade out human body contour slices completely during zoom (unscaled)
+      // 3. Fade out human body contour slices smoothly during zoom approach
       if (bodyMeshRef.current) {
         tl.to(
           bodyMeshRef.current,
           {
             opacity: 0,
             ease: "power1.inOut",
-            duration: 0.4,
+            duration: 0.35,
           },
           0.05
         );
@@ -109,13 +131,13 @@ export function BilateralPatternFlow({ triggerRef }: BilateralPatternFlowProps =
           {
             opacity: 0,
             ease: "power1.inOut",
-            duration: 0.4,
+            duration: 0.35,
           },
           0.05
         );
       }
 
-      // 5. Reveal high-resolution macro telemetry rings around focal dot
+      // 5. Reveal high-resolution macro telemetry rings around the central red dot
       if (macroDetailRef.current) {
         tl.fromTo(
           macroDetailRef.current,
@@ -852,42 +874,41 @@ export function BilateralPatternFlow({ triggerRef }: BilateralPatternFlowProps =
               </g>
             </g>
 
-            {/* Central Focal Core (The ONLY element that zooms in) */}
+            {/* Central Focal Core: Pinned Red Dot (PRIMARY CAMERA TARGET) */}
             <g transform="translate(0, -20)">
-              <g 
-                id="central-focal-core" 
-                ref={focalDotRef}
-                style={{ transformBox: "fill-box", transformOrigin: "center" }}
-              >
-                {/* Macro High-Detail Telemetry Rings (revealed as you zoom in) */}
-                <g ref={macroDetailRef} style={{ opacity: 0 }}>
-                  {/* Outermost Telemetry Ring */}
-                  <circle
-                    cx="0"
-                    cy="0"
-                    r="30"
-                    stroke="#0F7A4E"
-                    strokeWidth="0.5"
-                    strokeDasharray="1 3"
-                    strokeOpacity="0.4"
-                    fill="none"
-                  />
-                  <circle
-                    cx="0"
-                    cy="0"
-                    r="24"
-                    stroke="#2D5A43"
-                    strokeWidth="0.6"
-                    strokeDasharray="2 4"
-                    strokeOpacity="0.45"
-                    fill="none"
-                  />
-                </g>
+              {/* Macro High-Detail Telemetry Rings (revealed as you zoom in) */}
+              <g ref={macroDetailRef} style={{ opacity: 0 }}>
+                {/* Outermost Telemetry Ring */}
+                <circle
+                  cx="0"
+                  cy="0"
+                  r="30"
+                  stroke="#D97757"
+                  strokeWidth="0.5"
+                  strokeDasharray="1 3"
+                  strokeOpacity="0.5"
+                  fill="none"
+                />
+                <circle
+                  cx="0"
+                  cy="0"
+                  r="22"
+                  stroke="#C53030"
+                  strokeWidth="0.6"
+                  strokeDasharray="2 4"
+                  strokeOpacity="0.5"
+                  fill="none"
+                />
+              </g>
 
-                {/* Solid Core Focal Center Dot */}
-                <circle cx="0" cy="0" r="4.5" fill="#2D5A43" />
-                <circle cx="0" cy="0" r="3" fill="#0F7A4E" />
-                <circle cx="-0.8" cy="-0.8" r="1.1" fill="#ffffff" opacity="0.95" />
+              {/* Solid Core Vivid Red Focal Dot */}
+              <g id="central-red-dot" ref={focalDotRef}>
+                <circle cx="0" cy="0" r="8" fill="#D97757" fillOpacity="0.25" />
+                <circle cx="0" cy="0" r="5" fill="#D97757" fillOpacity="0.5" />
+                <circle cx="0" cy="0" r="4.2" fill="#D97757" />
+                <circle cx="0" cy="0" r="3.0" fill="#C53030" />
+                <circle cx="0" cy="0" r="2.0" fill="#E53E3E" />
+                <circle cx="-0.8" cy="-0.8" r="1.0" fill="#FFFFFF" opacity="0.95" />
               </g>
             </g>
           </svg>
