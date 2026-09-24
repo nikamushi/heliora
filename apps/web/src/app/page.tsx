@@ -199,12 +199,12 @@ export default function LandingPage() {
           <div className="absolute bottom-0 left-1/4 w-[400px] h-[400px] bg-teal-500/10 rounded-full blur-[120px] pointer-events-none" />
 
           <div className="container mx-auto px-6 lg:px-12 relative z-10">
-            <div className="max-w-4xl mx-auto text-center space-y-6 sm:space-y-8 md:space-y-10">
+            <div className="max-w-4xl mx-auto text-center space-y-4 sm:space-y-6">
               <span className="text-base sm:text-lg md:text-xl font-medium tracking-normal text-emerald-300/80 block">
                 Platform Intelijen Kesehatan Berbasis AI
               </span>
-              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white leading-[1.05]">
-                HELIORA
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.1] text-balance">
+                Melihat kesehatan secara lebih utuh.
               </h2>
             </div>
 
