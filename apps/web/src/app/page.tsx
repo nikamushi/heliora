@@ -88,32 +88,26 @@ function SectionLifestyleNarrative() {
   return (
     <section 
       id="narrative" 
-      className="container mx-auto px-6 lg:px-12 py-20 md:py-28 scroll-mt-24 border-t border-brand-900/5"
+      className="container mx-auto px-6 lg:px-12 py-24 sm:py-36 md:py-44 scroll-mt-24"
     >
-      <div className="max-w-5xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-          {narrativeBlocks.map((block, idx) => (
-            <motion.div
-              key={idx}
-              custom={idx}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.2 }}
-              variants={fadeUpVariants}
-              className="bg-white/80 backdrop-blur-xl rounded-[2.25rem] p-8 sm:p-10 border border-brand-900/10 shadow-sm hover:shadow-md transition-all flex flex-col justify-between space-y-6"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-mono font-bold text-brand-900/40 uppercase tracking-widest">
-                  {block.num}
-                </span>
-                <div className="w-2 h-2 rounded-full bg-emerald-600/50" />
-              </div>
-              <p className="text-base sm:text-lg text-brand-900/85 font-normal leading-relaxed">
-                {block.text}
-              </p>
-            </motion.div>
-          ))}
-        </div>
+      <div className="max-w-3xl mx-auto flex flex-col items-center space-y-28 sm:space-y-36 md:space-y-44">
+        {narrativeBlocks.map((block, idx) => (
+          <motion.div
+            key={idx}
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.35, margin: "-40px" }}
+            transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
+            className="flex flex-col items-center text-center space-y-5"
+          >
+            <span className="text-xs font-mono font-semibold text-emerald-800/60 uppercase tracking-[0.3em]">
+              {block.num}
+            </span>
+            <p className="text-2xl sm:text-3xl md:text-4xl text-brand-900 font-normal tracking-tight leading-snug sm:leading-[1.4] text-balance">
+              {block.text}
+            </p>
+          </motion.div>
+        ))}
       </div>
     </section>
   );
