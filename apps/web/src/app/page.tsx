@@ -34,23 +34,27 @@ function SectionPatternsPinned() {
     offset: ["start start", "end end"],
   });
 
-  // Fade out headline as we zoom in (between progress 0.28 and 0.55)
-  const headlineOpacity = useTransform(scrollYProgress, [0.0, 0.28, 0.55], [1, 1, 0]);
-  const headlineY = useTransform(scrollYProgress, [0.28, 0.55], [0, -28]);
-  const bridgeOpacity = useTransform(scrollYProgress, [0.0, 0.28, 0.55], [1, 1, 0]);
+  // Fade out headline as we zoom in (between progress 0.22 and 0.48)
+  const headlineOpacity = useTransform(scrollYProgress, [0.0, 0.22, 0.48], [1, 1, 0]);
+  const headlineY = useTransform(scrollYProgress, [0.22, 0.48], [0, -32]);
+  const bridgeOpacity = useTransform(scrollYProgress, [0.0, 0.22, 0.45], [1, 1, 0]);
+
+  // Zoom revelation insight badge (appears when camera has zoomed deep into the central dot)
+  const zoomBadgeOpacity = useTransform(scrollYProgress, [0.50, 0.68, 0.90, 0.98], [0, 1, 1, 0]);
+  const zoomBadgeY = useTransform(scrollYProgress, [0.50, 0.68], [18, 0]);
 
   return (
     <section 
       ref={sectionRef} 
       id="patterns" 
-      className="relative w-full h-[220vh] border-t border-brand-900/5"
+      className="relative w-full h-[260vh] border-t border-brand-900/5"
     >
       <div className="sticky top-0 h-[100dvh] w-full overflow-hidden flex flex-col justify-between py-6 sm:py-10">
-        <div className="container mx-auto px-6 lg:px-12 max-w-6xl flex-1 flex flex-col justify-between">
-          {/* Typographic Header */}
+        <div className="container mx-auto px-6 lg:px-12 max-w-6xl flex-1 flex flex-col justify-between relative">
+          {/* Typographic Header (Static overview -> Fades out on camera zoom) */}
           <motion.div 
             style={{ opacity: headlineOpacity, y: headlineY }}
-            className="max-w-4xl pt-4 sm:pt-6"
+            className="max-w-4xl pt-4 sm:pt-6 z-20"
           >
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-normal tracking-tight text-brand-900 leading-[1.08]">
               Setiap hari, kita melakukan <br className="hidden sm:inline" />
@@ -58,7 +62,7 @@ function SectionPatternsPinned() {
             </h2>
           </motion.div>
 
-          {/* Biological Canvas & Figure */}
+          {/* Biological Canvas & Figure (Camera zoom lens straight into central dot) */}
           <div className="relative w-full flex-1 flex items-center justify-center select-none my-auto">
             {/* Soft Ambient Radial Glows */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] h-[300px] bg-emerald-300/15 rounded-full blur-[110px] pointer-events-none -z-10" />
@@ -68,10 +72,20 @@ function SectionPatternsPinned() {
             <BilateralPatternFlow progress={scrollYProgress} />
           </div>
 
+          {/* Zoom Revelation Insight Badge (Fades in when deep inside the dot) */}
+          <motion.div 
+            style={{ opacity: zoomBadgeOpacity, y: zoomBadgeY }}
+            className="absolute bottom-12 left-1/2 -translate-x-1/2 pointer-events-none text-center z-30 w-full px-4"
+          >
+            <span className="inline-block text-[11px] md:text-xs font-semibold tracking-[0.22em] uppercase text-emerald-950 bg-emerald-100/90 px-4 py-1.5 rounded-full border border-emerald-800/20 shadow-md backdrop-blur-md">
+              TITIK TEMU: SEMUA POLA BIOLOGIS TERKONEKSI
+            </span>
+          </motion.div>
+
           {/* Editorial Conceptual Forward Bridge */}
           <motion.div 
             style={{ opacity: bridgeOpacity }}
-            className="flex justify-center pb-2"
+            className="flex justify-center pb-2 z-20"
           >
             <Link 
               href="#how-it-works"
