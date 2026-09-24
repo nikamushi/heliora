@@ -43,7 +43,6 @@ export function Navbar() {
               {[
                 { name: "Fitur", href: "#features" },
                 { name: "How it works", href: "#how-it-works" },
-                { name: "Science", href: "#science" },
               ].map((item) => (
                 <Link
                   key={item.name}
@@ -87,7 +86,6 @@ export function Navbar() {
           <nav className="flex flex-col gap-6 text-2xl font-medium tracking-tight text-brand-900">
             <Link href="#features" onClick={() => setMobileMenuOpen(false)}>Fitur</Link>
             <Link href="#how-it-works" onClick={() => setMobileMenuOpen(false)}>How it works</Link>
-            <Link href="#science" onClick={() => setMobileMenuOpen(false)}>Science</Link>
           </nav>
           <div className="mt-auto pb-12 flex flex-col gap-4">
             <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
