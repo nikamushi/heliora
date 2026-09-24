@@ -111,8 +111,10 @@ function SectionLifestyleNarrative() {
       </span>
     ),
     (
-      <span className="text-brand-900">
-        Dengan memahami bagaimana kebiasaan itu saling terkait, kita bisa melihat kesehatan dengan cara yang lebih personal, lalu mulai mempertimbangkan perubahan sebelum kita benar-benar membutuhkannya.
+      <span className="text-brand-900/80">
+        Dengan memahami bagaimana kebiasaan itu saling terkait, kita bisa{" "}
+        <span className="text-brand-900">melihat kesehatan dengan cara yang lebih personal</span>, lalu
+        mulai mempertimbangkan perubahan sebelum kita benar-benar membutuhkannya.
       </span>
     ),
   ];
