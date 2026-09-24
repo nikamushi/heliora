@@ -48,11 +48,11 @@ export function BilateralPatternFlow({ timeline }: BilateralPatternFlowProps = {
   useEffect(() => {
     if (!timeline || !focalPointRef.current) return;
 
-    // 1. Isolated Focal Point scales up cleanly from its own center
+    // 1. Subtle, restrained scale for the focal indicator (no giant ballooning)
     timeline.to(
       focalPointRef.current,
       {
-        scale: 5.5,
+        scale: 1.25,
         transformOrigin: "50% 50%",
         ease: "none",
         duration: 1,
@@ -67,7 +67,7 @@ export function BilateralPatternFlow({ timeline }: BilateralPatternFlowProps = {
         {
           opacity: 0,
           ease: "none",
-          duration: 0.55,
+          duration: 0.5,
         },
         0.3
       );
@@ -80,34 +80,36 @@ export function BilateralPatternFlow({ timeline }: BilateralPatternFlowProps = {
         {
           opacity: 0,
           ease: "none",
-          duration: 0.55,
+          duration: 0.5,
         },
         0.3
       );
     }
 
-    // 4. Staged Focal Icon Morph: Question Mark (?) -> Loop / Cycle Icon (⟳)
+    // 4. Subtle, minimal icon transition: Question Mark (?) -> Loop Icon (⟳)
+    // Phase 2: Question mark gently dissolves
     if (questionMarkRef.current) {
       timeline.to(
         questionMarkRef.current,
         {
           opacity: 0,
-          scale: 0.7,
+          scale: 0.92,
           transformOrigin: "50% 50%",
           ease: "power2.inOut",
-          duration: 0.22,
+          duration: 0.15,
         },
-        0.72
+        0.70
       );
     }
 
+    // Phase 3: Loop icon emerges with a tiny -15° -> 0° settling motion (no continuous 360° spin)
     if (loopIconRef.current) {
       timeline.fromTo(
         loopIconRef.current,
         {
           opacity: 0,
-          scale: 0.7,
-          rotation: -45,
+          scale: 0.92,
+          rotation: -15,
           transformOrigin: "50% 50%",
         },
         {
@@ -116,9 +118,9 @@ export function BilateralPatternFlow({ timeline }: BilateralPatternFlowProps = {
           rotation: 0,
           transformOrigin: "50% 50%",
           ease: "power2.out",
-          duration: 0.26,
+          duration: 0.20,
         },
-        0.74
+        0.80
       );
     }
   }, [timeline]);
@@ -836,7 +838,7 @@ export function BilateralPatternFlow({ timeline }: BilateralPatternFlowProps = {
             </svg>
           </div>
 
-          {/* Isolated Central Focal Point (Transitions: Question Mark '?' -> Loop Icon '⟳') */}
+          {/* Isolated Central Focal Point (Clean, understated insight indicator) */}
           <div 
             ref={focalPointRef}
             style={{ 
@@ -844,69 +846,58 @@ export function BilateralPatternFlow({ timeline }: BilateralPatternFlowProps = {
               left: "50%",
               transformOrigin: "50% 50%"
             }}
-            className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none z-30 flex items-center justify-center w-8 h-8"
+            className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none z-30 flex items-center justify-center w-7 h-7"
           >
-            <svg viewBox="-16 -16 32 32" className="w-8 h-8 overflow-visible">
-              <defs>
-                <radialGradient id="focalGlow" cx="0%" cy="0%" r="100%">
-                  <stop offset="0%" stopColor="#E53E3E" stopOpacity="0.9" />
-                  <stop offset="40%" stopColor="#D97757" stopOpacity="0.8" />
-                  <stop offset="70%" stopColor="#C53030" stopOpacity="0.4" />
-                  <stop offset="100%" stopColor="#D97757" stopOpacity="0" />
-                </radialGradient>
-              </defs>
+            <svg viewBox="-14 -14 28 28" className="w-7 h-7 overflow-visible">
+              {/* Soft, minimal focal signal glow */}
+              <circle cx="0" cy="0" r="10" fill="#D97757" fillOpacity="0.16" />
+              <circle cx="0" cy="0" r="7.5" fill="#D97757" fillOpacity="0.88" />
 
-              {/* Concentric Halo and Core Disc */}
-              <circle cx="0" cy="0" r="14" fill="#D97757" fillOpacity="0.2" />
-              <circle cx="0" cy="0" r="11" fill="#D97757" fillOpacity="0.38" />
-              <circle cx="0" cy="0" r="8.5" fill="#D97757" />
-              <circle cx="0" cy="0" r="7.5" fill="#C53030" />
-
-              {/* State 1: Question Mark '?' (Initial uncertainty / observation) */}
+              {/* State 1: Question Mark '?' (Clean, thin outline icon) */}
               <g ref={questionMarkRef} style={{ transformOrigin: "0px 0px" }}>
                 <path
-                  d="M -3.8 -4.2 C -3.8 -7.8, 3.8 -7.8, 3.8 -4.2 C 3.8 -1.8, 0 -0.8, 0 2.2"
+                  d="M -2.8 -3.2 C -2.8 -5.8, 2.8 -5.8, 2.8 -3.2 C 2.8 -1.2, 0 -0.4, 0 1.6"
                   fill="none"
                   stroke="#FFFFFF"
-                  strokeWidth="1.9"
+                  strokeWidth="1.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
-                <circle cx="0" cy="5.8" r="1.05" fill="#FFFFFF" />
+                <circle cx="0" cy="4.2" r="0.75" fill="#FFFFFF" />
               </g>
 
-              {/* State 2: Loop / Cycle Icon '⟳' (Discovered pattern / continuous feedback cycle) */}
+              {/* State 2: Loop / Cycle Icon '⟳' (Matching minimal outline icon) */}
               <g ref={loopIconRef} style={{ transformOrigin: "0px 0px", opacity: 0 }}>
-                {/* Top Clockwise Arc with Arrowhead */}
+                {/* Top Clockwise Arc with Minimal Arrow Tip */}
                 <path
-                  d="M -5.6 -3.2 A 6.4 6.4 0 0 1 5.6 -3.2"
+                  d="M -4.2 -2.2 A 4.8 4.8 0 0 1 4.2 -2.2"
                   fill="none"
                   stroke="#FFFFFF"
-                  strokeWidth="1.75"
+                  strokeWidth="1.4"
                   strokeLinecap="round"
                 />
                 <path
-                  d="M 6.4 -6.2 L 5.6 -3.2 L 2.6 -3.6"
+                  d="M 4.6 -4.4 L 4.2 -2.2 L 2.0 -2.4"
                   fill="none"
                   stroke="#FFFFFF"
-                  strokeWidth="1.75"
+                  strokeWidth="1.4"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
 
-                {/* Bottom Clockwise Arc with Arrowhead */}
+                {/* Bottom Clockwise Arc with Minimal Arrow Tip */}
                 <path
-                  d="M 5.6 3.2 A 6.4 6.4 0 0 1 -5.6 3.2"
+                  d="M 4.2 2.2 A 4.8 4.8 0 0 1 -4.2 2.2"
                   fill="none"
                   stroke="#FFFFFF"
-                  strokeWidth="1.75"
+                  strokeWidth="1.4"
                   strokeLinecap="round"
                 />
                 <path
-                  d="M -6.4 6.2 L -5.6 3.2 L -2.6 3.6"
+                  d="M -4.6 4.4 L -4.2 2.2 L -2.0 2.4"
                   fill="none"
                   stroke="#FFFFFF"
-                  strokeWidth="1.75"
+                  strokeWidth="1.4"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
