@@ -4,17 +4,13 @@ import React from "react";
 import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
+import { BilateralPatternFlow } from "@/components/BilateralPatternFlow";
 import { motion } from "motion/react";
 import { 
   IconHeartbeat,
   IconArrowRight,
   IconAdjustmentsHorizontal,
-  IconHistory,
-  IconShieldCheck,
-  IconActivity,
-  IconClipboardList,
-  IconFileText,
-  IconMoon
+  IconHistory
 } from "@tabler/icons-react";
 
 // Fluid Apple HIG motion curves
@@ -45,214 +41,76 @@ export default function LandingPage() {
       <Navbar />
 
       <main className="pt-28 pb-16">
-        {/* HERO SECTION: Split 2-Column with 3D Glass Assessment Mockup Card */}
-        <section className="container mx-auto px-6 lg:px-12 pt-12 sm:pt-16 lg:pt-20 pb-20 relative">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
-            {/* Left Column (7 cols): Direct Typography & CTAs */}
-            <div className="lg:col-span-7 space-y-6 text-left">
-              <motion.h1 
-                custom={1} initial="hidden" animate="visible" variants={fadeUpVariants}
-                className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight text-brand-900 text-balance leading-[1.06]"
-              >
-                Kesehatan Anda, <br />
-                <span className="bg-gradient-to-r from-brand-900 via-emerald-800 to-emerald-600 bg-clip-text text-transparent">
-                  Dapat Diprediksi.
-                </span>
-              </motion.h1>
-              
-              <motion.p 
-                custom={2} initial="hidden" animate="visible" variants={fadeUpVariants}
-                className="text-lg sm:text-xl text-brand-900/70 max-w-xl text-balance leading-relaxed font-normal"
-              >
-                Masukkan parameter kesehatan dan kebiasaan harian Anda. Heliora memetakan pola risiko kardiometabolik secara privat, objektif, dan terarah.
-              </motion.p>
-              
-              <motion.div 
-                custom={3} initial="hidden" animate="visible" variants={fadeUpVariants}
-                className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 pt-3"
-              >
-                <Link href="/register">
-                  <Button className="w-full sm:w-auto h-14 px-8 rounded-2xl bg-brand-900 hover:bg-brand-900/90 text-white text-base font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-brand-900/15 flex items-center justify-center gap-2.5">
-                    <span>Mulai Assessment</span>
-                    <IconArrowRight size={18} />
-                  </Button>
-                </Link>
-                <Link href="#how-it-works">
-                  <Button variant="outline" className="w-full sm:w-auto h-14 px-8 rounded-2xl border-brand-900/15 bg-white/80 backdrop-blur-xl hover:bg-brand-50/80 text-brand-900 text-base font-semibold transition-all shadow-xs">
-                    Pelajari Alur
-                  </Button>
-                </Link>
-              </motion.div>
-            </div>
+        {/* HERO SECTION: Centered Minimal Editorial (Stitch Final Hero + Design.md) */}
+        <section className="container mx-auto px-6 lg:px-12 pt-12 sm:pt-16 lg:pt-24 pb-20 relative">
+          <div className="flex flex-col items-center text-center max-w-4xl mx-auto space-y-8">
+            <motion.span 
+              custom={0} initial="hidden" animate="visible" variants={fadeUpVariants}
+              className="text-xs font-semibold uppercase tracking-[0.28em] text-brand-900/60 bg-brand-100/60 px-4 py-1.5 rounded-full border border-brand-900/10 backdrop-blur-sm"
+            >
+              HELIORA
+            </motion.span>
 
-            {/* Right Column (5 cols): 3D Perspective Glass Mockup Card */}
+            <motion.h1 
+              custom={1} initial="hidden" animate="visible" variants={fadeUpVariants}
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-brand-900 text-balance leading-[1.08]"
+            >
+              Kesehatan Anda,<br />
+              <span className="italic font-light text-brand-900/80">dapat dipahami.</span>
+            </motion.h1>
+
             <motion.div 
               custom={2} initial="hidden" animate="visible" variants={fadeUpVariants}
-              className="lg:col-span-5 relative [perspective:1200px] flex items-center justify-center pt-6 lg:pt-0"
+              className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 pt-4"
             >
-              {/* Floating Badge 1: Standard Method (Top Left) */}
-              <motion.div
-                animate={{ y: [0, -6, 0] }}
-                transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute -top-3 -left-3 sm:-top-5 sm:-left-6 z-20 bg-white/90 backdrop-blur-xl border border-brand-900/10 rounded-2xl px-4 py-3 shadow-[0_12px_30px_rgba(0,0,0,0.06)] flex items-center gap-3"
+              <Link href="/register">
+                <Button className="h-13 px-8 rounded-full bg-[#1e3a2b] hover:bg-[#162c20] text-white text-base font-medium shadow-[0_4px_16px_rgba(30,58,43,0.18)] hover:shadow-[0_6px_20px_rgba(30,58,43,0.25)] transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2">
+                  <span>Mulai Assessment</span>
+                  <IconArrowRight size={18} />
+                </Button>
+              </Link>
+              <Link 
+                href="#how-it-works"
+                className="group flex items-center gap-2 text-base font-medium text-brand-900/70 hover:text-brand-900 transition-colors py-3 px-4"
               >
-                <div className="w-9 h-9 rounded-xl bg-brand-50 flex items-center justify-center text-brand-900">
-                  <IconClipboardList size={20} />
-                </div>
-                <div>
-                  <p className="text-[10px] uppercase font-mono tracking-wider text-brand-900/50 font-bold">Metode Terstandar</p>
-                  <p className="text-sm font-bold text-brand-900 leading-tight">Asesmen Mandiri</p>
-                </div>
-              </motion.div>
-
-              {/* Floating Badge 2: Local Encryption (Bottom Right) */}
-              <motion.div
-                animate={{ y: [0, 6, 0] }}
-                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-                className="absolute -bottom-4 -right-2 sm:-bottom-5 sm:-right-4 z-20 bg-white/90 backdrop-blur-xl border border-brand-900/10 rounded-2xl px-4 py-3 shadow-[0_12px_30px_rgba(0,0,0,0.06)] flex items-center gap-3"
-              >
-                <div className="w-9 h-9 rounded-xl bg-brand-900/10 flex items-center justify-center text-brand-900">
-                  <IconShieldCheck size={20} />
-                </div>
-                <div>
-                  <p className="text-[10px] uppercase font-mono tracking-wider text-brand-900/50 font-bold">Keamanan Data</p>
-                  <p className="text-sm font-bold text-brand-900 leading-tight">Enkripsi Lokal E2E</p>
-                </div>
-              </motion.div>
-
-              {/* Main 3D Perspective Card */}
-              <div className="w-full max-w-md bg-white/80 backdrop-blur-2xl border border-white/80 rounded-[2.5rem] p-7 sm:p-8 shadow-[0_25px_60px_-15px_rgba(13,95,63,0.12)] space-y-6 [transform:rotateY(-6deg)_rotateX(4deg)] hover:[transform:rotateY(0deg)_rotateX(0deg)] transition-all duration-700 ease-out relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-44 h-44 bg-gradient-to-br from-brand-400/20 to-transparent rounded-full blur-2xl pointer-events-none" />
-
-                {/* Card Header (Clean Title Only) */}
-                <div className="flex items-center justify-between border-b border-brand-900/5 pb-4">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-lg bg-brand-900 text-white flex items-center justify-center shadow-xs">
-                      <IconHeartbeat size={16} />
-                    </div>
-                    <span className="text-xs font-bold tracking-tight text-brand-900">HELIORA ASSESSMENT</span>
-                  </div>
-                  <span className="text-[11px] font-medium text-brand-900/50">Formulir Mandiri</span>
-                </div>
-
-                {/* Status Panel - Factual Health Profile Categories */}
-                <div className="bg-brand-50/50 rounded-2xl p-5 border border-brand-900/5 space-y-1">
-                  <div className="text-2xl font-bold text-brand-900 tracking-tight">
-                    Profil Kardiometabolik
-                  </div>
-                  <p className="text-xs text-brand-900/60">
-                    Fisik • Tekanan Darah • Pola Kebiasaan
-                  </p>
-                </div>
-
-                {/* 3 Real Health Profile Input Categories */}
-                <div className="space-y-3">
-                  <p className="text-[11px] font-mono uppercase tracking-wider text-brand-900/40 font-bold">
-                    Komponen Pengisian
-                  </p>
-                  
-                  {/* Category 1: Physical Profile */}
-                  <div className="flex items-center justify-between p-3.5 rounded-xl bg-white/90 border border-brand-900/5 hover:border-brand-900/15 transition-all">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-800 flex items-center justify-center">
-                        <IconClipboardList size={17} />
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-brand-900">Profil Fisik & Antropometri</p>
-                        <p className="text-[11px] text-brand-900/60">Usia, Tinggi, & Berat Badan</p>
-                      </div>
-                    </div>
-                    <span className="text-xs font-medium text-brand-900/60">Siap Diisi</span>
-                  </div>
-
-                  {/* Category 2: Blood Pressure & History */}
-                  <div className="flex items-center justify-between p-3.5 rounded-xl bg-white/90 border border-brand-900/5 hover:border-brand-900/15 transition-all">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-rose-50 text-rose-700 flex items-center justify-center">
-                        <IconHeartbeat size={17} />
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-brand-900">Tekanan Darah & Riwayat</p>
-                        <p className="text-[11px] text-brand-900/60">Tensi Darah & Riwayat Keluarga</p>
-                      </div>
-                    </div>
-                    <span className="text-xs font-medium text-brand-900/60">Siap Diisi</span>
-                  </div>
-
-                  {/* Category 3: Lifestyle Habits */}
-                  <div className="flex items-center justify-between p-3.5 rounded-xl bg-white/90 border border-brand-900/5 hover:border-brand-900/15 transition-all">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center">
-                        <IconMoon size={17} />
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-brand-900">Pola Gaya Hidup</p>
-                        <p className="text-[11px] text-brand-900/60">Aktivitas, Durasi Tidur, & Rokok</p>
-                      </div>
-                    </div>
-                    <span className="text-xs font-medium text-brand-900/60">Siap Diisi</span>
-                  </div>
-                </div>
-              </div>
+                <span>Pelajari Alur</span>
+                <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
+              </Link>
             </motion.div>
           </div>
         </section>
 
-        {/* SECTION 01: TANTANGAN */}
-        <section className="container mx-auto px-6 lg:px-12 py-16">
-          <div className="max-w-2xl mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-brand-900 leading-tight">
-              Mengapa Deteksi Dini Sering Terlambat?
-            </h2>
-            <p className="text-base text-brand-900/60 mt-2 font-normal">
-              Banyak masalah kardiometabolik berkembang tanpa rasa sakit fisik.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Card 1 */}
-            <div className="bg-white/80 backdrop-blur-xl rounded-[2rem] p-7 border border-brand-900/10 shadow-sm flex flex-col justify-between space-y-4 hover:-translate-y-1 hover:shadow-lg transition-all">
-              <div className="w-10 h-10 rounded-xl bg-brand-50 border border-brand-900/10 flex items-center justify-center text-brand-900">
-                <IconFileText size={20} />
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-lg font-bold text-brand-900 tracking-tight">
-                  Data Tercecer
-                </h3>
-                <p className="text-sm text-brand-900/65 leading-relaxed">
-                  Riwayat tensi darah, hasil lab lama, dan catatan pola hidup harian kerap tersimpan terpisah tanpa evaluasi menyeluruh.
-                </p>
-              </div>
+        {/* SECTION 01 (STITCH SECTION 2: FINAL - BILATERAL CONVERGENCE): KESEHATAN BUKAN SEKADAR ANGKA */}
+        <section className="relative w-full overflow-hidden py-20 md:py-32 border-t border-brand-900/5">
+          <div className="container mx-auto px-6 lg:px-12 max-w-6xl">
+            {/* Typographic Header: Editorial Hierarchy */}
+            <div className="max-w-4xl mb-12 md:mb-16">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-normal tracking-tight text-brand-900 leading-[1.08]">
+                Setiap hari, kita melakukan <br className="hidden sm:inline" />
+                <span className="italic font-light text-brand-900/80">lebih dari yang kita sadari.</span>
+              </h2>
             </div>
 
-            {/* Card 2 */}
-            <div className="bg-white/80 backdrop-blur-xl rounded-[2rem] p-7 border border-brand-900/10 shadow-sm flex flex-col justify-between space-y-4 hover:-translate-y-1 hover:shadow-lg transition-all">
-              <div className="w-10 h-10 rounded-xl bg-brand-50 border border-brand-900/10 flex items-center justify-center text-brand-900">
-                <IconActivity size={20} />
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-lg font-bold text-brand-900 tracking-tight">
-                  Perkembangan Senyap
-                </h3>
-                <p className="text-sm text-brand-900/65 leading-relaxed">
-                  Pergeseran metabolisme dapat berjalan bertahun-tahun tanpa gejala sebelum memicu masalah serius.
-                </p>
-              </div>
+            {/* BiologicalPatternFlow Component: Bilateral Convergence to Exact Center */}
+            <div className="relative w-full select-none">
+              {/* Subtle Soft Ambient Radial Glows */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] h-[300px] bg-emerald-300/15 rounded-full blur-[110px] pointer-events-none -z-10" />
+              <div className="absolute top-1/3 left-12 w-[280px] h-[200px] bg-[#d97757]/10 rounded-full blur-[90px] pointer-events-none -z-10" />
+              <div className="absolute bottom-1/4 right-12 w-[300px] h-[220px] bg-[#64748b]/10 rounded-full blur-[90px] pointer-events-none -z-10" />
+
+              {/* Interactive Dynamic Biological Stream Canvas */}
+              <BilateralPatternFlow />
             </div>
 
-            {/* Card 3 */}
-            <div className="bg-white/80 backdrop-blur-xl rounded-[2rem] p-7 border border-brand-900/10 shadow-sm flex flex-col justify-between space-y-4 hover:-translate-y-1 hover:shadow-lg transition-all">
-              <div className="w-10 h-10 rounded-xl bg-brand-50 border border-brand-900/10 flex items-center justify-center text-brand-900">
-                <IconHeartbeat size={20} />
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-lg font-bold text-brand-900 tracking-tight">
-                  Kecemasan Diagnostik
-                </h3>
-                <p className="text-sm text-brand-900/65 leading-relaxed">
-                  Pemeriksaan klinis sering dihindari karena takut vonis. Pendekatan mandiri memberi ruang yang lebih tenang.
-                </p>
-              </div>
+            {/* Editorial Conceptual Forward Bridge */}
+            <div className="mt-16 md:mt-24 flex justify-center">
+              <Link 
+                href="#how-it-works"
+                className="group inline-flex items-center gap-2 text-sm md:text-base font-medium text-brand-900/80 hover:text-brand-900 transition-colors tracking-wide"
+              >
+                <span>Bagaimana HELIORA membaca pola</span>
+                <IconArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-300" />
+              </Link>
             </div>
           </div>
         </section>
