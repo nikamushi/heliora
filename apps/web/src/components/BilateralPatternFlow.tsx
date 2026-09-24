@@ -416,38 +416,21 @@ export function BilateralPatternFlow() {
     function calculatePointOnStream(
       stream: StreamConfig,
       t: number,
-      timestamp: number
+      timestamp: number,
+      targetX: number,
+      targetY: number
     ) {
-      const containerElem = containerRef.current;
-      const bodyElem = bodyRef.current;
-      let bodyCenterX = width * 0.5;
-      let bodyCenterY = height * 0.5;
-      let scale = height * 0.0023;
-
-      if (containerElem && bodyElem) {
-        const cRect = containerElem.getBoundingClientRect();
-        const bRect = bodyElem.getBoundingClientRect();
-        if (cRect.width > 0 && bRect.height > 0) {
-          bodyCenterX = bRect.left - cRect.left + bRect.width * 0.5;
-          bodyCenterY = bRect.top - cRect.top + bRect.height * 0.5;
-          scale = bRect.height / 216;
-        }
-      }
-
       let startX: number;
-      const endX = bodyCenterX + stream.targetNode.x * scale;
-      const endY = bodyCenterY + stream.targetNode.y * scale;
-
       if (stream.side === "left") {
-        startX = width * 0.015;
+        startX = width * 0.005;
       } else {
-        startX = width * 0.985;
+        startX = width * 0.995;
       }
 
       const startY = height * stream.startYRatio;
-      const currentX = startX + (endX - startX) * t;
+      const currentX = startX + (targetX - startX) * t;
 
-      // Wave dampens to zero at t = 1 for 100% precise landing on the dot
+      // Wave dampens to zero at t = 1 for 100% seamless landing on the focal dot
       const convergenceFactor = Math.sin(t * Math.PI * 0.5) * (1 - t);
       const wave1 =
         Math.sin(
@@ -465,7 +448,7 @@ export function BilateralPatternFlow() {
         convergenceFactor;
 
       const easeT = t * t * (3 - 2 * t);
-      let currentY = startY + (endY - startY) * easeT + wave1 + wave2;
+      let currentY = startY + (targetY - startY) * easeT + wave1 + wave2;
 
       if (mouse.active) {
         const dx = currentX - mouse.x;
@@ -489,28 +472,41 @@ export function BilateralPatternFlow() {
 
       context.clearRect(0, 0, width, height);
 
-      const centerX = width * 0.5;
-      const centerY = height * 0.5;
+      // Dynamically compute exact focal dot center in canvas pixel coordinates
+      const containerElem = containerRef.current;
+      const bodyElem = bodyRef.current;
+      let focalX = width * 0.5;
+      let focalY = height * 0.5;
+
+      if (containerElem && bodyElem) {
+        const cRect = containerElem.getBoundingClientRect();
+        const bRect = bodyElem.getBoundingClientRect();
+        if (cRect.width > 0 && bRect.height > 0) {
+          focalX = bRect.left - cRect.left + bRect.width * 0.5;
+          // SVG viewBox is "-50 -108 100 216", dot is at cy = -20
+          focalY = bRect.top - cRect.top + bRect.height * (0.5 + (-20) / 216);
+        }
+      }
 
       // 1. Central Convergence Aura
       const breathe = Math.sin(timestamp * 0.0018) * 0.5 + 0.5;
       const haloRadius = 46 + breathe * 22;
       const auraGrad = context.createRadialGradient(
-        centerX,
-        centerY,
+        focalX,
+        focalY,
         0,
-        centerX,
-        centerY,
+        focalX,
+        focalY,
         haloRadius
       );
-      auraGrad.addColorStop(0, "rgba(45, 90, 67, 0.22)");
-      auraGrad.addColorStop(0.45, "rgba(188, 238, 211, 0.12)");
+      auraGrad.addColorStop(0, "rgba(45, 90, 67, 0.24)");
+      auraGrad.addColorStop(0.45, "rgba(188, 238, 211, 0.14)");
       auraGrad.addColorStop(1, "rgba(250, 249, 246, 0)");
 
       context.save();
       context.fillStyle = auraGrad;
       context.beginPath();
-      context.arc(centerX, centerY, haloRadius, 0, Math.PI * 2);
+      context.arc(focalX, focalY, haloRadius, 0, Math.PI * 2);
       context.fill();
       context.restore();
 
@@ -521,11 +517,11 @@ export function BilateralPatternFlow() {
 
         for (let s = 0; s <= steps; s++) {
           const t = s / steps;
-          points.push(calculatePointOnStream(stream, t, timestamp));
+          points.push(calculatePointOnStream(stream, t, timestamp, focalX, focalY));
         }
 
-        const startX = stream.side === "left" ? width * 0.02 : width * 0.98;
-        const grad = context.createLinearGradient(startX, 0, centerX, 0);
+        const startX = stream.side === "left" ? width * 0.01 : width * 0.99;
+        const grad = context.createLinearGradient(startX, 0, focalX, 0);
         grad.addColorStop(0, stream.colorStart);
         grad.addColorStop(0.65, stream.colorStart);
         grad.addColorStop(0.92, stream.colorEnd);
@@ -559,9 +555,9 @@ export function BilateralPatternFlow() {
           stream.name.includes("metabolic") ||
           stream.name.includes("hemodynamic");
         const dotColor = isWarm ? "217, 119, 87" : "15, 122, 78";
-        context.fillStyle = `rgba(${dotColor}, 0.4)`;
+        context.fillStyle = `rgba(${dotColor}, 0.5)`;
         context.beginPath();
-        context.arc(lastPt.x, lastPt.y, 3.2, 0, Math.PI * 2);
+        context.arc(lastPt.x, lastPt.y, 3.5, 0, Math.PI * 2);
         context.fill();
         context.restore();
       });
@@ -575,7 +571,7 @@ export function BilateralPatternFlow() {
         }
 
         const stream = streams[p.streamIndex];
-        const pt = calculatePointOnStream(stream, p.progress, timestamp);
+        const pt = calculatePointOnStream(stream, p.progress, timestamp, focalX, focalY);
 
         const alpha = Math.min(1, Math.sin(p.progress * Math.PI)) * p.opacity;
         const particleGrad = context.createRadialGradient(
@@ -613,13 +609,13 @@ export function BilateralPatternFlow() {
       // 4. Pola Kesehatan Center Organic Bio-pulse (converging into the body core)
       context.save();
       const pulseScale = 1 + breathe * 0.22;
-      const coreGrad = context.createRadialGradient(centerX, centerY, 0, centerX, centerY, 38 * pulseScale);
+      const coreGrad = context.createRadialGradient(focalX, focalY, 0, focalX, focalY, 38 * pulseScale);
       coreGrad.addColorStop(0, "rgba(45, 90, 67, 0.22)");
       coreGrad.addColorStop(0.55, "rgba(15, 122, 78, 0.06)");
       coreGrad.addColorStop(1, "rgba(45, 90, 67, 0)");
       context.fillStyle = coreGrad;
       context.beginPath();
-      context.arc(centerX, centerY, 38 * pulseScale, 0, Math.PI * 2);
+      context.arc(focalX, focalY, 38 * pulseScale, 0, Math.PI * 2);
       context.fill();
       context.restore();
 
@@ -651,7 +647,7 @@ export function BilateralPatternFlow() {
 
           {/* Topographic Bio-Wave Mesh Human Figure */}
           <svg
-            viewBox="-50 -105 100 216"
+            viewBox="-50 -108 100 216"
             className="w-full h-full drop-shadow-sm overflow-visible"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
