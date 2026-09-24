@@ -33,10 +33,10 @@ interface Particle {
 }
 
 interface BilateralPatternFlowProps {
-  triggerRef?: React.RefObject<HTMLElement | null>;
+  timeline?: gsap.core.Timeline | null;
 }
 
-export function BilateralPatternFlow({ triggerRef }: BilateralPatternFlowProps = {}) {
+export function BilateralPatternFlow({ timeline }: BilateralPatternFlowProps = {}) {
   const cameraViewportRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -46,113 +46,99 @@ export function BilateralPatternFlow({ triggerRef }: BilateralPatternFlowProps =
   const bodyMeshRef = useRef<SVGGElement>(null);
   const macroDetailRef = useRef<SVGGElement>(null);
 
-  useGSAP(
-    () => {
-      if (!cameraViewportRef.current || !sceneRef.current || !focalDotRef.current) return;
+  useEffect(() => {
+    if (!timeline || !sceneRef.current || !focalDotRef.current) return;
 
-      const trigger = triggerRef?.current || cameraViewportRef.current;
+    const dotElem = focalDotRef.current;
+    const sceneElem = sceneRef.current;
 
-      const updateTransformOrigin = () => {
-        const dotElem = focalDotRef.current;
-        const sceneElem = sceneRef.current;
-        if (!dotElem || !sceneElem) return;
+    const updateTransformOrigin = () => {
+      const dotRect = dotElem.getBoundingClientRect();
+      const sceneRect = sceneElem.getBoundingClientRect();
 
-        const dotRect = dotElem.getBoundingClientRect();
-        const sceneRect = sceneElem.getBoundingClientRect();
+      // Exact scene-local coordinates of the red dot (not viewport coordinates)
+      const dotLocalX = dotRect.left + dotRect.width / 2 - sceneRect.left;
+      const dotLocalY = dotRect.top + dotRect.height / 2 - sceneRect.top;
 
-        // Exact scene-local coordinates of the red dot (not viewport coordinates)
-        const dotLocalX = dotRect.left + dotRect.width / 2 - sceneRect.left;
-        const dotLocalY = dotRect.top + dotRect.height / 2 - sceneRect.top;
+      if (dotLocalX > 0 && dotLocalY > 0) {
+        gsap.set(sceneElem, {
+          transformOrigin: `${dotLocalX}px ${dotLocalY}px`,
+          force3D: true,
+        });
+      }
+    };
 
-        if (dotLocalX > 0 && dotLocalY > 0) {
-          gsap.set(sceneRef.current, {
-            transformOrigin: `${dotLocalX}px ${dotLocalY}px`,
-            force3D: true,
-          });
-        }
-      };
+    updateTransformOrigin();
 
-      updateTransformOrigin();
+    // 1. Camera zooms straight into the central red dot (pinned stationary in screen space)
+    timeline.to(
+      sceneElem,
+      {
+        scale: 6.8,
+        ease: "none",
+        duration: 1,
+      },
+      0
+    );
 
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: trigger,
-          start: "top top",
-          end: "+=2200",
-          scrub: 1,
-          invalidateOnRefresh: true,
-          onRefresh: () => {
-            updateTransformOrigin();
-          },
-        },
-      });
-
-      // 1. Camera zooms straight into the central red dot (pinned stationary in screen space)
-      tl.to(
-        sceneRef.current,
+    // 2. Fade out bilateral flowing lines (canvas) smoothly during zoom approach
+    if (canvasRef.current) {
+      timeline.to(
+        canvasRef.current,
         {
-          scale: 6.8,
-          ease: "power2.out",
-          duration: 1,
+          opacity: 0,
+          ease: "power1.inOut",
+          duration: 0.35,
         },
-        0
+        0.05
       );
+    }
 
-      // 2. Fade out bilateral flowing lines (canvas) smoothly during zoom approach
-      if (canvasRef.current) {
-        tl.to(
-          canvasRef.current,
-          {
-            opacity: 0,
-            ease: "power1.inOut",
-            duration: 0.35,
-          },
-          0.05
-        );
-      }
+    // 3. Fade out human body contour slices smoothly during zoom approach
+    if (bodyMeshRef.current) {
+      timeline.to(
+        bodyMeshRef.current,
+        {
+          opacity: 0,
+          ease: "power1.inOut",
+          duration: 0.35,
+        },
+        0.05
+      );
+    }
 
-      // 3. Fade out human body contour slices smoothly during zoom approach
-      if (bodyMeshRef.current) {
-        tl.to(
-          bodyMeshRef.current,
-          {
-            opacity: 0,
-            ease: "power1.inOut",
-            duration: 0.35,
-          },
-          0.05
-        );
-      }
+    // 4. Fade out body background ambient glow
+    if (bodyGlowRef.current) {
+      timeline.to(
+        bodyGlowRef.current,
+        {
+          opacity: 0,
+          ease: "power1.inOut",
+          duration: 0.35,
+        },
+        0.05
+      );
+    }
 
-      // 4. Fade out body background ambient glow
-      if (bodyGlowRef.current) {
-        tl.to(
-          bodyGlowRef.current,
-          {
-            opacity: 0,
-            ease: "power1.inOut",
-            duration: 0.35,
-          },
-          0.05
-        );
-      }
+    // 5. Reveal high-resolution macro telemetry rings around the central red dot
+    if (macroDetailRef.current) {
+      timeline.fromTo(
+        macroDetailRef.current,
+        { opacity: 0 },
+        {
+          opacity: 1,
+          ease: "power1.inOut",
+          duration: 0.4,
+        },
+        0.2
+      );
+    }
 
-      // 5. Reveal high-resolution macro telemetry rings around the central red dot
-      if (macroDetailRef.current) {
-        tl.fromTo(
-          macroDetailRef.current,
-          { opacity: 0 },
-          {
-            opacity: 1,
-            ease: "power1.inOut",
-            duration: 0.4,
-          },
-          0.2
-        );
-      }
-    },
-    { scope: cameraViewportRef, dependencies: [triggerRef] }
-  );
+    ScrollTrigger.addEventListener("refresh", updateTransformOrigin);
+    return () => {
+      ScrollTrigger.removeEventListener("refresh", updateTransformOrigin);
+    };
+  }, [timeline]);
 
   useEffect(() => {
     const canvas = canvasRef.current;

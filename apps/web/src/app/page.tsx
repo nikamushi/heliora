@@ -40,6 +40,7 @@ function SectionPatternsPinned() {
   const headlineRef = React.useRef<HTMLDivElement>(null);
   const bridgeRef = React.useRef<HTMLDivElement>(null);
   const glowsRef = React.useRef<HTMLDivElement>(null);
+  const [timeline, setTimeline] = React.useState<gsap.core.Timeline | null>(null);
 
   useGSAP(
     () => {
@@ -96,6 +97,8 @@ function SectionPatternsPinned() {
           0
         );
       }
+
+      setTimeline(tl);
     },
     { scope: sectionRef }
   );
@@ -139,7 +142,7 @@ function SectionPatternsPinned() {
             <div className="absolute bottom-1/4 right-12 w-[380px] h-[300px] bg-[#64748b]/10 rounded-full blur-[110px]" />
           </div>
 
-          <BilateralPatternFlow triggerRef={sectionRef} />
+          <BilateralPatternFlow timeline={timeline} />
         </div>
 
         {/* Editorial Conceptual Forward Bridge */}
