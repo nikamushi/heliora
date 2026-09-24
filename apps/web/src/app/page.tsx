@@ -105,8 +105,8 @@ function SectionLifestyleNarrative() {
     ),
     (
       <span className="text-brand-900/80">
-        Seiring waktu, perubahan kecil bisa{" "}
-        <span className="text-brand-900">memperlihatkan hal baru tentang kesehatan kita</span>:
+        Seiring waktu,{" "}
+        <span className="text-brand-900">perubahan kecil</span> bisa memperlihatkan hal baru tentang kesehatan kita:
         {" "}bagaimana kondisinya hari ini, dan apa yang mungkin terjadi ke depannya.
       </span>
     ),
