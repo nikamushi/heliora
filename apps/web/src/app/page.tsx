@@ -102,7 +102,7 @@ function SectionLifestyleNarrative() {
   return (
     <section 
       id="narrative" 
-      className="container mx-auto px-6 lg:px-12 pt-8 sm:pt-12 md:pt-16 pb-20 sm:pb-28 md:pb-36 scroll-mt-24"
+      className="container mx-auto px-6 lg:px-12 pt-8 sm:pt-12 md:pt-16 pb-10 sm:pb-14 md:pb-18 scroll-mt-24"
     >
       <div className="max-w-5xl mx-auto flex flex-col items-center">
         <NarrativeItem content={narrativeContent} />
@@ -193,7 +193,7 @@ export default function LandingPage() {
         <SectionLifestyleNarrative />
 
         {/* SECTION 04: AI UNTUK KESEHATAN - HELIORA (#how-it-works) */}
-        <section id="how-it-works" className="w-full bg-[#13281c] text-white py-24 sm:py-32 md:py-40 my-12 relative overflow-hidden border-y border-emerald-950 scroll-mt-24">
+        <section id="how-it-works" className="w-full bg-[#13281c] text-white py-16 sm:py-20 md:py-28 my-6 sm:my-8 relative overflow-hidden border-y border-emerald-950 scroll-mt-24">
           {/* Subtle Ambient Glows */}
           <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[140px] pointer-events-none" />
           <div className="absolute bottom-0 left-1/4 w-[400px] h-[400px] bg-teal-500/10 rounded-full blur-[120px] pointer-events-none" />
@@ -206,12 +206,12 @@ export default function LandingPage() {
             </div>
 
             {/* Generative Abstract Layered Health Visual */}
-            <div className="mt-12 sm:mt-16 md:mt-20">
+            <div className="mt-8 sm:mt-10 md:mt-12">
               <LayeredHealthPicture />
             </div>
 
             {/* Editorial Description Text */}
-            <div className="mt-10 sm:mt-14 max-w-3xl mx-auto text-center">
+            <div className="mt-6 sm:mt-8 max-w-3xl mx-auto text-center">
               <p className="text-base sm:text-lg md:text-xl text-emerald-100/65 font-normal leading-relaxed text-balance">
                 Kesehatan bukan sekadar angka. HELIORA membantu Anda{" "}
                 <span className="text-white">memahami</span> apa yang membentuk kesehatan,{" "}
