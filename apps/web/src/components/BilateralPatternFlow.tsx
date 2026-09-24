@@ -48,11 +48,11 @@ export function BilateralPatternFlow({ timeline }: BilateralPatternFlowProps = {
   useEffect(() => {
     if (!timeline || !focalPointRef.current) return;
 
-    // 1. Focal Point zooms up progressively across the entire scroll range (Scale 1 -> 5)
+    // 1. Focal Icon zooms up progressively across the entire scroll range (Scale 1 -> 14)
     timeline.to(
       focalPointRef.current,
       {
-        scale: 5,
+        scale: 14,
         transformOrigin: "50% 50%",
         ease: "none",
         duration: 1,
@@ -837,7 +837,7 @@ export function BilateralPatternFlow({ timeline }: BilateralPatternFlowProps = {
             </svg>
           </div>
 
-          {/* Isolated Central Focal Point (Clean, understated insight indicator) */}
+          {/* Isolated Central Focal Point (Floating icon without background badge) */}
           <div 
             ref={focalPointRef}
             style={{ 
@@ -845,41 +845,37 @@ export function BilateralPatternFlow({ timeline }: BilateralPatternFlowProps = {
               left: "50%",
               transformOrigin: "50% 50%"
             }}
-            className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none z-30 flex items-center justify-center w-7 h-7"
+            className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none z-30 flex items-center justify-center w-7 h-7 bg-transparent border-0 shadow-none"
           >
             <svg viewBox="-14 -14 28 28" className="w-7 h-7 overflow-visible">
-              {/* Soft, minimal focal signal glow */}
-              <circle cx="0" cy="0" r="10" fill="#D97757" fillOpacity="0.16" />
-              <circle cx="0" cy="0" r="7.5" fill="#D97757" fillOpacity="0.88" />
-
-              {/* State 1: Question Mark '?' (Clean, thin outline icon) */}
+              {/* State 1: Question Mark '?' (Clean outline icon) */}
               <g ref={questionMarkRef} style={{ transformOrigin: "0px 0px" }}>
                 <path
                   d="M -2.8 -3.2 C -2.8 -5.8, 2.8 -5.8, 2.8 -3.2 C 2.8 -1.2, 0 -0.4, 0 1.6"
                   fill="none"
-                  stroke="#FFFFFF"
-                  strokeWidth="1.5"
+                  stroke="#1e3a2b"
+                  strokeWidth="1.4"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
-                <circle cx="0" cy="4.2" r="0.75" fill="#FFFFFF" />
+                <circle cx="0" cy="4.2" r="0.75" fill="#1e3a2b" />
               </g>
 
-              {/* State 2: Loop / Cycle Icon '⟳' (Matching minimal outline icon) */}
+              {/* State 2: Loop / Cycle Icon '⟳' (Clean matching outline icon) */}
               <g ref={loopIconRef} style={{ transformOrigin: "0px 0px", opacity: 0 }}>
                 {/* Top Clockwise Arc with Minimal Arrow Tip */}
                 <path
                   d="M -4.2 -2.2 A 4.8 4.8 0 0 1 4.2 -2.2"
                   fill="none"
-                  stroke="#FFFFFF"
-                  strokeWidth="1.4"
+                  stroke="#1e3a2b"
+                  strokeWidth="1.3"
                   strokeLinecap="round"
                 />
                 <path
                   d="M 4.6 -4.4 L 4.2 -2.2 L 2.0 -2.4"
                   fill="none"
-                  stroke="#FFFFFF"
-                  strokeWidth="1.4"
+                  stroke="#1e3a2b"
+                  strokeWidth="1.3"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
@@ -888,15 +884,15 @@ export function BilateralPatternFlow({ timeline }: BilateralPatternFlowProps = {
                 <path
                   d="M 4.2 2.2 A 4.8 4.8 0 0 1 -4.2 2.2"
                   fill="none"
-                  stroke="#FFFFFF"
-                  strokeWidth="1.4"
+                  stroke="#1e3a2b"
+                  strokeWidth="1.3"
                   strokeLinecap="round"
                 />
                 <path
                   d="M -4.6 4.4 L -4.2 2.2 L -2.0 2.4"
                   fill="none"
-                  stroke="#FFFFFF"
-                  strokeWidth="1.4"
+                  stroke="#1e3a2b"
+                  strokeWidth="1.3"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
