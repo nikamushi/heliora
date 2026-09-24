@@ -51,7 +51,7 @@ function SectionPatterns() {
       </div>
 
       {/* Dedicated Viewport for Bilateral Flow Visualization */}
-      <div className="relative w-full flex-1 min-h-[380px] md:min-h-[480px] overflow-hidden flex items-center justify-center pointer-events-none z-10 my-auto">
+      <div className="relative w-full h-[460px] sm:h-[520px] md:h-[600px] flex items-center justify-center pointer-events-none z-10 my-auto">
         {/* Soft Ambient Radial Glows */}
         <div className="absolute inset-0 pointer-events-none -z-10">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[450px] bg-emerald-300/15 rounded-full blur-[140px]" />

@@ -55,8 +55,8 @@ export function BilateralPatternFlow() {
       if (!canvas || !container) return;
       const rect = container.getBoundingClientRect();
       const dpr = window.devicePixelRatio || 1;
-      width = rect.width;
-      height = rect.height;
+      width = rect.width || container.clientWidth || 800;
+      height = rect.height || container.clientHeight || 500;
       canvas.width = width * dpr;
       canvas.height = height * dpr;
       canvas.style.width = `${width}px`;
@@ -66,6 +66,11 @@ export function BilateralPatternFlow() {
 
     handleResize();
     window.addEventListener("resize", handleResize);
+
+    const resizeObserver = new ResizeObserver(() => {
+      handleResize();
+    });
+    resizeObserver.observe(container);
 
     const handleMouseMove = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
@@ -570,6 +575,7 @@ export function BilateralPatternFlow() {
 
     return () => {
       cancelAnimationFrame(animationFrameId);
+      resizeObserver.disconnect();
       window.removeEventListener("resize", handleResize);
       canvas.removeEventListener("mousemove", handleMouseMove);
       canvas.removeEventListener("mouseleave", handleMouseLeave);
@@ -579,21 +585,19 @@ export function BilateralPatternFlow() {
   return (
     <div
       ref={cameraViewportRef}
-      className="relative w-full h-full z-10 flex items-center justify-center overflow-hidden"
+      className="relative w-full h-full min-h-[440px] z-10 flex items-center justify-center"
     >
-      {/* Visualization Scene (Static composition) */}
-      <div className="w-full h-full absolute inset-0 flex items-center justify-center pointer-events-none">
-        {/* Flowing Lines Canvas Layer */}
-        <canvas 
-          ref={canvasRef} 
-          className="w-full h-full block absolute inset-0 pointer-events-none" 
-        />
+      {/* Flowing Lines Canvas Layer */}
+      <canvas 
+        ref={canvasRef} 
+        className="w-full h-full block absolute inset-0 pointer-events-none" 
+      />
 
-        {/* Central Human Bio-Mesh / Topographic Wave Silhouette */}
-        <div 
-          ref={bodyRef} 
-          className="relative w-32 h-56 sm:w-36 sm:h-64 md:w-40 md:h-72 flex items-center justify-center pointer-events-none select-none"
-        >
+      {/* Central Human Bio-Mesh / Topographic Wave Silhouette */}
+      <div 
+        ref={bodyRef} 
+        className="relative z-20 w-36 h-64 sm:w-40 sm:h-72 md:w-44 md:h-80 flex items-center justify-center pointer-events-none select-none"
+      >
           {/* Subtle Ambient Radial Glow behind the body */}
           <div className="absolute inset-0 bg-gradient-to-b from-emerald-400/20 via-emerald-600/25 to-transparent rounded-full blur-3xl -z-10" />
 
@@ -750,7 +754,6 @@ export function BilateralPatternFlow() {
             </g>
           </svg>
         </div>
-      </div>
     </div>
   );
 }
