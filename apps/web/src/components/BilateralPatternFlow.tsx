@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
+import { motion } from "motion/react";
 
 interface StreamConfig {
   side: "left" | "right";
@@ -606,7 +607,74 @@ export function BilateralPatternFlow() {
         context.restore();
       });
 
-      // 4. Pola Kesehatan Center Organic Bio-pulse (converging into the body core)
+      // 4. Continuously Revolving Bio-Orbital Rings around the focal core
+      const spinAngle1 = timestamp * 0.0006;
+      const spinAngle2 = -timestamp * 0.001;
+      const spinAngle3 = timestamp * 0.0018;
+
+      // Outer Orbital Ring (Clockwise segmented)
+      context.save();
+      context.translate(focalX, focalY);
+      context.rotate(spinAngle1);
+      context.strokeStyle = "rgba(15, 122, 78, 0.45)";
+      context.lineWidth = 1.2;
+      context.setLineDash([7, 9, 3, 9]);
+      context.beginPath();
+      context.arc(0, 0, 36, 0, Math.PI * 2);
+      context.stroke();
+
+      // Satellite orbiting beacon dots on Ring 1
+      context.fillStyle = "rgba(15, 122, 78, 0.85)";
+      context.beginPath();
+      context.arc(36, 0, 2.5, 0, Math.PI * 2);
+      context.arc(-36, 0, 2.5, 0, Math.PI * 2);
+      context.fill();
+      context.restore();
+
+      // Middle Orbital Ring (Counter-clockwise with terracotta nodes)
+      context.save();
+      context.translate(focalX, focalY);
+      context.rotate(spinAngle2);
+      context.strokeStyle = "rgba(217, 119, 87, 0.55)";
+      context.lineWidth = 1.0;
+      context.setLineDash([5, 7, 2, 7]);
+      context.beginPath();
+      context.arc(0, 0, 23, 0, Math.PI * 2);
+      context.stroke();
+
+      // Satellite terracotta nodes on Ring 2
+      context.fillStyle = "rgba(217, 119, 87, 0.95)";
+      context.beginPath();
+      context.arc(0, 23, 2.2, 0, Math.PI * 2);
+      context.arc(0, -23, 2.2, 0, Math.PI * 2);
+      context.fill();
+      context.restore();
+
+      // Inner Fast Calibrated Ring
+      context.save();
+      context.translate(focalX, focalY);
+      context.rotate(spinAngle3);
+      context.strokeStyle = "rgba(45, 90, 67, 0.7)";
+      context.lineWidth = 0.9;
+      context.setLineDash([3, 4]);
+      context.beginPath();
+      context.arc(0, 0, 14, 0, Math.PI * 2);
+      context.stroke();
+      context.restore();
+
+      // Expanding Bio-Radar Ripple Pulse
+      const rippleProgress = (timestamp % 2400) / 2400;
+      const rippleRadius = 16 + rippleProgress * 38;
+      const rippleAlpha = (1 - rippleProgress) * 0.35;
+      context.save();
+      context.strokeStyle = `rgba(15, 122, 78, ${rippleAlpha})`;
+      context.lineWidth = 1;
+      context.beginPath();
+      context.arc(focalX, focalY, rippleRadius, 0, Math.PI * 2);
+      context.stroke();
+      context.restore();
+
+      // 5. Pola Kesehatan Center Organic Bio-pulse
       context.save();
       const pulseScale = 1 + breathe * 0.22;
       const coreGrad = context.createRadialGradient(focalX, focalY, 0, focalX, focalY, 38 * pulseScale);
@@ -639,8 +707,14 @@ export function BilateralPatternFlow() {
     >
       <canvas ref={canvasRef} className="w-full h-full block absolute inset-0" />
 
-      {/* Central Human Bio-Mesh / Topographic Wave Silhouette */}
-      <div className="relative z-20 pointer-events-none flex flex-col items-center justify-center select-none translate-y-1">
+      {/* Central Human Bio-Mesh / Topographic Wave Silhouette with Scroll Reveal */}
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.93, y: 16 }}
+        whileInView={{ opacity: 1, scale: 1, y: 0 }}
+        viewport={{ once: true, margin: "0px 0px -120px 0px" }}
+        transition={{ duration: 0.85, ease: [0.21, 0.47, 0.32, 0.98] }}
+        className="relative z-20 pointer-events-none flex flex-col items-center justify-center select-none translate-y-1"
+      >
         <div ref={bodyRef} className="relative w-32 h-52 sm:w-36 sm:h-60 md:w-40 md:h-68 flex items-center justify-center">
           {/* Subtle Ambient Radial Glow behind the body */}
           <div className="absolute inset-0 bg-gradient-to-b from-emerald-400/20 via-emerald-600/25 to-transparent rounded-full blur-2xl -z-10" />
@@ -790,31 +864,94 @@ export function BilateralPatternFlow() {
               <path d="M -7.5 105 Q -5 102.5 -2.5 105 M 2.5 105 Q 5 102.5 7.5 105" />
             </g>
 
-            {/* Single Unified Central Focal Dot (All Lines Converge Here) */}
-            <g>
+            {/* Single Unified Central Focal Core: Perpetually Revolving Bio-Orbital Rings */}
+            <g transform="translate(0, -20)">
               {/* Radiant Core Aura */}
-              <circle cx="0" cy="-20" r="22" fill="url(#coreAura)" />
-              {/* Concentric Precision Ring */}
-              <circle
-                cx="0"
-                cy="-20"
-                r="10"
-                stroke="#2D5A43"
-                strokeWidth="1"
-                strokeOpacity="0.45"
-                fill="none"
-                strokeDasharray="2 2"
-              />
-              {/* Outer Core Dot */}
-              <circle cx="0" cy="-20" r="5.5" fill="#2D5A43" />
-              {/* Inner Emerald Core */}
-              <circle cx="0" cy="-20" r="3.5" fill="#0F7A4E" />
-              {/* Specular White Highlight */}
-              <circle cx="-1.2" cy="-21.2" r="1.4" fill="#ffffff" opacity="0.95" />
+              <circle cx="0" cy="0" r="26" fill="url(#coreAura)" />
+
+              {/* Outer Clockwise Revolving Orbital Ring */}
+              <g>
+                <animateTransform
+                  attributeName="transform"
+                  type="rotate"
+                  from="0"
+                  to="360"
+                  dur="14s"
+                  repeatCount="indefinite"
+                />
+                <circle
+                  cx="0"
+                  cy="0"
+                  r="18"
+                  stroke="#0F7A4E"
+                  strokeWidth="1.2"
+                  strokeDasharray="4 6 2 6"
+                  strokeOpacity="0.75"
+                  fill="none"
+                />
+                <circle cx="18" cy="0" r="1.6" fill="#0F7A4E" />
+                <circle cx="-18" cy="0" r="1.6" fill="#0F7A4E" />
+                <circle cx="0" cy="18" r="1.2" fill="#2D5A43" opacity="0.8" />
+                <circle cx="0" cy="-18" r="1.2" fill="#2D5A43" opacity="0.8" />
+              </g>
+
+              {/* Middle Counter-Clockwise Revolving Ring */}
+              <g>
+                <animateTransform
+                  attributeName="transform"
+                  type="rotate"
+                  from="360"
+                  to="0"
+                  dur="8.5s"
+                  repeatCount="indefinite"
+                />
+                <circle
+                  cx="0"
+                  cy="0"
+                  r="11.5"
+                  stroke="#2D5A43"
+                  strokeWidth="1"
+                  strokeDasharray="3 4 1 4"
+                  strokeOpacity="0.8"
+                  fill="none"
+                />
+                <circle cx="0" cy="11.5" r="1.5" fill="#D97757" />
+                <circle cx="0" cy="-11.5" r="1.5" fill="#D97757" />
+                <circle cx="11.5" cy="0" r="1.1" fill="#0F7A4E" opacity="0.8" />
+                <circle cx="-11.5" cy="0" r="1.1" fill="#0F7A4E" opacity="0.8" />
+              </g>
+
+              {/* Inner Fast Orbiting Calibrated Ring */}
+              <g>
+                <animateTransform
+                  attributeName="transform"
+                  type="rotate"
+                  from="0"
+                  to="360"
+                  dur="4.5s"
+                  repeatCount="indefinite"
+                />
+                <circle
+                  cx="0"
+                  cy="0"
+                  r="7"
+                  stroke="#0F7A4E"
+                  strokeWidth="0.85"
+                  strokeDasharray="2 3"
+                  strokeOpacity="0.65"
+                  fill="none"
+                />
+                <circle cx="7" cy="0" r="1.2" fill="#ffffff" />
+              </g>
+
+              {/* Solid Core Focal Center */}
+              <circle cx="0" cy="0" r="5" fill="#2D5A43" />
+              <circle cx="0" cy="0" r="3.2" fill="#0F7A4E" />
+              <circle cx="-1" cy="-1" r="1.2" fill="#ffffff" opacity="0.95" />
             </g>
           </svg>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
