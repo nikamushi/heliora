@@ -224,68 +224,84 @@ export default function LandingPage() {
         </section>
 
         {/* SECTION 03: KENAPA HARUS HELIORA (#features & #simulation) */}
-        <section id="features" className="w-full bg-white/80 backdrop-blur-md border-y border-brand-900/5 py-20 sm:py-28 md:py-32 my-12 scroll-mt-24">
+        <section id="features" className="w-full bg-white/80 backdrop-blur-md border-y border-brand-900/5 py-20 sm:py-28 md:py-36 my-12 scroll-mt-24">
           <div id="simulation" className="scroll-mt-24" />
           <div className="container mx-auto px-6 lg:px-12">
-            <div className="max-w-2xl mx-auto text-center">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-brand-900 leading-tight">
+            <div className="max-w-3xl mx-auto text-center mb-16 sm:mb-20 md:mb-24">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-brand-900 leading-tight">
                 Kenapa harus HELIORA?
               </h2>
             </div>
 
-            {/* 2 Side-by-Side Columns */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 lg:gap-10 mt-12 sm:mt-16 max-w-5xl mx-auto">
+            {/* Full-Width Side-by-Side Open Columns (No Cards) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20 max-w-6xl mx-auto divide-y md:divide-y-0 md:divide-x divide-brand-900/10">
               {/* Column 1: Berbasis AI */}
-              <div className="bg-brand-50/40 rounded-[2rem] p-8 sm:p-10 border border-brand-900/10 shadow-xs flex flex-col justify-between space-y-6 hover:shadow-md transition-all">
-                <div className="space-y-4">
-                  <div className="w-12 h-12 rounded-2xl bg-white shadow-xs border border-brand-900/10 flex items-center justify-center text-emerald-800">
-                    <IconBrain size={24} stroke={1.75} />
+              <div className="flex flex-col space-y-6 md:pr-10 lg:pr-16 pt-8 md:pt-0">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-brand-100/70 border border-brand-900/10 flex items-center justify-center text-brand-900">
+                    <IconBrain size={22} stroke={1.8} />
                   </div>
-                  <h3 className="text-2xl sm:text-3xl font-bold text-brand-900 tracking-tight">
-                    Berbasis AI
-                  </h3>
-                  <p className="text-sm sm:text-base text-brand-900/70 leading-relaxed font-normal">
-                    Mengolah keterkaitan kompleks antara pola tidur, aktivitas harian, dan biomarker tubuh untuk memetakan dinamika kesehatan secara menyeluruh dan memproyeksikan arah perubahan ke depan.
-                  </p>
+                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-900/50 font-mono">
+                    Pilar 01
+                  </span>
                 </div>
 
-                <div className="pt-4 border-t border-brand-900/5 flex flex-wrap gap-2">
-                  <span className="text-xs px-3 py-1.5 rounded-full bg-white/80 border border-brand-900/10 text-brand-900/80 font-medium">
-                    Analisis Pola Multimodal
-                  </span>
-                  <span className="text-xs px-3 py-1.5 rounded-full bg-white/80 border border-brand-900/10 text-brand-900/80 font-medium">
-                    Simulasi Skenario Kebiasaan
-                  </span>
-                  <span className="text-xs px-3 py-1.5 rounded-full bg-white/80 border border-brand-900/10 text-brand-900/80 font-medium">
-                    Insight yang Dipersonalisasi
-                  </span>
+                <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-brand-900 tracking-tight">
+                  Berbasis AI
+                </h3>
+
+                <p className="text-base sm:text-lg text-brand-900/75 leading-relaxed font-normal">
+                  Mengolah keterkaitan kompleks antara pola tidur, ritme sirkadian, aktivitas harian, dan biomarker tubuh untuk memetakan dinamika kesehatan secara menyeluruh serta memproyeksikan arah perubahan ke depan.
+                </p>
+
+                <div className="pt-2 flex flex-col space-y-3 text-sm text-brand-900/80">
+                  <div className="flex items-start gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 mt-2 shrink-0" />
+                    <span>Analisis multimodal mendeteksi pola yang tidak terlihat dalam angka statis.</span>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 mt-2 shrink-0" />
+                    <span>Simulasi skenario memproyeksikan efek perubahan kebiasaan sebelum dimulai.</span>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 mt-2 shrink-0" />
+                    <span>Insight adaptif yang dipersonalisasi sesuai profil biologis individual Anda.</span>
+                  </div>
                 </div>
               </div>
 
               {/* Column 2: Bukti ilmiah */}
-              <div className="bg-brand-50/40 rounded-[2rem] p-8 sm:p-10 border border-brand-900/10 shadow-xs flex flex-col justify-between space-y-6 hover:shadow-md transition-all">
-                <div className="space-y-4">
-                  <div className="w-12 h-12 rounded-2xl bg-white shadow-xs border border-brand-900/10 flex items-center justify-center text-teal-800">
-                    <IconCertificate size={24} stroke={1.75} />
+              <div className="flex flex-col space-y-6 md:pl-10 lg:pl-16 pt-12 md:pt-0">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-brand-100/70 border border-brand-900/10 flex items-center justify-center text-brand-900">
+                    <IconCertificate size={22} stroke={1.8} />
                   </div>
-                  <h3 className="text-2xl sm:text-3xl font-bold text-brand-900 tracking-tight">
-                    Bukti ilmiah
-                  </h3>
-                  <p className="text-sm sm:text-base text-brand-900/70 leading-relaxed font-normal">
-                    Setiap pemodelan kalkulasi dan rekomendasi berlandaskan pada konsensus klinis terkemuka dan riset epidemiologi terverifikasi yang transparan dan dapat dipertanggungjawabkan.
-                  </p>
+                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-900/50 font-mono">
+                    Pilar 02
+                  </span>
                 </div>
 
-                <div className="pt-4 border-t border-brand-900/5 flex flex-wrap gap-2">
-                  <span className="text-xs px-3 py-1.5 rounded-full bg-white/80 border border-brand-900/10 text-brand-900/80 font-medium">
-                    Rujukan CDC BRFSS & WHO
-                  </span>
-                  <span className="text-xs px-3 py-1.5 rounded-full bg-white/80 border border-brand-900/10 text-brand-900/80 font-medium">
-                    Konsensus Medis Nasional (PERKENI/PERKI)
-                  </span>
-                  <span className="text-xs px-3 py-1.5 rounded-full bg-white/80 border border-brand-900/10 text-brand-900/80 font-medium">
-                    Kalkulasi Risiko Transparan
-                  </span>
+                <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-brand-900 tracking-tight">
+                  Bukti ilmiah
+                </h3>
+
+                <p className="text-base sm:text-lg text-brand-900/75 leading-relaxed font-normal">
+                  Setiap kalkulasi risiko preventif dan rekomendasi dibangun di atas konsensus klinis terpercaya serta riset epidemiologi global yang terverifikasi dan transparan.
+                </p>
+
+                <div className="pt-2 flex flex-col space-y-3 text-sm text-brand-900/80">
+                  <div className="flex items-start gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-teal-600 mt-2 shrink-0" />
+                    <span>Standar epidemiologi bersumber dari surveilans data CDC BRFSS dan WHO.</span>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-teal-600 mt-2 shrink-0" />
+                    <span>Disesuaikan dengan pedoman klinis nasional PERKENI & PERKI Indonesia.</span>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-teal-600 mt-2 shrink-0" />
+                    <span>Explainable AI yang transparan tanpa black-box tanpa keraguan medis.</span>
+                  </div>
                 </div>
               </div>
             </div>
