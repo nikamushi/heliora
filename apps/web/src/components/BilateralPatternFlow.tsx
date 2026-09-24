@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
-import { motion, useScroll, useTransform } from "motion/react";
+import { motion, useScroll, useTransform, type MotionValue } from "motion/react";
 
 interface StreamConfig {
   side: "left" | "right";
@@ -26,18 +26,24 @@ interface Particle {
   lateralOffset: number;
 }
 
-export function BilateralPatternFlow() {
+interface BilateralPatternFlowProps {
+  progress?: MotionValue<number>;
+}
+
+export function BilateralPatternFlow({ progress }: BilateralPatternFlowProps = {}) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
 
-  const { scrollYProgress } = useScroll({
+  const internalScroll = useScroll({
     target: containerRef,
     offset: ["start 90%", "end 10%"],
   });
 
-  const zoomScale = useTransform(scrollYProgress, [0.05, 0.8], [1.0, 2.5]);
-  const bodyOpacity = useTransform(scrollYProgress, [0.0, 0.2, 0.85, 1.0], [0.4, 1, 1, 0.7]);
+  const activeProgress = progress || internalScroll.scrollYProgress;
+  // Two-phase scroll: [0.0, 0.35] is 100% static 1.0x overview (only bilateral lines flow); [0.35, 0.90] zooms from 1.0x to 3.6x straight into the dot
+  const zoomScale = useTransform(activeProgress, [0, 0.35, 0.9], [1.0, 1.0, 3.6]);
+  const bodyOpacity = useTransform(activeProgress, [0.0, 0.2, 0.85, 1.0], [1.0, 1.0, 1.0, 0.8]);
 
   useEffect(() => {
     const canvas = canvasRef.current;

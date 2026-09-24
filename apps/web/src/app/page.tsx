@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { BilateralPatternFlow } from "@/components/BilateralPatternFlow";
-import { motion } from "motion/react";
+import { motion, useScroll, useTransform } from "motion/react";
 import { 
   IconHeartbeat,
   IconArrowRight,
@@ -26,6 +26,66 @@ const fadeUpVariants = {
     }
   })
 };
+
+function SectionPatternsPinned() {
+  const sectionRef = React.useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end end"],
+  });
+
+  // Fade out headline as we zoom in (between progress 0.28 and 0.55)
+  const headlineOpacity = useTransform(scrollYProgress, [0.0, 0.28, 0.55], [1, 1, 0]);
+  const headlineY = useTransform(scrollYProgress, [0.28, 0.55], [0, -28]);
+  const bridgeOpacity = useTransform(scrollYProgress, [0.0, 0.28, 0.55], [1, 1, 0]);
+
+  return (
+    <section 
+      ref={sectionRef} 
+      id="patterns" 
+      className="relative w-full h-[220vh] border-t border-brand-900/5"
+    >
+      <div className="sticky top-0 h-[100dvh] w-full overflow-hidden flex flex-col justify-between py-6 sm:py-10">
+        <div className="container mx-auto px-6 lg:px-12 max-w-6xl flex-1 flex flex-col justify-between">
+          {/* Typographic Header */}
+          <motion.div 
+            style={{ opacity: headlineOpacity, y: headlineY }}
+            className="max-w-4xl pt-4 sm:pt-6"
+          >
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-normal tracking-tight text-brand-900 leading-[1.08]">
+              Setiap hari, kita melakukan <br className="hidden sm:inline" />
+              <span className="italic font-light text-brand-900/80">lebih dari yang kita sadari.</span>
+            </h2>
+          </motion.div>
+
+          {/* Biological Canvas & Figure */}
+          <div className="relative w-full flex-1 flex items-center justify-center select-none my-auto">
+            {/* Soft Ambient Radial Glows */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] h-[300px] bg-emerald-300/15 rounded-full blur-[110px] pointer-events-none -z-10" />
+            <div className="absolute top-1/3 left-12 w-[280px] h-[200px] bg-[#d97757]/10 rounded-full blur-[90px] pointer-events-none -z-10" />
+            <div className="absolute bottom-1/4 right-12 w-[300px] h-[220px] bg-[#64748b]/10 rounded-full blur-[90px] pointer-events-none -z-10" />
+
+            <BilateralPatternFlow progress={scrollYProgress} />
+          </div>
+
+          {/* Editorial Conceptual Forward Bridge */}
+          <motion.div 
+            style={{ opacity: bridgeOpacity }}
+            className="flex justify-center pb-2"
+          >
+            <Link 
+              href="#how-it-works"
+              className="group inline-flex items-center gap-2 text-sm md:text-base font-medium text-brand-900/80 hover:text-brand-900 transition-colors tracking-wide"
+            >
+              <span>Bagaimana HELIORA membaca pola</span>
+              <IconArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-300" />
+            </Link>
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 export default function LandingPage() {
   return (
@@ -102,46 +162,8 @@ export default function LandingPage() {
           </motion.div>
         </section>
 
-        {/* SECTION 01 (STITCH SECTION 2: FINAL - BILATERAL CONVERGENCE): KESEHATAN BUKAN SEKADAR ANGKA */}
-        <section id="patterns" className="relative w-full overflow-hidden py-20 md:py-32 border-t border-brand-900/5 scroll-mt-20">
-          <div className="container mx-auto px-6 lg:px-12 max-w-6xl">
-            {/* Typographic Header: Editorial Hierarchy */}
-            <div className="max-w-4xl mb-12 md:mb-16">
-              <motion.h2 
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, margin: "0px 0px -150px 0px" }}
-                variants={fadeUpVariants}
-                className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-normal tracking-tight text-brand-900 leading-[1.08]"
-              >
-                Setiap hari, kita melakukan <br className="hidden sm:inline" />
-                <span className="italic font-light text-brand-900/80">lebih dari yang kita sadari.</span>
-              </motion.h2>
-            </div>
-
-            {/* BiologicalPatternFlow Component: Bilateral Convergence to Exact Center */}
-            <div className="relative w-full select-none">
-              {/* Subtle Soft Ambient Radial Glows */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] h-[300px] bg-emerald-300/15 rounded-full blur-[110px] pointer-events-none -z-10" />
-              <div className="absolute top-1/3 left-12 w-[280px] h-[200px] bg-[#d97757]/10 rounded-full blur-[90px] pointer-events-none -z-10" />
-              <div className="absolute bottom-1/4 right-12 w-[300px] h-[220px] bg-[#64748b]/10 rounded-full blur-[90px] pointer-events-none -z-10" />
-
-              {/* Interactive Dynamic Biological Stream Canvas */}
-              <BilateralPatternFlow />
-            </div>
-
-            {/* Editorial Conceptual Forward Bridge */}
-            <div className="mt-16 md:mt-24 flex justify-center">
-              <Link 
-                href="#how-it-works"
-                className="group inline-flex items-center gap-2 text-sm md:text-base font-medium text-brand-900/80 hover:text-brand-900 transition-colors tracking-wide"
-              >
-                <span>Bagaimana HELIORA membaca pola</span>
-                <IconArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-300" />
-              </Link>
-            </div>
-          </div>
-        </section>
+        {/* SECTION 01 (STITCH SECTION 2: FINAL - BILATERAL CONVERGENCE & PINNED SCROLL ZOOM): KESEHATAN BUKAN SEKADAR ANGKA */}
+        <SectionPatternsPinned />
 
         {/* SECTION 02: ALUR KERJA (#how-it-works) */}
         <section id="how-it-works" className="container mx-auto px-6 lg:px-12 py-16 scroll-mt-24">
