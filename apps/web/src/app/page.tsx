@@ -223,15 +223,15 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* SECTION 03: SIMULASI & FITUR (#simulation & #features) */}
-        <section id="simulation" className="container mx-auto px-6 lg:px-12 py-16 scroll-mt-24">
-          <div id="features" className="scroll-mt-24" />
+        {/* SECTION 03: KENAPA HARUS HELIORA & FITUR (#features & #simulation) */}
+        <section id="features" className="container mx-auto px-6 lg:px-12 py-16 scroll-mt-24">
+          <div id="simulation" className="scroll-mt-24" />
           <div className="mb-12 max-w-2xl">
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-brand-900 leading-tight">
-              Simulasi Interaktif
+              Kenapa harus HELIORA?
             </h2>
             <p className="text-base text-brand-900/60 mt-2 font-normal">
-              Lihat bagaimana penyesuaian gaya hidup memengaruhi kestabilan tubuh.
+              Pendekatan cerdas, transparan, dan berbasis bukti untuk memahami serta memproyeksikan arah kesehatan Anda.
             </p>
           </div>
 
