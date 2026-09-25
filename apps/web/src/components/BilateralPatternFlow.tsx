@@ -35,56 +35,64 @@ export function BilateralPatternFlow() {
     const container = cameraViewportRef.current;
     if (!canvas || !container) return;
 
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { alpha: true, desynchronized: true }) || canvas.getContext("2d");
     if (!ctx) return;
     const context = ctx;
 
     let animationFrameId: number;
     let width = 0;
     let height = 0;
+    let focalX = 0;
+    let focalY = 0;
 
-    const mouse = {
-      x: 0,
-      y: 0,
-      targetX: 0,
-      targetY: 0,
-      active: false,
+    let prevWidth = 0;
+    let prevHeight = 0;
+    let prevDpr = 0;
+
+    let streamGradients: CanvasGradient[] = [];
+    const updateGradients = () => {
+      const fx = width * 0.5;
+      streamGradients = streams.map((stream) => {
+        const startX = stream.side === "left" ? width * 0.01 : width * 0.99;
+        const grad = context.createLinearGradient(startX, 0, fx, 0);
+        grad.addColorStop(0, stream.colorStart);
+        grad.addColorStop(0.65, stream.colorStart);
+        grad.addColorStop(0.92, stream.colorEnd);
+        grad.addColorStop(1, stream.colorEnd);
+        return grad;
+      });
     };
 
     const handleResize = () => {
       if (!canvas || !container) return;
       const rect = container.getBoundingClientRect();
       const dpr = window.devicePixelRatio || 1;
-      width = rect.width || container.clientWidth || 800;
-      height = rect.height || container.clientHeight || 500;
-      canvas.width = width * dpr;
-      canvas.height = height * dpr;
-      canvas.style.width = `${width}px`;
-      canvas.style.height = `${height}px`;
+      const newWidth = Math.floor(rect.width || container.clientWidth || 800);
+      const newHeight = Math.floor(rect.height || container.clientHeight || 500);
+
+      // Prevent canvas buffer reset if dimensions did not actually change
+      if (newWidth === prevWidth && newHeight === prevHeight && dpr === prevDpr) {
+        return;
+      }
+
+      prevWidth = newWidth;
+      prevHeight = newHeight;
+      prevDpr = dpr;
+      width = newWidth;
+      height = newHeight;
+
+      const bElem = bodyRef.current;
+      const bHeight = bElem ? bElem.offsetHeight : 300;
+      focalX = newWidth * 0.5;
+      focalY = newHeight * 0.5 + (-20 / 216) * bHeight;
+
+      canvas.width = newWidth * dpr;
+      canvas.height = newHeight * dpr;
+      canvas.style.width = `${newWidth}px`;
+      canvas.style.height = `${newHeight}px`;
       context.setTransform(dpr, 0, 0, dpr, 0, 0);
+      updateGradients();
     };
-
-    handleResize();
-    window.addEventListener("resize", handleResize);
-
-    const resizeObserver = new ResizeObserver(() => {
-      handleResize();
-    });
-    resizeObserver.observe(container);
-
-    const handleMouseMove = (e: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      mouse.targetX = e.clientX - rect.left;
-      mouse.targetY = e.clientY - rect.top;
-      mouse.active = true;
-    };
-
-    const handleMouseLeave = () => {
-      mouse.active = false;
-    };
-
-    canvas.addEventListener("mousemove", handleMouseMove);
-    canvas.addEventListener("mouseleave", handleMouseLeave);
 
     const streams: StreamConfig[] = [
       // 12 LEFT-ORIGIN STREAMS (Lifestyle & Habits -> Converge to Central Body Core)
@@ -404,6 +412,9 @@ export function BilateralPatternFlow() {
       },
     ];
 
+    handleResize();
+    window.addEventListener("resize", handleResize);
+
     const particles: Particle[] = [];
     const PARTICLE_COUNT = 64;
 
@@ -453,52 +464,35 @@ export function BilateralPatternFlow() {
         convergenceFactor;
 
       const easeT = t * t * (3 - 2 * t);
-      let currentY = startY + (targetY - startY) * easeT + wave1 + wave2;
-
-      if (mouse.active) {
-        const dx = currentX - mouse.x;
-        const dy = currentY - mouse.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        const maxDist = 160;
-        if (dist < maxDist) {
-          const influence = (1 - dist / maxDist) * convergenceFactor;
-          const ripple =
-            Math.sin(dist * 0.08 - timestamp * 0.005) * 12 * influence;
-          currentY += (dy / (dist || 1)) * ripple;
-        }
-      }
+      const currentY = startY + (targetY - startY) * easeT + wave1 + wave2;
 
       return { x: currentX, y: currentY };
     }
 
+    let lastTime = 0;
+    let animTime = 0;
+
     function render(timestamp: number) {
-      mouse.x += (mouse.targetX - mouse.x) * 0.08;
-      mouse.y += (mouse.targetY - mouse.y) * 0.08;
+      if (!lastTime) lastTime = timestamp;
+      const rawDt = timestamp - lastTime;
+      lastTime = timestamp;
+      // Cap delta time to max 33ms so browser background hitches don't cause sudden time leaps
+      const dt = Math.max(0, Math.min(rawDt, 33));
+      animTime += dt;
 
       context.clearRect(0, 0, width, height);
 
-      // Focal center in canvas pixel coordinates
-      const bElem = bodyRef.current;
-      const bHeight = bElem ? bElem.offsetHeight : 300;
-      const focalX = width * 0.5;
-      const focalY = height * 0.5 + (-20 / 216) * bHeight;
-
       // 1. Translucent Biological Stream Ribbons (Bilateral Flow Lines)
-      streams.forEach((stream) => {
+      streams.forEach((stream, index) => {
         const steps = 64;
         const points = [];
 
         for (let s = 0; s <= steps; s++) {
           const t = s / steps;
-          points.push(calculatePointOnStream(stream, t, timestamp, focalX, focalY));
+          points.push(calculatePointOnStream(stream, t, animTime, focalX, focalY));
         }
 
-        const startX = stream.side === "left" ? width * 0.01 : width * 0.99;
-        const grad = context.createLinearGradient(startX, 0, focalX, 0);
-        grad.addColorStop(0, stream.colorStart);
-        grad.addColorStop(0.65, stream.colorStart);
-        grad.addColorStop(0.92, stream.colorEnd);
-        grad.addColorStop(1, stream.colorEnd);
+        const grad = streamGradients[index] || stream.colorStart;
 
         context.save();
         context.beginPath();
@@ -524,41 +518,29 @@ export function BilateralPatternFlow() {
         context.restore();
       });
 
-      // 2. Biometric Signal Particles along Bilateral Streams
+      // 2. Biometric Signal Particles along Bilateral Streams (Zero-allocation fast path)
+      const dtFactor = dt / 16.667;
       particles.forEach((p) => {
-        p.progress += p.speed;
+        p.progress += p.speed * dtFactor;
         if (p.progress > 0.99) {
           p.progress = 0.01;
           p.streamIndex = Math.floor(Math.random() * streams.length);
         }
 
         const stream = streams[p.streamIndex];
-        const pt = calculatePointOnStream(stream, p.progress, timestamp, focalX, focalY);
+        const pt = calculatePointOnStream(stream, p.progress, animTime, focalX, focalY);
 
         const alpha = Math.min(1, Math.sin(p.progress * Math.PI)) * p.opacity;
-        const particleGrad = context.createRadialGradient(
-          pt.x,
-          pt.y + p.lateralOffset,
-          0,
-          pt.x,
-          pt.y + p.lateralOffset,
-          p.size * 2
-        );
-
         const isWarm =
           stream.name.includes("metabolic") ||
           stream.name.includes("stress") ||
           stream.name.includes("vitality");
         const coreColor = isWarm ? "217, 119, 87" : "45, 90, 67";
 
-        particleGrad.addColorStop(0, `rgba(${coreColor}, ${alpha * 0.95})`);
-        particleGrad.addColorStop(0.5, `rgba(${coreColor}, ${alpha * 0.35})`);
-        particleGrad.addColorStop(1, `rgba(${coreColor}, 0)`);
-
         context.save();
         context.beginPath();
-        context.fillStyle = particleGrad;
-        context.arc(pt.x, pt.y + p.lateralOffset, p.size * 2, 0, Math.PI * 2);
+        context.fillStyle = `rgba(${coreColor}, ${alpha * 0.4})`;
+        context.arc(pt.x, pt.y + p.lateralOffset, p.size * 1.8, 0, Math.PI * 2);
         context.fill();
 
         context.fillStyle = `rgba(255, 255, 255, ${alpha * 0.9})`;
@@ -568,29 +550,46 @@ export function BilateralPatternFlow() {
         context.restore();
       });
 
-      animationFrameId = requestAnimationFrame(render);
+      if (isVisible) {
+        animationFrameId = requestAnimationFrame(render);
+      }
     }
+
+    let isVisible = true;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const currentlyVisible = entry.isIntersecting;
+        if (currentlyVisible && !isVisible) {
+          isVisible = true;
+          lastTime = 0;
+          animationFrameId = requestAnimationFrame(render);
+        } else if (!currentlyVisible && isVisible) {
+          isVisible = false;
+          cancelAnimationFrame(animationFrameId);
+        }
+      },
+      { threshold: 0.05 }
+    );
+    observer.observe(container);
 
     animationFrameId = requestAnimationFrame(render);
 
     return () => {
       cancelAnimationFrame(animationFrameId);
-      resizeObserver.disconnect();
+      observer.disconnect();
       window.removeEventListener("resize", handleResize);
-      canvas.removeEventListener("mousemove", handleMouseMove);
-      canvas.removeEventListener("mouseleave", handleMouseLeave);
     };
   }, []);
 
   return (
     <div
       ref={cameraViewportRef}
-      className="relative w-full h-full min-h-[440px] z-10 flex items-center justify-center"
+      className="relative w-full h-full min-h-[440px] z-10 flex items-center justify-center [contain:layout_style_paint] [isolation:isolate] [transform:translateZ(0)] select-none"
     >
       {/* Flowing Lines Canvas Layer */}
       <canvas 
         ref={canvasRef} 
-        className="w-full h-full block absolute inset-0 pointer-events-none" 
+        className="w-full h-full block absolute inset-0 pointer-events-none [contain:strict] will-change-transform [transform:translateZ(0)]" 
       />
 
       {/* Central Human Bio-Mesh / Topographic Wave Silhouette */}
@@ -599,7 +598,7 @@ export function BilateralPatternFlow() {
         className="relative z-20 w-36 h-64 sm:w-40 sm:h-72 md:w-44 md:h-80 flex items-center justify-center pointer-events-none select-none"
       >
           {/* Subtle Ambient Radial Glow behind the body */}
-          <div className="absolute inset-0 bg-gradient-to-b from-emerald-400/20 via-emerald-600/25 to-transparent rounded-full blur-3xl -z-10" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle,rgba(16,185,129,0.22)_0%,transparent_70%)] rounded-full -z-10 [transform:translateZ(0)]" />
 
           {/* Topographic Bio-Wave Mesh Human Figure */}
           <svg

@@ -6,26 +6,21 @@ import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { BilateralPatternFlow } from "@/components/BilateralPatternFlow";
 import { LayeredHealthPicture } from "@/components/LayeredHealthPicture";
+import { UnderstandActivityIcons } from "@/components/UnderstandActivityIcons";
+import { ExplainableFactorsVisual } from "@/components/ExplainableFactorsVisual";
+import { SimulationDirectionVisual } from "@/components/SimulationDirectionVisual";
+import { RecommendationsEvidenceVisual } from "@/components/RecommendationsEvidenceVisual";
 import { motion, useScroll, useTransform } from "motion/react";
 import { 
   IconHeartbeat,
-  IconArrowRight,
-  IconBrain,
-  IconCertificate,
   IconShieldLock,
   IconEye,
   IconCompass,
   IconAdjustmentsHorizontal,
   IconSparkles,
   IconBolt,
-  IconCpu,
-  IconArrowsShuffle,
-  IconDeviceAnalytics,
-  IconFileCheck,
-  IconShieldCheck,
-  IconLayersSubtract,
-  IconActivity,
-  IconTrendingUp
+  IconStack2,
+  IconUserHeart
 } from "@tabler/icons-react";
 
 // Fluid Apple HIG motion curves
@@ -46,7 +41,7 @@ function SectionPatterns() {
   return (
     <section 
       id="patterns" 
-      className="min-h-[100dvh] w-full border-t border-brand-900/5 overflow-hidden flex flex-col justify-between pt-24 md:pt-28 pb-8 px-6 lg:px-12 relative"
+      className="min-h-[100dvh] w-full overflow-hidden flex flex-col justify-between pt-24 md:pt-28 pb-8 px-6 lg:px-12 relative"
     >
       {/* Top Typographic Header (Clean spacing below navbar) */}
       <div className="container mx-auto max-w-6xl w-full z-20 pointer-events-none mb-3 md:mb-5">
@@ -66,12 +61,12 @@ function SectionPatterns() {
       </div>
 
       {/* Dedicated Viewport for Bilateral Flow Visualization */}
-      <div className="relative w-full h-[460px] sm:h-[520px] md:h-[600px] flex items-center justify-center pointer-events-none z-10 my-auto">
-        {/* Soft Ambient Radial Glows */}
-        <div className="absolute inset-0 pointer-events-none -z-10">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[450px] bg-emerald-300/15 rounded-full blur-[140px]" />
-          <div className="absolute top-1/3 left-12 w-[350px] h-[280px] bg-[#d97757]/10 rounded-full blur-[110px]" />
-          <div className="absolute bottom-1/4 right-12 w-[380px] h-[300px] bg-[#64748b]/10 rounded-full blur-[110px]" />
+      <div className="relative w-full h-[460px] sm:h-[520px] md:h-[600px] flex items-center justify-center pointer-events-none z-10 my-auto [transform:translateZ(0)]">
+        {/* Soft Ambient Radial Glows (Hardware Accelerated Radial Gradients) */}
+        <div className="absolute inset-0 pointer-events-none -z-10 [transform:translateZ(0)]">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[450px] bg-[radial-gradient(ellipse_at_center,rgba(110,231,183,0.15),transparent_70%)]" />
+          <div className="absolute top-1/3 left-12 w-[350px] h-[280px] bg-[radial-gradient(ellipse_at_center,rgba(217,119,87,0.10),transparent_70%)]" />
+          <div className="absolute bottom-1/4 right-12 w-[380px] h-[300px] bg-[radial-gradient(ellipse_at_center,rgba(100,116,139,0.10),transparent_70%)]" />
         </div>
 
         <BilateralPatternFlow />
@@ -125,22 +120,128 @@ function SectionLifestyleNarrative() {
   );
 }
 
+function SectionUnderstandingPurpose() {
+  const showcaseItems = [
+    {
+      title: "Personal",
+      icon: IconUserHeart,
+      bg: "bg-gradient-to-br from-[#f0f7fc] to-[#e1effa]",
+      border: "border-[#cee3f5]",
+      text: "text-[#1d6fad]",
+      shadow: "shadow-[0_8px_24px_rgba(29,111,173,0.08)]",
+    },
+    {
+      title: "Teruji",
+      icon: IconStack2,
+      bg: "bg-gradient-to-br from-[#f5f2fb] to-[#e8e0f7]",
+      border: "border-[#d8ccf2]",
+      text: "text-[#6941b0]",
+      shadow: "shadow-[0_8px_24px_rgba(105,65,176,0.08)]",
+    },
+    {
+      title: "Pribadi",
+      icon: IconShieldLock,
+      bg: "bg-gradient-to-br from-[#f3f5f8] to-[#e4e8ee]",
+      border: "border-[#ccd3de]",
+      text: "text-[#334155]",
+      shadow: "shadow-[0_8px_24px_rgba(51,65,85,0.08)]",
+    },
+  ];
+
+  return (
+    <section 
+      id="purpose" 
+      className="container mx-auto px-6 lg:px-12 py-20 sm:py-28 md:py-36 scroll-mt-24"
+    >
+      <div className="max-w-5xl mx-auto flex flex-col items-center">
+        {/* Top Header Block */}
+        <div className="w-full max-w-4xl mx-auto flex flex-col items-center text-center">
+          <motion.h2 
+            custom={0}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.1 }}
+            variants={fadeUpVariants}
+            className="w-full text-center text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-brand-900 leading-tight"
+          >
+            Untuk memahami, bukan mendiagnosis.
+          </motion.h2>
+
+          <motion.p 
+            custom={1}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.1 }}
+            variants={fadeUpVariants}
+            className="mt-5 sm:mt-6 text-base sm:text-lg md:text-xl text-brand-900/70 font-normal leading-relaxed max-w-2xl mx-auto text-balance text-center"
+          >
+            HELIORA membaca gaya hidup Anda untuk memberi gambaran kesehatan yang lebih personal, agar Anda bisa mengambil langkah pencegahan lebih awal.
+          </motion.p>
+        </div>
+
+        {/* Showcase Group (Unified Same Background) */}
+        <div className="w-full mt-24 sm:mt-32 md:mt-40 flex flex-col items-center">
+          <motion.h3
+            custom={2}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.1 }}
+            variants={fadeUpVariants}
+            className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-brand-900 text-center mb-10 sm:mb-14"
+          >
+            Dibangun untuk Anda percaya.
+          </motion.h3>
+
+          {/* 3 Squircles Showcase Row (Static - No animation, No hover) */}
+          <div className="flex flex-row items-center justify-center gap-8 sm:gap-14 md:gap-20 w-full select-none">
+            {showcaseItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <div
+                  key={item.title}
+                  className="flex flex-col items-center gap-3.5"
+                >
+                  {/* Static Organic Ceramic-Glass Squircle */}
+                  <div 
+                    className={`w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-[24px] sm:rounded-[28px] md:rounded-[32px] ${item.bg} ${item.border} ${item.shadow} border flex items-center justify-center relative overflow-hidden`}
+                  >
+                    {/* Soft ambient surface light */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-white/80 via-transparent to-black/[0.02] pointer-events-none rounded-[inherit]" />
+                    <Icon 
+                      className={`w-9 h-9 sm:w-11 sm:h-11 md:w-13 md:h-13 ${item.text} relative z-10`} 
+                      stroke={1.6} 
+                    />
+                  </div>
+                  {/* Clean Label Underneath */}
+                  <span className="text-sm sm:text-base md:text-lg font-semibold tracking-tight text-brand-900 text-center">
+                    {item.title}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-brand-50/20 text-brand-900 selection:bg-brand-200 relative overflow-hidden">
-      {/* Ambient Liquid Orbs */}
-      <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
-        <div className="absolute -top-32 left-1/4 w-[550px] h-[550px] bg-brand-400/12 rounded-full blur-[140px]" />
-        <div className="absolute top-48 right-10 w-[450px] h-[450px] bg-emerald-300/12 rounded-full blur-[130px]" />
-        <div className="absolute top-[950px] left-10 w-[600px] h-[450px] bg-teal-400/10 rounded-full blur-[150px]" />
-        <div className="absolute top-[1900px] right-1/4 w-[520px] h-[520px] bg-brand-400/10 rounded-full blur-[140px]" />
+      {/* Ambient Liquid Orbs (Hardware Accelerated Radial Gradients) */}
+      <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden [transform:translateZ(0)]">
+        <div className="absolute -top-32 left-1/4 w-[550px] h-[550px] rounded-full bg-[radial-gradient(circle,rgba(45,90,67,0.12)_0%,transparent_70%)]" />
+        <div className="absolute top-48 right-10 w-[450px] h-[450px] rounded-full bg-[radial-gradient(circle,rgba(110,231,183,0.15)_0%,transparent_70%)]" />
+        <div className="absolute top-[950px] left-10 w-[600px] h-[450px] rounded-full bg-[radial-gradient(circle,rgba(45,212,191,0.12)_0%,transparent_70%)]" />
+        <div className="absolute top-[1900px] right-1/4 w-[520px] h-[520px] rounded-full bg-[radial-gradient(circle,rgba(45,90,67,0.10)_0%,transparent_70%)]" />
       </div>
 
       <Navbar />
 
-      <main className="pb-16">
+      <main>
         {/* HERO SECTION: 1 Full Viewport (Centered Editorial Experience) */}
-        <section id="hero" className="min-h-[100dvh] w-full flex flex-col justify-between items-center relative px-6 lg:px-12 pt-28 pb-10">
+        <section id="hero" className="min-h-[calc(100dvh-84px)] w-full flex flex-col justify-between items-center relative px-6 lg:px-12 pt-8 sm:pt-12 pb-12">
           {/* Top spacer for optical centering */}
           <div className="w-full" />
 
@@ -148,7 +249,7 @@ export default function LandingPage() {
           <div className="flex flex-col items-center text-center max-w-4xl mx-auto space-y-8 my-auto">
             <motion.span 
               custom={0} initial="hidden" animate="visible" variants={fadeUpVariants}
-              className="text-xs font-semibold uppercase tracking-[0.28em] text-brand-900/60 bg-brand-100/60 px-4 py-1.5 rounded-full border border-brand-900/10 backdrop-blur-sm"
+              className="text-xs sm:text-sm font-bold uppercase tracking-[0.28em] text-brand-900"
             >
               HELIORA
             </motion.span>
@@ -158,46 +259,20 @@ export default function LandingPage() {
               className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-brand-900 text-balance leading-[1.08]"
             >
               Kesehatan Anda,<br />
-              <span className="italic font-light text-brand-900/80">dapat dipahami.</span>
+              <span className="font-light text-brand-900/80">dapat dipahami.</span>
             </motion.h1>
 
             <motion.div 
               custom={2} initial="hidden" animate="visible" variants={fadeUpVariants}
-              className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 pt-4"
+              className="flex items-center justify-center pt-4"
             >
               <Link href="/register">
-                <Button className="h-13 px-8 rounded-full bg-[#1e3a2b] hover:bg-[#162c20] text-white text-base font-medium shadow-[0_4px_16px_rgba(30,58,43,0.18)] hover:shadow-[0_6px_20px_rgba(30,58,43,0.25)] transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2">
-                  <span>Mulai Assessment</span>
-                  <IconArrowRight size={18} />
+                <Button className="h-13 px-8 rounded-full bg-[#1e3a2b] hover:bg-[#162c20] text-white text-base font-medium shadow-[0_4px_16px_rgba(30,58,43,0.18)] hover:shadow-[0_6px_20px_rgba(30,58,43,0.25)] transition-all hover:scale-[1.02] active:scale-[0.98]">
+                  Mulai Assessment
                 </Button>
-              </Link>
-              <Link 
-                href="#how-it-works"
-                className="group flex items-center gap-2 text-base font-medium text-brand-900/70 hover:text-brand-900 transition-colors py-3 px-4"
-              >
-                <span>Pelajari Alur</span>
-                <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
               </Link>
             </motion.div>
           </div>
-
-          {/* Bottom Scroll Cue to Section 01 */}
-          <motion.div 
-            custom={3} initial="hidden" animate="visible" variants={fadeUpVariants}
-            className="flex flex-col items-center pt-6"
-          >
-            <a 
-              href="#patterns" 
-              onClick={(e) => {
-                e.preventDefault();
-                document.getElementById("patterns")?.scrollIntoView({ behavior: "smooth" });
-              }}
-              className="flex flex-col items-center gap-1.5 text-brand-900/40 hover:text-brand-900/80 transition-colors group cursor-pointer"
-            >
-              <span className="text-[10px] font-semibold tracking-[0.2em] uppercase">Eksplorasi Pola</span>
-              <span className="animate-bounce text-sm opacity-70 group-hover:opacity-100 transition-opacity">↓</span>
-            </a>
-          </motion.div>
         </section>
 
         {/* SECTION 01 (STITCH SECTION 2: BILATERAL CONVERGENCE): KESEHATAN BUKAN SEKADAR ANGKA */}
@@ -206,384 +281,287 @@ export default function LandingPage() {
         {/* SECTION 02: NARASI POLA HIDUP & EKSPLORASI RISIKO */}
         <SectionLifestyleNarrative />
 
-        {/* SECTION 03: KENAPA HARUS HELIORA (#why-heliora) */}
-        <section id="why-heliora" className="w-full bg-white/80 backdrop-blur-md border-y border-brand-900/5 py-20 sm:py-28 md:py-32 my-8 sm:my-12 scroll-mt-24">
-          <div className="container mx-auto px-6 lg:px-12">
-            <div className="max-w-3xl mx-auto text-center mb-16 sm:mb-20 md:mb-24">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-brand-900 leading-tight">
-                Kenapa harus HELIORA?
-              </h2>
-            </div>
-
-            {/* Full-Width Side-by-Side Open Columns (No Cards) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20 max-w-6xl mx-auto divide-y md:divide-y-0 md:divide-x divide-brand-900/10">
-              {/* Column 1: Berbasis AI */}
-              <div className="flex flex-col space-y-6 md:pr-10 lg:pr-16 pt-8 md:pt-0">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-brand-100/70 border border-brand-900/10 flex items-center justify-center text-brand-900">
-                    <IconBrain size={22} stroke={1.8} />
-                  </div>
-                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-900/50 font-mono">
-                    Pilar 01
-                  </span>
-                </div>
-
-                <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-brand-900 tracking-tight">
-                  Berbasis AI
-                </h3>
-
-                <p className="text-base sm:text-lg text-brand-900/75 leading-relaxed font-normal">
-                  Mengolah keterkaitan kompleks antara pola tidur, ritme sirkadian, aktivitas harian, dan biomarker tubuh untuk memetakan dinamika kesehatan secara menyeluruh serta memproyeksikan arah perubahan ke depan.
-                </p>
-
-                <div className="pt-2 flex flex-col space-y-3 text-sm text-brand-900/80">
-                  <div className="flex items-start gap-2.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 mt-2 shrink-0" />
-                    <span>Analisis multimodal mendeteksi pola yang tidak terlihat dalam angka statis.</span>
-                  </div>
-                  <div className="flex items-start gap-2.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 mt-2 shrink-0" />
-                    <span>Simulasi skenario memproyeksikan efek perubahan kebiasaan sebelum dimulai.</span>
-                  </div>
-                  <div className="flex items-start gap-2.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 mt-2 shrink-0" />
-                    <span>Insight adaptif yang dipersonalisasi sesuai profil biologis individual Anda.</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Column 2: Bukti ilmiah */}
-              <div className="flex flex-col space-y-6 md:pl-10 lg:pl-16 pt-12 md:pt-0">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-brand-100/70 border border-brand-900/10 flex items-center justify-center text-brand-900">
-                    <IconCertificate size={22} stroke={1.8} />
-                  </div>
-                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-900/50 font-mono">
-                    Pilar 02
-                  </span>
-                </div>
-
-                <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-brand-900 tracking-tight">
-                  Bukti ilmiah
-                </h3>
-
-                <p className="text-base sm:text-lg text-brand-900/75 leading-relaxed font-normal">
-                  Setiap kalkulasi risiko preventif dan rekomendasi dibangun di atas konsensus klinis terpercaya serta riset epidemiologi global yang terverifikasi dan transparan.
-                </p>
-
-                <div className="pt-2 flex flex-col space-y-3 text-sm text-brand-900/80">
-                  <div className="flex items-start gap-2.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-teal-600 mt-2 shrink-0" />
-                    <span>Standar epidemiologi bersumber dari surveilans data CDC BRFSS dan WHO.</span>
-                  </div>
-                  <div className="flex items-start gap-2.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-teal-600 mt-2 shrink-0" />
-                    <span>Disesuaikan dengan pedoman klinis nasional PERKENI & PERKI Indonesia.</span>
-                  </div>
-                  <div className="flex items-start gap-2.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-teal-600 mt-2 shrink-0" />
-                    <span>Explainable AI yang transparan tanpa black-box tanpa keraguan medis.</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Full-Width Pillar 3: Privasi Data */}
-            <div className="mt-14 sm:mt-18 pt-12 sm:pt-16 border-t border-brand-900/10 max-w-6xl mx-auto">
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-start">
-                <div className="lg:col-span-5 flex flex-col space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-brand-100/70 border border-brand-900/10 flex items-center justify-center text-brand-900">
-                      <IconShieldLock size={22} stroke={1.8} />
-                    </div>
-                    <span className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-900/50 font-mono">
-                      Pilar 03
-                    </span>
-                  </div>
-                  <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-brand-900 tracking-tight">
-                    Privasi Data
-                  </h3>
-                  <p className="text-base sm:text-lg text-brand-900/75 leading-relaxed font-normal">
-                    Kesehatan adalah informasi paling personal Anda. HELIORA dirancang dengan prinsip *privacy-by-design*, memastikan data Anda terlindungi seutuhnya tanpa kompromi.
-                  </p>
-                </div>
-
-                <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-3 gap-6 pt-2 lg:pt-4">
-                  <div className="space-y-2">
-                    <h4 className="text-base font-semibold text-brand-900">
-                      Kedaulatan Penuh
-                    </h4>
-                    <p className="text-xs sm:text-sm text-brand-900/65 leading-relaxed">
-                      Anda memiliki kendali mutlak atas data Anda, termasuk hak ekspor dan penghapusan riwayat kapan saja.
-                    </p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <h4 className="text-base font-semibold text-brand-900">
-                      Enkripsi Berlapis
-                    </h4>
-                    <p className="text-xs sm:text-sm text-brand-900/65 leading-relaxed">
-                      Protokol keamanan tingkat tinggi mengamankan seluruh rekaman parameter vital saat disimpan maupun dikirim.
-                    </p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <h4 className="text-base font-semibold text-brand-900">
-                      Tanpa Komersialisasi
-                    </h4>
-                    <p className="text-xs sm:text-sm text-brand-900/65 leading-relaxed">
-                      HELIORA tidak pernah menjual atau membagikan data profil kesehatan Anda kepada pihak ketiga atau pengiklan.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* SECTION: ALUR PREVENTIF (Understand Explore Simulate Recommend Act.) */}
-        <section className="w-full bg-brand-100/60 border-y border-brand-900/10 py-12 sm:py-16 md:py-20 text-center my-4 relative overflow-hidden">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-12 relative z-10">
-            <div className="max-w-5xl mx-auto flex items-center justify-center">
-              <div className="flex items-center justify-between sm:justify-center whitespace-nowrap flex-nowrap gap-x-2 sm:gap-x-6 md:gap-x-10 lg:gap-x-14 w-full">
-                {/* 1. Understand */}
-                <div className="flex flex-col items-center gap-1.5 sm:gap-2.5 group cursor-default">
-                  <IconEye className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-brand-900/60 group-hover:text-emerald-800 transition-colors" stroke={1.75} />
-                  <span className="text-xs sm:text-base md:text-xl lg:text-2xl font-medium tracking-tight text-brand-900 group-hover:text-emerald-800 transition-colors">
-                    Understand
-                  </span>
-                </div>
-
-                {/* 2. Explore */}
-                <div className="flex flex-col items-center gap-1.5 sm:gap-2.5 group cursor-default">
-                  <IconCompass className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-brand-900/60 group-hover:text-emerald-800 transition-colors" stroke={1.75} />
-                  <span className="text-xs sm:text-base md:text-xl lg:text-2xl font-medium tracking-tight text-brand-900 group-hover:text-emerald-800 transition-colors">
-                    Explore
-                  </span>
-                </div>
-
-                {/* 3. Simulate */}
-                <div className="flex flex-col items-center gap-1.5 sm:gap-2.5 group cursor-default">
-                  <IconAdjustmentsHorizontal className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-brand-900/60 group-hover:text-emerald-800 transition-colors" stroke={1.75} />
-                  <span className="text-xs sm:text-base md:text-xl lg:text-2xl font-medium tracking-tight text-brand-900 group-hover:text-emerald-800 transition-colors">
-                    Simulate
-                  </span>
-                </div>
-
-                {/* 4. Recommend */}
-                <div className="flex flex-col items-center gap-1.5 sm:gap-2.5 group cursor-default">
-                  <IconSparkles className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-brand-900/60 group-hover:text-emerald-800 transition-colors" stroke={1.75} />
-                  <span className="text-xs sm:text-base md:text-xl lg:text-2xl font-medium tracking-tight text-brand-900 group-hover:text-emerald-800 transition-colors">
-                    Recommend
-                  </span>
-                </div>
-
-                {/* 5. Act. */}
-                <div className="flex flex-col items-center gap-1.5 sm:gap-2.5 group cursor-default">
-                  <IconBolt className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-emerald-800 group-hover:text-emerald-950 transition-colors" stroke={1.75} />
-                  <span className="text-xs sm:text-base md:text-xl lg:text-2xl font-semibold tracking-tight text-emerald-800">
-                    Act.
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* SECTION: FEATURES */}
-        <section id="features" className="container mx-auto px-6 lg:px-12 py-16 sm:py-24 scroll-mt-24">
-          <div className="mb-10 sm:mb-14">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-brand-900 leading-[1.15]">
-              Fitur
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            {/* Feature 01: Personal Health Profile */}
-            <div className="group bg-white border border-brand-900/10 rounded-3xl p-7 sm:p-8 shadow-xs hover:shadow-md hover:border-emerald-800/30 transition-all flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between mb-6">
-                  <div className="w-12 h-12 rounded-2xl bg-brand-100/70 border border-brand-900/10 flex items-center justify-center text-emerald-800 group-hover:scale-105 group-hover:bg-emerald-800 group-hover:text-white transition-all">
-                    <IconHeartbeat className="w-6 h-6" stroke={1.75} />
-                  </div>
-                  <span className="text-xs font-mono font-bold text-brand-900/35 group-hover:text-emerald-800 transition-colors">
-                    01
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-xl font-bold text-brand-900 tracking-tight">
-                    Personal Health Profile
-                  </h3>
-                  <p className="text-sm text-brand-900/65 leading-relaxed">
-                    Pahami kesehatan berdasarkan profil dan pola hidup Anda.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Feature 02: Health & Risk Insights */}
-            <div className="group bg-white border border-brand-900/10 rounded-3xl p-7 sm:p-8 shadow-xs hover:shadow-md hover:border-emerald-800/30 transition-all flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between mb-6">
-                  <div className="w-12 h-12 rounded-2xl bg-brand-100/70 border border-brand-900/10 flex items-center justify-center text-emerald-800 group-hover:scale-105 group-hover:bg-emerald-800 group-hover:text-white transition-all">
-                    <IconActivity className="w-6 h-6" stroke={1.75} />
-                  </div>
-                  <span className="text-xs font-mono font-bold text-brand-900/35 group-hover:text-emerald-800 transition-colors">
-                    02
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-xl font-bold text-brand-900 tracking-tight">
-                    Health &amp; Risk Insights
-                  </h3>
-                  <p className="text-sm text-brand-900/65 leading-relaxed">
-                    Lihat Health Score, Lifestyle Score, dan estimasi risiko secara lebih jelas.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Feature 03: Explainable AI */}
-            <div className="group bg-white border border-brand-900/10 rounded-3xl p-7 sm:p-8 shadow-xs hover:shadow-md hover:border-emerald-800/30 transition-all flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between mb-6">
-                  <div className="w-12 h-12 rounded-2xl bg-brand-100/70 border border-brand-900/10 flex items-center justify-center text-emerald-800 group-hover:scale-105 group-hover:bg-emerald-800 group-hover:text-white transition-all">
-                    <IconBrain className="w-6 h-6" stroke={1.75} />
-                  </div>
-                  <span className="text-xs font-mono font-bold text-brand-900/35 group-hover:text-emerald-800 transition-colors">
-                    03
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-xl font-bold text-brand-900 tracking-tight">
-                    Explainable AI
-                  </h3>
-                  <p className="text-sm text-brand-900/65 leading-relaxed">
-                    Pahami mengapa hasil tersebut muncul dan faktor apa yang paling berkontribusi.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Feature 04: Future Health Simulation */}
-            <div className="group bg-white border border-brand-900/10 rounded-3xl p-7 sm:p-8 shadow-xs hover:shadow-md hover:border-emerald-800/30 transition-all flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between mb-6">
-                  <div className="w-12 h-12 rounded-2xl bg-brand-100/70 border border-brand-900/10 flex items-center justify-center text-emerald-800 group-hover:scale-105 group-hover:bg-emerald-800 group-hover:text-white transition-all">
-                    <IconTrendingUp className="w-6 h-6" stroke={1.75} />
-                  </div>
-                  <span className="text-xs font-mono font-bold text-brand-900/35 group-hover:text-emerald-800 transition-colors">
-                    04
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-xl font-bold text-brand-900 tracking-tight">
-                    Future Health Simulation
-                  </h3>
-                  <p className="text-sm text-brand-900/65 leading-relaxed">
-                    Jelajahi bagaimana pola hidup saat ini dapat membentuk kemungkinan kondisi di masa depan.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Feature 05: What-if Simulation */}
-            <div className="group bg-white border border-brand-900/10 rounded-3xl p-7 sm:p-8 shadow-xs hover:shadow-md hover:border-emerald-800/30 transition-all flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between mb-6">
-                  <div className="w-12 h-12 rounded-2xl bg-brand-100/70 border border-brand-900/10 flex items-center justify-center text-emerald-800 group-hover:scale-105 group-hover:bg-emerald-800 group-hover:text-white transition-all">
-                    <IconAdjustmentsHorizontal className="w-6 h-6" stroke={1.75} />
-                  </div>
-                  <span className="text-xs font-mono font-bold text-brand-900/35 group-hover:text-emerald-800 transition-colors">
-                    05
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-xl font-bold text-brand-900 tracking-tight">
-                    What-if Simulation
-                  </h3>
-                  <p className="text-sm text-brand-900/65 leading-relaxed">
-                    Ubah pilihan lifestyle dan lihat bagaimana estimasi dapat berubah.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Feature 06: Preventive Recommendations */}
-            <div className="group bg-white border border-brand-900/10 rounded-3xl p-7 sm:p-8 shadow-xs hover:shadow-md hover:border-emerald-800/30 transition-all flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between mb-6">
-                  <div className="w-12 h-12 rounded-2xl bg-brand-100/70 border border-brand-900/10 flex items-center justify-center text-emerald-800 group-hover:scale-105 group-hover:bg-emerald-800 group-hover:text-white transition-all">
-                    <IconFileCheck className="w-6 h-6" stroke={1.75} />
-                  </div>
-                  <span className="text-xs font-mono font-bold text-brand-900/35 group-hover:text-emerald-800 transition-colors">
-                    06
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-xl font-bold text-brand-900 tracking-tight">
-                    Preventive Recommendations
-                  </h3>
-                  <p className="text-sm text-brand-900/65 leading-relaxed">
-                    Dapatkan langkah preventif yang relevan berdasarkan insight dan evidence.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* SECTION 04: AI UNTUK KESEHATAN - HELIORA (#how-it-works) */}
-        <section id="how-it-works" className="w-full bg-[#13281c] text-white py-20 sm:py-24 md:py-32 my-12 sm:my-16 relative overflow-hidden border-y border-emerald-950 scroll-mt-24">
+        <section id="how-it-works" className="w-full bg-[#13281c] text-white py-20 sm:py-24 md:py-32 mt-12 sm:mt-16 mb-0 relative overflow-hidden border-y border-emerald-950 scroll-mt-24">
           <div id="simulation" className="scroll-mt-24" />
-          {/* Subtle Ambient Glows */}
-          <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[140px] pointer-events-none" />
-          <div className="absolute bottom-0 left-1/4 w-[400px] h-[400px] bg-teal-500/10 rounded-full blur-[120px] pointer-events-none" />
+          {/* Subtle Ambient Glows (Hardware Accelerated Radial Gradients) */}
+          <div className="absolute top-0 right-1/4 w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(16,185,129,0.12)_0%,transparent_70%)] pointer-events-none [transform:translateZ(0)]" />
+          <div className="absolute bottom-0 left-1/4 w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,rgba(20,184,166,0.12)_0%,transparent_70%)] pointer-events-none [transform:translateZ(0)]" />
 
           <div className="container mx-auto px-6 lg:px-12 relative z-10">
             <div className="max-w-4xl mx-auto text-center">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.1] text-balance">
+              <motion.h2 
+                custom={0}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.2 }}
+                variants={fadeUpVariants}
+                className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.1] text-balance"
+              >
                 Melihat kesehatan secara lebih utuh.
-              </h2>
+              </motion.h2>
             </div>
 
             {/* Generative Abstract Layered Health Visual */}
-            <div className="mt-8 sm:mt-10 md:mt-12">
+            <motion.div 
+              custom={1}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.2 }}
+              variants={fadeUpVariants}
+              className="mt-8 sm:mt-10 md:mt-12"
+            >
               <LayeredHealthPicture />
-            </div>
+            </motion.div>
 
             {/* Editorial Description Text */}
             <div className="mt-6 sm:mt-8 max-w-3xl mx-auto text-center">
-              <p className="text-base sm:text-lg md:text-xl text-emerald-100/65 font-normal leading-relaxed text-balance">
+              <motion.p 
+                custom={2}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.2 }}
+                variants={fadeUpVariants}
+                className="text-base sm:text-lg md:text-xl text-emerald-100/65 font-normal leading-relaxed text-balance"
+              >
                 Kesehatan bukan sekadar angka. HELIORA membantu Anda{" "}
                 <span className="text-white">memahami</span> apa yang membentuk kesehatan,{" "}
                 <span className="text-white">mengeksplorasi</span> apa yang mungkin, dan melihat bagaimana{" "}
                 <span className="text-white">perubahan kecil</span> dapat membawa arah yang berbeda. Dengan insight yang dipersonalisasi dan didukung evidence ilmiah, Anda dapat menemukan{" "}
                 <span className="text-white">langkah yang lebih tepat</span> untuk diri Anda.
-              </p>
+              </motion.p>
+            </div>
+
+            {/* Pipeline Alur Preventif inside Dark Section */}
+            <motion.div 
+              custom={3}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.2 }}
+              variants={fadeUpVariants}
+              className="mt-12 sm:mt-16 max-w-5xl mx-auto w-full"
+            >
+              <div className="flex items-center justify-between sm:justify-center whitespace-nowrap flex-nowrap gap-x-3 sm:gap-x-8 md:gap-x-12 lg:gap-x-16 w-full">
+                {/* 1. Understand / Pahami */}
+                <div className="flex flex-col items-center gap-2 sm:gap-3 group cursor-default">
+                  <IconEye className="w-7 h-7 sm:w-9 sm:h-9 md:w-11 md:h-11 lg:w-12 lg:h-12 text-white/60 group-hover:text-white transition-all duration-200 group-hover:scale-110" stroke={1.6} />
+                  <span className="text-xs sm:text-sm md:text-base font-medium tracking-tight text-white/60 group-hover:text-white transition-colors">
+                    Pahami
+                  </span>
+                </div>
+
+                {/* 2. Explore / Jelajahi */}
+                <div className="flex flex-col items-center gap-2 sm:gap-3 group cursor-default">
+                  <IconCompass className="w-7 h-7 sm:w-9 sm:h-9 md:w-11 md:h-11 lg:w-12 lg:h-12 text-white/60 group-hover:text-white transition-all duration-200 group-hover:scale-110" stroke={1.6} />
+                  <span className="text-xs sm:text-sm md:text-base font-medium tracking-tight text-white/60 group-hover:text-white transition-colors">
+                    Jelajahi
+                  </span>
+                </div>
+
+                {/* 3. Simulate / Simulasikan */}
+                <div className="flex flex-col items-center gap-2 sm:gap-3 group cursor-default">
+                  <IconAdjustmentsHorizontal className="w-7 h-7 sm:w-9 sm:h-9 md:w-11 md:h-11 lg:w-12 lg:h-12 text-white/60 group-hover:text-white transition-all duration-200 group-hover:scale-110" stroke={1.6} />
+                  <span className="text-xs sm:text-sm md:text-base font-medium tracking-tight text-white/60 group-hover:text-white transition-colors">
+                    Simulasikan
+                  </span>
+                </div>
+
+                {/* 4. Recommend / Rekomendasi */}
+                <div className="flex flex-col items-center gap-2 sm:gap-3 group cursor-default">
+                  <IconSparkles className="w-7 h-7 sm:w-9 sm:h-9 md:w-11 md:h-11 lg:w-12 lg:h-12 text-white/60 group-hover:text-white transition-all duration-200 group-hover:scale-110" stroke={1.6} />
+                  <span className="text-xs sm:text-sm md:text-base font-medium tracking-tight text-white/60 group-hover:text-white transition-colors">
+                    Rekomendasi
+                  </span>
+                </div>
+
+                {/* 5. Act / Bertindak */}
+                <div className="flex flex-col items-center gap-2 sm:gap-3 group cursor-default">
+                  <IconBolt className="w-7 h-7 sm:w-9 sm:h-9 md:w-11 md:h-11 lg:w-12 lg:h-12 text-white/60 group-hover:text-white transition-all duration-200 group-hover:scale-110" stroke={1.6} />
+                  <span className="text-xs sm:text-sm md:text-base font-medium tracking-tight text-white/60 group-hover:text-white transition-colors">
+                    Bertindak
+                  </span>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* SECTION 03: KENAPA HARUS HELIORA (#why-heliora) */}
+        <section id="why-heliora" className="w-full bg-white/80 backdrop-blur-md border-y border-brand-900/5 pt-28 sm:pt-36 md:pt-44 pb-20 sm:pb-28 md:pb-32 mt-0 mb-8 sm:mb-12 scroll-mt-24">
+          <div className="container mx-auto px-6 lg:px-12">
+            <div className="max-w-3xl mx-auto text-center mb-28 sm:mb-36 md:mb-48 lg:mb-56">
+              <motion.h2 
+                custom={0}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.2 }}
+                variants={fadeUpVariants}
+                className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-brand-900 leading-tight"
+              >
+                Kenapa harus HELIORA?
+              </motion.h2>
+            </div>
+
+            {/* Sub-section 01: UNDERSTAND - Open Layout (No Card) */}
+            <div className="w-full max-w-6xl mx-auto">
+              <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-14 sm:gap-18 lg:gap-24 xl:gap-32 items-center">
+                {/* Left Content Column */}
+                <motion.div 
+                  custom={0}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, amount: 0.2 }}
+                  variants={fadeUpVariants}
+                  className="flex flex-col justify-center space-y-5 sm:space-y-6 text-left"
+                >
+                  <h3 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-brand-900 leading-[1.12] text-balance">
+                    Tidak semua dampak datang dengan segera.
+                  </h3>
+
+                  <p className="text-base sm:text-lg text-brand-900/70 font-normal leading-relaxed text-balance">
+                    Kebiasaan membentuk pola. Pola membentuk kemungkinan. HELIORA membantu Anda memahami apa yang mungkin terjadi selanjutnya.
+                  </p>
+                </motion.div>
+
+                {/* Right Large Visual Column: Activity Icons Collection */}
+                <motion.div 
+                  custom={1}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, amount: 0.2 }}
+                  variants={fadeUpVariants}
+                  className="w-full flex items-center justify-center"
+                >
+                  <UnderstandActivityIcons />
+                </motion.div>
+              </div>
+            </div>
+
+            {/* Sub-section 02: EXPLAINABLE REASONS / ALASAN DI BALIK SETIAP HASIL */}
+            <div className="w-full max-w-6xl mx-auto mt-28 sm:mt-36 md:mt-48 lg:mt-56">
+              <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-14 sm:gap-18 lg:gap-24 xl:gap-32 items-center">
+                {/* Left Visual Column: Analytics / Metric Icons */}
+                <motion.div 
+                  custom={1}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, amount: 0.2 }}
+                  variants={fadeUpVariants}
+                  className="w-full flex items-center justify-center order-2 lg:order-1"
+                >
+                  <ExplainableFactorsVisual />
+                </motion.div>
+
+                {/* Right Content Column */}
+                <motion.div 
+                  custom={0}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, amount: 0.2 }}
+                  variants={fadeUpVariants}
+                  className="flex flex-col justify-center space-y-5 sm:space-y-6 order-1 lg:order-2 text-left lg:text-right"
+                >
+                  <h3 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-brand-900 leading-[1.12] text-balance">
+                    Ada alasan di balik setiap hasil.
+                  </h3>
+
+                  <p className="text-base sm:text-lg text-brand-900/70 font-normal leading-relaxed text-balance">
+                    HELIORA menunjukkan bagaimana pola dari keseharian Anda memengaruhi estimasi risiko Anda, lengkap dengan alasan di balik setiap hasilnya.
+                  </p>
+                </motion.div>
+              </div>
+            </div>
+
+            {/* Sub-section 03: SIMULATION / BAGAIMANA JIKA ARAHNYA BERBEDA */}
+            <div className="w-full max-w-6xl mx-auto mt-28 sm:mt-36 md:mt-48 lg:mt-56">
+              <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-14 sm:gap-18 lg:gap-24 xl:gap-32 items-center">
+                {/* Left Content Column */}
+                <motion.div 
+                  custom={0}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, amount: 0.2 }}
+                  variants={fadeUpVariants}
+                  className="flex flex-col justify-center space-y-5 sm:space-y-6 text-left"
+                >
+                  <h3 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-brand-900 leading-[1.12] text-balance">
+                    Bagaimana jika arahnya berbeda?
+                  </h3>
+
+                  <p className="text-base sm:text-lg text-brand-900/70 font-normal leading-relaxed text-balance">
+                    Coba berbagai kemungkinan dan lihat bagaimana perubahan gaya hidup dapat mengubah estimasi risiko Anda.
+                  </p>
+                </motion.div>
+
+                {/* Right Visual Column: Simulation / Direction Icons */}
+                <motion.div 
+                  custom={1}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, amount: 0.2 }}
+                  variants={fadeUpVariants}
+                  className="w-full flex items-center justify-center"
+                >
+                  <SimulationDirectionVisual />
+                </motion.div>
+              </div>
+            </div>
+
+            {/* Sub-section 04: RECOMMENDATIONS & EVIDENCE */}
+            <div className="w-full max-w-6xl mx-auto mt-28 sm:mt-36 md:mt-48 lg:mt-56">
+              <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-14 sm:gap-18 lg:gap-24 xl:gap-32 items-center">
+                {/* Left Visual Column: Recommendation / Evidence Icons */}
+                <motion.div 
+                  custom={1}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, amount: 0.2 }}
+                  variants={fadeUpVariants}
+                  className="w-full flex items-center justify-center order-2 lg:order-1"
+                >
+                  <RecommendationsEvidenceVisual />
+                </motion.div>
+
+                {/* Right Content Column */}
+                <motion.div 
+                  custom={0}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, amount: 0.2 }}
+                  variants={fadeUpVariants}
+                  className="flex flex-col justify-center space-y-5 sm:space-y-6 order-1 lg:order-2 text-left lg:text-right"
+                >
+                  <h3 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-brand-900 leading-[1.12] text-balance">
+                    Saatnya mengambil langkah yang berarti.
+                  </h3>
+
+                  <p className="text-base sm:text-lg text-brand-900/70 font-normal leading-relaxed text-balance">
+                    Temukan langkah preventif yang relevan untuk Anda, dengan rekomendasi yang didukung evidence.
+                  </p>
+                </motion.div>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* SECTION 05: CTA FINAL */}
-        <section className="container mx-auto px-6 lg:px-12 py-12 text-center">
-          <div className="bg-gradient-to-br from-brand-900 via-[#0B4F35] to-[#083826] text-white rounded-[2.5rem] p-10 sm:p-14 md:p-16 max-w-4xl mx-auto border border-brand-900/20 shadow-xl space-y-6 relative overflow-hidden">
-            <div className="absolute top-0 right-1/4 w-72 h-72 bg-brand-400/15 blur-[90px] rounded-full pointer-events-none" />
-            <div className="absolute bottom-0 left-1/4 w-72 h-72 bg-emerald-300/10 blur-[90px] rounded-full pointer-events-none" />
+        {/* SECTION: FILOSOFI PREVENTIF (UNTUK MEMAHAMI, BUKAN MENDIAGNOSIS) */}
+        <SectionUnderstandingPurpose />
 
-            <div className="relative z-10 space-y-3 max-w-xl mx-auto">
-              <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white leading-tight">
-                Mulai Pantau Kesehatan Anda Hari Ini.
-              </h2>
-              <p className="text-base text-emerald-100/80 font-normal leading-relaxed">
-                Pahami tubuh Anda lebih baik setiap hari tanpa komplikasi.
-              </p>
-            </div>
+        {/* SECTION 05: CTA FINAL (Full-Width Rich Gradient) */}
+        <section className="w-full bg-gradient-to-b from-[#1b5e3f] via-[#0d3422] to-[#05140d] text-white py-24 sm:py-32 md:py-36 relative overflow-hidden border-t border-emerald-500/20 text-center mt-12 sm:mt-16">
+          {/* Enhanced Ambient Radial Glows (Hardware Accelerated Radial Gradients) */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[750px] h-[400px] rounded-full bg-[radial-gradient(circle,rgba(52,211,153,0.22)_0%,transparent_70%)] pointer-events-none [transform:translateZ(0)]" />
+          <div className="absolute bottom-0 right-1/4 w-[450px] h-[300px] rounded-full bg-[radial-gradient(circle,rgba(94,234,212,0.15)_0%,transparent_70%)] pointer-events-none [transform:translateZ(0)]" />
+
+          <div className="container mx-auto px-6 lg:px-12 max-w-4xl flex flex-col items-center justify-center space-y-6 sm:space-y-8 relative z-10">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-tight">
+              Ambil langkah lebih awal.
+            </h2>
             
-            <div className="pt-2 relative z-10">
+            <div>
               <Link href="/register">
-                <Button className="h-13 px-8 rounded-2xl bg-white hover:bg-neutral-100 text-brand-900 text-base font-bold shadow-lg shadow-black/20 transition-all hover:scale-[1.02] active:scale-[0.98]">
-                  Buat Akun Gratis
+                <Button className="h-13 px-8 rounded-full bg-white hover:bg-neutral-100 text-brand-900 text-base font-semibold shadow-[0_4px_20px_rgba(0,0,0,0.2)] transition-all hover:scale-[1.02] active:scale-[0.98]">
+                  Mulai dengan HELIORA
                 </Button>
               </Link>
             </div>

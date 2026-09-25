@@ -23,10 +23,10 @@ export function LayeredHealthPicture() {
 
   return (
     <div className="relative w-full max-w-3xl mx-auto flex items-center justify-center select-none py-2 sm:py-4">
-      {/* Ambient Radial Lighting Behind SVG */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none -z-10">
-        <div className="w-[460px] h-[320px] bg-emerald-500/15 rounded-full blur-[110px]" />
-        <div className="w-[320px] h-[240px] bg-teal-400/10 rounded-full blur-[80px]" />
+      {/* Ambient Radial Lighting Behind SVG (Hardware Accelerated Radial Gradients) */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none -z-10 [transform:translateZ(0)]">
+        <div className="w-[460px] h-[320px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.15),transparent_70%)]" />
+        <div className="w-[320px] h-[240px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(45,212,191,0.10),transparent_70%)]" />
       </div>
 
       {/* Static Isometric SVG Stack (5 Compact Layers) */}

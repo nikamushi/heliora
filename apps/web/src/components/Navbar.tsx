@@ -1,30 +1,15 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { IconHeartbeat, IconMenu2, IconX } from "@tabler/icons-react";
 
 export function Navbar() {
-  const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   return (
-    <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled 
-          ? "py-3 bg-white/75 backdrop-blur-xl border-b border-brand-900/10 shadow-[0_4px_20px_rgb(0,0,0,0.02)]" 
-          : "py-5 bg-transparent"
-      }`}
-    >
+    <header className="w-full relative z-50 py-5 sm:py-6 bg-transparent">
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex items-center justify-between">
           {/* Logo (Left) */}
@@ -41,7 +26,7 @@ export function Navbar() {
           <nav className="hidden md:flex items-center absolute left-1/2 -translate-x-1/2">
             <div className="flex items-center gap-1 rounded-full bg-brand-50/80 px-1.5 py-1.5 backdrop-blur-md border border-brand-200/50 shadow-sm">
               {[
-                { name: "Fitur", href: "#features" },
+                { name: "Fitur", href: "#why-heliora" },
                 { name: "How it works", href: "#how-it-works" },
               ].map((item) => (
                 <Link
@@ -84,7 +69,7 @@ export function Navbar() {
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-40 bg-brand-50 pt-24 px-6 md:hidden flex flex-col h-screen">
           <nav className="flex flex-col gap-6 text-2xl font-medium tracking-tight text-brand-900">
-            <Link href="#features" onClick={() => setMobileMenuOpen(false)}>Fitur</Link>
+            <Link href="#why-heliora" onClick={() => setMobileMenuOpen(false)}>Fitur</Link>
             <Link href="#how-it-works" onClick={() => setMobileMenuOpen(false)}>How it works</Link>
           </nav>
           <div className="mt-auto pb-12 flex flex-col gap-4">
