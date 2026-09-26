@@ -2,6 +2,10 @@
 
 @custom-variant dark (&:is(.dark *));
 
+html {
+  scroll-behavior: smooth;
+}
+
 /* Palette source of truth: docs/Design.md §2.2 (light), §2.3 (dark), §2.4 (risk semantics) */
 :root {
   --background: #FFFFFF;

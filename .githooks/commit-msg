@@ -64,17 +64,17 @@ CHILD_RAW=$(printf '%s\n' "$SUMMARY" | sed -E 's/^[A-Z][A-Z0-9]*-[0-9]+\.([0-9]+
 # Normalize child ordinal (strip leading zeros; treat all-zero as 0).
 CHILD=$(printf '%s\n' "$CHILD_RAW" | sed 's/^0*\([0-9]\)/\1/; s/^0*$/0/')
 
-# Parent heading must exist: ### SETUP-001
-if ! grep -Eq "^### ${PARENT}( |$)" "$TASK_FILE"; then
+# Parent heading must exist: ## or ### SETUP-001
+if ! grep -Eq "^##+ ${PARENT}( |$)" "$TASK_FILE"; then
   fail "parent task '${PARENT}' not found in docs/TASK.md"
 fi
 
-# Count checklist items under this parent until the next ### heading.
+# Count checklist items under this parent until the next ## / ### heading.
 CHILD_COUNT=$(awk -v parent="$PARENT" '
   BEGIN { in_section = 0; count = 0 }
-  /^### / {
+  /^##+ / {
     if (in_section) { exit }
-    if ($0 ~ "^### " parent "( |$)") { in_section = 1; next }
+    if ($0 ~ "^##+ " parent "( |$)") { in_section = 1; next }
   }
   in_section && /^- \[[ xX]\] / { count++ }
   END { print count + 0 }

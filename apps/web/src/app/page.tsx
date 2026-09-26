@@ -1,486 +1,567 @@
 "use client";
 
-import React from "react";
+import React, { useRef } from "react";
 import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
-import { motion } from "motion/react";
+import { BilateralPatternFlow } from "@/components/BilateralPatternFlow";
+import { LayeredHealthPicture } from "@/components/LayeredHealthPicture";
+import { UnderstandActivityIcons } from "@/components/UnderstandActivityIcons";
+import { ExplainableFactorsVisual } from "@/components/ExplainableFactorsVisual";
+import { SimulationDirectionVisual } from "@/components/SimulationDirectionVisual";
+import { RecommendationsEvidenceVisual } from "@/components/RecommendationsEvidenceVisual";
+import { motion, useScroll, useTransform } from "motion/react";
 import { 
   IconHeartbeat,
-  IconArrowRight,
+  IconShieldLock,
+  IconEye,
+  IconCompass,
   IconAdjustmentsHorizontal,
-  IconHistory,
-  IconShieldCheck,
-  IconActivity,
-  IconClipboardList,
-  IconFileText,
-  IconMoon
+  IconSparkles,
+  IconBolt,
+  IconStack2,
+  IconUserHeart
 } from "@tabler/icons-react";
 
 // Fluid Apple HIG motion curves
 const fadeUpVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 28 },
   visible: (i: number = 0) => ({
     opacity: 1,
     y: 0,
     transition: {
       delay: i * 0.08,
-      duration: 0.6,
+      duration: 0.65,
       ease: [0.21, 0.47, 0.32, 0.98] as const,
     }
   })
 };
 
+function SectionPatterns() {
+  return (
+    <section 
+      id="patterns" 
+      className="min-h-[100dvh] w-full overflow-hidden flex flex-col justify-between pt-24 md:pt-28 pb-8 px-6 lg:px-12 relative"
+    >
+      {/* Top Typographic Header (Clean spacing below navbar) */}
+      <div className="container mx-auto max-w-6xl w-full z-20 pointer-events-none mb-3 md:mb-5">
+        <div className="max-w-4xl pointer-events-auto">
+          <motion.h2 
+            custom={1}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.25 }}
+            variants={fadeUpVariants}
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-normal tracking-tight text-brand-900 leading-[1.08]"
+          >
+            Setiap hari, kita melakukan <br className="hidden sm:inline" />
+            <span className="italic font-light text-brand-900/80">lebih dari yang kita sadari.</span>
+          </motion.h2>
+        </div>
+      </div>
+
+      {/* Dedicated Viewport for Bilateral Flow Visualization */}
+      <div className="relative w-full h-[460px] sm:h-[520px] md:h-[600px] flex items-center justify-center pointer-events-none z-10 my-auto [transform:translateZ(0)]">
+        {/* Soft Ambient Radial Glows (Hardware Accelerated Radial Gradients) */}
+        <div className="absolute inset-0 pointer-events-none -z-10 [transform:translateZ(0)]">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[450px] bg-[radial-gradient(ellipse_at_center,rgba(110,231,183,0.15),transparent_70%)]" />
+          <div className="absolute top-1/3 left-12 w-[350px] h-[280px] bg-[radial-gradient(ellipse_at_center,rgba(217,119,87,0.10),transparent_70%)]" />
+          <div className="absolute bottom-1/4 right-12 w-[380px] h-[300px] bg-[radial-gradient(ellipse_at_center,rgba(100,116,139,0.10),transparent_70%)]" />
+        </div>
+
+        <BilateralPatternFlow />
+      </div>
+    </section>
+  );
+}
+
+function NarrativeItem({ content }: { content: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start 90%", "center 50%", "end 10%"],
+  });
+
+  // Pure clean scroll-linked opacity fade
+  const opacity = useTransform(scrollYProgress, [0, 0.25, 0.75, 1], [0, 1, 1, 0]);
+
+  return (
+    <motion.div
+      ref={ref}
+      style={{ opacity }}
+      className="flex flex-col items-center text-center min-h-[30vh] sm:min-h-[36vh] justify-center px-4 w-full"
+    >
+      <p className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-normal tracking-tight leading-snug sm:leading-[1.35] text-balance max-w-4xl sm:max-w-5xl">
+        {content}
+      </p>
+    </motion.div>
+  );
+}
+
+function SectionLifestyleNarrative() {
+  const narrativeContent = (
+    <span className="text-brand-900/80">
+      Kebiasaan yang kita jalani setiap hari perlahan membentuk{" "}
+      <span className="text-brand-900">pola</span> hidup, memberi kita gambaran tentang{" "}
+      <span className="text-brand-900">kondisi kesehatan</span>, dan membuka kemungkinan untuk melihat{" "}
+      <span className="text-brand-900">perubahan ke depan</span>.
+    </span>
+  );
+
+  return (
+    <section 
+      id="narrative" 
+      className="container mx-auto px-6 lg:px-12 pt-8 sm:pt-12 md:pt-16 pb-14 sm:pb-18 md:pb-24 scroll-mt-24"
+    >
+      <div className="max-w-5xl mx-auto flex flex-col items-center">
+        <NarrativeItem content={narrativeContent} />
+      </div>
+    </section>
+  );
+}
+
+function SectionUnderstandingPurpose() {
+  const showcaseItems = [
+    {
+      title: "Personal",
+      icon: IconUserHeart,
+      bg: "bg-gradient-to-br from-[#f0f7fc] to-[#e1effa]",
+      border: "border-[#cee3f5]",
+      text: "text-[#1d6fad]",
+      shadow: "shadow-[0_8px_24px_rgba(29,111,173,0.08)]",
+    },
+    {
+      title: "Teruji",
+      icon: IconStack2,
+      bg: "bg-gradient-to-br from-[#f5f2fb] to-[#e8e0f7]",
+      border: "border-[#d8ccf2]",
+      text: "text-[#6941b0]",
+      shadow: "shadow-[0_8px_24px_rgba(105,65,176,0.08)]",
+    },
+    {
+      title: "Pribadi",
+      icon: IconShieldLock,
+      bg: "bg-gradient-to-br from-[#f3f5f8] to-[#e4e8ee]",
+      border: "border-[#ccd3de]",
+      text: "text-[#334155]",
+      shadow: "shadow-[0_8px_24px_rgba(51,65,85,0.08)]",
+    },
+  ];
+
+  return (
+    <section 
+      id="purpose" 
+      className="container mx-auto px-6 lg:px-12 py-20 sm:py-28 md:py-36 scroll-mt-24"
+    >
+      <div className="max-w-5xl mx-auto flex flex-col items-center">
+        {/* Top Header Block */}
+        <div className="w-full max-w-4xl mx-auto flex flex-col items-center text-center">
+          <motion.h2 
+            custom={0}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.1 }}
+            variants={fadeUpVariants}
+            className="w-full text-center text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-brand-900 leading-tight"
+          >
+            Untuk memahami, bukan mendiagnosis.
+          </motion.h2>
+
+          <motion.p 
+            custom={1}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.1 }}
+            variants={fadeUpVariants}
+            className="mt-5 sm:mt-6 text-base sm:text-lg md:text-xl text-brand-900/70 font-normal leading-relaxed max-w-2xl mx-auto text-balance text-center"
+          >
+            HELIORA membaca gaya hidup Anda untuk memberi gambaran kesehatan yang lebih personal, agar Anda bisa mengambil langkah pencegahan lebih awal.
+          </motion.p>
+        </div>
+
+        {/* Showcase Group (Unified Same Background) */}
+        <div className="w-full mt-24 sm:mt-32 md:mt-40 flex flex-col items-center">
+          <motion.h3
+            custom={2}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.1 }}
+            variants={fadeUpVariants}
+            className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-brand-900 text-center mb-10 sm:mb-14"
+          >
+            Dibangun untuk Anda percaya.
+          </motion.h3>
+
+          {/* 3 Squircles Showcase Row (Static - No animation, No hover) */}
+          <div className="flex flex-row items-center justify-center gap-8 sm:gap-14 md:gap-20 w-full select-none">
+            {showcaseItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <div
+                  key={item.title}
+                  className="flex flex-col items-center gap-3.5"
+                >
+                  {/* Static Organic Ceramic-Glass Squircle */}
+                  <div 
+                    className={`w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-[24px] sm:rounded-[28px] md:rounded-[32px] ${item.bg} ${item.border} ${item.shadow} border flex items-center justify-center relative overflow-hidden`}
+                  >
+                    {/* Soft ambient surface light */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-white/80 via-transparent to-black/[0.02] pointer-events-none rounded-[inherit]" />
+                    <Icon 
+                      className={`w-9 h-9 sm:w-11 sm:h-11 md:w-13 md:h-13 ${item.text} relative z-10`} 
+                      stroke={1.6} 
+                    />
+                  </div>
+                  {/* Clean Label Underneath */}
+                  <span className="text-sm sm:text-base md:text-lg font-semibold tracking-tight text-brand-900 text-center">
+                    {item.title}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-brand-50/20 text-brand-900 selection:bg-brand-200 relative overflow-hidden">
-      {/* Ambient Liquid Orbs */}
-      <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
-        <div className="absolute -top-32 left-1/4 w-[550px] h-[550px] bg-brand-400/12 rounded-full blur-[140px]" />
-        <div className="absolute top-48 right-10 w-[450px] h-[450px] bg-emerald-300/12 rounded-full blur-[130px]" />
-        <div className="absolute top-[950px] left-10 w-[600px] h-[450px] bg-teal-400/10 rounded-full blur-[150px]" />
-        <div className="absolute top-[1900px] right-1/4 w-[520px] h-[520px] bg-brand-400/10 rounded-full blur-[140px]" />
+      {/* Ambient Liquid Orbs (Hardware Accelerated Radial Gradients) */}
+      <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden [transform:translateZ(0)]">
+        <div className="absolute -top-32 left-1/4 w-[550px] h-[550px] rounded-full bg-[radial-gradient(circle,rgba(45,90,67,0.12)_0%,transparent_70%)]" />
+        <div className="absolute top-48 right-10 w-[450px] h-[450px] rounded-full bg-[radial-gradient(circle,rgba(110,231,183,0.15)_0%,transparent_70%)]" />
+        <div className="absolute top-[950px] left-10 w-[600px] h-[450px] rounded-full bg-[radial-gradient(circle,rgba(45,212,191,0.12)_0%,transparent_70%)]" />
+        <div className="absolute top-[1900px] right-1/4 w-[520px] h-[520px] rounded-full bg-[radial-gradient(circle,rgba(45,90,67,0.10)_0%,transparent_70%)]" />
       </div>
 
       <Navbar />
 
-      <main className="pt-28 pb-16">
-        {/* HERO SECTION: Split 2-Column with 3D Glass Assessment Mockup Card */}
-        <section className="container mx-auto px-6 lg:px-12 pt-12 sm:pt-16 lg:pt-20 pb-20 relative">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
-            {/* Left Column (7 cols): Direct Typography & CTAs */}
-            <div className="lg:col-span-7 space-y-6 text-left">
-              <motion.h1 
-                custom={1} initial="hidden" animate="visible" variants={fadeUpVariants}
-                className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight text-brand-900 text-balance leading-[1.06]"
-              >
-                Kesehatan Anda, <br />
-                <span className="bg-gradient-to-r from-brand-900 via-emerald-800 to-emerald-600 bg-clip-text text-transparent">
-                  Dapat Diprediksi.
-                </span>
-              </motion.h1>
-              
-              <motion.p 
-                custom={2} initial="hidden" animate="visible" variants={fadeUpVariants}
-                className="text-lg sm:text-xl text-brand-900/70 max-w-xl text-balance leading-relaxed font-normal"
-              >
-                Masukkan parameter kesehatan dan kebiasaan harian Anda. Heliora memetakan pola risiko kardiometabolik secara privat, objektif, dan terarah.
-              </motion.p>
-              
-              <motion.div 
-                custom={3} initial="hidden" animate="visible" variants={fadeUpVariants}
-                className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 pt-3"
-              >
-                <Link href="/register">
-                  <Button className="w-full sm:w-auto h-14 px-8 rounded-2xl bg-brand-900 hover:bg-brand-900/90 text-white text-base font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-brand-900/15 flex items-center justify-center gap-2.5">
-                    <span>Mulai Assessment</span>
-                    <IconArrowRight size={18} />
-                  </Button>
-                </Link>
-                <Link href="#how-it-works">
-                  <Button variant="outline" className="w-full sm:w-auto h-14 px-8 rounded-2xl border-brand-900/15 bg-white/80 backdrop-blur-xl hover:bg-brand-50/80 text-brand-900 text-base font-semibold transition-all shadow-xs">
-                    Pelajari Alur
-                  </Button>
-                </Link>
-              </motion.div>
-            </div>
+      <main>
+        {/* HERO SECTION: 1 Full Viewport (Centered Editorial Experience) */}
+        <section id="hero" className="min-h-[calc(100dvh-84px)] w-full flex flex-col justify-between items-center relative px-6 lg:px-12 pt-8 sm:pt-12 pb-12">
+          {/* Top spacer for optical centering */}
+          <div className="w-full" />
 
-            {/* Right Column (5 cols): 3D Perspective Glass Mockup Card */}
+          {/* Centered Hero Typography & Action Buttons */}
+          <div className="flex flex-col items-center text-center max-w-4xl mx-auto space-y-8 my-auto">
+            <motion.span 
+              custom={0} initial="hidden" animate="visible" variants={fadeUpVariants}
+              className="text-xs sm:text-sm font-bold uppercase tracking-[0.28em] text-brand-900"
+            >
+              HELIORA
+            </motion.span>
+
+            <motion.h1 
+              custom={1} initial="hidden" animate="visible" variants={fadeUpVariants}
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-brand-900 text-balance leading-[1.08]"
+            >
+              Kesehatan Anda,<br />
+              <span className="font-light text-brand-900/80">dapat dipahami.</span>
+            </motion.h1>
+
             <motion.div 
               custom={2} initial="hidden" animate="visible" variants={fadeUpVariants}
-              className="lg:col-span-5 relative [perspective:1200px] flex items-center justify-center pt-6 lg:pt-0"
+              className="flex items-center justify-center pt-4"
             >
-              {/* Floating Badge 1: Standard Method (Top Left) */}
-              <motion.div
-                animate={{ y: [0, -6, 0] }}
-                transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute -top-3 -left-3 sm:-top-5 sm:-left-6 z-20 bg-white/90 backdrop-blur-xl border border-brand-900/10 rounded-2xl px-4 py-3 shadow-[0_12px_30px_rgba(0,0,0,0.06)] flex items-center gap-3"
+              <Link href="/register">
+                <Button className="h-13 px-8 rounded-full bg-[#1e3a2b] hover:bg-[#162c20] text-white text-base font-medium shadow-[0_4px_16px_rgba(30,58,43,0.18)] hover:shadow-[0_6px_20px_rgba(30,58,43,0.25)] transition-all hover:scale-[1.02] active:scale-[0.98]">
+                  Mulai Assessment
+                </Button>
+              </Link>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* SECTION 01 (STITCH SECTION 2: BILATERAL CONVERGENCE): KESEHATAN BUKAN SEKADAR ANGKA */}
+        <SectionPatterns />
+
+        {/* SECTION 02: NARASI POLA HIDUP & EKSPLORASI RISIKO */}
+        <SectionLifestyleNarrative />
+
+        {/* SECTION 04: AI UNTUK KESEHATAN - HELIORA (#how-it-works) */}
+        <section id="how-it-works" className="w-full bg-[#13281c] text-white py-20 sm:py-24 md:py-32 mt-12 sm:mt-16 mb-0 relative overflow-hidden border-y border-emerald-950 scroll-mt-24">
+          <div id="simulation" className="scroll-mt-24" />
+          {/* Subtle Ambient Glows (Hardware Accelerated Radial Gradients) */}
+          <div className="absolute top-0 right-1/4 w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(16,185,129,0.12)_0%,transparent_70%)] pointer-events-none [transform:translateZ(0)]" />
+          <div className="absolute bottom-0 left-1/4 w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,rgba(20,184,166,0.12)_0%,transparent_70%)] pointer-events-none [transform:translateZ(0)]" />
+
+          <div className="container mx-auto px-6 lg:px-12 relative z-10">
+            <div className="max-w-4xl mx-auto text-center">
+              <motion.h2 
+                custom={0}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.2 }}
+                variants={fadeUpVariants}
+                className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.1] text-balance"
               >
-                <div className="w-9 h-9 rounded-xl bg-brand-50 flex items-center justify-center text-brand-900">
-                  <IconClipboardList size={20} />
-                </div>
-                <div>
-                  <p className="text-[10px] uppercase font-mono tracking-wider text-brand-900/50 font-bold">Metode Terstandar</p>
-                  <p className="text-sm font-bold text-brand-900 leading-tight">Asesmen Mandiri</p>
-                </div>
-              </motion.div>
+                Melihat kesehatan secara lebih utuh.
+              </motion.h2>
+            </div>
 
-              {/* Floating Badge 2: Local Encryption (Bottom Right) */}
-              <motion.div
-                animate={{ y: [0, 6, 0] }}
-                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-                className="absolute -bottom-4 -right-2 sm:-bottom-5 sm:-right-4 z-20 bg-white/90 backdrop-blur-xl border border-brand-900/10 rounded-2xl px-4 py-3 shadow-[0_12px_30px_rgba(0,0,0,0.06)] flex items-center gap-3"
+            {/* Generative Abstract Layered Health Visual */}
+            <motion.div 
+              custom={1}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.2 }}
+              variants={fadeUpVariants}
+              className="mt-8 sm:mt-10 md:mt-12"
+            >
+              <LayeredHealthPicture />
+            </motion.div>
+
+            {/* Editorial Description Text */}
+            <div className="mt-6 sm:mt-8 max-w-3xl mx-auto text-center">
+              <motion.p 
+                custom={2}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.2 }}
+                variants={fadeUpVariants}
+                className="text-base sm:text-lg md:text-xl text-emerald-100/65 font-normal leading-relaxed text-balance"
               >
-                <div className="w-9 h-9 rounded-xl bg-brand-900/10 flex items-center justify-center text-brand-900">
-                  <IconShieldCheck size={20} />
-                </div>
-                <div>
-                  <p className="text-[10px] uppercase font-mono tracking-wider text-brand-900/50 font-bold">Keamanan Data</p>
-                  <p className="text-sm font-bold text-brand-900 leading-tight">Enkripsi Lokal E2E</p>
-                </div>
-              </motion.div>
+                Kesehatan bukan sekadar angka. HELIORA membantu Anda{" "}
+                <span className="text-white">memahami</span> apa yang membentuk kesehatan,{" "}
+                <span className="text-white">mengeksplorasi</span> apa yang mungkin, dan melihat bagaimana{" "}
+                <span className="text-white">perubahan kecil</span> dapat membawa arah yang berbeda. Dengan insight yang dipersonalisasi dan didukung evidence ilmiah, Anda dapat menemukan{" "}
+                <span className="text-white">langkah yang lebih tepat</span> untuk diri Anda.
+              </motion.p>
+            </div>
 
-              {/* Main 3D Perspective Card */}
-              <div className="w-full max-w-md bg-white/80 backdrop-blur-2xl border border-white/80 rounded-[2.5rem] p-7 sm:p-8 shadow-[0_25px_60px_-15px_rgba(13,95,63,0.12)] space-y-6 [transform:rotateY(-6deg)_rotateX(4deg)] hover:[transform:rotateY(0deg)_rotateX(0deg)] transition-all duration-700 ease-out relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-44 h-44 bg-gradient-to-br from-brand-400/20 to-transparent rounded-full blur-2xl pointer-events-none" />
-
-                {/* Card Header (Clean Title Only) */}
-                <div className="flex items-center justify-between border-b border-brand-900/5 pb-4">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-lg bg-brand-900 text-white flex items-center justify-center shadow-xs">
-                      <IconHeartbeat size={16} />
-                    </div>
-                    <span className="text-xs font-bold tracking-tight text-brand-900">HELIORA ASSESSMENT</span>
-                  </div>
-                  <span className="text-[11px] font-medium text-brand-900/50">Formulir Mandiri</span>
-                </div>
-
-                {/* Status Panel - Factual Health Profile Categories */}
-                <div className="bg-brand-50/50 rounded-2xl p-5 border border-brand-900/5 space-y-1">
-                  <div className="text-2xl font-bold text-brand-900 tracking-tight">
-                    Profil Kardiometabolik
-                  </div>
-                  <p className="text-xs text-brand-900/60">
-                    Fisik • Tekanan Darah • Pola Kebiasaan
-                  </p>
+            {/* Pipeline Alur Preventif inside Dark Section */}
+            <motion.div 
+              custom={3}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.2 }}
+              variants={fadeUpVariants}
+              className="mt-12 sm:mt-16 max-w-5xl mx-auto w-full"
+            >
+              <div className="flex items-center justify-between sm:justify-center whitespace-nowrap flex-nowrap gap-x-3 sm:gap-x-8 md:gap-x-12 lg:gap-x-16 w-full">
+                {/* 1. Understand / Pahami */}
+                <div className="flex flex-col items-center gap-2 sm:gap-3 group cursor-default">
+                  <IconEye className="w-7 h-7 sm:w-9 sm:h-9 md:w-11 md:h-11 lg:w-12 lg:h-12 text-white/60 group-hover:text-white transition-all duration-200 group-hover:scale-110" stroke={1.6} />
+                  <span className="text-xs sm:text-sm md:text-base font-medium tracking-tight text-white/60 group-hover:text-white transition-colors">
+                    Pahami
+                  </span>
                 </div>
 
-                {/* 3 Real Health Profile Input Categories */}
-                <div className="space-y-3">
-                  <p className="text-[11px] font-mono uppercase tracking-wider text-brand-900/40 font-bold">
-                    Komponen Pengisian
-                  </p>
-                  
-                  {/* Category 1: Physical Profile */}
-                  <div className="flex items-center justify-between p-3.5 rounded-xl bg-white/90 border border-brand-900/5 hover:border-brand-900/15 transition-all">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-800 flex items-center justify-center">
-                        <IconClipboardList size={17} />
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-brand-900">Profil Fisik & Antropometri</p>
-                        <p className="text-[11px] text-brand-900/60">Usia, Tinggi, & Berat Badan</p>
-                      </div>
-                    </div>
-                    <span className="text-xs font-medium text-brand-900/60">Siap Diisi</span>
-                  </div>
+                {/* 2. Explore / Jelajahi */}
+                <div className="flex flex-col items-center gap-2 sm:gap-3 group cursor-default">
+                  <IconCompass className="w-7 h-7 sm:w-9 sm:h-9 md:w-11 md:h-11 lg:w-12 lg:h-12 text-white/60 group-hover:text-white transition-all duration-200 group-hover:scale-110" stroke={1.6} />
+                  <span className="text-xs sm:text-sm md:text-base font-medium tracking-tight text-white/60 group-hover:text-white transition-colors">
+                    Jelajahi
+                  </span>
+                </div>
 
-                  {/* Category 2: Blood Pressure & History */}
-                  <div className="flex items-center justify-between p-3.5 rounded-xl bg-white/90 border border-brand-900/5 hover:border-brand-900/15 transition-all">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-rose-50 text-rose-700 flex items-center justify-center">
-                        <IconHeartbeat size={17} />
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-brand-900">Tekanan Darah & Riwayat</p>
-                        <p className="text-[11px] text-brand-900/60">Tensi Darah & Riwayat Keluarga</p>
-                      </div>
-                    </div>
-                    <span className="text-xs font-medium text-brand-900/60">Siap Diisi</span>
-                  </div>
+                {/* 3. Simulate / Simulasikan */}
+                <div className="flex flex-col items-center gap-2 sm:gap-3 group cursor-default">
+                  <IconAdjustmentsHorizontal className="w-7 h-7 sm:w-9 sm:h-9 md:w-11 md:h-11 lg:w-12 lg:h-12 text-white/60 group-hover:text-white transition-all duration-200 group-hover:scale-110" stroke={1.6} />
+                  <span className="text-xs sm:text-sm md:text-base font-medium tracking-tight text-white/60 group-hover:text-white transition-colors">
+                    Simulasikan
+                  </span>
+                </div>
 
-                  {/* Category 3: Lifestyle Habits */}
-                  <div className="flex items-center justify-between p-3.5 rounded-xl bg-white/90 border border-brand-900/5 hover:border-brand-900/15 transition-all">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center">
-                        <IconMoon size={17} />
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-brand-900">Pola Gaya Hidup</p>
-                        <p className="text-[11px] text-brand-900/60">Aktivitas, Durasi Tidur, & Rokok</p>
-                      </div>
-                    </div>
-                    <span className="text-xs font-medium text-brand-900/60">Siap Diisi</span>
-                  </div>
+                {/* 4. Recommend / Rekomendasi */}
+                <div className="flex flex-col items-center gap-2 sm:gap-3 group cursor-default">
+                  <IconSparkles className="w-7 h-7 sm:w-9 sm:h-9 md:w-11 md:h-11 lg:w-12 lg:h-12 text-white/60 group-hover:text-white transition-all duration-200 group-hover:scale-110" stroke={1.6} />
+                  <span className="text-xs sm:text-sm md:text-base font-medium tracking-tight text-white/60 group-hover:text-white transition-colors">
+                    Rekomendasi
+                  </span>
+                </div>
+
+                {/* 5. Act / Bertindak */}
+                <div className="flex flex-col items-center gap-2 sm:gap-3 group cursor-default">
+                  <IconBolt className="w-7 h-7 sm:w-9 sm:h-9 md:w-11 md:h-11 lg:w-12 lg:h-12 text-white/60 group-hover:text-white transition-all duration-200 group-hover:scale-110" stroke={1.6} />
+                  <span className="text-xs sm:text-sm md:text-base font-medium tracking-tight text-white/60 group-hover:text-white transition-colors">
+                    Bertindak
+                  </span>
                 </div>
               </div>
             </motion.div>
           </div>
         </section>
 
-        {/* SECTION 01: TANTANGAN */}
-        <section className="container mx-auto px-6 lg:px-12 py-16">
-          <div className="max-w-2xl mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-brand-900 leading-tight">
-              Mengapa Deteksi Dini Sering Terlambat?
-            </h2>
-            <p className="text-base text-brand-900/60 mt-2 font-normal">
-              Banyak masalah kardiometabolik berkembang tanpa rasa sakit fisik.
-            </p>
-          </div>
+        {/* SECTION 03: KENAPA HARUS HELIORA (#why-heliora) */}
+        <section id="why-heliora" className="w-full bg-white/80 backdrop-blur-md border-y border-brand-900/5 pt-28 sm:pt-36 md:pt-44 pb-20 sm:pb-28 md:pb-32 mt-0 mb-8 sm:mb-12 scroll-mt-24">
+          <div className="container mx-auto px-6 lg:px-12">
+            <div className="max-w-3xl mx-auto text-center mb-28 sm:mb-36 md:mb-48 lg:mb-56">
+              <motion.h2 
+                custom={0}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.2 }}
+                variants={fadeUpVariants}
+                className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-brand-900 leading-tight"
+              >
+                Kenapa harus HELIORA?
+              </motion.h2>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Card 1 */}
-            <div className="bg-white/80 backdrop-blur-xl rounded-[2rem] p-7 border border-brand-900/10 shadow-sm flex flex-col justify-between space-y-4 hover:-translate-y-1 hover:shadow-lg transition-all">
-              <div className="w-10 h-10 rounded-xl bg-brand-50 border border-brand-900/10 flex items-center justify-center text-brand-900">
-                <IconFileText size={20} />
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-lg font-bold text-brand-900 tracking-tight">
-                  Data Tercecer
-                </h3>
-                <p className="text-sm text-brand-900/65 leading-relaxed">
-                  Riwayat tensi darah, hasil lab lama, dan catatan pola hidup harian kerap tersimpan terpisah tanpa evaluasi menyeluruh.
-                </p>
+            {/* Sub-section 01: UNDERSTAND - Open Layout (No Card) */}
+            <div className="w-full max-w-6xl mx-auto">
+              <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-14 sm:gap-18 lg:gap-24 xl:gap-32 items-center">
+                {/* Left Content Column */}
+                <motion.div 
+                  custom={0}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, amount: 0.2 }}
+                  variants={fadeUpVariants}
+                  className="flex flex-col justify-center space-y-5 sm:space-y-6 text-left"
+                >
+                  <h3 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-brand-900 leading-[1.12] text-balance">
+                    Tidak semua dampak datang dengan segera.
+                  </h3>
+
+                  <p className="text-base sm:text-lg text-brand-900/70 font-normal leading-relaxed text-balance">
+                    Kebiasaan membentuk pola. Pola membentuk kemungkinan. HELIORA membantu Anda memahami apa yang mungkin terjadi selanjutnya.
+                  </p>
+                </motion.div>
+
+                {/* Right Large Visual Column: Activity Icons Collection */}
+                <motion.div 
+                  custom={1}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, amount: 0.2 }}
+                  variants={fadeUpVariants}
+                  className="w-full flex items-center justify-center"
+                >
+                  <UnderstandActivityIcons />
+                </motion.div>
               </div>
             </div>
 
-            {/* Card 2 */}
-            <div className="bg-white/80 backdrop-blur-xl rounded-[2rem] p-7 border border-brand-900/10 shadow-sm flex flex-col justify-between space-y-4 hover:-translate-y-1 hover:shadow-lg transition-all">
-              <div className="w-10 h-10 rounded-xl bg-brand-50 border border-brand-900/10 flex items-center justify-center text-brand-900">
-                <IconActivity size={20} />
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-lg font-bold text-brand-900 tracking-tight">
-                  Perkembangan Senyap
-                </h3>
-                <p className="text-sm text-brand-900/65 leading-relaxed">
-                  Pergeseran metabolisme dapat berjalan bertahun-tahun tanpa gejala sebelum memicu masalah serius.
-                </p>
-              </div>
-            </div>
+            {/* Sub-section 02: EXPLAINABLE REASONS / ALASAN DI BALIK SETIAP HASIL */}
+            <div className="w-full max-w-6xl mx-auto mt-28 sm:mt-36 md:mt-48 lg:mt-56">
+              <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-14 sm:gap-18 lg:gap-24 xl:gap-32 items-center">
+                {/* Left Visual Column: Analytics / Metric Icons */}
+                <motion.div 
+                  custom={1}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, amount: 0.2 }}
+                  variants={fadeUpVariants}
+                  className="w-full flex items-center justify-center order-2 lg:order-1"
+                >
+                  <ExplainableFactorsVisual />
+                </motion.div>
 
-            {/* Card 3 */}
-            <div className="bg-white/80 backdrop-blur-xl rounded-[2rem] p-7 border border-brand-900/10 shadow-sm flex flex-col justify-between space-y-4 hover:-translate-y-1 hover:shadow-lg transition-all">
-              <div className="w-10 h-10 rounded-xl bg-brand-50 border border-brand-900/10 flex items-center justify-center text-brand-900">
-                <IconHeartbeat size={20} />
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-lg font-bold text-brand-900 tracking-tight">
-                  Kecemasan Diagnostik
-                </h3>
-                <p className="text-sm text-brand-900/65 leading-relaxed">
-                  Pemeriksaan klinis sering dihindari karena takut vonis. Pendekatan mandiri memberi ruang yang lebih tenang.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
+                {/* Right Content Column */}
+                <motion.div 
+                  custom={0}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, amount: 0.2 }}
+                  variants={fadeUpVariants}
+                  className="flex flex-col justify-center space-y-5 sm:space-y-6 order-1 lg:order-2 text-left lg:text-right"
+                >
+                  <h3 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-brand-900 leading-[1.12] text-balance">
+                    Ada alasan di balik setiap hasil.
+                  </h3>
 
-        {/* SECTION 02: ALUR KERJA (#how-it-works) */}
-        <section id="how-it-works" className="container mx-auto px-6 lg:px-12 py-16 scroll-mt-24">
-          <div className="mb-12 max-w-2xl">
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-brand-900 leading-tight">
-              Alur Kerja
-            </h2>
-            <p className="text-base text-brand-900/60 mt-2 font-normal">
-              Tiga tahap mengolah data kesehatan Anda secara terarah.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Step 1: Pengisian Mandiri */}
-            <div className="bg-white/80 backdrop-blur-xl rounded-[2rem] p-7 border border-brand-900/10 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all flex flex-col justify-between">
-              <div className="space-y-3">
-                <span className="text-xs font-mono font-bold text-brand-900/40 uppercase">
-                  Tahap 01
-                </span>
-                <h3 className="text-xl font-bold text-brand-900 tracking-tight">
-                  Pengisian Data Mandiri
-                </h3>
-                <p className="text-brand-900/65 text-sm leading-relaxed">
-                  Masukkan data kesehatan dasar seperti tekanan darah, durasi tidur, dan riwayat keluarga melalui formulir terpandu.
-                </p>
-              </div>
-              <p className="text-xs text-brand-900/50 pt-6 border-t border-brand-900/5 mt-6 font-medium">
-                Formulir Singkat & Terpandu
-              </p>
-            </div>
-
-            {/* Step 2 */}
-            <div className="bg-white/80 backdrop-blur-xl rounded-[2rem] p-7 border border-brand-900/10 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all flex flex-col justify-between">
-              <div className="space-y-3">
-                <span className="text-xs font-mono font-bold text-brand-900/40 uppercase">
-                  Tahap 02
-                </span>
-                <h3 className="text-xl font-bold text-brand-900 tracking-tight">
-                  Analisis Pola
-                </h3>
-                <p className="text-brand-900/65 text-sm leading-relaxed">
-                  Sistem membaca tren parameter tubuh Anda berdasarkan standar acuan klinis untuk mendeteksi pergeseran lebih awal.
-                </p>
-              </div>
-              <p className="text-xs text-brand-900/50 pt-6 border-t border-brand-900/5 mt-6 font-medium">
-                Standar Acuan Epidemiologi
-              </p>
-            </div>
-
-            {/* Step 3 */}
-            <div className="bg-white/80 backdrop-blur-xl rounded-[2rem] p-7 border border-brand-900/10 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all flex flex-col justify-between">
-              <div className="space-y-3">
-                <span className="text-xs font-mono font-bold text-brand-900/40 uppercase">
-                  Tahap 03
-                </span>
-                <h3 className="text-xl font-bold text-brand-900 tracking-tight">
-                  Privasi Mutlak
-                </h3>
-                <p className="text-brand-900/65 text-sm leading-relaxed">
-                  Data Anda tersimpan dengan enkripsi lokal. Tidak ada informasi pribadi yang dijual atau dibagikan ke pihak ketiga.
-                </p>
-              </div>
-              <p className="text-xs text-brand-900/50 pt-6 border-t border-brand-900/5 mt-6 font-medium">
-                Enkripsi AES-256 GCM
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* SECTION 03: SIMULASI & FITUR (#simulation & #features) */}
-        <section id="simulation" className="container mx-auto px-6 lg:px-12 py-16 scroll-mt-24">
-          <div id="features" className="scroll-mt-24" />
-          <div className="mb-12 max-w-2xl">
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-brand-900 leading-tight">
-              Simulasi Interaktif
-            </h2>
-            <p className="text-base text-brand-900/60 mt-2 font-normal">
-              Lihat bagaimana penyesuaian gaya hidup memengaruhi kestabilan tubuh.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-            {/* Feature 1: Pemetaan Tren */}
-            <div className="bg-white/80 backdrop-blur-xl rounded-[2.25rem] p-8 border border-brand-900/10 shadow-sm flex flex-col justify-between space-y-6 hover:shadow-lg transition-all">
-              <div className="space-y-3">
-                <div className="w-11 h-11 rounded-xl bg-brand-50 flex items-center justify-center text-brand-900 border border-brand-900/10">
-                  <IconHistory size={22} />
-                </div>
-                <h3 className="text-2xl font-bold text-brand-900 tracking-tight">
-                  Pemetaan Tren Kebiasaan
-                </h3>
-                <p className="text-sm text-brand-900/65 leading-relaxed">
-                  Pantau bagaimana konsistensi pola tidur dan aktivitas fisik menjaga kestabilan ritme tubuh dalam rentang 30, 90, hingga 180 hari.
-                </p>
-              </div>
-
-              <div className="bg-brand-50/50 rounded-2xl p-5 border border-brand-900/5 space-y-3">
-                <div className="flex justify-between text-xs font-semibold text-brand-900">
-                  <span>30 Hari</span>
-                  <span>90 Hari</span>
-                  <span className="text-brand-900/50">180 Hari</span>
-                </div>
-                <div className="h-2 w-full bg-neutral-200/80 rounded-full overflow-hidden">
-                  <div className="h-full bg-emerald-600 rounded-full w-3/4" />
-                </div>
-                <p className="text-xs text-brand-900/60">
-                  Konsistensi istirahat tercatat stabil dengan deviasi terkontrol.
-                </p>
+                  <p className="text-base sm:text-lg text-brand-900/70 font-normal leading-relaxed text-balance">
+                    HELIORA menunjukkan bagaimana pola dari keseharian Anda memengaruhi estimasi risiko Anda, lengkap dengan alasan di balik setiap hasilnya.
+                  </p>
+                </motion.div>
               </div>
             </div>
 
-            {/* Feature 2: Simulasi Penyesuaian */}
-            <div className="bg-white/80 backdrop-blur-xl rounded-[2.25rem] p-8 border border-brand-900/10 shadow-sm flex flex-col justify-between space-y-6 hover:shadow-lg transition-all">
-              <div className="space-y-3">
-                <div className="w-11 h-11 rounded-xl bg-brand-50 flex items-center justify-center text-brand-900 border border-brand-900/10">
-                  <IconAdjustmentsHorizontal size={22} />
-                </div>
-                <h3 className="text-2xl font-bold text-brand-900 tracking-tight">
-                  Simulasi Penyesuaian
-                </h3>
-                <p className="text-sm text-brand-900/65 leading-relaxed">
-                  Uji skenario sebelum memulai: lihat pengaruh penambahan 45 menit waktu istirahat atau aktivitas harian terhadap ritme tubuh Anda.
-                </p>
-              </div>
+            {/* Sub-section 03: SIMULATION / BAGAIMANA JIKA ARAHNYA BERBEDA */}
+            <div className="w-full max-w-6xl mx-auto mt-28 sm:mt-36 md:mt-48 lg:mt-56">
+              <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-14 sm:gap-18 lg:gap-24 xl:gap-32 items-center">
+                {/* Left Content Column */}
+                <motion.div 
+                  custom={0}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, amount: 0.2 }}
+                  variants={fadeUpVariants}
+                  className="flex flex-col justify-center space-y-5 sm:space-y-6 text-left"
+                >
+                  <h3 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-brand-900 leading-[1.12] text-balance">
+                    Bagaimana jika arahnya berbeda?
+                  </h3>
 
-              <div className="bg-brand-50/50 rounded-2xl p-5 border border-brand-900/5 flex items-center justify-between">
-                <div>
-                  <div className="text-xs font-bold text-brand-900">Skenario: +45 Menit Istirahat</div>
-                  <div className="text-xs text-brand-900/60 mt-0.5">Pengaruh terhadap pemulihan tubuh</div>
-                </div>
-                <span className="text-xs font-medium text-emerald-800">
-                  Pemulihan Optimal
-                </span>
+                  <p className="text-base sm:text-lg text-brand-900/70 font-normal leading-relaxed text-balance">
+                    Coba berbagai kemungkinan dan lihat bagaimana perubahan gaya hidup dapat mengubah estimasi risiko Anda.
+                  </p>
+                </motion.div>
+
+                {/* Right Visual Column: Simulation / Direction Icons */}
+                <motion.div 
+                  custom={1}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, amount: 0.2 }}
+                  variants={fadeUpVariants}
+                  className="w-full flex items-center justify-center"
+                >
+                  <SimulationDirectionVisual />
+                </motion.div>
+              </div>
+            </div>
+
+            {/* Sub-section 04: RECOMMENDATIONS & EVIDENCE */}
+            <div className="w-full max-w-6xl mx-auto mt-28 sm:mt-36 md:mt-48 lg:mt-56">
+              <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-14 sm:gap-18 lg:gap-24 xl:gap-32 items-center">
+                {/* Left Visual Column: Recommendation / Evidence Icons */}
+                <motion.div 
+                  custom={1}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, amount: 0.2 }}
+                  variants={fadeUpVariants}
+                  className="w-full flex items-center justify-center order-2 lg:order-1"
+                >
+                  <RecommendationsEvidenceVisual />
+                </motion.div>
+
+                {/* Right Content Column */}
+                <motion.div 
+                  custom={0}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, amount: 0.2 }}
+                  variants={fadeUpVariants}
+                  className="flex flex-col justify-center space-y-5 sm:space-y-6 order-1 lg:order-2 text-left lg:text-right"
+                >
+                  <h3 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-brand-900 leading-[1.12] text-balance">
+                    Saatnya mengambil langkah yang berarti.
+                  </h3>
+
+                  <p className="text-base sm:text-lg text-brand-900/70 font-normal leading-relaxed text-balance">
+                    Temukan langkah preventif yang relevan untuk Anda, dengan rekomendasi yang didukung evidence.
+                  </p>
+                </motion.div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* SECTION 04: DASAR ILMIAH & VALIDASI (#science) */}
-        <section id="science" className="container mx-auto px-6 lg:px-12 py-16 scroll-mt-24">
-          <div className="mb-12 max-w-2xl">
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-brand-900 leading-tight">
-              Dasar Ilmiah & Validasi
+        {/* SECTION: FILOSOFI PREVENTIF (UNTUK MEMAHAMI, BUKAN MENDIAGNOSIS) */}
+        <SectionUnderstandingPurpose />
+
+        {/* SECTION 05: CTA FINAL (Full-Width Rich Gradient) */}
+        <section className="w-full bg-gradient-to-b from-[#1b5e3f] via-[#0d3422] to-[#05140d] text-white py-24 sm:py-32 md:py-36 relative overflow-hidden border-t border-emerald-500/20 text-center mt-12 sm:mt-16">
+          {/* Enhanced Ambient Radial Glows (Hardware Accelerated Radial Gradients) */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[750px] h-[400px] rounded-full bg-[radial-gradient(circle,rgba(52,211,153,0.22)_0%,transparent_70%)] pointer-events-none [transform:translateZ(0)]" />
+          <div className="absolute bottom-0 right-1/4 w-[450px] h-[300px] rounded-full bg-[radial-gradient(circle,rgba(94,234,212,0.15)_0%,transparent_70%)] pointer-events-none [transform:translateZ(0)]" />
+
+          <div className="container mx-auto px-6 lg:px-12 max-w-4xl flex flex-col items-center justify-center space-y-6 sm:space-y-8 relative z-10">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-tight">
+              Ambil langkah lebih awal.
             </h2>
-            <p className="text-base text-brand-900/60 mt-2 font-normal">
-              Model kalkulasi preventif Heliora mengacu pada konsensus epidemiologi dan panduan kesehatan terverifikasi.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* CDC BRFSS */}
-            <div className="bg-white border border-brand-900/10 rounded-[2rem] p-7 shadow-xs hover:shadow-md transition-all flex flex-col justify-between space-y-4">
-              <div className="space-y-3">
-                <span className="text-xs font-mono font-bold text-brand-900/40 uppercase">
-                  Epidemiologi Gaya Hidup
-                </span>
-                <h3 className="text-xl font-bold text-brand-900 tracking-tight">
-                  CDC BRFSS
-                </h3>
-                <p className="text-brand-900/65 text-sm leading-relaxed">
-                  Memetakan korelasi terukur antara aktivitas fisik, durasi istirahat, dan indeks massa tubuh dengan risiko penyakit metabolik kronis.
-                </p>
-              </div>
-              <p className="text-xs text-brand-900/50 pt-4 border-t border-brand-900/5 font-medium">
-                Sistem Surveilans Perilaku CDC
-              </p>
-            </div>
-
-            {/* WHO Guidelines */}
-            <div className="bg-white border border-brand-900/10 rounded-[2rem] p-7 shadow-xs hover:shadow-md transition-all flex flex-col justify-between space-y-4">
-              <div className="space-y-3">
-                <span className="text-xs font-mono font-bold text-brand-900/40 uppercase">
-                  Pencegahan Primer
-                </span>
-                <h3 className="text-xl font-bold text-brand-900 tracking-tight">
-                  WHO NCD Guidelines
-                </h3>
-                <p className="text-brand-900/65 text-sm leading-relaxed">
-                  Standar ambang batas risiko penyakit tidak menular global untuk mendeteksi pergeseran kondisi tubuh sebelum timbul keluhan klinis.
-                </p>
-              </div>
-              <p className="text-xs text-brand-900/50 pt-4 border-t border-brand-900/5 font-medium">
-                World Health Organization
-              </p>
-            </div>
-
-            {/* PERKENI & PERKI */}
-            <div className="bg-white border border-brand-900/10 rounded-[2rem] p-7 shadow-xs hover:shadow-md transition-all flex flex-col justify-between space-y-4">
-              <div className="space-y-3">
-                <span className="text-xs font-mono font-bold text-brand-900/40 uppercase">
-                  Konteks Klinis Indonesia
-                </span>
-                <h3 className="text-xl font-bold text-brand-900 tracking-tight">
-                  PERKENI & PERKI
-                </h3>
-                <p className="text-brand-900/65 text-sm leading-relaxed">
-                  Penyesuaian parameter pencegahan diabetes melitus dan hipertensi dengan karakteristik demografi serta pola hidup masyarakat Indonesia.
-                </p>
-              </div>
-              <p className="text-xs text-brand-900/50 pt-4 border-t border-brand-900/5 font-medium">
-                Konsensus Nasional Dokter Spesialis
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* SECTION 05: CTA FINAL */}
-        <section className="container mx-auto px-6 lg:px-12 py-12 text-center">
-          <div className="bg-gradient-to-br from-brand-900 via-[#0B4F35] to-[#083826] text-white rounded-[2.5rem] p-10 sm:p-14 md:p-16 max-w-4xl mx-auto border border-brand-900/20 shadow-xl space-y-6 relative overflow-hidden">
-            <div className="absolute top-0 right-1/4 w-72 h-72 bg-brand-400/15 blur-[90px] rounded-full pointer-events-none" />
-            <div className="absolute bottom-0 left-1/4 w-72 h-72 bg-emerald-300/10 blur-[90px] rounded-full pointer-events-none" />
-
-            <div className="relative z-10 space-y-3 max-w-xl mx-auto">
-              <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white leading-tight">
-                Mulai Pantau Kesehatan Anda Hari Ini.
-              </h2>
-              <p className="text-base text-emerald-100/80 font-normal leading-relaxed">
-                Pahami tubuh Anda lebih baik setiap hari tanpa komplikasi.
-              </p>
-            </div>
             
-            <div className="pt-2 relative z-10">
+            <div>
               <Link href="/register">
-                <Button className="h-13 px-8 rounded-2xl bg-white hover:bg-neutral-100 text-brand-900 text-base font-bold shadow-lg shadow-black/20 transition-all hover:scale-[1.02] active:scale-[0.98]">
-                  Buat Akun Gratis
+                <Button className="h-13 px-8 rounded-full bg-white hover:bg-neutral-100 text-brand-900 text-base font-semibold shadow-[0_4px_20px_rgba(0,0,0,0.2)] transition-all hover:scale-[1.02] active:scale-[0.98]">
+                  Mulai dengan HELIORA
                 </Button>
               </Link>
             </div>
