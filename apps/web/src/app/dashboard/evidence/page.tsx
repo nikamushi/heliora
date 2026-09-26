@@ -12,6 +12,7 @@ import {
   Filter,
 } from "lucide-react";
 import { useRequireAuth } from "@/lib/use-require-auth";
+import { apiClient } from "@/lib/api-client";
 import { DisclaimerBanner } from "@/components/disclaimer-banner";
 
 interface ClinicalEvidence {
@@ -114,12 +115,49 @@ function EvidenceCenterContent() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [evidenceList, setEvidenceList] = useState<ClinicalEvidence[]>(EVIDENCE_DATABASE);
+
+  // Fetch dynamic evidence records from backend
+  useEffect(() => {
+    let isCancelled = false;
+
+    async function loadEvidence() {
+      try {
+        const res = await apiClient.evidence.list();
+        if (!isCancelled && res.items && res.items.length > 0) {
+          const mapped: ClinicalEvidence[] = res.items.map((i) => ({
+            id: i.id,
+            rule_id: i.rule_id,
+            title: i.title,
+            organization: i.organization,
+            year: i.year,
+            evidence_level: i.evidence_level,
+            category: i.category,
+            categoryLabel: i.category_label,
+            summary: i.summary,
+            clinicalSection: i.clinical_section,
+            citation: i.citation,
+            externalUrl: i.external_url,
+          }));
+          setEvidenceList(mapped);
+        }
+      } catch {
+        // Silently preserve initial evidence database on network error
+      }
+    }
+
+    loadEvidence();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
 
   const highlightedEvidenceId = useMemo(() => {
     if (!refParam && !diseaseParam) return null;
 
     if (refParam) {
-      const found = EVIDENCE_DATABASE.find(
+      const found = evidenceList.find(
         (e) =>
           e.rule_id.toLowerCase() === refParam.toLowerCase() ||
           e.category.toLowerCase() === refParam.toLowerCase()
@@ -140,7 +178,7 @@ function EvidenceCenterContent() {
     }
 
     return null;
-  }, [refParam, diseaseParam]);
+  }, [refParam, diseaseParam, evidenceList]);
 
   // Effect performs DOM scroll without triggering re-render
   useEffect(() => {
@@ -153,7 +191,7 @@ function EvidenceCenterContent() {
   }, [highlightedEvidenceId]);
 
   const filteredEvidence = useMemo(() => {
-    return EVIDENCE_DATABASE.filter((item) => {
+    return evidenceList.filter((item) => {
       const matchesCategory =
         selectedCategory === "all" || item.category === selectedCategory;
 
@@ -167,7 +205,7 @@ function EvidenceCenterContent() {
 
       return matchesCategory && matchesSearch;
     });
-  }, [searchQuery, selectedCategory]);
+  }, [searchQuery, selectedCategory, evidenceList]);
 
   return (
     <div className="space-y-8">

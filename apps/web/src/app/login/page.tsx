@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { FormAlertTooltip } from "@/components/ui/alert-tooltip";
 import { AuthLayout } from "@/components/auth-layout";
 import { apiClient, ApiClientError } from "@/lib/api-client";
 import {
@@ -77,11 +77,11 @@ export default function LoginPage() {
       {/* Solid High-Contrast Form Card (Apple HIG) */}
       <div className="bg-white border border-brand-900/10 rounded-2xl p-4 sm:p-5 shadow-xs space-y-3">
         <form onSubmit={handleLogin} className="space-y-3">
-          {error && (
-            <Alert variant="destructive" className="rounded-xl border-red-200 bg-red-50 text-red-900 text-xs py-2 px-3">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
+          <FormAlertTooltip
+            message={error}
+            onDismiss={() => setError("")}
+            className="mb-1"
+          />
 
           {/* Email Field */}
           <div className="space-y-1">

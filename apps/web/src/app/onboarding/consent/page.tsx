@@ -54,7 +54,8 @@ export default function ConsentPage() {
     setError(null);
 
     try {
-      if (apiClient.getToken()) {
+      const accessToken = await apiClient.getAccessToken();
+      if (accessToken) {
         await apiClient.consent.record({
           agreed: true,
           consent_version: "1.0",

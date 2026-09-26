@@ -10,8 +10,9 @@ Creates the FastAPI app instance with:
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse, RedirectResponse
 
 from app.api.routes import router as api_router
 from app.core.config import settings
@@ -66,6 +67,45 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# ── Global Exception Handlers ─────────────────────────────────────
+@app.exception_handler(OSError)
+async def os_error_handler(request: Request, exc: OSError) -> JSONResponse:
+    """Handle low-level socket connection errors when the database is unavailable."""
+    err_str = str(exc).lower()
+    is_socket_conn_failure = (
+        isinstance(exc, ConnectionRefusedError)
+        or "connection refused" in err_str
+        or "1225" in err_str
+    )
+    if is_socket_conn_failure:
+        return JSONResponse(
+            status_code=503,
+            content={
+                "detail": (
+                    "Koneksi ke database gagal. Pastikan service database PostgreSQL aktif dan kredensial valid."
+                )
+            },
+        )
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Terjadi kesalahan internal sistem."},
+    )
+
+
+# ── Root & Docs Redirection ───────────────────────────────────────
+@app.get("/", include_in_schema=False)
+async def root() -> RedirectResponse:
+    """Redirect root path to interactive Swagger documentation."""
+    return RedirectResponse(url=f"{settings.API_V1_PREFIX}/docs")
+
+
+@app.get("/docs", include_in_schema=False)
+async def docs_shortcut() -> RedirectResponse:
+    """Convenience alias for standard /docs path."""
+    return RedirectResponse(url=f"{settings.API_V1_PREFIX}/docs")
+
 
 # ── Mount versioned API routes ───────────────────────────────────
 app.include_router(api_router, prefix=settings.API_V1_PREFIX)

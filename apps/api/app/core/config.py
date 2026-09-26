@@ -5,6 +5,7 @@ Secrets and deployment-specific values MUST come from the environment,
 never from source code (Architecture §22.3).
 """
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -27,8 +28,21 @@ class Settings(BaseSettings):
     # ── Database ─────────────────────────────────────────────────
     DATABASE_URL: str = "postgresql+asyncpg://heliora:heliora@localhost:5432/heliora"
 
+    @field_validator("DATABASE_URL", mode="before")
+    @classmethod
+    def normalize_database_url(cls, v: str) -> str:
+        """Ensure standard postgresql:// scheme uses asyncpg driver."""
+        if isinstance(v, str) and v.startswith("postgresql://"):
+            return v.replace("postgresql://", "postgresql+asyncpg://", 1)
+        return v
+
     # ── CORS ─────────────────────────────────────────────────────
-    CORS_ORIGINS: list[str] = ["http://localhost:3000"]
+    CORS_ORIGINS: list[str] = [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:3001",
+        "http://127.0.0.1:3001",
+    ]
 
     # ── Auth (Legacy & FastAPI Native) ───────────────────────────
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 24 hours

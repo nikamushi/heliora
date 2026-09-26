@@ -56,9 +56,7 @@ class HealthProfile(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         String(30), nullable=False
     )  # never / former / current
     family_history: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
-    family_history_details: Mapped[str | None] = mapped_column(
-        Text, nullable=True
-    )
+    family_history_details: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # ── Optional fields ──────────────────────────────────────────
     stress_level: Mapped[int | None] = mapped_column(

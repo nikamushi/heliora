@@ -6,7 +6,9 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { FormAlertTooltip } from "@/components/ui/alert-tooltip";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { TriangleAlert } from "lucide-react";
 import { AuthLayout } from "@/components/auth-layout";
 import { apiClient, ApiClientError } from "@/lib/api-client";
 import {
@@ -24,6 +26,7 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [showTermsTooltip, setShowTermsTooltip] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -58,7 +61,7 @@ export default function RegisterPage() {
     }
 
     if (!agreedToTerms) {
-      setError("Silakan setujui Ketentuan Layanan & Kebijakan Privasi.");
+      setShowTermsTooltip(true);
       setIsLoading(false);
       return;
     }
@@ -99,13 +102,13 @@ export default function RegisterPage() {
   return (
     <AuthLayout title="Mulai Perjalanan Preventif" showDisclaimer>
       {/* Solid High-Contrast Form Card (Apple HIG) */}
-      <div className="bg-white border border-brand-900/10 rounded-2xl p-4 sm:p-5 shadow-xs space-y-3">
-        <form onSubmit={handleRegister} className="space-y-2.5">
-          {error && (
-            <Alert variant="destructive" className="rounded-xl border-red-200 bg-red-50 text-red-900 text-xs py-2 px-3">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
+      <div className="bg-white border border-brand-900/10 rounded-2xl p-3.5 sm:p-4.5 shadow-xs space-y-2">
+        <form onSubmit={handleRegister} className="space-y-2">
+          <FormAlertTooltip
+            message={error}
+            onDismiss={() => setError("")}
+            className="mb-0.5"
+          />
 
           {/* Stacked Form Fields with Distinct Gap between Email & Password */}
           <div>
@@ -147,7 +150,7 @@ export default function RegisterPage() {
             </div>
 
             {/* Credential Fields (Kata Sandi & Konfirmasi) */}
-            <div className="space-y-2 pt-3">
+            <div className="space-y-1.5 pt-2">
               {/* Password Field */}
               <div className="space-y-1.5">
                 <Label htmlFor="password" className="text-[11px] font-semibold text-brand-900/80 uppercase tracking-wider">
@@ -231,23 +234,37 @@ export default function RegisterPage() {
           </div>
 
           {/* Agreement Checkbox */}
-          <div className="flex items-start space-x-2 pt-0.5">
-            <input
-              id="terms"
-              type="checkbox"
-              checked={agreedToTerms}
-              onChange={(e) => setAgreedToTerms(e.target.checked)}
-              required
-              disabled={isLoading}
-              className="h-3.5 w-3.5 mt-0.5 rounded border-neutral-300 text-brand-900 focus:ring-brand-900 cursor-pointer accent-brand-900 disabled:opacity-50"
-            />
-            <label htmlFor="terms" className="text-[11px] text-brand-900/70 leading-tight cursor-pointer select-none">
-              Saya menyetujui{" "}
-              <Link href="/terms" className="font-semibold text-brand-900 hover:underline">
-                Ketentuan Layanan
-              </Link>{" "}
-              & kebijakan privasi data HELIORA.
-            </label>
+          <div className="pt-0.5">
+            <Tooltip open={showTermsTooltip} onOpenChange={setShowTermsTooltip}>
+              <TooltipTrigger asChild>
+                <div className="flex items-start space-x-2">
+                  <input
+                    id="terms"
+                    type="checkbox"
+                    checked={agreedToTerms}
+                    onChange={(e) => {
+                      setAgreedToTerms(e.target.checked);
+                      if (e.target.checked) setShowTermsTooltip(false);
+                    }}
+                    disabled={isLoading}
+                    className="h-3.5 w-3.5 mt-0.5 rounded border-neutral-300 text-brand-900 focus:ring-brand-900 cursor-pointer accent-brand-900 disabled:opacity-50"
+                  />
+                  <label htmlFor="terms" className="text-[11px] text-brand-900/70 leading-tight cursor-pointer select-none">
+                    Saya menyetujui{" "}
+                    <Link href="/terms" className="font-semibold text-brand-900 hover:underline">
+                      Ketentuan Layanan
+                    </Link>{" "}
+                    & kebijakan privasi data HELIORA.
+                  </label>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="top" align="start" className="border-amber-200/90 bg-amber-50 text-amber-900 font-medium max-w-xs shadow-md">
+                <div className="flex items-center gap-1.5">
+                  <TriangleAlert className="size-3.5 text-amber-600 shrink-0" />
+                  <span className="text-xs">Wajib menyetujui ketentuan layanan &amp; privasi data sebelum mendaftar.</span>
+                </div>
+              </TooltipContent>
+            </Tooltip>
           </div>
 
           {/* Submit Button & Switch Link */}
@@ -271,7 +288,7 @@ export default function RegisterPage() {
             </Button>
 
             {/* Divider */}
-            <div className="relative my-2.5">
+            <div className="relative my-1.5">
               <div className="absolute inset-0 flex items-center" aria-hidden="true">
                 <div className="w-full border-t border-neutral-200/80" />
               </div>

@@ -40,7 +40,7 @@ class Recommendation(Base, UUIDPrimaryKeyMixin, CreatedAtMixin):
 
     __table_args__ = (
         CheckConstraint(
-            "priority IN ('high', 'medium', 'low')",
+            "priority IN ('high', 'medium', 'low', 'protective')",
             name="ck_rec_priority",
         ),
     )

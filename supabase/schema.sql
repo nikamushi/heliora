@@ -166,7 +166,7 @@ CREATE TABLE IF NOT EXISTS public.recommendations (
     title VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
     guideline_source VARCHAR(255) NOT NULL,
-    priority VARCHAR(20) NOT NULL CHECK (priority IN ('high', 'medium', 'low')),
+    priority VARCHAR(20) NOT NULL CHECK (priority IN ('high', 'medium', 'low', 'protective')),
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
