@@ -1732,6 +1732,7 @@ Tasks:
 - [x] Supabase user types.
 - [x] Lint and build gate.
 - [x] OAuth callback route with consent-aware routing.
+- [x] JWKS verifier test coverage for expiry, audience, and key rotation.
 
 Acceptance Criteria:
 

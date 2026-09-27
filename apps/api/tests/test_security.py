@@ -3,7 +3,7 @@ and Supabase JWKS verification.
 """
 
 import time
-from datetime import timedelta
+from datetime import UTC, datetime, timedelta
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -155,6 +155,108 @@ def test_supabase_jwks_verifier_end_to_end():
         payload = verifier.verify_supabase_token(token)
         assert payload["sub"] == "123e4567-e89b-12d3-a456-426614174000"
         assert payload["email"] == "test@heliora.health"
+
+
+def _es256_keypair(kid: str) -> tuple[str, dict]:
+    """Build a P-256 keypair as (PEM private key, JWKS dict carrying kid)."""
+    from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.primitives.asymmetric import ec
+    from jose import jwk
+
+    private_key = ec.generate_private_key(ec.SECP256R1())
+    pem = private_key.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.PKCS8,
+        encryption_algorithm=serialization.NoEncryption(),
+    )
+    jwk_dict = jwk.construct(private_key.public_key(), algorithm="ES256").to_dict()
+    jwk_dict["kid"] = kid
+    return pem.decode(), jwk_dict
+
+
+def _supabase_claims(**overrides) -> dict:
+    """Build a claim set matching the configured issuer and audience."""
+    claims = {
+        "sub": "123e4567-e89b-12d3-a456-426614174000",
+        "email": "test@heliora.health",
+        "aud": settings.SUPABASE_AUDIENCE,
+    }
+    if settings.SUPABASE_ISSUER:
+        claims["iss"] = settings.SUPABASE_ISSUER
+    claims.update(overrides)
+    return claims
+
+
+def test_supabase_jwks_verifier_expired_token():
+    """Expired Supabase token is rejected even when the signature is valid."""
+    pem, jwk_dict = _es256_keypair("valid-kid")
+    token = jwt.encode(
+        _supabase_claims(exp=datetime.now(UTC) - timedelta(minutes=1)),
+        pem,
+        algorithm="ES256",
+        headers={"kid": "valid-kid"},
+    )
+
+    verifier = SupabaseJWKSVerifier()
+    with patch.object(verifier, "fetch_keys", return_value={"valid-kid": jwk_dict}):
+        with pytest.raises(jwt.ExpiredSignatureError):
+            verifier.verify_supabase_token(token)
+
+
+def test_supabase_jwks_verifier_wrong_audience():
+    """A correctly signed token for another audience is rejected.
+
+    Guards the SUPABASE_AUDIENCE setting: a mismatch here rejects every real
+    Google token even though the key and signature are valid.
+    """
+    pem, jwk_dict = _es256_keypair("valid-kid")
+    token = jwt.encode(
+        _supabase_claims(aud="some-other-audience"),
+        pem,
+        algorithm="ES256",
+        headers={"kid": "valid-kid"},
+    )
+
+    verifier = SupabaseJWKSVerifier()
+    with patch.object(verifier, "fetch_keys", return_value={"valid-kid": jwk_dict}):
+        with pytest.raises(jwt.JWTError, match="audience"):
+            verifier.verify_supabase_token(token)
+
+
+def test_supabase_jwks_verifier_rotated_key():
+    """A key published after the cache was warmed triggers a forced refetch.
+
+    Supabase rotates its signing keys, so a fresh key must not be treated as
+    unknown while a still-valid cache exists.
+    """
+    pem, jwk_dict = _es256_keypair("new-kid")
+    token = jwt.encode(
+        _supabase_claims(),
+        pem,
+        algorithm="ES256",
+        headers={"kid": "new-kid"},
+    )
+
+    verifier = SupabaseJWKSVerifier()
+    verifier._keys = {"stale-kid": MagicMock()}
+    verifier._last_fetched = time.time()
+
+    response = MagicMock()
+    response.raise_for_status.return_value = None
+    response.json.return_value = {"keys": [jwk_dict]}
+
+    with (
+        patch.object(
+            settings,
+            "SUPABASE_JWKS_URL",
+            "https://example.supabase.co/auth/v1/.well-known/jwks.json",
+        ),
+        patch("app.core.security.httpx.Client.get", return_value=response),
+    ):
+        payload = verifier.verify_supabase_token(token)
+
+    assert payload["sub"] == "123e4567-e89b-12d3-a456-426614174000"
+    assert "new-kid" in verifier._keys
 
 
 @pytest.mark.asyncio
