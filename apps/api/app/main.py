@@ -27,6 +27,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     On shutdown: dispose engine connection pool.
     """
     # ── Startup ──────────────────────────────────────────────
+    import logging
+
     from app.db.session import engine
 
     # Quick connectivity check (fail fast if DB is unreachable)
@@ -34,11 +36,15 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         async with engine.connect() as conn:
             await conn.execute(__import__("sqlalchemy").text("SELECT 1"))
     except Exception as exc:
-        import logging
-
         logging.getLogger(__name__).warning(
             "Database connectivity check failed on startup: %s", exc
         )
+
+    # A half-configured Supabase environment rejects every Google token with a
+    # signature error, so name the missing setting instead of leaving it to be
+    # discovered during a sign-in attempt.
+    for problem in settings.supabase_config_problems():
+        logging.getLogger(__name__).warning("Supabase config problem: %s", problem)
 
     yield
 

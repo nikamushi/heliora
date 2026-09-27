@@ -16,7 +16,7 @@ from httpx import AsyncClient
 from jose import jwk, jwt
 
 from app.api.dependencies import get_db
-from app.core.config import settings
+from app.core.config import Settings, settings
 from app.db.models.user import User
 from app.main import app
 
@@ -143,3 +143,48 @@ async def test_google_signin_without_local_user_row_is_unauthorised(
             assert "handle_new_user" in response.json()["detail"]
     finally:
         app.dependency_overrides.clear()
+
+
+def test_supabase_config_is_quiet_when_unset():
+    """Local development without Supabase reports nothing."""
+    problems = Settings(
+        SUPABASE_URL=None,
+        SUPABASE_JWKS_URL=None,
+        SUPABASE_ISSUER=None,
+    ).supabase_config_problems()
+    assert problems == []
+
+
+def test_supabase_config_flags_missing_jwks_url():
+    """A half-filled environment is reported instead of failing at sign-in."""
+    problems = Settings(
+        SUPABASE_URL="https://demo.supabase.co",
+        SUPABASE_JWKS_URL=None,
+        SUPABASE_ISSUER="https://demo.supabase.co/auth/v1",
+    ).supabase_config_problems()
+
+    assert len(problems) == 1
+    assert "SUPABASE_JWKS_URL" in problems[0]
+
+
+def test_supabase_config_flags_missing_issuer():
+    """An unset issuer silently disables issuer validation and must be reported."""
+    problems = Settings(
+        SUPABASE_URL="https://demo.supabase.co",
+        SUPABASE_JWKS_URL="https://demo.supabase.co/auth/v1/.well-known/jwks.json",
+        SUPABASE_ISSUER=None,
+    ).supabase_config_problems()
+
+    assert len(problems) == 1
+    assert "SUPABASE_ISSUER" in problems[0]
+
+
+def test_supabase_config_is_quiet_when_complete():
+    """A complete configuration reports nothing."""
+    problems = Settings(
+        SUPABASE_URL="https://demo.supabase.co",
+        SUPABASE_JWKS_URL="https://demo.supabase.co/auth/v1/.well-known/jwks.json",
+        SUPABASE_ISSUER="https://demo.supabase.co/auth/v1",
+    ).supabase_config_problems()
+
+    assert problems == []

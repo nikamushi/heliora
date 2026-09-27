@@ -1734,6 +1734,7 @@ Tasks:
 - [x] OAuth callback route with consent-aware routing.
 - [x] JWKS verifier test coverage for expiry, audience, and key rotation.
 - [x] Google sign-in integration coverage for the callback request sequence.
+- [x] Startup warning for partially configured Supabase settings.
 
 Acceptance Criteria:
 

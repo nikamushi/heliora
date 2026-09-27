@@ -61,5 +61,38 @@ class Settings(BaseSettings):
         """Return a synchronous database URL for Alembic migrations."""
         return self.DATABASE_URL.replace("postgresql+asyncpg", "postgresql+psycopg2")
 
+    def supabase_config_problems(self) -> list[str]:
+        """Report Supabase settings that are only partly configured.
+
+        Supabase tokens carry a `kid`, and ``verify_token`` only routes them to
+        the JWKS verifier when ``SUPABASE_JWKS_URL`` is set. A half-filled
+        environment therefore looks healthy while sending every Google token
+        down the legacy HS256 path, where it surfaces as a signature error with
+        nothing pointing at the missing setting. Local development that never
+        enables Supabase at all is left alone.
+        """
+        if not self.SUPABASE_JWKS_URL:
+            partially_set = [
+                name
+                for name in ("SUPABASE_URL", "SUPABASE_ISSUER")
+                if getattr(self, name)
+            ]
+            if not partially_set:
+                return []
+            return [
+                f"{', '.join(partially_set)} is set but SUPABASE_JWKS_URL is not. "
+                "Supabase tokens will be routed to the legacy HS256 verifier "
+                "and rejected."
+            ]
+
+        if not self.SUPABASE_ISSUER:
+            return [
+                "SUPABASE_JWKS_URL is set but SUPABASE_ISSUER is not. Issuer "
+                "validation is skipped, so a token minted by another project "
+                "would be accepted."
+            ]
+
+        return []
+
 
 settings = Settings()
