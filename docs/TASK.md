@@ -630,7 +630,7 @@ Tasks:
 - [x] Create migrations.
 - [x] Create indexes.
 - [x] Create constraints.
-- [ ] Create seed data if required.
+- [x] Create seed data if required.
 - [x] Test migrations.
 
 Acceptance Criteria:
