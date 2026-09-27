@@ -1413,6 +1413,7 @@ Tasks:
 - [x] Error state.
 - [x] Loading state.
 - [x] Logout.
+- [x] Login and register UI refinement.
 
 Acceptance Criteria:
 
