@@ -1731,6 +1731,7 @@ Tasks:
 - [x] Google OAuth via Supabase.
 - [x] Supabase user types.
 - [x] Lint and build gate.
+- [x] OAuth callback route with consent-aware routing.
 
 Acceptance Criteria:
 
