@@ -1733,6 +1733,7 @@ Tasks:
 - [x] Lint and build gate.
 - [x] OAuth callback route with consent-aware routing.
 - [x] JWKS verifier test coverage for expiry, audience, and key rotation.
+- [x] Google sign-in integration coverage for the callback request sequence.
 
 Acceptance Criteria:
 

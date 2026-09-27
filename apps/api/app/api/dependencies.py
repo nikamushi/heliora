@@ -57,7 +57,21 @@ async def get_current_user(
 
     user = await user_repo.get_by_id(db, user_id)
     if user is None:
-        raise credentials_exception
+        # The token itself verified, so its signature and claims are sound and
+        # the failure is on the provisioning side. Per ADR-011 the
+        # handle_new_user() trigger creates this row during Supabase Auth
+        # signup, so a valid token with no row almost always means the trigger
+        # is absent from the Supabase Postgres. Naming that beats a generic 401
+        # while the environment is still being brought up.
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=(
+                "Token is valid but no user row exists for this subject. The "
+                "handle_new_user() trigger is likely missing from the Supabase "
+                "Postgres."
+            ),
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
     return user
 
