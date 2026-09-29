@@ -1378,6 +1378,7 @@ Tasks:
 - [x] Layout.
 - [x] Loading states.
 - [x] Error states.
+- [x] Landing page editorial layout & visual components.
 
 Reference:
 
@@ -1768,12 +1769,13 @@ Acceptance Criteria:
 **Owner:** Pino & Tumir + Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S2  
-**Status:** READY
+**Status:** IN PROGRESS
 
-- [ ] Connect profile form.
-- [ ] Connect API.
-- [ ] Handle validation.
-- [ ] Handle errors.
+- [x] Connect profile form.
+- [x] Connect API.
+- [x] Handle validation.
+- [x] Handle errors.
+- [ ] End-to-end live database verification (pending DB-002).
 
 ---
 
@@ -1784,12 +1786,13 @@ Acceptance Criteria:
 **Owner:** Pino & Tumir + Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S4  
-**Status:** BACKLOG
+**Status:** IN PROGRESS
 
-- [ ] Connect assessment.
-- [ ] Display result.
-- [ ] Handle loading.
-- [ ] Handle error.
+- [x] Connect assessment.
+- [x] Display result.
+- [x] Handle loading.
+- [x] Handle error.
+- [ ] End-to-end live assessment verification (pending DB-002).
 
 ---
 
@@ -1800,12 +1803,12 @@ Acceptance Criteria:
 **Owner:** Pino & Tumir + Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S6  
-**Status:** BACKLOG
+**Status:** DONE
 
-- [ ] Connect simulation API.
-- [ ] Send scenario.
-- [ ] Receive result.
-- [ ] Update UI.
+- [x] Connect simulation API.
+- [x] Send scenario.
+- [x] Receive result.
+- [x] Update UI.
 
 Acceptance Criteria:
 
@@ -1820,12 +1823,12 @@ Acceptance Criteria:
 **Owner:** Pino & Tumir + Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S8  
-**Status:** BACKLOG
+**Status:** IN PROGRESS
 
-- [ ] Connect recommendation API.
-- [ ] Connect evidence API.
-- [ ] Connect explanation API.
-- [ ] Handle fallback.
+- [x] Connect recommendation API.
+- [x] Connect evidence API.
+- [ ] Connect explanation API (pending LLM-001).
+- [x] Handle fallback.
 
 ---
 
@@ -2019,7 +2022,7 @@ Acceptance Criteria:
 **Owner:** Angga  
 **Priority:** P0  
 **Sprint:** S9-S10  
-**Status:** BACKLOG
+**Status:** IN PROGRESS
 
 Tasks:
 
@@ -2027,7 +2030,7 @@ Tasks:
 - [ ] Review Design.
 - [ ] Review Architecture.
 - [ ] Review Database.
-- [ ] Review TASK.
+- [x] Review TASK.
 - [ ] Document final implementation.
 - [ ] Document AI methodology.
 - [ ] Document dataset.
