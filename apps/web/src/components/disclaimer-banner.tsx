@@ -8,14 +8,20 @@ export const MEDICAL_DISCLAIMER =
 interface DisclaimerBannerProps {
   variant?: "banner" | "note";
   className?: string;
+  /** Overrides the mandated text. Keep the default on clinical surfaces. */
+  text?: string;
 }
 
-export function DisclaimerBanner({ variant = "banner", className }: DisclaimerBannerProps) {
+export function DisclaimerBanner({
+  variant = "banner",
+  className,
+  text = MEDICAL_DISCLAIMER,
+}: DisclaimerBannerProps) {
   if (variant === "note") {
     return (
       <p className={cn("flex gap-2 text-[11px] leading-relaxed text-brand-900/70", className)}>
         <Info aria-hidden="true" className="mt-0.5 size-3.5 text-brand-900/60 shrink-0" />
-        <span>{MEDICAL_DISCLAIMER}</span>
+        <span>{text}</span>
       </p>
     );
   }
@@ -29,7 +35,7 @@ export function DisclaimerBanner({ variant = "banner", className }: DisclaimerBa
       )}
     >
       <Info aria-hidden="true" className="mt-0.5 size-4 text-brand-900/70 shrink-0" />
-      <p className="font-normal">{MEDICAL_DISCLAIMER}</p>
+      <p className="font-normal">{text}</p>
     </aside>
   );
 }

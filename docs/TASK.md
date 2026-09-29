@@ -1413,6 +1413,7 @@ Tasks:
 - [x] Error state.
 - [x] Loading state.
 - [x] Logout.
+- [x] Login and register UI refinement.
 
 Acceptance Criteria:
 
@@ -1730,6 +1731,7 @@ Tasks:
 - [x] Google OAuth via Supabase.
 - [x] Supabase user types.
 - [x] Lint and build gate.
+- [x] OAuth callback route with consent-aware routing.
 
 Acceptance Criteria:
 
