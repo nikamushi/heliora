@@ -87,6 +87,8 @@ MANIFEST
 *.keras
 *.safetensors
 *.joblib
+*.pkl
+apps/api/app/models/
 
 # Training / experiment output
 runs/
@@ -100,6 +102,7 @@ artifacts/
 data/raw/
 data/downloads/
 data/tmp/
+apps/api/app/data/
 
 # CDC BRFSS raw CSV datasets
 **/*BRFSS*.csv

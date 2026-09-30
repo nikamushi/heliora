@@ -825,7 +825,7 @@ Acceptance Criteria:
 **Owner:** Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S3-S4  
-**Status:** BACKLOG
+**Status:** TESTING
 
 Objective:
 
@@ -841,13 +841,13 @@ Estimated Cardiovascular Risk
 
 Tasks:
 
-- [ ] Define features.
-- [ ] Define targets.
-- [ ] Train baseline model.
-- [ ] Evaluate model.
-- [ ] Save model artifact.
-- [ ] Create inference function.
-- [ ] Document limitations.
+- [x] Define features.
+- [x] Define targets.
+- [x] Train baseline model.
+- [x] Evaluate model.
+- [x] Save model artifact.
+- [x] Create inference function.
+- [x] Document limitations.
 
 Acceptance Criteria:
 
@@ -868,16 +868,16 @@ Acceptance Criteria:
 **Owner:** Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S4  
-**Status:** BACKLOG
+**Status:** TESTING
 
 Tasks:
 
-- [ ] Define metrics.
-- [ ] Evaluate model.
-- [ ] Perform error analysis.
+- [x] Define metrics.
+- [x] Evaluate model.
+- [x] Perform error analysis.
 - [ ] Review class imbalance.
-- [ ] Document performance.
-- [ ] Document limitations.
+- [x] Document performance.
+- [x] Document limitations.
 
 Acceptance Criteria:
 
@@ -949,7 +949,7 @@ Acceptance Criteria:
 **Owner:** Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S5  
-**Status:** BACKLOG
+**Status:** TESTING
 
 Objective:
 
@@ -967,12 +967,12 @@ Family History
 
 Tasks:
 
-- [ ] Integrate SHAP.
-- [ ] Generate feature contribution.
-- [ ] Rank top factors.
-- [ ] Define explanation schema.
-- [ ] Integrate with API.
-- [ ] Test explanation.
+- [x] Integrate SHAP.
+- [x] Generate feature contribution.
+- [x] Rank top factors.
+- [x] Define explanation schema.
+- [x] Integrate with API.
+- [x] Test explanation.
 
 Acceptance Criteria:
 
@@ -993,7 +993,7 @@ Acceptance Criteria:
 **Owner:** Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S5  
-**Status:** BACKLOG
+**Status:** TESTING
 
 Supported horizon:
 
@@ -1253,12 +1253,12 @@ Acceptance Criteria:
 
 Tasks:
 
-- [ ] Document ingestion.
-- [ ] Document cleaning.
-- [ ] Chunking.
-- [ ] Embedding generation.
-- [ ] Vector storage.
-- [ ] Metadata storage.
+- [x] Document ingestion.
+- [x] Document cleaning.
+- [x] Chunking.
+- [x] Embedding generation.
+- [x] Vector storage.
+- [x] Metadata storage.
 
 Acceptance Criteria:
 
@@ -1274,14 +1274,14 @@ Acceptance Criteria:
 **Owner:** Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S7-S8  
-**Status:** BACKLOG
+**Status:** TESTING
 
 Tasks:
 
-- [ ] Query construction.
-- [ ] Similarity search.
-- [ ] Relevance filtering.
-- [ ] Source preservation.
+- [x] Query construction.
+- [x] Similarity search.
+- [x] Relevance filtering.
+- [x] Source preservation.
 - [ ] Retrieval testing.
 
 Acceptance Criteria:

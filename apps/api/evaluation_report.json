@@ -1,0 +1,51 @@
+{
+  "eval_timestamp": "2026-09-29T22:32:38.151944+00:00",
+  "sample_count": 1000,
+  "runtime_seconds": 1.186,
+  "overall_accuracy": 0.8863,
+  "disclaimer": "Evaluation based on trained XGBoost models (10k samples). Metrics reflect model performance on synthetic data, not clinical validation.",
+  "conditions": [
+    {
+      "condition": "Diabetes Melitus",
+      "label_count": 1000,
+      "positive_count": 133,
+      "threshold": 0.3,
+      "precision": 0.6914,
+      "recall": 0.4211,
+      "f1": 0.5234,
+      "accuracy": 0.898,
+      "roc_auc": 0.9044,
+      "brier_score": 0.089176,
+      "mean_predicted": 0.1541,
+      "mean_actual": 0.133
+    },
+    {
+      "condition": "Hipertensi",
+      "label_count": 1000,
+      "positive_count": 370,
+      "threshold": 0.3,
+      "precision": 0.8843,
+      "recall": 0.5162,
+      "f1": 0.6519,
+      "accuracy": 0.796,
+      "roc_auc": 0.9059,
+      "brier_score": 0.196726,
+      "mean_predicted": 0.2055,
+      "mean_actual": 0.37
+    },
+    {
+      "condition": "Penyakit Jantung",
+      "label_count": 1000,
+      "positive_count": 26,
+      "threshold": 0.3,
+      "precision": 0.2632,
+      "recall": 0.1923,
+      "f1": 0.2222,
+      "accuracy": 0.965,
+      "roc_auc": 0.9308,
+      "brier_score": 0.02472,
+      "mean_predicted": 0.0718,
+      "mean_actual": 0.026
+    }
+  ]
+}
