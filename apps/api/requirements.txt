@@ -15,7 +15,7 @@ email-validator==2.3.0
 fastapi==0.141.1
 greenlet==3.5.6
 h11==0.16.0
--e git+https://github.com/nikamushi/heliora.git@e50d25b3218aed5a6e53dca771c14cd23e67ea15#egg=heliora_api&subdirectory=apps\api
+-e git+https://github.com/nikamushi/heliora.git@e50d25b3218aed5a6e53dca771c14cd23e67ea15#egg=heliora_api&subdirectory=apps/api
 httpcore==1.0.9
 httptools==0.8.0
 httpx==0.28.1

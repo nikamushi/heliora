@@ -1,10 +1,11 @@
 """HELIORA API — Assessment service.
 
 Orchestrates the health assessment pipeline: profile validation,
-risk calculation, scoring, factor attribution, recommendations,
-and persistence (Architecture §6.6, §8, BE-004).
+risk calculation, SHAP-based explainable AI, scoring, factor attribution,
+recommendations, and persistence (Architecture §6.6, §8, BE-004, XAI-001).
 """
 
+import logging
 import uuid
 from typing import Literal
 
@@ -21,6 +22,13 @@ from app.schemas.assessment import (
     RecommendationItem,
     RiskAssessmentItem,
 )
+
+logger = logging.getLogger(__name__)
+
+try:
+    from app.ai.shap_explainer import explain_health_profile as explain_shap_profile
+except ImportError:
+    explain_shap_profile = None  # type: ignore[assignment]
 
 
 class AssessmentService:
@@ -123,8 +131,25 @@ class AssessmentService:
                     )
                 )
 
-        # 1. Prefer explicitly supplied in-memory factors (e.g. fresh run)
-        factors = top_factors or []
+        # 1. Prefer explicitly supplied in-memory factors (e.g. fresh SHAP run)
+        factors: list[ContributingFactor] = []
+        if top_factors:
+            for f in top_factors:
+                if isinstance(f, dict):
+                    factors.append(
+                        ContributingFactor(
+                            feature=f["feature"],
+                            label=f.get("label", f["feature"].replace("_", " ").title()),
+                            impact=f.get("impact", "increase"),
+                            weight_percentage=f.get("weight_percentage", 0.0),
+                            description=f.get(
+                                "description",
+                                f"Kontribusi faktor {f['feature']} terhadap estimasi risiko.",
+                            ),
+                        )
+                    )
+                else:
+                    factors.append(f)
 
         # 2. Reconstruct from persisted XAI results (historical immutability)
         if not factors and rr.xai_results:
@@ -180,7 +205,19 @@ class AssessmentService:
         risks = risk_engine.estimate_risks(profile)
         health_score = risk_engine.calculate_health_score(risks)
         lifestyle_score = risk_engine.calculate_lifestyle_score(profile)
-        top_factors = risk_engine.extract_top_factors(profile, risks)
+
+        # XAI-001: SHAP-based feature attribution
+        try:
+            if explain_shap_profile is not None:
+                shap_factors = explain_shap_profile(profile)
+                top_factors_data = shap_factors if shap_factors else risk_engine.extract_top_factors(profile, risks)
+            else:
+                logger.debug("SHAP not available, using rule-based factors")
+                top_factors_data = risk_engine.extract_top_factors(profile, risks)
+        except Exception as e:
+            logger.warning("SHAP explanation failed, falling back to rule-based: %s", e)
+            top_factors_data = risk_engine.extract_top_factors(profile, risks)
+
         recs_data = risk_engine.generate_recommendations(profile)
 
         # 2. Persist assessment session & associated outcomes
@@ -210,7 +247,7 @@ class AssessmentService:
         xai_records = await assessment_repo.create_xai_results(
             session,
             risk_result_id=risk_res.id,
-            factors_data=top_factors,
+            factors_data=top_factors_data,
         )
 
         await assessment_repo.commit_assessment_transaction(session, assessment)
@@ -221,7 +258,7 @@ class AssessmentService:
         assessment.recommendations = rec_records
         assessment.health_profile = profile
 
-        return self._format_assessment_response(assessment, top_factors)
+        return self._format_assessment_response(assessment, top_factors_data)
 
     async def get_latest_assessment(
         self, session: AsyncSession, user_id: uuid.UUID
