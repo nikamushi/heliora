@@ -18,6 +18,7 @@ dependencies = [
     "email-validator>=2.0.0",
     "httpx>=0.27.0",
     "numpy>=1.24.0",
+    "numba>=0.59.0",
     "shap>=0.50.0",
     "chromadb>=1.5.0",
     "sentence-transformers>=2.0.0",

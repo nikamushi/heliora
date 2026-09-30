@@ -1,22 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  LayoutDashboard,
-  Activity,
   Sliders,
   TrendingUp,
-  ShieldCheck,
-  User,
-  Settings,
-  LogOut,
-  Menu,
-  ChevronRight,
-  BookOpen,
   ArrowRight,
-  ArrowLeft,
   Info,
   Clock,
   CheckCircle2,
@@ -40,17 +30,11 @@ const HORIZON_OPTIONS: { days: SimulationHorizon; label: string; period: string 
 export default function FutureSimulationPage() {
   const router = useRouter();
   const { isAuthorized, redirectToLogin } = useRequireAuth();
-  const user = useMemo(
-    () => (typeof window !== "undefined" ? apiClient.getStoredUser() : null),
-    []
-  );
 
   const [selectedHorizon, setSelectedHorizon] = useState<SimulationHorizon>(90);
   const [simulationData, setSimulationData] = useState<FutureSimulationResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<ApiClientError | null>(null);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isRiskMenuExpanded, setIsRiskMenuExpanded] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
 
   const handleRetry = useCallback(() => {
@@ -99,238 +83,24 @@ export default function FutureSimulationPage() {
     };
   }, [isAuthorized, selectedHorizon, reloadKey, redirectToLogin]);
 
-  const handleLogout = () => {
-    apiClient.auth.logout();
-    router.push("/login");
-  };
-
-  const userInitials =
-    user?.full_name
-      ?.split(" ")
-      .map((n) => n[0])
-      .slice(0, 2)
-      .join("")
-      .toUpperCase() || "HL";
-
   if (!isAuthorized) {
     return null;
   }
 
   return (
-    <div className="min-h-screen bg-brand-50/25 text-brand-900 selection:bg-brand-200 flex">
-      {/* ── Desktop Sidebar ── */}
-      <aside className="hidden lg:flex w-64 shrink-0 flex-col justify-between border-r border-brand-900/10 bg-white/85 backdrop-blur-xl h-screen sticky top-0 p-5 z-20">
-        <div className="space-y-6">
-          {/* Brand Mark */}
-          <Link href="/dashboard" className="flex items-center gap-3 px-1 group">
-            <div className="size-9 rounded-xl bg-brand-900 text-white flex items-center justify-center shadow-xs">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="w-5 h-5 text-emerald-300"
-              >
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                <path d="m9 12 2 2 4-4" />
-              </svg>
-            </div>
-            <div>
-              <span className="text-base font-bold tracking-tight text-brand-900 block leading-none">
-                HELIORA
-              </span>
-              <span className="text-[10px] font-mono tracking-wider text-brand-900/50 uppercase mt-1 block">
-                Preventive Health AI
-              </span>
-            </div>
+    <div className="flex-1 min-w-0 flex flex-col">
+      {/* Top Header / Breadcrumb */}
+      <header className="h-16 border-b border-brand-900/10 bg-white/70 backdrop-blur-md sticky top-0 z-10 px-6 hidden lg:flex items-center">
+        <div className="flex items-center gap-2 text-xs font-mono">
+          <Link href="/dashboard" className="text-brand-900/50 uppercase hover:text-brand-900 transition-colors">
+            Dashboard
           </Link>
-
-          {/* Navigation Groups */}
-          <nav className="space-y-5">
-            {/* Group 1: Menu Utama */}
-            <div className="space-y-1">
-              <p className="text-[10px] font-mono font-bold tracking-widest text-brand-900/40 uppercase px-3 mb-2">
-                Menu Utama
-              </p>
-              <Link
-                href="/dashboard"
-                className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-brand-900/70 hover:bg-neutral-100/60 transition-all"
-              >
-                <LayoutDashboard className="w-4 h-4 shrink-0" />
-                <span>Ringkasan Klinis</span>
-              </Link>
-
-              {/* Disease Risk Sub-menu */}
-              <div className="pt-1">
-                <button
-                  type="button"
-                  onClick={() => setIsRiskMenuExpanded(!isRiskMenuExpanded)}
-                  className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-brand-900/70 hover:bg-neutral-100/60 transition-colors"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <Activity className="w-4 h-4 shrink-0 text-brand-900" />
-                    <span>Analisis Risiko</span>
-                  </div>
-                  <ChevronRight
-                    className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                      isRiskMenuExpanded ? "rotate-90" : ""
-                    }`}
-                  />
-                </button>
-
-                {isRiskMenuExpanded && (
-                  <div className="pl-9 pr-2 py-1 space-y-1">
-                    <Link
-                      href="/dashboard/risk/diabetes"
-                      className="block py-1 text-xs text-brand-900/60 hover:text-brand-900 transition-colors"
-                    >
-                      Diabetes Melitus
-                    </Link>
-                    <Link
-                      href="/dashboard/risk/hypertension"
-                      className="block py-1 text-xs text-brand-900/60 hover:text-brand-900 transition-colors"
-                    >
-                      Hipertensi
-                    </Link>
-                    <Link
-                      href="/dashboard/risk/cardiovascular"
-                      className="block py-1 text-xs text-brand-900/60 hover:text-brand-900 transition-colors"
-                    >
-                      Kardiovaskular
-                    </Link>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Group 2: Intervensi & Bukti */}
-            <div className="space-y-1">
-              <p className="text-[10px] font-mono font-bold tracking-widest text-brand-900/40 uppercase px-3 mb-2">
-                Intervensi &amp; Bukti
-              </p>
-              <Link
-                href="/dashboard/recommendations"
-                className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-brand-900/70 hover:bg-neutral-100/60 hover:text-brand-900 transition-colors"
-              >
-                <ShieldCheck className="w-4 h-4 shrink-0" />
-                <span>Rencana Tindakan</span>
-              </Link>
-              <Link
-                href="/dashboard/evidence"
-                className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-brand-900/70 hover:bg-neutral-100/60 hover:text-brand-900 transition-colors"
-              >
-                <BookOpen className="w-4 h-4 shrink-0" />
-                <span>Pusat Bukti Medis</span>
-              </Link>
-            </div>
-
-            {/* Group 3: Simulasi */}
-            <div className="space-y-1">
-              <p className="text-[10px] font-mono font-bold tracking-widest text-brand-900/40 uppercase px-3 mb-2">
-                Simulasi
-              </p>
-              <Link
-                href="/dashboard/simulation/future"
-                className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold bg-brand-900 text-white shadow-xs transition-all"
-              >
-                <TrendingUp className="w-4 h-4 shrink-0 text-emerald-300" />
-                <span>Proyeksi Horison</span>
-              </Link>
-              <Link
-                href="/dashboard/simulation/what-if"
-                className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-brand-900/70 hover:bg-neutral-100/60 hover:text-brand-900 transition-colors"
-              >
-                <Sliders className="w-4 h-4 shrink-0" />
-                <span>What-If Simulator</span>
-              </Link>
-            </div>
-
-            {/* Group 4: Profil & Akun */}
-            <div className="space-y-1">
-              <p className="text-[10px] font-mono font-bold tracking-widest text-brand-900/40 uppercase px-3 mb-2">
-                Profil &amp; Akun
-              </p>
-              <Link
-                href="/onboarding/health-profile"
-                className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-brand-900/70 hover:bg-neutral-100/60 hover:text-brand-900 transition-colors"
-              >
-                <User className="w-4 h-4 shrink-0" />
-                <span>Profil Saya</span>
-              </Link>
-              <Link
-                href="/onboarding/health-profile"
-                className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-brand-900/70 hover:bg-neutral-100/60 hover:text-brand-900 transition-colors"
-              >
-                <Settings className="w-4 h-4 shrink-0" />
-                <span>Pengaturan Akun</span>
-              </Link>
-            </div>
-          </nav>
+          <span className="text-brand-900/30">/</span>
+          <span className="text-brand-900/50 uppercase">Simulasi</span>
+          <span className="text-brand-900/30">/</span>
+          <span className="text-brand-900 font-bold uppercase">Proyeksi Horison</span>
         </div>
-
-        {/* Sidebar Footer */}
-        <div className="space-y-3 pt-4 border-t border-brand-900/10">
-          <Link
-            href="/onboarding/health-profile"
-            className="p-2.5 rounded-xl bg-neutral-50/80 border border-brand-900/10 flex items-center gap-3 hover:bg-neutral-100/60 transition-colors"
-          >
-            <div className="size-8 rounded-xl bg-brand-900/10 border border-brand-900/15 text-brand-900 font-mono font-bold flex items-center justify-center text-xs shrink-0">
-              {userInitials}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-xs font-bold text-brand-900 truncate">
-                {user?.full_name || "Pengguna Heliora"}
-              </p>
-              <p className="text-[10px] font-mono text-brand-900/50 truncate">
-                {user?.email || "Profil Terverifikasi"}
-              </p>
-            </div>
-          </Link>
-
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-rose-700 hover:bg-rose-50 transition-colors cursor-pointer"
-          >
-            <LogOut className="w-4 h-4 shrink-0" />
-            <span>Keluar dari Akun</span>
-          </button>
-        </div>
-      </aside>
-
-      {/* ── Main Workspace Area ── */}
-      <div className="flex-1 min-w-0 flex flex-col min-h-screen">
-        {/* Top Header / Breadcrumb */}
-        <header className="h-16 border-b border-brand-900/10 bg-white/70 backdrop-blur-md sticky top-0 z-10 px-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-1.5 rounded-xl border border-brand-900/15 text-brand-900 hover:bg-neutral-50"
-            >
-              <Menu className="w-5 h-5" />
-            </button>
-            <div className="flex items-center gap-2 text-xs font-mono">
-              <Link href="/dashboard" className="text-brand-900/50 uppercase hover:text-brand-900">
-                Dashboard
-              </Link>
-              <span className="text-brand-900/30">/</span>
-              <span className="text-brand-900/50 uppercase">Simulasi</span>
-              <span className="text-brand-900/30">/</span>
-              <span className="text-brand-900 font-bold uppercase">Proyeksi Horison</span>
-            </div>
-          </div>
-
-          <Link
-            href="/dashboard"
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-brand-900/70 hover:text-brand-900 transition-colors"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Kembali ke Dashboard</span>
-          </Link>
-        </header>
+      </header>
 
         {/* Scrollable Content Body */}
         <main className="flex-1 p-6 sm:p-8 space-y-8 max-w-6xl w-full mx-auto">
@@ -538,7 +308,7 @@ export default function FutureSimulationPage() {
                     Proyeksi Risiko Kardiometabolik ({selectedHorizon} Hari)
                   </h2>
                   <p className="text-xs text-brand-900/60">
-                    Bandingkan estimasi probabilitas risiko saat ini dengan hasil proyeksi model AI.
+                    Bandingkan estimasi risiko saat ini dengan hasil proyeksi model AI.
                   </p>
                 </div>
 
@@ -672,12 +442,11 @@ export default function FutureSimulationPage() {
 
               {/* Row 5: Verbatim Medical Disclaimer */}
               <div className="pt-2">
-                <DisclaimerBanner variant="note" className="text-xs text-brand-900/65" />
+                <DisclaimerBanner variant="banner" className="text-xs text-brand-900/65" />
               </div>
             </div>
           )}
         </main>
       </div>
-    </div>
   );
 }

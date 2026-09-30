@@ -54,14 +54,16 @@ Diturunkan langsung dari PRD §3.13 (User Experience Principle), §5.5 (Product 
 
 ## 2. Tema & Visual Language (Design Tokens)
 
-> Palet warna & tipografi di bawah adalah keputusan tim (hijau, light+dark mode, geometric sans) yang sudah diterjemahkan jadi token konkret. Spacing scale & komponen Figma detail tetap menyusul di iterasi hi-fi.
+> Palet warna, tipografi, dan token visual HELIORA dirancang dengan prinsip **Editorial Minimalism** yang presisi, hangat, dan terpercaya — memadukan panduan *Apple Human Interface Guidelines (HIG)*, standar tipografi editorial modern, dan larangan mutlak terhadap ornamen generik seperti pill chips.
 
 ### 2.1 Brand & Filosofi Warna
 
-- **Warna utama: Hijau** — selaras prinsip "Preventive First" (PRD §5.5.1). Nuansa yang dipakai deliberately bukan hijau "steril rumah sakit", tapi hijau daun/forest yang lebih hangat, supaya tidak berkesan seperti aplikasi diagnosis klinis (selaras Prinsip #3 "Preventive, Not Diagnostic" di §1 dokumen ini).
-- Hijau juga dipakai sebagai warna semantik **"Low Risk"** (§2.4) — ada overlap makna antara "warna brand" dan "status risiko rendah". Ini **sengaja dipertahankan**, bukan dianggap bug: secara naratif justru memperkuat citra "hijau = kondisi baik, preventive, aman". Mitigasinya: badge risiko selalu berbentuk **pill + ikon + label teks**, sehingga tidak pernah tertukar secara visual dengan tombol CTA brand.
-- **Light + Dark Mode** didukung sejak MVP.
-- **Tipografi:** geometric sans-serif — [Plus Jakarta Sans](https://fonts.google.com/specimen/Plus+Jakarta+Sans). Dipilih juga karena relevansi naratif (typeface ini didesain di Jakarta) untuk produk kompetisi asal Indonesia, gratis di Google Fonts, dukungan diakritik Latin lengkap, dan mudah diimplementasikan via `next/font/google` (selaras stack Next.js, PRD §12.3.1).
+- **Warna utama: Forest Green (`#0F7A4E`)** — selaras prinsip "Preventive First" (PRD §5.5.1). Nuansa yang dipakai bukan hijau "steril rumah sakit", melainkan hijau daun/forest yang hangat dan berwibawa, memastikan platform tidak berkesan seperti aplikasi diagnosis klinis (selaras Prinsip #3 "Preventive, Not Diagnostic").
+- **Tipografi Editorial Murni untuk Status:** Status risiko ("Lower", "Moderate", "Higher") disajikan menggunakan **tipografi editorial murni** (`font-mono text-xs font-bold tracking-wider uppercase` + ikon semantik garis tipis) tanpa kontainer kapsul lonjong (`rounded-full`), tanpa background warna oval, dan tanpa dot berkedip. Ini memastikan tampilan tetap bersih, berwibawa, dan tidak tertukar dengan tombol aksi/CTA.
+- **Light + Dark Mode** didukung penuh sejak MVP dengan penyesuaian kontras lumiansi terverifikasi WCAG AAA/AA.
+- **Tipografi Dwi-Sistem:**
+  - **Primary Sans:** [Plus Jakarta Sans](https://fonts.google.com/specimen/Plus+Jakarta+Sans) untuk heading hero, judul kartu, copy naratif, dan label UI.
+  - **Accent Monospace:** System Monospace / JetBrains Mono (`font-mono`) untuk section eyebrow, status risiko klinis, angka skor tabular, dan metadata kalkulasi.
 
 ### 2.2 Palet Warna — Light Mode
 
@@ -69,11 +71,11 @@ Diturunkan langsung dari PRD §3.13 (User Experience Principle), §5.5 (Product 
 
 | Token | Hex | Kegunaan | Kontras Terverifikasi |
 |---|---|---|---|
-| `primary-50` | `#F0FDF6` | Background section alt, hover subtle | — (bukan konteks teks) |
-| `primary-100` | `#DCFCE9` | Background badge "Low risk", chip aktif | — |
-| `primary-300` | `#86E8B0` | Border aktif, aksen ilustrasi | — |
-| `primary-500` | `#22B573` | Ikon, brand mark — **jangan** dipakai sebagai teks di atas putih | ❌ 2.65:1 (gagal AA sbg teks) |
-| `primary-700` | `#0F7A4E` | Tombol primer (bg + teks putih), link teks, teks badge "Low" di atas `primary-100` | ✅ AA — 5.37:1 (di atas putih) / 4.89:1 (di atas `primary-100`) |
+| `primary-50` | `#F0FDF6` | Background section alternate, hover subtle | — (bukan konteks teks) |
+| `primary-100` | `#DCFCE9` | Background highlight halus, kartu aksen lembut | — |
+| `primary-300` | `#86E8B0` | Border aktif, aksen grafis visual | — |
+| `primary-500` | `#22B573` | Ikon brand, aksen grafis non-teks | ❌ 2.65:1 (gagal AA sbg teks) |
+| `primary-700` | `#0F7A4E` | Tombol primer (bg + teks putih), link aktif, teks status "Lower Risk" | ✅ AA — 5.37:1 (di atas putih) |
 | `primary-800` | `#0D5F3F` | Hover/active state tombol primer | ✅ AAA — 7.70:1 |
 
 **Neutral**
@@ -81,96 +83,106 @@ Diturunkan langsung dari PRD §3.13 (User Experience Principle), §5.5 (Product 
 | Token | Hex | Kegunaan | Kontras |
 |---|---|---|---|
 | `neutral-0` | `#FFFFFF` | Background utama | — |
-| `neutral-50` | `#F7F9F8` | Background section alternate (warm, bukan abu netral) | — |
-| `neutral-200` | `#DEE5E1` | Border / divider | — |
-| `neutral-700` | `#3A423D` | Body text | ✅ AAA — 10.36:1 |
-| `neutral-900` | `#14201A` | Heading | ✅ AAA — 16.78:1 |
+| `neutral-50` | `#F7F9F8` | Background section alternate (warm editorial) | — |
+| `neutral-200` | `#DEE5E1` | Border / divider halus | — |
+| `neutral-700` | `#3A423D` | Body text naratif | ✅ AAA — 10.36:1 |
+| `neutral-900` | `#14201A` | Heading utama & judul kartu | ✅ AAA — 16.78:1 |
 
-**Semantic — Moderate (Amber) & Higher (Clay-Red)** — dipakai untuk badge risiko §2.4, warna merahnya sengaja dibuat hangat/muted, bukan merah alarm terang, selaras prinsip "Non-Alarming" (§1).
+**Semantic Status (Muted & Non-Alarming)**
+
+Warna status risiko sengaja dirancang hangat dan terkalibrasi (*non-alarming*), bukan merah sirine darurat yang menakut-nakuti pengguna:
 
 | Token | Hex | Kegunaan | Kontras |
 |---|---|---|---|
-| `amber-100` | `#FEF3D6` | Background badge "Moderate" | — |
-| `amber-800` | `#92400E` | Teks badge "Moderate" (di atas `amber-100`) / tombol amber + teks putih | ✅ AA 6.42:1 (badge) · ✅ AAA 7.09:1 (tombol) |
-| `red-100` | `#FBE3E0` | Background badge "Higher" | — |
-| `red-600` | `#B8392E` | Tombol/ikon "Higher" (bg + teks putih) | ✅ AA — 5.73:1 |
-| `red-700` | `#9A2E24` | Teks badge "Higher" (di atas `red-100`) | ✅ AA — 6.15:1 |
-
-> Rasio kontras dihitung dengan formula relative luminance WCAG 2.1, bukan tebakan estetika — tetap wajib divalidasi ulang dengan contrast checker saat implementasi final di Tailwind config, terutama bila hue digeser demi preferensi visual di tahap hi-fi.
+| `emerald-700` | `#047857` | Teks status & ikon "Lower Risk" | ✅ AAA — 7.20:1 |
+| `amber-700` | `#B45309` | Teks status & ikon "Moderate Risk" | ✅ AA — 5.80:1 |
+| `rose-700` | `#BE123C` | Teks status & ikon "Higher Risk" (warm clay-rose) | ✅ AA — 6.10:1 |
 
 ### 2.3 Palet Warna — Dark Mode
 
-Bukan sekadar invert dari light mode — tone brand digeser lebih terang (`primary-400`, bukan `primary-700`) supaya tetap kontras di atas background gelap.
+Dark mode bukan sekadar invert dari light mode — tone permukaan menggunakan palet *warm forest dark* (`#0E1512` dan `#182620`) dengan aksen semantik yang ditingkatkan luminansinya agar terbaca tajam:
 
 | Token | Hex | Kegunaan | Kontras (di atas `surface`) |
 |---|---|---|---|
-| `bg-base` (dark) | `#0E1512` | Background utama (hijau-hitam hangat, bukan hitam pekat) | — |
-| `surface` (dark) | `#182620` | Card, panel | — |
+| `bg-base` (dark) | `#0E1512` | Background utama (hijau-hitam hangat) | — |
+| `surface` (dark) | `#182620` | Card, container, panel konten solid | — |
 | `surface-hover` (dark) | `#22332B` | Hover/active surface | — |
-| `border` (dark) | `#2A3A32` | Divider | — |
-| `text-primary` (dark) | `#EAF3EE` | Body text | ✅ AAA — 13.88:1 |
-| `text-secondary` (dark) | `#A9B8B0` | Caption / secondary text | ✅ AAA — 7.61:1 |
-| `primary-400` (dark) | `#4ED18C` | Brand accent, link, teks badge "Low" | ✅ AAA — 8.10:1 |
-| `amber-400` (dark) | `#FBBF24` | Teks/badge "Moderate" | ✅ AAA — 9.41:1 |
-| `red-400` (dark) | `#F2726B` | Teks/badge "Higher" | ✅ AA — 5.53:1 |
+| `border` (dark) | `#2A3A32` | Divider dan outline kartu | — |
+| `text-primary` (dark) | `#EAF3EE` | Body text utama | ✅ AAA — 13.88:1 |
+| `text-secondary` (dark) | `#A9B8B0` | Caption, metadata, secondary text | ✅ AAA — 7.61:1 |
+| `emerald-400` (dark) | `#34D399` | Teks status & ikon "Lower Risk" | ✅ AAA — 8.40:1 |
+| `amber-400` (dark) | `#FBBF24` | Teks status & ikon "Moderate Risk" | ✅ AAA — 9.41:1 |
+| `rose-400` (dark) | `#FB7185` | Teks status & ikon "Higher Risk" | ✅ AA — 5.85:1 |
 
-### 2.4 Semantik Warna Risiko
+---
 
-PRD §13.7 tetap berlaku: status risiko **tidak boleh bergantung warna saja** → setiap badge wajib kombinasi **warna + ikon + label teks**, di kedua mode.
+### 2.4 Aturan Desain Mutlak: Larangan Pill Chips & Standar Tipografi Editorial
 
-| Level Risiko | Light Mode | Dark Mode | Ikon | Label Teks |
-|---|---|---|---|---|
-| Low | bg `primary-100` · teks `primary-700` | bg `surface` · teks `primary-400` | check-circle | "Lower" |
-| Moderate | bg `amber-100` · teks `amber-800` | bg `surface` · teks `amber-400` | alert-triangle (outline) | "Moderate" |
-| Higher | bg `red-100` · teks `red-700` | bg `surface` · teks `red-400` | alert-triangle (filled) | "Higher" |
+Sesuai aturan ketat [.agents/rules/no-pill-chips.md](file:///C:/Users/Lenovo/Documents/GitHub/heliora/heliora/.agents/rules/no-pill-chips.md) dan standar editorial HELIORA:
 
-Catatan: PRD §17.37A mewajibkan istilah **"estimated risk score"**, bukan "probability", selama model belum tervalidasi kalibrasinya — istilah ini yang dipakai di seluruh copy UI, bukan "Probability" atau "Chance".
+#### 1. LARANGAN MUTLAK (STRICT BAN)
+AI dan pengembang **DILARANG KERAS** membuat atau memunculkan elemen:
+- **Pill Chips / Oval Badges**: Kontainer kapsul lonjong (`rounded-full` dengan padding `px-3 py-1`, background warna tipis, dan border) yang diletakkan mengambang di atas heading, hero, section header, maupun di dalam kartu.
+- **Dot Indikator Dekoratif**: Dot kecil berkedip (`w-2 h-2 rounded-full animate-pulse`) di dalam kapsul.
+- **Badge Kapsul Status**: Membungkus teks status (seperti "AUC-ROC", "Terenkripsi", "Langkah X", "Lower", "Moderate", "Higher") ke dalam chip oval.
+
+#### 2. STANDAR PENGGANTI (EDITORIAL MINIMALISM)
+1. **Section Eyebrow / Kategori:**
+   Gunakan tipografi bersih murni:
+   `text-xs font-mono font-bold tracking-widest text-brand-900/40 uppercase mb-3`
+   (Tanpa latar belakang kapsul, tanpa border, tanpa dot).
+2. **Hero Section:**
+   Judul utama (H1) harus berdiri sendiri secara gagah, lapang, dan bersih di puncak hierarki visual tanpa dihiasi chip mengambang di atasnya.
+3. **Status Risiko & Metrik:**
+   Tampilkan sebagai teks tipografi berbobot (*plain text*) sejajar dengan ikon semantik garis tipis (Lucide outline), tanpa kontainer kapsul:
+   - **Lower:** `text-xs font-mono font-bold tracking-wider text-emerald-700 dark:text-emerald-400` dengan ikon `CheckCircle2`.
+   - **Moderate:** `text-xs font-mono font-bold tracking-wider text-amber-700 dark:text-amber-400` dengan ikon `AlertCircle`.
+   - **Higher:** `text-xs font-mono font-bold tracking-wider text-rose-700 dark:text-rose-400` dengan ikon `AlertTriangle`.
+4. **Terminologi Estimasi:**
+   Sesuai PRD §17.37A, seluruh copy UI wajib menggunakan istilah **"estimated risk"** atau **"estimasi risiko"**, bukan "probability" atau "peluang mutlak".
+
+---
 
 ### 2.5 Tipografi, Skor & Ikonografi
 
-- **Font:** Plus Jakarta Sans untuk heading, body, dan UI label. Weight 400 (body) / 600 (label, tombol) / 700 (heading, angka skor besar) sudah cukup untuk MVP — hindari menambah family kedua supaya bundle size & waktu development tetap ringkas.
-- Angka skor besar (Health Score, Lifestyle Score) memakai **tabular/lining figures** dari font yang sama, supaya digit sejajar rapi saat dua skor tampil berdampingan (lihat wireframe Dashboard §7.1).
-- Skor tetap **tidak boleh berdiri sendiri** tanpa interpretasi teks (PRD §13.6.1 — prinsip ini sudah masuk §1 poin 2).
-- Istilah teknis (SHAP, feature contribution, model version) tidak muncul di UI utama pengguna — hanya di Admin Panel / Evidence detail lanjutan.
-- **Ikonografi:** outline/stroke icon minimalis agar senada dengan tipografi geometric — [Lucide](https://lucide.dev/) adalah kandidat yang cocok dan sudah tersedia sebagai library React (`lucide-react`).
+- **Font Heading & Body:** Plus Jakarta Sans (Weight 400 normal, 500 medium, 600 semibold, 700 bold).
+- **Tabular Figures & Metrics:** Angka skor besar (Health Score, Lifestyle Score) dan data angka simulasi wajib menggunakan angka tabular (`font-mono` atau `tabular-nums`) agar perbandingan digit sejajar rapi.
+- **Prinsip "Explainable by Default":** Skor angka tidak boleh ditampilkan sendirian tanpa label interpretasi teks bahasa awam di sampingnya (misal: "78 — Kondisi Baik", bukan `78` telanjang).
+- **Ikonografi:** Outline stroke minimalis berbobot 1.5px–1.75px dari [Lucide React](https://lucide.dev/). Hindari ikon bertipe solid/filled tebal yang terkesan berat atau kartun.
 
-### 2.6 Disclaimer Component
+### 2.6 Komponen Disclaimer Medis (Medical Disclaimer Component)
 
-Karena FR-005 mewajibkan disclaimer muncul di 4 titik (onboarding, hasil assessment, simulation, recommendation), disclaimer harus jadi **1 komponen reusable** (bukan teks bebas per halaman) agar konsisten kata-per-kata dengan pesan resmi PRD §8.4:
+Sesuai ketentuan statutori PRD FR-005, disclaimer medis adalah pesan keselamatan yang wajib tampil secara kata-per-kata:
 
-> "HELIORA adalah alat bantu preventive health berbasis lifestyle dan AI. Hasil yang diberikan merupakan estimasi berdasarkan data dan model yang digunakan, bukan diagnosis medis dan bukan pengganti konsultasi dokter."
+> *"HELIORA adalah alat bantu preventive health berbasis lifestyle dan AI. Hasil yang diberikan merupakan estimasi dan simulasi berdasarkan data dan model yang digunakan, bukan diagnosis medis dan bukan pengganti konsultasi tenaga kesehatan."*
 
-Disclaimer tampil di atas `neutral-50` (light) / `surface` (dark) dengan teks `neutral-700` / `text-secondary` — netral, tidak memakai warna semantik risiko apa pun, supaya tidak disalahartikan sebagai status. Disclaimer **selalu solid/opaque**, tidak pernah memakai material glass (lihat §2.7) — keterbacaan pesan keselamatan lebih penting daripada estetika.
+**Aturan Penempatan & Format:**
+- **Selalu Solid / Opaque:** Ditampilkan di atas background solid netral (`neutral-50` / `surface`), teks `neutral-700` / `text-secondary`, teks biasa tanpa material glass, dan **TIDAK PERNAH** berbentuk pill badge/chip.
+- **Lokasi Terbatas (4 Titik Data):** Disclaimer hanya wajib muncul di 4 area terautentikasi:
+  1. Halaman Onboarding Consent (`/onboarding/consent`).
+  2. Ringkasan Hasil Asesmen & Dashboard Risiko (`/dashboard`, `/dashboard/risk/:disease`).
+  3. Antarmuka Simulasi (`/dashboard/simulation/what-if`).
+  4. Halaman Rekomendasi Tindakan (`/dashboard/recommendations`).
+- **Landing Page Publik:** Tidak menampilkan banner disclaimer mengambang agar pesan pengenalan produk tetap fokus pada nilai preventif dan edukasi gaya hidup.
 
-### 2.7 Material — Glassmorphism (terinspirasi Apple HIG / Liquid Glass)
+### 2.7 Material — Glassmorphism (Apple Liquid Glass Standard)
 
-Sejak WWDC 2025, Apple HIG memformalkan material translucent bernama **Liquid Glass** di bagian *Materials* — dasar dari tren glassmorphism yang lebih luas. HELIORA mengadopsi prinsipnya secara selektif, bukan menerapkannya ke semua elemen:
+Mengadopsi filosofi *Liquid Glass* dari Apple Human Interface Guidelines secara selektif:
 
-- **Kaidah utama dari Apple (dipegang di HELIORA):** glass "best reserved for the navigation layer that floats above the content" — dipakai untuk elemen kontrol/navigasi yang mengambang di atas konten, **bukan** untuk konten itu sendiri. Apple juga eksplisit memperingatkan: jangan menumpuk lebih dari satu lapisan glass sekaligus (menyebabkan clutter, melemahkan hierarki).
-- **Isu aksesibilitas yang diakui Apple sendiri:** komponen transparan di atas background kompleks bisa mengganggu keterbacaan. Rekomendasi mereka — kontras teks tetap ≥4.5:1 (WCAG) meski di atas material transparan, dan sistem harus menghormati preferensi pengguna *Reduce Transparency* (beralih ke solid).
+- **Hanya untuk Lapisan Kontrol/Navigasi:** Digunakan eksklusif untuk elemen navigasi yang mengambang di atas konten yang bergulir (*scrolling*):
+  - Sticky Navbar di Landing Page & aplikasi (`backdrop-blur-md bg-white/70 dark:bg-[#0E1512]/75 border-b border-black/[0.06] dark:border-white/[0.08]`).
+  - Floating bottom action controls saat navigasi simulasi.
+  - Backdrop modal dialog.
+- **DILARANG untuk Konten Data:** Kartu data kesehatan, form input formulir, teks hasil asesmen, dan komponen disclaimer wajib berupa **permukaan solid/opaque** demi menjamin keterbacaan kontras 100% tanpa gangguan background.
+- **Anti-Stacking:** Dilarang keras menumpuk dua atau lebih lapisan kaca (glass over glass).
+- **Aksesibilitas:** Menghormati media query `prefers-reduced-transparency` dengan beralih otomatis ke solid background tanpa blur.
 
-**Dipakai di HELIORA (elemen chrome/navigasi):**
-- Navbar sticky di Landing Page & top-nav aplikasi.
-- Floating action card (2 tombol simulasi di Dashboard) saat di-scroll/sticky.
-- Backdrop modal (Safety Guardrail, Risk Detail jika berbentuk modal).
-- Floating tagline card di panel visual Login (§5.3).
+### 2.8 Referensi Komponen — shadcn/ui & Editorial Standard
 
-**TIDAK dipakai (harus solid/opaque):**
-- `ScoreCard`, `RiskBadge`, teks faktor kontribusi — data kesehatan wajib kontras penuh.
-- `DisclaimerBanner` / Disclaimer Component (§2.6) — pesan keselamatan.
-- Form input (Health Profile, Login, Register) — keterbacaan input lebih penting dari estetika.
-
-**Token (light mode):** background putih 70% opacity + `backdrop-blur` 16–20px + border 1px putih ~40% opacity (kesan tepi kaca) + shadow halus.
-**Token (dark mode):** background `surface` (`#182620`) ~55–65% opacity + `backdrop-blur` + border 1px putih ~8–12% opacity.
-**Fallback wajib:** saat OS/browser mengaktifkan `prefers-reduced-transparency`, elemen glass beralih ke background solid (`neutral-0`/`surface`) tanpa blur — mengikuti pendekatan Apple sendiri, bukan preferensi HELIORA yang diabaikan begitu saja.
-
-### 2.8 Referensi Komponen — shadcn/ui
-
-[shadcn/ui](https://ui.shadcn.com/) dipakai sebagai acuan struktur komponen (bukan library wajib) karena dibangun di atas **React + Tailwind CSS + TypeScript** — identik dengan stack HELIORA (PRD §12.3) — dan ikon default-nya adalah **Lucide**, sama dengan rekomendasi §2.5. Tidak perlu rekonsiliasi tambahan.
-
-- **Struktur Card acuan:** `Card` (border, `rounded-xl` ±12px, `shadow-sm` halus) → `CardHeader` (`CardTitle` + `CardDescription`) → `CardContent` → `CardFooter`. Dipakai sebagai bentuk dasar `ScoreCard`, `EvidenceCard`, dan container `RiskBadge` di §11 Component Library.
-- **Token mapping:** token HELIORA (§2.2–2.3) dipetakan ke CSS variable bergaya shadcn — `--background`, `--foreground`, `--card`, `--card-foreground`, `--primary`, `--primary-foreground`, `--muted`, `--muted-foreground`, `--border`, `--radius: 0.75rem` — supaya komponen shadcn bisa dipakai langsung tanpa override berlebihan.
-- **Varian "glass":** untuk elemen chrome di §2.7, `Card` shadcn di-override dengan `backdrop-blur` + background semi-transparan sesuai token di atas. Untuk konten data (skor, disclaimer), tetap pakai `Card` standar solid — **jangan** dijadikan glass.
+Komponen UI dibangun mengacu pada pola arsitektur [shadcn/ui](https://ui.shadcn.com/) dengan penyelarasan token editorial:
+- **Card:** `Card` solid (`rounded-2xl`, border halus `border-neutral-200/80 dark:border-neutral-800`, `shadow-sm` lembut).
+- **RiskStatusIndicator:** Menggantikan komponen badge oval lama dengan baris status teks editorial murni (`[Icon] LABEL` dengan styling semantik `font-mono`).
+- **Button:** Tombol primer berujung `rounded-xl` atau `rounded-lg` tegas (bukan `rounded-full` kapsul), dengan kontras teks putih solid di atas `primary-700`.
 
 ---
 
@@ -178,20 +190,20 @@ Sejak WWDC 2025, Apple HIG memformalkan material translucent bernama **Liquid Gl
 
 ```text
 PUBLIC (unauthenticated)                         AUTHENTICATED (user)
-├── / (Landing Page)                              ├── /onboarding/consent
-├── /login (Sign In)                              ├── /onboarding/health-profile
-├── /register (Sign Up)                           ├── /assessment/processing
-├── /forgot-password  *usulan*                     ├── /dashboard  (home setelah login)
-└── /evidence-preview *opsional, lihat §7.1*       ├── /risk/:diseaseId
-                                                   ├── /simulation/future
-                                                   ├── /simulation/what-if
-                                                   ├── /recommendations
-                                                   ├── /evidence  &  /evidence/:id
-                                                   ├── /history (assessment + simulation)
-                                                   ├── /account (profile, privacy, consent, logout)
-                                                   └── /help (disclaimer & batasan produk)
+├── / (Landing Page - 8-Section Bento)            ├── /onboarding/consent (Langkah 01/02)
+├── /login (Sign In - Centered Card + Google)     ├── /onboarding/health-profile (Langkah 02/02 - 3-Step)
+├── /register (Sign Up - Centered Card + Strength)├── /dashboard (Ringkasan Klinis & Hub Inti)
+├── /terms (Ketentuan Layanan)                    │   ├── /dashboard/risk/:disease (diabetes, hypertension, cardiovascular)
+├── /privacy (Kebijakan Privasi)                  │   ├── /dashboard/simulation/what-if (Interactive Simulator)
+└── /forgot-password *usulan*                     │   ├── /dashboard/simulation/future (Proyeksi Horison 30/90/180 Hari)
+                                                  │   ├── /dashboard/recommendations (Rencana Tindakan Klinis)
+ROUTE ALIASES (PRD Parity & Deep Links)           │   └── /dashboard/evidence (Pusat Bukti Medis Terakreditasi)
+├── /simulation/what-if  ──► /dashboard/simulation/what-if
+├── /simulation/future   ──► /dashboard/simulation/future
+├── /evidence            ──► /dashboard/evidence
+└── /assessment/processing ──► /dashboard
 
-ADMIN *usulan tambahan, lihat §11*
+ADMIN *usulan tambahan, lihat §10*
 ├── /admin/dashboard
 ├── /admin/users
 ├── /admin/knowledge-base (Evidence/RAG)
@@ -200,7 +212,7 @@ ADMIN *usulan tambahan, lihat §11*
 └── /admin/audit-log
 ```
 
-Sesuai BR-AUTH-001: user tidak login hanya boleh mengakses halaman di grup **PUBLIC**. Semua route di bawah `/dashboard` dst. wajib redirect ke `/login` jika belum autentikasi.
+Sesuai BR-AUTH-001: user tidak login hanya boleh mengakses halaman di grup **PUBLIC**. Semua route di bawah `/dashboard` dan `/onboarding` wajib redirect ke `/login` jika belum terautentikasi (dilindungi oleh middleware Supabase session guard dan `useRequireAuth`). Sesuai PRD §8, alias route tingkat atas (`/evidence`, `/simulation/what-if`, `/simulation/future`) dipertahankan secara transparan dengan meneruskan seluruh parameter pencarian (*query params*) ke rute `/dashboard/...`.
 
 ---
 
@@ -260,109 +272,124 @@ flowchart TD
 
 ### 5.1 Landing Page (`/`)
 
-PRD §8.3 hanya menyebut landing page harus menjelaskan: apa itu HELIORA, masalah yang diselesaikan, manfaat utama, konsep preventive health, Future Health Simulation, What-if Simulation, dan disclaimer medis. Struktur section berikut adalah **penjabaran** dari requirement tersebut mengikuti pola landing page SaaS yang umum (lihat §15 Referensi) — problem-first, bukan feature-first, karena audiens umumnya belum sadar (problem-aware) terhadap risiko lifestyle mereka.
+Landing page HELIORA mengadopsi arsitektur **Editorial Bento Grid 8-Section** yang lapang, informatif, dan tidak templated — berpedoman penuh pada standar tipografi editorial murni, larangan pill chips, dan prinsip "Understand Before Acting".
 
 ```text
-┌─────────────────────────────────────────────────────┐
-│ NAVBAR: [HELIORA logo]     Fitur  Cara Kerja  FAQ    │
-│                                   [Sign In] [Daftar] │
-├─────────────────────────────────────────────────────┤
-│ HERO                                                 │
-│ "Predict Today. Prevent Tomorrow."                   │
-│ Sub: Pahami risiko kesehatanmu dari gaya hidup —     │
-│ sebelum jadi masalah.                                │
-│ [Mulai Assessment Gratis]   [Lihat Cara Kerja]       │
-├─────────────────────────────────────────────────────┤
-│ PROBLEM SECTION                                      │
-│ "Informasi kesehatan terlalu umum & sulit dipahami"  │
-│ 3 pain point singkat (ref PRD §4.4)                  │
-├─────────────────────────────────────────────────────┤
-│ HOW IT WORKS — 5 Langkah                             │
-│ Predict → Explain → Simulate → Recommend → Educate   │
-│ (ref PRD §2.2 / §5.4)                                │
-├─────────────────────────────────────────────────────┤
-│ KILLER FEATURES (highlight 2 fitur utama)            │
-│ ┌───────────────────┐  ┌───────────────────┐        │
-│ │ Future Health      │  │ What-if Simulation │        │
-│ │ Simulation          │  │                    │        │
-│ │ "Lihat proyeksi     │  │ "Coba ubah tidur,  │        │
-│ │  30/90/180 hari"     │  │  aktivitas, berat  │        │
-│ │                      │  │  badan — lihat     │        │
-│ │                      │  │  dampaknya"        │        │
-│ └───────────────────┘  └───────────────────┘        │
-├─────────────────────────────────────────────────────┤
-│ TRUST / EVIDENCE STRIP                               │
-│ "Didukung sumber terpercaya:"                        │
-│ WHO · Kemenkes RI · PERKENI · PERKI · CDC             │
-├─────────────────────────────────────────────────────┤
-│ MEDICAL DISCLAIMER BANNER (persistent, tidak dismiss) │
-│ Teks resmi FR-005 (lihat §2.6)                        │
-├─────────────────────────────────────────────────────┤
-│ FAQ (opsional P2) — "Apakah ini diagnosis medis?"     │
-├─────────────────────────────────────────────────────┤
-│ FOOTER: About · Privacy · Disclaimer · Contact        │
-└─────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│ SECTION 1: STICKY GLASS NAVBAR                                 │
+│ [HELIORA Logo]       Fitur   Alur   Kemampuan   Bukti   FAQ     │
+│                                            [Masuk] [Mulai Asesmen]
+├─────────────────────────────────────────────────────────────────┤
+│ SECTION 2: HERO & INTERACTIVE PATTERN FLOW                      │
+│ Eyebrow: PREVENTIVE HEALTH INTELLIGENCE                         │
+│ Headline: Predict Today. Prevent Tomorrow.                      │
+│ Subheadline: Pahami pola risiko gaya hidup sebelum berkembang   │
+│ menjadi keluhan kronis melalui pendekatan AI terkalibrasi.      │
+│ CTAs: [Mulai Asesmen Gratis]   [Pelajari Metodologi →]          │
+│ Visual: Bilateral Pattern Flow Canvas + Layered Health Picture  │
+├─────────────────────────────────────────────────────────────────┤
+│ SECTION 3: MEMAHAMI POLA KESEHATAN SEBELUM TERLAMBAT            │
+│ 3 Kartu Bento Analisis:                                         │
+│ 1. Gaya Hidup & Faktor Risiko (Aktivitas, tidur, nutrisi)       │
+│ 2. Penurunan Risiko Bertahap (Estimasi berbasis lifestyle)      │
+│ 3. Pendekatan Multidisiplin (Pedoman klinis terverifikasi)      │
+├─────────────────────────────────────────────────────────────────┤
+│ SECTION 4: GAMBARAN UTUH PROFIL KESEHATAN KAMU                  │
+│ Isometric Visual Architecture (3 SVG Isometric Planes):         │
+│ • Bidang 1: Input Catatan Gaya Hidup (Lifestyle Record)         │
+│ • Bidang 2: AI & Machine Learning Risk Engine                   │
+│ • Bidang 3: Proyeksi Risiko & Rekomendasi Terarah               │
+├─────────────────────────────────────────────────────────────────┤
+│ SECTION 5: FITUR UTAMA UNTUK KEPUTUSAN KESEHATAN YANG JELAS     │
+│ 6 Kartu Kemampuan Inti (Editorial Bento):                       │
+│ 1. Profil Risiko Terintegrasi (Kardiometabolik komprehensif)    │
+│ 2. Faktor Penjelas Interaktif / XAI (Transparansi SHAP)         │
+│ 3. Simulasi Arah & Skenario / What-If (Eksplorasi aman)         │
+│ 4. Rekomendasi Terarah & Berbasis Bukti (Rule-based klinis)     │
+│ 5. Pusat Bukti Klinis / Evidence Center (Sitasi transparan)     │
+│ 6. Pemantauan Berkelanjutan (Evaluasi berkala)                  │
+├─────────────────────────────────────────────────────────────────┤
+│ SECTION 6: DASAR KLINIS & METODOLOGI TRANSPARAN                 │
+│ Eyebrow: DUKUNGAN KONSENSUS & PANDUAN RESMI                     │
+│ Logo/Teks Strip: WHO · Kemenkes RI · CDC · PERKENI · PERKI      │
+├─────────────────────────────────────────────────────────────────┤
+│ SECTION 7: PERTANYAAN UMUM (FAQ ACCORDION)                      │
+│ Accordion interaktif seputar batasan preventif, privasi data,   │
+│ dan validitas metodologi non-diagnosis.                         │
+├─────────────────────────────────────────────────────────────────┤
+│ SECTION 8: FINAL CTA BANNER & FOOTER                            │
+│ Headline: Mulai Langkah Preventif Kamu Hari Ini                 │
+│ CTA: [Mulai Asesmen Gratis]                                     │
+│ Footer: Navigasi Tautan, Hak Cipta, dan Legal Terms             │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-**Catatan desain:**
-- Satu CTA primer saja di hero ("Mulai Assessment Gratis") — CTA sekunder ("Lihat Cara Kerja") hanya scroll-anchor, bukan kompetisi perhatian.
-- Disclaimer harus **selalu terlihat sebelum user meninggalkan landing page**, sesuai batasan produk PRD §20.21 yang berlaku juga di "marketing statement" — cukup lewat **MEDICAL DISCLAIMER BANNER** di bawah (satu elemen persistent), tanpa perlu badge/chip tambahan di hero yang membuat hero terasa ramai.
-- Tidak ada elemen visual yang menyerupai hasil lab/diagnosis (hindari ikon stetoskop, salib medis, dsb.) — selaras §3.19 Medical Safety Boundary.
+**Catatan Desain & Batasan Mutlak:**
+- **Tanpa Pill Chips:** Sesuai §2.4, tidak ada chip kapsul lonjong mengambang di atas judul hero maupun di dalam kartu. Eyebrow disajikan dengan tipografi mono bersih (`text-xs font-mono font-bold tracking-widest text-brand-900/40 uppercase mb-3`).
+- **Tanpa Medical Disclaimer Mengambang di Publik:** Sesuai PRD FR-005, disclaimer wajib dihadirkan pada 4 titik autentikasi yang memproses data riil pengguna (Onboarding, Hasil Asesmen, Simulasi, Rekomendasi). Landing page berfokus pada edukasi preventif dan value proposition tanpa clutter banner disclaimer.
+- **Visual Non-Medis:** Selaras §3.19, dilarang menampilkan ikon alat medis klinis (stetoskop, jarum suntik, silang merah). Ilustrasi berpusat pada aliran data gaya hidup, visual isometrik mesin AI, dan kanvas partikel interaktif.
+
+---
 
 ### 5.2 Register (`/register`) — FR-001
 
 | Field | Validasi |
 |---|---|
-| Nama | required |
-| Email | required, unik |
-| Password | required, hashed di backend (BR-AUTH-002) |
-| Konfirmasi Password | harus sama dengan Password |
+| Nama Lengkap | required, minimal 2 karakter |
+| Email | required, format email valid, unik |
+| Password | required, minimal 8 karakter, hashed via bcrypt di backend |
+| Konfirmasi Password | required, harus identik dengan Password |
+| Checkbox Syarat & Ketentuan | required, dilengkapi interactive tooltip peringatan jika terlewat |
 
-- Setelah submit sukses → redirect ke `/login` (sesuai FR-001 output: "berhasil memiliki akun dan dapat login") atau auto-login langsung ke `/onboarding/consent` — **keputusan desain untuk didiskusikan tim** (PRD tidak menspesifikasikan mana yang dipakai).
-- Link "Sudah punya akun? Sign In" di bawah form.
+- **Integrasi Supabase Auth & Google OAuth:** Mendukung registrasi via email/password maupun one-click Google Sign-in ([FE-012](file:///C:/Users/Lenovo/Documents/GitHub/heliora/heliora/docs/TASK.md#L1719)).
+- **Layout:** Mengadopsi tata letak Centered Auth Container (`variant="centered"` di [auth-layout.tsx](file:///C:/Users/Lenovo/Documents/GitHub/heliora/heliora/apps/web/src/components/auth-layout.tsx)) yang fokus dan bersih.
+- **Password Strength:** Dilengkapi visual dynamic 4-bar indicator kompleksitas kata sandi.
+- **Syarat & Ketentuan:** Dilengkapi interactive tooltip peringatan amber (`TriangleAlert`) jika checkbox belum dicentang.
+- **Privacy Note:** Menampilkan jaminan privasi data di bawah tombol submit.
+- **Scrollbar:** Menggunakan utilitas `no-scrollbar` agar formulir autentikasi tampil bersih tanpa scrollbar vertikal.
+- Setelah registrasi sukses → diarahkan ke alur Onboarding Consent (`/onboarding/consent`).
+
+---
 
 ### 5.3 Login / Sign In (`/login`) — FR-002
 
-Layout **split-screen 2 section** — kolom kiri berisi form, kolom kanan panel visual brand:
+Halaman login HELIORA mengadopsi arsitektur **Centered Auth Container** (`variant="centered"` di [auth-layout.tsx](file:///C:/Users/Lenovo/Documents/GitHub/heliora/heliora/apps/web/src/components/auth-layout.tsx)) yang bersih, terfokus, dan terintegrasi langsung dengan Supabase OAuth:
 
 ```text
-┌───────────────────────┬───────────────────────────────┐
-│ ← Kembali ke Beranda    │                                 │
-│ [HELIORA logo]          │                                 │
-│                          │                                 │
-│ Masuk ke akun kamu       │     Panel visual — foto/ilustrasi │
-│ Silakan login untuk      │     nature/wellness (hijau,       │
-│ melanjutkan              │     organik), dimasking bentuk     │
-│                          │     rounded/blob — BUKAN foto      │
-│ ┌───────────────────────┐│    medis (stetoskop, dsb.)        │
-│ │ Email    [__________] ││                                 │
-│ │ Password [__________] ││    ┌─────────────────────┐     │
-│ └───────────────────────┘│    │ "Predict Today.       │     │
-│  card, border + shadow   │    │  Prevent Tomorrow."    │     │
-│  tipis (shadcn-style)     │    └─────────────────────┘     │
-│          Lupa password?  │        floating card — glass      │
-│ ☐ Ingat saya  *usulan     │        (§2.7, blur+translucent)   │
-│                          │                                 │
-│ [ Sign In ] [ Daftar ]   │                                 │
-│  (solid)     (outline)   │                        (●) ← toggle │
-│                          │                          light/dark │
-│ ⚠ Dengan masuk, kamu       │                                 │
-│ menyetujui HELIORA tidak  │                                 │
-│ menggantikan diagnosis    │                                 │
-│ medis.                    │                                 │
-└───────────────────────┴───────────────────────────────┘
-   Kolom kiri ~40–45% lebar        Kolom kanan ~55–60% lebar
+┌─────────────────────────────────────────────┐
+│                 [❤️ Emblem]                  │
+│              Masuk ke HELIORA               │
+│                                             │
+│  ┌───────────────────────────────────────┐  │
+│  │ [Email                              ] │  │
+│  │ [Kata Sandi                   (👁)] │  │
+│  └───────────────────────────────────────┘  │
+│                                             │
+│  [               Masuk                  ]   │
+│                                             │
+│  ────────────────── atau ──────────────────  │
+│                                             │
+│  [  G   Google                          ]   │
+│                                             │
+│         Lupa email atau kata sandi?         │
+│                 Buat akun                   │
+├─────────────────────────────────────────────┤
+│ © HELIORA Inc.   Ketentuan Layanan · Privasi│
+└─────────────────────────────────────────────┘
 ```
 
-- Kolom kanan **disembunyikan** di breakpoint mobile — form kolom kiri jadi full-width, sesuai prinsip mobile-first §9.
-- **"Kembali ke Beranda"** — tombol ghost/text kecil di pojok kiri atas, di atas logo, mengarah ke `/` (Landing Page). Styling sekunder (teks muted, ikon panah kiri), tidak boleh bersaing visual dengan tombol "Sign In".
-- **Field Email + Password dibungkus 1 card** — border tipis + shadow halus (acuan `Card` shadcn/ui §2.8: `rounded-xl`, `border`, `shadow-sm`), supaya form terpisah jelas dari background putih polos, bukan sekadar input mengambang. Heading & subtext tetap di luar card, di atasnya.
-- "Ingat saya" ditandai usulan seperti "Lupa password?" — FR-002 hanya menyebut Email + Password sebagai input, checkbox ini bukan requirement resmi PRD.
-- Tombol "Daftar" dijadikan tombol outline bersebelahan dengan "Sign In" (bukan sekadar link teks) — lebih discoverable, tanpa mengubah makna FR-002.
-- Floating card tagline & toggle light/dark di kolom kanan murni elemen brand/dekoratif, tidak mengandung data pengguna.
-- Setelah autentikasi sukses → redirect ke `/dashboard` (FR-002 output eksplisit: "diarahkan ke dashboard HELIORA").
-- Jika user belum pernah menyelesaikan Health Profile, `/dashboard` harus redirect otomatis ke `/onboarding/consent` (bukan menampilkan dashboard kosong) — flow ini tidak eksplisit di PRD, diusulkan agar user baru tidak "nyasar" di dashboard tanpa data.
-- Error autentikasi: pesan generik ("Email atau password salah") — jangan spesifik "email tidak ditemukan" (mencegah user enumeration, selaras BR-AUTH security-first).
+**Fitur & Komponen Kunci:**
+- **Branding Header:** Menampilkan logo emblem Heartbeat di dalam rounded-xl container (`bg-brand-900 text-white`) dan judul h1 tegas.
+- **Toggle Password:** Tombol ikon `IconEye`/`IconEyeOff` di sisi kanan input password untuk fleksibilitas pengecekan kata sandi.
+- **Google OAuth (One-Click):** Tombol resmi Google via Supabase Auth ([FE-012](file:///C:/Users/Lenovo/Documents/GitHub/heliora/heliora/docs/TASK.md#L1719)) diletakkan di bawah pemisah horizontal "atau".
+- **Floating Alert Tooltip:** Menampilkan pesan galat autentikasi via `FormAlertTooltip` yang dapat di-dismiss.
+- **Routing Cerdas Pasca-Login (Consent-Aware Routing):**
+  - Sistem memeriksa status consent pengguna via `apiClient.consent.getStatus()`.
+  - Jika consent sudah aktif (`has_active_consent: true`) → diarahkan ke `/dashboard`.
+  - Jika belum memberikan consent → diarahkan ke alur onboarding awal (`/onboarding/consent`).
+- **Footer Minimalis:** Footer permanen dengan tautan Ketentuan Layanan (`/terms`) dan Privasi Data (`/privacy`).
+- **Dual-Layout Architecture:** Komponen penampung [auth-layout.tsx](file:///C:/Users/Lenovo/Documents/GitHub/heliora/heliora/apps/web/src/components/auth-layout.tsx) mendukung mode utama `centered` (aktif digunakan) dan varian sekunder `split` (3-pilar bento), siap beradaptasi secara mulus.
+- **Keamanan Kredensial:** Pesan error bersifat aman dari segi keamanan (generik: *"Gagal masuk. Pastikan email dan kata sandi Anda benar."* untuk mencegah *user enumeration attack*).
 
 ### 5.4 Forgot Password (`/forgot-password`) — *usulan, tidak ada di PRD*
 
@@ -374,66 +401,89 @@ PRD tidak mendefinisikan reset password (hanya FR-001 Register, FR-002 Login, FR
 
 ### 6.1 Consent & Medical Disclaimer (`/onboarding/consent`) — FR-004, FR-005, BR-CONSENT-001/002
 
+Halaman persetujuan privasi dirancang terpusat (*centered container*) dengan kartu glassmorphic (`bg-white/80 backdrop-blur-xl border border-brand-900/10 rounded-3xl p-6 sm:p-8`) dan ambient glow halus di latar belakang:
+
 ```text
-┌─────────────────────────────────────────────┐
-│ Sebelum memulai...                            │
-│                                               │
-│ HELIORA akan menggunakan data lifestyle-mu    │
-│ untuk:                                        │
-│  • Estimasi risiko kesehatan                  │
-│  • Health & Lifestyle Score                   │
-│  • Simulasi (Future Health & What-if)         │
-│  • Rekomendasi preventif                      │
-│                                               │
-│ ⚠ Disclaimer Medis                            │
-│ [teks resmi FR-005, lihat §2.6]               │
-│                                               │
-│ ☐ Saya memahami dan menyetujui penggunaan     │
-│    data sesuai penjelasan di atas             │
-│                                               │
-│        [Lanjut ke Health Profile]  (disabled  │
-│         sampai checkbox dicentang)            │
-└─────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                       [H] HELIORA                           │
+│     Langkah 01 / 02 · Persetujuan Privasi & Etika Data      │
+│                 Sebelum Memulai Asesmen                     │
+│                                                             │
+│ ┌───────────────────────────┐ ┌───────────────────────────┐ │
+│ │ 🛡 Estimasi Risiko Presisi │ │ 📈 Health & Lifestyle Score│ │
+│ │    Kalkulasi probabilitas │ │    Skor komprehensif      │ │
+│ │    risiko kardiometabolik │ │    kualitas gaya hidup    │ │
+│ ├───────────────────────────┤ ├───────────────────────────┤ │
+│ │ ✨ Simulasi Masa Depan    │ │ 🩺 Rekomendasi Preventif  │ │
+│ │    Proyeksi dinamis       │ │    Panduan pencegahan     │ │
+│ │    dampak kebiasaan       │ │    tervalidasi klinis     │ │
+│ └───────────────────────────┘ └───────────────────────────┘ │
+│                                                             │
+│ ┌─────────────────────────────────────────────────────────┐ │
+│ │ ⚠ Disclaimer Medis (FR-005 Solid Banner)                │ │
+│ │ "HELIORA adalah alat bantu preventive health..."        │ │
+│ └─────────────────────────────────────────────────────────┘ │
+│                                                             │
+│ ┌─────────────────────────────────────────────────────────┐ │
+│ │ [✓] Saya memahami dan menyetujui pemrosesan data gaya   │ │
+│ │     hidup saya untuk tujuan estimasi risiko preventif   │ │
+│ └─────────────────────────────────────────────────────────┘ │
+│                                                             │
+│               [ Lanjut ke Profil Kesehatan → ]              │
+│               (aktif hanya setelah consent dicentang)       │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-- Tombol lanjut **disabled** sampai consent dicentang — implementasi langsung dari AC-CONSENT-01 ("Pengguna tidak dapat melanjutkan ke health assessment sebelum memberikan consent").
-- Consent yang diberikan harus tercatat (FR-039 Consent Recording) dan dapat dicabut kembali lewat `/account` (BR-CONSENT-003).
+- **Step Indicator:** Tipografi editorial murni `text-xs font-mono font-bold tracking-widest text-brand-900/50 uppercase` ("Langkah 01 / 02 · Persetujuan Privasi & Etika Data").
+- **4 Feature Grid:** Menampilkan 4 kartu benefit analisis data (`ShieldCheck`, `Activity`, `Sparkles`, `HeartPulse`) dengan background `bg-brand-50/40`.
+- **Disclaimer Banner Solid:** Menggunakan komponen `<DisclaimerBanner />` dengan teks statutori persis sesuai FR-005 (bukan material kaca, bukan pill chips).
+- **Interactive Checkbox Box:** Kontainer seleksi interaktif dengan dukungan aksesibilitas penuh (`role="checkbox"`, `aria-checked`, keyboard event Space/Enter).
+- **Pencatatan Consent:** Saat tombol ditekan, memanggil `apiClient.consent.record({ agreed: true, consent_version: "1.0" })` sebelum mengarahkan ke `/onboarding/health-profile`. Jika sesi kedaluwarsa, otomatis dialihkan ke `/login?redirect=/onboarding/consent`.
+
+---
 
 ### 6.2 Health Profile Input (`/onboarding/health-profile`) — FR-006/007/008
 
-Form **multi-step** (bukan 1 form panjang), sesuai UX Principle PRD §8.5 ("menghindari form yang terlalu panjang"):
+Formulir bertahap (*multi-step wizard* 3 tahap) dengan animasi transisi halus (`motion.div`), progress bar linier, dan visual input modern:
 
 ```text
-Step 1/3 — Data Dasar          Step 2/3 — Lifestyle         Step 3/3 — Riwayat (opsional)
-Age, Gender                    Physical Activity            Family History
-Height, Weight (→ live BMI)    Sleep Duration                Stress Level*
-                                Smoking Status                Waist Circumference*
-                                                              Blood Pressure*
-                                                              Blood Sugar*, Cholesterol*
-                                                              (* skip tersedia — FR ini optional,
-                                                               tidak boleh jadi dependency utama MVP)
+┌─────────────────────────────────────────────────────────────┐
+│ Langkah 02 / 02 · Profil Kesehatan & Gaya Hidup             │
+│ Progress: [██████████████░░░░░░░░░░] 66% (Tahap 2 dari 3)   │
+├─────────────────────────────────────────────────────────────┤
+│ TAHAP 1: DATA DASAR BIOMETRIK                               │
+│ • Usia (tahun)                                              │
+│ • Jenis Kelamin: [♂ Pria]  [♀ Wanita] (Toggle Buttons)      │
+│ • Tinggi Badan (cm)                                         │
+│ • Berat Badan (kg)                                          │
+│ ──► Live BMI Indicator: Nilai numerik + Label Kategori      │
+│     (Berat Kurang / Normal / Kelebihan Berat / Obesitas)    │
+├─────────────────────────────────────────────────────────────┤
+│ TAHAP 2: POLA GAYA HIDUP                                    │
+│ • Aktivitas Fisik: [Sedentari] [Ringan] [Sedang] [Aktif]    │
+│ • Durasi Tidur Harian: Slider interaktif 4–12 jam (Moon)    │
+│ • Status Merokok: [Tidak Pernah] [Mantan] [Perokok Aktif]   │
+├─────────────────────────────────────────────────────────────┤
+│ TAHAP 3: RIWAYAT MEDIS & GAYA HIDUP LANJUTAN                │
+│ • Riwayat Penyakit Keluarga (Checkboxes):                   │
+│   [Tidak Ada] [Diabetes] [Hipertensi] [Penyakit Jantung]    │
+│ • Detail Riwayat Keluarga (Textarea bebas)                  │
+│ • Tingkat Beban Stres Harian: Slider interaktif 1–10 (Brain)│
+├─────────────────────────────────────────────────────────────┤
+│ Navigasi Form:                                              │
+│ [← Kembali]              [Simpan & Jalankan Asesmen →]      │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-- Progress indicator step 1/2/3 di atas form.
-- BMI dihitung **live** saat height/weight diisi, ditampilkan sebagai info pendukung — bukan sebagai skor tunggal (FR-008: "BMI tidak boleh ditampilkan sebagai diagnosis penyakit").
-- Validasi inline per field sesuai FR-007 (contoh: age harus dalam rentang valid, height/weight > 0). Pesan error muncul di bawah field saat blur, bukan hanya saat submit.
-- Step 3 (optional data) punya tombol "Lewati" yang jelas terlihat, tidak disamarkan — supaya user tidak merasa wajib mengisi data sensitif tambahan (selaras BR-PRIVACY-001 Data Minimization).
+- **Live Calculated BMI Indicator:** BMI dihitung seketika saat tinggi dan berat badan diisi (`w / (h * h)`). Menampilkan angka tabular, kategori (Normal / Sehat, Kelebihan Berat, Obesitas), dan warna aksen semantik yang proporsional. Sesuai FR-008, BMI diposisikan sebagai indikator pendukung, bukan diagnosis medis.
+- **Prefetch & Auto-Population:** Jika pengguna telah memiliki data profil tersimpan (`apiClient.healthProfile.get()`), formulir akan terisi otomatis (*pre-populated*) sehingga pengguna dapat langsung memperbarui data tanpa mengetik ulang dari awal.
+- **Eksekusi Asesmen:** Tombol submit akhir memicu penyimpanan profil (`apiClient.healthProfile.create()`) sekaligus kalkulasi model AI (`apiClient.assessments.create()`). Setelah kalkulasi selesai, sistem langsung melakukan transisi mulus ke `/dashboard`.
+
+---
 
 ### 6.3 Assessment Processing (`/assessment/processing`)
 
-Halaman transisi singkat saat pipeline berjalan (§8.6: Data Validation → Feature Engineering → Risk Engine → Score).
-
-```text
-┌───────────────────────────┐
-│   Menganalisis profil-mu   │
-│         [spinner]           │
-│  "Menghitung estimasi       │
-│   risiko berbasis lifestyle │
-│   kamu..."                  │
-└───────────────────────────┘
-```
-
-- Jika AI service gagal (FR-042), tampilkan pesan fallback yang jelas + opsi retry — lihat §10 Error States. Tidak boleh hang tanpa feedback.
+Dalam arsitektur produksi modern, kalkulasi model risiko gaya hidup dijalankan secara sinkron dan berkecepatan tinggi pada tombol submit profil kesehatan. Rute `/assessment/processing` dipertahankan sebagai **alias transisi / redirect handler instan** yang langsung meneruskan pengguna ke `/dashboard` begitu sesi asesmen aktif terverifikasi. Jika terjadi kegagalan jaringan atau model AI, dialog error di dalam form profil menyediakan opsi penanganan galat transparan dan tombol coba lagi (*retry*).
 
 ---
 
@@ -441,159 +491,258 @@ Halaman transisi singkat saat pipeline berjalan (§8.6: Data Validation → Feat
 
 ### 7.1 Personalized Health Dashboard (`/dashboard`) — FR-033, FR-034
 
-Ini adalah pengembangan langsung dari Conceptual Layout PRD §8.7, dipecah jadi grid card agar lebih scannable:
+Halaman ringkasan klinis utama HELIORA mengadopsi arsitektur **Sidebar + Workspace** yang terstruktur, tenang, dan berbasis data editorial murni:
 
 ```text
-┌───────────────────────────────────────────────────────┐
-│  Halo, {Nama}         Assessment terakhir: {tanggal}    │
-├───────────────────────────────────────────────────────┤
-│ ┌───────────────┐ ┌───────────────┐                    │
-│ │ Health Score   │ │ Lifestyle Score│                    │
-│ │      78        │ │       72       │                    │
-│ └───────────────┘ └───────────────┘                    │
-├───────────────────────────────────────────────────────┤
-│ Estimated Health Risk                                   │
-│ ┌─────────────────────────────────────────────────┐    │
-│ │ Diabetes         🟡 Moderate        [Detail →]    │    │
-│ │ Hypertension     🟢 Lower           [Detail →]    │    │
-│ │ Cardiovascular   🟡 Moderate        [Detail →]    │    │
-│ └─────────────────────────────────────────────────┘    │
-├───────────────────────────────────────────────────────┤
-│ Top Contributing Factors        Recommended Actions      │
-│ • Aktivitas fisik rendah        1. Tingkatkan aktivitas  │
-│ • Durasi tidur kurang           2. Perbaiki durasi tidur │
-│ • BMI di atas target            [Lihat semua →]          │
-├───────────────────────────────────────────────────────┤
-│ [🔮 Future Health Simulation]  [🎛 What-if Simulation]   │
-├───────────────────────────────────────────────────────┤
-│ ⚠ HELIORA bukan alat diagnosis medis. [selengkapnya]     │
-└───────────────────────────────────────────────────────┘
+┌──────────────┬─────────────────────────────────────────────────────────────────┐
+│ SIDEBAR      │ TOPBAR: [☰]  Dashboard / Ringkasan Klinis                       │
+│ [🛡] HELIORA │                                                                 │
+│              │ Halo, {Nama}                      Asesmen terakhir: {tanggal}   │
+│ MENU UTAMA   ├─────────────────────────────────────────────────────────────────┤
+│ • Ringkasan  │ ROW 1: KARTU SKOR GAYA HIDUP & KESEHATAN                        │
+│ • Analisis ▼ │ ┌─────────────────────────────┐ ┌─────────────────────────────┐ │
+│   - Diabetes │ │ Health Score                │ │ Lifestyle Score             │ │
+│   - Hiperten │ │ 78                          │ │ 72                          │ │
+│   - Kardio   │ │ Kondisi Baik                │ │ Cukup Sehat                 │ │
+│              │ └─────────────────────────────┘ └─────────────────────────────┘ │
+│ INTERVENSI   ├─────────────────────────────────────────────────────────────────┤
+│ • Rencana    │ ROW 2: ESTIMASI RISIKO KESEHATAN (KARDIOMETABOLIK)              │
+│ • Bukti Medis│ ┌──────────────────┐ ┌──────────────────┐ ┌──────────────────┐  │
+│              │ │ Diabetes Melitus │ │ Hipertensi       │ │ Kardiovaskular   │  │
+│ SIMULASI     │ │ 🟡 MODERATE      │ │ 🟢 LOWER         │ │ 🟡 MODERATE      │  │
+│ • What-If    │ │ 42% estimasi     │ │ 22% estimasi     │ │ 38% estimasi     │  │
+│ • Horison    │ │ [██████░░░░░░░░] │ │ [███░░░░░░░░░░░] │ │ [█████░░░░░░░░░] │  │
+│              │ │ Tren: Stabil     │ │ Tren: Menurun    │ │ Tren: Stabil     │  │
+│ PROFIL/AKUN  │ │ Lihat rincian →  │ │ Lihat rincian →  │ │ Lihat rincian →  │  │
+│ • Profil     │ └──────────────────┘ └──────────────────┘ └──────────────────┘  │
+│ • Pengaturan ├─────────────────────────────────────────────────────────────────┤
+│              │ ROW 3: INTERACTIVE SIMULATION HUB                               │
+│ [HL] User    │ ┌─────────────────────────────────────────────────────────────┐ │
+│ [🚪] Keluar  │ │ Eksplorasi Skenario & Proyeksi Horison Masa Depan           │ │
+│              │ │ [🎛 What-If Simulator]       [📈 Proyeksi Horison]          │ │
+│              │ └─────────────────────────────────────────────────────────────┘ │
+│              ├─────────────────────────────────────────────────────────────────┤
+│              │ ROW 4: XAI CONTRIBUTING FACTORS & TOP RECOMMENDATIONS           │
+│              │ ┌─────────────────────────────┐ ┌─────────────────────────────┐ │
+│              │ │ Faktor Penjelas Utama (XAI) │ │ Rencana Tindakan Teratas    │ │
+│              │ │ • Durasi Tidur Kurang (35%) │ │ 1. Latihan Fisik 150 mnt/mgg│ │
+│              │ │ • Aktivitas Rendah    (28%) │ │    Target: Konsensus WHO    │ │
+│              │ │ • IMT di Atas Target  (19%) │ │    [Lihat Bukti Klinis →]   │ │
+│              │ │ (Klik faktor untuk scroll)  │ │ 2. Stabilisasi Jam Tidur    │ │
+│              │ └─────────────────────────────┘ └─────────────────────────────┘ │
+│              ├─────────────────────────────────────────────────────────────────┤
+│              │ FOOTER: ⚠ Disclaimer Medis Statutori (FR-005 Solid Component)   │
+└──────────────┴─────────────────────────────────────────────────────────────────┘
 ```
 
-- Dashboard **tidak boleh** menampilkan raw model output (selaras §6.15: "mengutamakan readability, tidak terlalu banyak informasi teknis").
-- Card risiko per penyakit adalah entry point ke Risk Detail (`/risk/:diseaseId`).
-- Dua tombol simulasi ditempatkan menonjol karena keduanya **killer feature** produk (PRD §2.9) — bukan disembunyikan di menu.
+- **Sidebar Desktop & Mobile Drawer:** Navigasi hirarkis dengan 4 grup terstruktur (Menu Utama, Intervensi & Bukti, Simulasi, Profil & Akun) dan kartu user initials di bagian bawah.
+- **Dua Kartu Skor Tabular:** Health Score dan Lifestyle Score ditampilkan dengan angka besar berformat tabular dan interpretasi naratif di bawahnya.
+- **3 Kartu Risiko Kardiometabolik:** Diabetes Melitus, Hipertensi, dan Kardiovaskular dilengkapi persentase skor estimasi, `<RiskBadge />` (LOWER / MODERATE / HIGHER dengan ikon outline semantik Lucide), bar progres horizontal berwarna proporsional, tren, dan link direct ke `/dashboard/risk/[disease]`.
+- **Interaksi XAI ke Rekomendasi:** Mengklik faktor penjelas pada daftar XAI otomatis melakukan *smooth scroll* dan efek *highlight pulse* ke kartu rekomendasi terkait di halaman.
+- **Komponen Disclaimer Statutori:** Menggunakan `<DisclaimerBanner />` solid di bagian bawah halaman sesuai FR-005.
 
-### 7.2 Risk Detail (`/risk/:diseaseId`) — §6.16, FR-014/015/016
+---
 
-Bisa berupa halaman penuh atau modal (PRD memberi kebebasan: "Halaman atau modal detail").
+### 7.2 Risk Detail (`/dashboard/risk/:disease`) — §6.16, FR-014/015/016
+
+Halaman detail risiko penyakit kardiometabolik dengan routing dinamis (`/dashboard/risk/diabetes`, `/dashboard/risk/hypertension`, `/dashboard/risk/cardiovascular`):
 
 ```text
-┌─────────────────────────────────────────┐
-│ ← Kembali ke Dashboard                    │
-│                                           │
-│ Diabetes Risk — 🟡 Moderate               │
-│                                           │
-│ Mengapa hasil ini muncul?                 │
-│ ┌───────────────────────────────────┐    │
-│ │ Aktivitas fisik rendah    ▓▓▓▓▓░░░ │    │  ← feature contribution bar (FR-015)
-│ │ Durasi tidur kurang        ▓▓▓▓░░░ │    │
-│ │ BMI di atas target         ▓▓▓░░░░ │    │
-│ └───────────────────────────────────┘    │
-│                                           │
-│ [Lihat rekomendasi terkait]               │
-│ [Lihat evidence]                          │
-│                                           │
-│ ⚠ Disclaimer medis (komponen reusable)    │
-└─────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│ [← Dashboard] / Detail Risiko                               │
+│                                                             │
+│ [METABOLIK & ENDOKRIN] · PERKENI (2021) & WHO Guidelines    │
+│ Diabetes Melitus Tipe 2                                     │
+│ "Estimasi tingkat risiko gangguan metabolisme glukosa..."    │
+│                                                             │
+│ ┌─────────────────────────────────────────────────────────┐ │
+│ │ Skor Estimasi Risiko: 42%             🟡 MODERATE RISK  │ │
+│ │ "Beberapa kebiasaan Anda masih bisa diperbaiki..."      │ │
+│ └─────────────────────────────────────────────────────────┘ │
+│                                                             │
+│ Faktor Biometrik & Gaya Hidup yang Memengaruhi (XAI SHAP):  │
+│ ┌─────────────────────────────────────────────────────────┐ │
+│ │ • Indeks Massa Tubuh (35%)                    [Menaikkan]│ │
+│ │   Akumulasi adiposa memicu resistensi reseptor perifer. │ │
+│ │ • Aktivitas Fisik Rendah (28%)                [Menaikkan]│ │
+│ │   Kurangnya kontraksi menurunkan translokasi GLUT-4.    │ │
+│ │ • Durasi Tidur Kurang (18%)                   [Menaikkan]│ │
+│ │   Memicu peningkatan kortisol diurnal nokturnal.        │ │
+│ │ • Kebiasaan Bebas Rokok (19%)                 [Menurunkan]│ │
+│ │   Faktor protektif meredam stres oksidatif vaskular.    │ │
+│ └─────────────────────────────────────────────────────────┘ │
+│                                                             │
+│ Rencana Tindakan Khusus Penyakit:                           │
+│ ┌─────────────────────────────────────────────────────────┐ │
+│ │ 1. Aktivitas Aerobik 150 Menit/Minggu (Panduan WHO)     │ │
+│ │ 2. Stabilisasi Jam Tidur 7–8 Jam (Regulasi Sirkadian)   │ │
+│ │ 3. Manajemen Porsi Karbohidrat Olahan (Konsensus PERKENI│ │
+│ └─────────────────────────────────────────────────────────┘ │
+│                                                             │
+│ Navigasi Lanjutan:                                          │
+│ [🎛 Uji di What-If Simulator]    [📖 Buka Dasar Bukti Medis] │
+│                                                             │
+│ ⚠ Disclaimer Medis Statutori (FR-005 Solid Component)       │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-- Visualisasi kontribusi faktor menggunakan **bar chart horizontal sederhana** dengan label bahasa natural, bukan grafik SHAP mentah (PRD §13.6.2: SHAP jadi *metode di balik layar*, bukan tampilan literal ke user awam).
+- **Metadata Klinis:** Menampilkan kategori klinis resmi, sitasi konsensus acuan (PERKENI, PERKI, WHO, AHA, ESC), dan definisi medis komprehensif.
+- **Visualisasi Kontribusi Faktor (XAI):** Menguraikan bobot persentase relatif faktor gaya hidup beserta tanda dampak (`increase` / `decrease`) dan penjelasan mekanisme fisiologis bahasa awam.
+- **Rencana Tindakan Khusus:** Menyajikan intervensi preventif spesifik untuk penyakit tersebut beserta target panduan resmi.
 
-### 7.3 Future Health Simulation (`/simulation/future`) — §8.10, FR-017/018/019
+### 7.3 Future Health Simulation (`/dashboard/simulation/future`) — §8.10, FR-017/018/019
+
+Halaman proyeksi masa depan multi-horison (dengan alias tingkat atas `/simulation/future`):
 
 ```text
-┌─────────────────────────────────────────────┐
-│ Future Health Simulation                      │
-│ "Proyeksi berdasarkan kebiasaan kamu saat ini"│
-│                                               │
-│ Lifestyle Score saat ini: 68                  │
-│                                               │
-│   30 hari      90 hari      180 hari          │
-│     70            73            76            │
-│   [●───────●───────●──────────────────]       │  ← timeline horizon selector
-│                                               │
-│ ℹ Ini adalah proyeksi berbasis model,          │
-│   bukan prediksi medis yang pasti.            │
-│                                               │
-│ [Coba ubah gaya hidup → What-if Simulation]   │
-└─────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│ [← Dashboard] / Simulasi Masa Depan                         │
+│                                                             │
+│ Proyeksi Tren Risiko Berdasarkan Pola Gaya Hidup Saat Ini   │
+│ Horizon Waktu:                                              │
+│ [ 30 Hari (Awal) ]   [ 90 Hari (Adaptif) ]   [ 180 Hari ]   │
+│                                                             │
+│ ┌───────────────────────────┐ ┌───────────────────────────┐ │
+│ │ Proyeksi Health Score     │ │ Proyeksi Lifestyle Score  │ │
+│ │ 78 ──► 82 (+4 poin)       │ │ 72 ──► 76 (+4 poin)       │ │
+│ └───────────────────────────┘ └───────────────────────────┘ │
+│                                                             │
+│ Proyeksi Risiko Kardiometabolik:                            │
+│ ┌─────────────────────────────────────────────────────────┐ │
+│ │ • Diabetes:       42% ──► 36% (↓ 6% potensi penurunan)  │ │
+│ │ • Hipertensi:     22% ──► 20% (↓ 2% potensi penurunan)  │ │
+│ │ • Kardiovaskular: 38% ──► 33% (↓ 5% potensi penurunan)  │ │
+│ └─────────────────────────────────────────────────────────┘ │
+│                                                             │
+│ [ Ingin eksplorasi perubahan kebiasaan? Buka What-If → ]    │
+│                                                             │
+│ ⚠ Disclaimer Medis Statutori (FR-005 Solid Component)       │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-- Horizon 30/90/180 hari sesuai §8.10 — ditampilkan sebagai **satu garis proyeksi**, bukan grafik kompleks, agar tetap mudah dipahami pengguna non-teknis.
-- CTA di bawah mengarahkan ke What-if Simulation — dua fitur ini secara sengaja dihubungkan sebagai satu alur eksplorasi (selaras Demo Scenario PRD §20.19 Step 4→5).
+- **Pilihan 3 Horison Waktu:** 30 Hari (Adaptasi Awal), 90 Hari (Respons Adaptif), dan 180 Hari (Stabilisasi Preventif).
+- **Proyeksi Dinamis:** Menghitung estimasi pergeseran skor dan persentase risiko kardiometabolik bila kebiasaan dipertahankan atau diperbaiki secara konsisten.
+- **Bridge ke What-If:** Tombol transisi langsung ke simulator What-If untuk menguji modifikasi parameter harian.
 
-### 7.4 What-if Simulation (`/simulation/what-if`) — §8.11, FR-020/021/022/023
+### 7.4 What-if Simulation (`/dashboard/simulation/what-if`) — §8.11, FR-020/021/022/023
+
+Simulator gaya hidup interaktif berkecepatan tinggi (dengan alias tingkat atas `/simulation/what-if`):
 
 ```text
-┌─────────────────────────────────────────────────┐
-│ What-if Simulation                                │
-│                                                   │
-│ Sleep Duration      [────●──────] 5.5 → 7.5 jam   │
-│ Physical Activity    [──●────────] 60 → 150 min/mgg│
-│ Weight                [────●─────] 82 → 78 kg      │
-│                                                   │
-│ ┌─────────────────┐   ┌─────────────────┐         │
-│ │ Current           │   │ Simulated         │         │
-│ │ 🟡 Moderate        │ → │ 🟢 Lower           │         │
-│ └─────────────────┘   └─────────────────┘         │
-│                                                   │
-│         Perubahan: ↓ 12%                          │
-│  (hasil simulasi model, bukan jaminan medis)      │
-│                                                   │
-│ [Reset ke Current]      [Simpan skenario ini]     │
-└─────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│ [← Dashboard] / Simulator What-If                           │
+│                                                             │
+│ PARAMETER EKSPLORASI GAYA HIDUP:                            │
+│ ┌─────────────────────────────────────────────────────────┐ │
+│ │ Durasi Tidur:       [──────●──────] 7.5 jam             │ │
+│ │ Aktivitas Fisik:    [────────●────] 180 menit/minggu    │ │
+│ │ Berat Badan:        [────●────────] 68.0 kg (BMI 22.2)  │ │
+│ │ Status Merokok:     [ Tidak Pernah ] [ Mantan ] [Aktif] │ │
+│ └─────────────────────────────────────────────────────────┘ │
+│                                                             │
+│ HASIL ESTIMASI: BASELINE VS SIMULASI                        │
+│ ┌──────────────────┐ ┌──────────────────┐ ┌───────────────┐ │
+│ │ Diabetes Melitus │ │ Hipertensi       │ │ Kardiovaskular│ │
+│ │ 42% ──► 32%      │ │ 22% ──► 18%      │ │ 38% ──► 30%   │ │
+│ │ Perubahan: ↓ 10% │ │ Perubahan: ↓ 4%  │ │ Perubahan:↓ 8%│ │
+│ └──────────────────┘ └──────────────────┘ └───────────────┘ │
+│                                                             │
+│ Kontrol Simulator:                                          │
+│ [↺ Reset ke Nilai Dasar]     [📖 Buka Bukti Medis Terkait]  │
+│                                                             │
+│ ⚠ Disclaimer Medis Statutori (FR-005 Solid Component)       │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-- 3 slider sesuai parameter prioritas MVP (sleep, physical activity, weight — §8.11).
-- **Real-time recalculation**: setiap slider digerakkan → panel "Simulated" update langsung (FR-021), tanpa perlu klik submit. Target performa mengacu NFR §13.2.2.
-- Kombinasi **slider + nilai numerik** ditampilkan berdampingan (bukan slider polos) agar user tetap tahu angka pasti yang sedang dicoba — pola umum untuk slider eksploratif (lihat referensi §15).
-- Tombol "Reset ke Current" wajib ada dan jelas — menegaskan sifat *exploratory, reversible* dari simulasi (BR-SIM-007/008: no permanent mutation, simulation reset).
-- Panel Current vs Simulated **berdampingan**, bukan bergantian tab, supaya perbandingan langsung terlihat tanpa toggle.
+- **4 Kontrol Parameter:**
+  1. Durasi Tidur (Slider 4.0 – 12.0 jam, step 0.5).
+  2. Aktivitas Fisik (Slider 0 – 360 menit/minggu, step 15).
+  3. Berat Badan (Slider 40.0 – 150.0 kg, step 0.5) dengan perhitungan live simulated BMI.
+  4. Status Merokok (Radio toggle buttons: Tidak Pernah, Mantan Perokok, Perokok Aktif).
+- **Komparasi Real-Time Berdampingan:** Panel perbandingan nilai dasar (*baseline*) vs nilai simulasi (*simulated*) untuk 3 penyakit dengan kalkulasi selisih delta persentase.
+- **Reversibilitas Penuh (BR-SIM-007/008):** Dilengkapi tombol "Reset ke Nilai Dasar" (`RotateCcw`). Seluruh perhitungan bersifat efemeral di memori aplikasi dengan jaminan nol mutasi ke database pengguna.
 
-### 7.5 Recommendation (`/recommendations`) — §8.12, FR-024/025/026
+### 7.5 Clinical Recommendations (`/dashboard/recommendations`) — §8.12, FR-024/025/026
+
+Halaman rencana tindakan preventif klinis berorientasi domain:
 
 ```text
-┌─────────────────────────────────────────┐
-│ Rekomendasi untuk Kamu                    │
-│                                           │
-│ 🔴 Prioritas Tinggi                       │
-│  Tingkatkan aktivitas fisik               │
-│  → Target: 150 menit/minggu               │
-│  [Lihat evidence]                         │
-│                                           │
-│ 🟡 Prioritas Sedang                       │
-│  Perbaiki durasi tidur ke 7–9 jam         │
-│  [Lihat evidence]                         │
-│                                           │
-│ ⚪ Prioritas Rendah                        │
-│  Pertahankan kebiasaan tidak merokok       │
-└─────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│ [← Dashboard] / Rencana Rekomendasi                         │
+│                                                             │
+│ Filter Kategori:                                            │
+│ [ Semua ] [ Aktivitas ] [ Pola Tidur ] [ Nutrisi ] [ Stres ]│
+│                                                             │
+│ ┌─────────────────────────────────────────────────────────┐ │
+│ │ PRIORITAS UTAMA (Border Kiri Merah)     [AKTIVITAS FISIK]│ │
+│ │ Tingkatkan Frekuensi Aktivitas Fisik Sedang              │ │
+│ │ Target Klinis: Minimal 150 menit/minggu (jalan cepat)    │ │
+│ │ Rasional: Memfasilitasi translokasi GLUT-4 independen    │ │
+│ │ insulin dan menjaga kelenturan arteri elastis.           │ │
+│ │ ──► [Lihat Dasar Bukti Klinis (WHO 2020) →]              │ │
+│ ├─────────────────────────────────────────────────────────┤ │
+│ │ PRIORITAS SEDANG (Border Kiri Amber)        [POLA TIDUR] │ │
+│ │ Stabilisasi Jam Tidur & Irama Sirkadian                  │ │
+│ │ Target Klinis: 7–8 jam tidur teratur setiap malam        │ │
+│ │ Rasional: Mendukung nocturnal dipping alami tensi darah. │ │
+│ │ ──► [Lihat Dasar Bukti Klinis (CDC / Kemenkes) →]        │ │
+│ ├─────────────────────────────────────────────────────────┤ │
+│ │ FAKTOR PROTEKTIF (Border Kiri Hijau)     [BEBAS ROKOK]   │ │
+│ │ Pertahankan Status Bebas Rokok                           │ │
+│ │ Target Klinis: Nol paparan nikotin & tar lingkungan      │ │
+│ │ ──► [Lihat Dasar Bukti Klinis (ESC 2021) →]              │ │
+│ └─────────────────────────────────────────────────────────┘ │
+│                                                             │
+│ ⚠ Disclaimer Medis Statutori (FR-005 Solid Component)       │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-- Urutan berdasarkan prioritas (BR-REC-002), bukan urutan kronologis.
-- Setiap item wajib punya tautan evidence bila didukung evidence (FR-028) — tidak semua rekomendasi wajib evidence, tapi yang tampil harus jujur soal ada/tidaknya dasar evidence (BR-EVIDENCE-005 Transparency).
+- **Filter Kategori Domain:** Tab filter horizontal untuk memilah rekomendasi berdasarkan ranah gaya hidup (Aktivitas, Tidur, Nutrisi, Stres).
+- **Hierarki Border Berwarna Semantik:**
+  - Prioritas Utama: `border-l-4 border-l-red-600/80`
+  - Prioritas Sedang: `border-l-4 border-l-amber-600/80`
+  - Prioritas Terpelihara: `border-l-4 border-l-brand-900/30`
+  - Faktor Protektif: `border-l-4 border-l-emerald-600/80`
+- **Target & Rasional Klinis:** Setiap kartu menyajikan target numerik konkret, mekanisme biologis, dan tautan langsung (*deep link*) ke Evidence Center (`/dashboard/evidence?ref=...`).
 
-### 7.6 Evidence Center (`/evidence`, `/evidence/:id`) — §8.13, FR-027/028/029
+---
+
+### 7.6 Evidence Center (`/dashboard/evidence`) — §8.13, FR-027/028/029
+
+Repositori pedoman konsensus resmi terakreditasi (dengan alias tingkat atas `/evidence`):
 
 ```text
-List (/evidence)                       Detail (/evidence/:id)
-┌─────────────────────────┐            ┌─────────────────────────┐
-│ Evidence Center            │            │ ← Kembali                │
-│                             │            │                          │
-│ 🔍 [cari topik...]          │            │ WHO Physical Activity     │
-│                             │            │ Guidelines                │
-│ • WHO Physical Activity     │   klik →   │                          │
-│   Guidelines    [Strong]    │            │ Organisasi: WHO           │
-│ • Sleep & Metabolic Health  │            │ Tahun: 2020                │
-│   [Moderate]                │            │ Ringkasan: ...             │
-│ • Smoking Cessation Support │            │ Bagian relevan: ...        │
-│   [Strong]                  │            │                          │
-└─────────────────────────┘            └─────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│ [← Dashboard] / Evidence Center                             │
+│                                                             │
+│ Pusat Bukti Medis Terakreditasi                             │
+│ 🔍 [ Cari pedoman, kata kunci, atau organisasi...         ] │
+│                                                             │
+│ Kategori: [Semua] [Aktivitas] [Nutrisi] [Tidur] [Kardio]    │
+│                                                             │
+│ ┌─────────────────────────────────────────────────────────┐ │
+│ │ [AKTIVITAS FISIK] • WHO (2020)   🛡 TINGKAT BUKTI: LEVEL A│ │
+│ │ WHO Guidelines on Physical Activity & Sedentary Behavior │ │
+│ │ Bagian Terkait: Chapter 3: Recommendations for Adults    │ │
+│ │ ┌─────────────────────────────────────────────────────┐ │ │
+│ │ │ Ringkasan Temuan Klinis:                            │ │ │
+│ │ │ Aktivitas aerobik sedang 150–300 mnt/mgg menurunkan │ │ │
+│ │ │ mortalitas kardiometabolik 20–30%...                │ │ │
+│ │ └─────────────────────────────────────────────────────┘ │ │
+│ │ Sitasi: Bull FC, et al. Br J Sports Med 2020;54:1451.   │ │
+│ │ ──► [Buka Sumber Resmi (who.int) ↗]                      │ │
+│ └─────────────────────────────────────────────────────────┘ │
+│                                                             │
+│ ⚠ Disclaimer Medis Statutori (FR-005 Solid Component)       │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-- Badge kekuatan evidence (Strong/Moderate) ditampilkan di list agar user bisa menilai bobot tanpa perlu buka detail.
-- Detail menampilkan metadata lengkap sesuai FR-029: sumber, judul, organisasi, tahun, bagian relevan, ringkasan.
+- **Pencarian Real-Time & Filter:** Kotak input pencarian reaktif menyaring judul dokumen, institusi, sitasi, maupun isi ringkasan secara instan.
+- **Tingkat Bukti Klinis:** Setiap kartu menampilkan badge terverifikasi dengan tingkat bukti resmi: `Level A (Kuat)`, `Level B (Sedang)`, atau `Level C (Konsensus Pakar)`.
+- **Integrasi Deep-Linking:** Mendukung parameter `?ref=...` dari halaman rekomendasi atau `?disease=...` dari halaman risiko untuk otomatis menyorot (*highlight pulse*) dan menggulir (*scroll into view*) artikel bukti yang bersangkutan.
+- **Tautan Eksternal Resmi:** Tombol outbound menuju naskah publikasi resmi (WHO, PERKENI, CDC, AHA, ESC).
+
+---
 
 ### 7.7 LLM-assisted Explanation — §8.14, FR-030/031/032
 
@@ -750,23 +899,23 @@ PRD menyebut beberapa komponen yang **butuh dikelola manusia** meski tidak ekspl
 
 ---
 
-## 11. Component Library (Referensi Awal)
+## 11. Component Library (Referensi Implementasi Riil)
 
-Struktur dasar mengacu `Card` shadcn/ui (§2.8): `CardHeader` → `CardContent` → `CardFooter`. Kolom **Material** menandai apakah komponen boleh pakai varian glass (§2.7) atau wajib solid.
+Struktur komponen aplikasi mengadopsi standar arsitektur [shadcn/ui](https://ui.shadcn.com/) (`Card`, `Button`, `Slider`, `Progress`, `Tooltip`) yang diperkaya dengan token editorial HELIORA, larangan ketat pill chips, dan prinsip keterbacaan data kesehatan:
 
-| Komponen | Dipakai di | Material | Catatan |
+| Komponen | Lokasi / Penggunaan | Material | Catatan & Perilaku Kunci |
 |---|---|---|---|
-| `ScoreCard` | Dashboard | Solid | Angka besar + label interpretasi, tidak berdiri sendiri |
-| `RiskBadge` | Dashboard, Risk Detail | Solid | Warna + ikon + teks, token warna di §2.4 |
-| `FactorContributionBar` | Risk Detail | Solid | Bahasa natural, bukan nilai SHAP mentah |
-| `EvidenceCard` | Recommendation, Evidence Center | Solid | Badge kekuatan evidence |
-| `SimulationSlider` | What-if Simulation | Solid | Slider + nilai numerik, keyboard-accessible |
-| `ComparisonPanel` | What-if Simulation | Solid | Current vs Simulated berdampingan |
-| `DisclaimerBanner` | Reusable di 4+ halaman | Solid (wajib) | Teks resmi FR-005, tidak boleh diubah bebas |
-| `SafetyModal` | Safety Guardrail | Solid (wajib) | Interupsi penuh, bukan toast kecil |
-| `ExplanationPanel` | Risk Detail, Recommendation | Solid | LLM output, dengan fallback state |
-| `TopNav` / Sticky Navbar | Landing Page, App shell | Glass | Backdrop-blur, fallback solid jika `prefers-reduced-transparency` |
-| `FloatingSimulationCTA` | Dashboard (sticky) | Glass | 2 tombol simulasi, mengambang saat scroll |
+| `ScoreCard` | `/dashboard` | Solid | Angka skor tabular besar (`text-4xl font-bold font-mono`) dengan interpretasi naratif di sampingnya |
+| `RiskBadge` | `/dashboard`, `/dashboard/risk/:disease` | Solid | Tipografi editorial murni (ikon outline Lucide + teks monospace UPPERCASE), dilarang kapsul oval/chip |
+| `DisclaimerBanner` | Onboarding, Dashboard, Simulasi, Rekomendasi, Evidence | Solid (wajib) | Teks statutori persis sesuai FR-005, kontras terverifikasi AAA, dilarang material kaca |
+| `MockDataNotice` | `/dashboard`, `/dashboard/risk/:disease` | Solid | Banner peringatan jika hasil asesmen bersumber dari data awal sebelum asesmen komprehensif |
+| `AuthLayout` | `/login`, `/register` | Hybrid | Container responsif dengan dukungan mode `variant="centered"` dan `variant="split"` |
+| `FormAlertTooltip` | `/login`, `/register` | Floating | Tooltip interaktif penunjuk galat input formulir (misal: syarat & ketentuan belum dicentang) |
+| `BilateralPatternFlow` | `/` (Landing Hero) | Canvas | Kanvas partikel dan kurva adaptif bilateral berkecepatan tinggi yang bebas jank |
+| `LayeredHealthPicture` | `/` (Landing Section 4) | SVG Isometric | 3 bidang isometrik bertumpuk (Lifestyle Record, AI Risk Engine, Tindakan Terarah) |
+| `StickyNavbar` | `/` (Landing Page) | Glass | Translucent frosted glass dengan `backdrop-blur-md`, transisi mulus ke solid pada reduced transparency |
+| `SimulationSlider` | `/dashboard/simulation/what-if` | Solid | Slider interaktif + angka nilai pasti di sampingnya, keyboard-accessible (arrow keys) |
+| `DeltaOutcomeCard` | `/dashboard/simulation/what-if` | Solid | Komparasi baseline vs simulated berdampingan dengan persentase selisih per penyakit |
 
 ---
 
@@ -846,91 +995,57 @@ imagery.
 Primary color: forest green #0F7A4E (buttons, links), soft tint #DCFCE9,
 accent #22B573. Neutrals: background #FFFFFF / #F7F9F8, body text #3A423D,
 headings #14201A. Font: Plus Jakarta Sans (geometric sans-serif).
-Cards styled like shadcn/ui: rounded-xl corners (~12px), thin border, soft
+Cards styled like shadcn/ui: rounded-2xl corners, thin border, soft
 shadow-sm, generous internal padding. Icons in the style of Lucide (thin
 outline/stroke icons).
-Do NOT use any pill-shaped chip/badge anywhere on this page.
+STRICT BAN: Do NOT use any pill-shaped chip/badge or glowing pulse dots anywhere on this page.
+All category tags and eyebrows MUST be pure editorial uppercase typography (e.g. text-xs font-mono font-bold tracking-widest text-brand-900/40 uppercase).
 
-Layout top to bottom:
-1. Sticky navbar with a glassmorphism (frosted-glass) treatment —
-   translucent white background (~70% opacity), background blur, thin
-   semi-transparent border, so page content is faintly visible behind it
-   when scrolling. HELIORA logo left, nav links (Fitur, Cara Kerja, FAQ)
-   center, "Sign In" (ghost button) and "Daftar" (solid primary button)
-   right.
-2. Hero — large headline "Predict Today. Prevent Tomorrow.", short
-   subheadline about understanding health risk from lifestyle, one primary
-   CTA button "Mulai Assessment Gratis", a small secondary text link "Lihat
-   Cara Kerja" below it — no badge or chip in this section. Abstract soft
-   nature-inspired illustration on the right.
-3. Problem section — 3 solid shadcn-style cards, each with a Lucide-style
-   icon and short headline about a lifestyle-health problem.
-4. "How It Works" — 5-step horizontal process: Predict, Explain, Simulate,
-   Recommend, Educate, connected with arrows.
-5. Killer features — 2 large solid shadcn-style cards side by side: "Future
-   Health Simulation" and "What-if Simulation", each with a small
-   illustrative chart graphic.
-6. Trust strip — row of text/logo placeholders: WHO, Kemenkes RI, PERKENI,
-   PERKI, CDC.
-7. Persistent disclaimer banner — solid background (not glass, not a chip),
-   full width, small info icon, plain text: "HELIORA adalah alat bantu
-   preventive health berbasis lifestyle dan AI, bukan diagnosis medis."
-8. Simple footer — About, Privacy, Disclaimer, Contact links.
+Layout top to bottom (8 Sections):
+1. Sticky Navbar: Frosted-glass translucent bar (~70% white, blur-md, thin border),
+   HELIORA logo left, nav anchor links (Fitur, Alur, Kemampuan, Bukti, FAQ) center,
+   "Masuk" (ghost) and "Mulai Asesmen" (solid primary button) right.
+2. Hero Section: Clean authoritative layout with Bilateral Pattern Flow Canvas
+   and Layered Health Picture SVG/asset on the right. Large headline "Predict Today.
+   Prevent Tomorrow.", subheadline on lifestyle risk patterns, primary CTA
+   "Mulai Asesmen Gratis" + secondary anchor "Pelajari Metodologi →".
+3. Section 3 (Memahami Pola): 3 structured bento cards addressing lifestyle health patterns.
+4. Section 4 (Gambaran Utuh Profil): Isometric 3 SVG planes representing Lifestyle Record,
+   AI Engine, and Risk Projection/Action.
+5. Section 5 (Fitur Utama): 6 editorial feature cards (Profil Risiko, Faktor Penjelas XAI,
+   Simulasi Skenario What-If, Rekomendasi Terarah, Pusat Bukti Klinis, Pemantauan Berkelanjutan).
+6. Section 6 (Dasar Klinis & Metodologi Transparan): Trust strip showing official guidance
+   partners (WHO, Kemenkes RI, CDC, PERKENI, PERKI).
+7. Section 7 (FAQ): Interactive clean accordion addressing common preventive questions.
+8. Section 8: Final CTA banner ("Mulai Langkah Preventif Kamu Hari Ini") + clean footer.
+(No floating disclaimer banner on landing page — statutory disclaimer is reserved for authenticated data flows per FR-005).
 ```
 
-### 15.2 Login / Sign In (final, dengan semua revisi)
+### 15.2 Login / Sign In (final, dengan integrasi Supabase OAuth)
 
 ```
 Design a responsive web sign-in page for HELIORA, an AI-powered preventive
-health platform. Split-screen two-section layout.
+health platform. Clean centered card container layout (max-width ~440px).
 
 Visual system: primary green #0F7A4E, soft tint #DCFCE9, background #FFFFFF
-/ #F7F9F8, text #3A423D / #14201A, font Plus Jakarta Sans (geometric
-sans-serif), rounded corners ~12px in the style of shadcn/ui Card (subtle
-border, soft shadow-sm), calm and trustworthy — not clinical. Icons in the
-style of Lucide (thin outline/stroke icons).
-Do NOT use any pill-shaped chip/badge anywhere on this screen — notes and
-disclaimers should be plain text, not chips.
+/ #F7F9F8, text #3A423D / #14201A, font Plus Jakarta Sans, rounded-xl corners
+in the style of shadcn/ui Card (subtle border, soft shadow-sm), calm and trustworthy.
+Icons in the style of Lucide.
+Do NOT use any pill-shaped chip/badge anywhere on this screen.
 
-LEFT SECTION (about 40% width, white background, generous padding):
-- A small ghost/text back button at the very top-left, above the logo: a
-  left-arrow icon with the label "Kembali ke Beranda", linking to the
-  landing page. Muted gray, secondary styling — must not compete visually
-  with the primary Sign In button.
-- HELIORA logo below the back button.
-- Heading "Masuk ke akun kamu", short subtext "Silakan login untuk
-  melanjutkan".
-- The Email and Password input fields are wrapped together inside a single
-  card container: white background, thin 1px border (#DEE5E1), rounded-xl
-  corners (~12px), and a subtle soft shadow (light shadow-sm) — visually
-  separated from the plain page background, not floating fields.
-- A small "Lupa password?" link and a small "Ingat saya" checkbox, both on
-  the same row just below the password field (inside or right under the
-  card).
-- Two buttons side by side: solid primary-green "Sign In" and an
-  outline/secondary "Daftar" button.
-- Small muted plain-text footer note (not a badge): "Dengan masuk, kamu
-  menyetujui bahwa HELIORA bukan alat diagnosis medis."
-
-RIGHT SECTION (about 55-60% width, full height, large rounded corners):
-- A calm nature/wellness photograph (green foliage, soft natural light,
-  outdoor wellness scene) — NOT medical imagery, no stethoscope or
-  hospital cross.
-- The photo is masked into a soft organic rounded/blob shape, not a hard
-  rectangle.
-- A floating glassmorphism card overlapping the image with the tagline
-  "Predict Today. Prevent Tomorrow." — frosted-glass style: translucent
-  white background (~70% opacity), background blur, a thin 1px
-  semi-transparent white border, soft shadow — like Apple's Liquid Glass
-  material for floating controls, NOT a solid opaque card.
-- A small circular glass-style icon button (same frosted-glass treatment)
-  in the bottom-right corner, representing a light/dark mode toggle.
-
-On narrow/mobile viewports, the right section collapses and only the left
-form section is shown, full width.
+CENTERED CONTAINER:
+- Heartbeat emblem brand mark inside rounded-xl brand-900 container.
+- Heading "Masuk ke HELIORA" (font-semibold, 36px/42px).
+- Floating error alert tooltip for credential validation failures.
+- Form inputs: Email field and Password field with interactive eye toggle button.
+- Primary submit button "Masuk" (solid primary-700 green, white text, h-12 rounded-xl).
+- Horizontal divider with subtle "atau" label.
+- Official Google OAuth button ("Google") with multi-color SVG icon (white bg, shadow-sm).
+- Secondary links: "Lupa email atau kata sandi?" linking to `/forgot-password` and "Buat akun" linking to `/register`.
+- Minimalist fixed footer with copyright, "Ketentuan Layanan", and "Privasi Data".
 ```
 
-### 15.3 Dashboard
+### 15.3 Dashboard (final, dengan tipografi editorial murni)
 
 ```
 Design a responsive web dashboard for HELIORA, an AI-powered preventive
@@ -939,35 +1054,36 @@ assessment.
 
 Visual style: same system — primary green #0F7A4E / soft tint #DCFCE9,
 background #FFFFFF / #F7F9F8, text #3A423D / #14201A, font Plus Jakarta
-Sans. Cards styled like shadcn/ui: rounded-xl (~12px), thin border,
-shadow-sm, solid backgrounds (not glass) since this is health data content.
-Icons in the style of Lucide.
-Do NOT use any pill-shaped chip/badge for the disclaimer — plain text only.
-Status badges for risk level (Low/Moderate/Higher) ARE small rounded pills,
-but only for risk status, not for the disclaimer.
+Sans for prose/headers, font-mono for numbers and status indicators.
+Cards styled like shadcn/ui: rounded-2xl, thin border, shadow-sm,
+solid backgrounds (not glass) since this is health data content.
+Icons in the style of Lucide outline.
+STRICT BAN: Do NOT use any pill-shaped chip/badge anywhere on this screen —
+status indicators and disclaimers MUST use clean editorial typography, NOT oval capsules.
 
-Layout:
-- A glassmorphism (frosted-glass) top nav or left sidebar — translucent
-  background with blur — with icons for Dashboard, Simulation,
-  Recommendations, Evidence, History, Account.
+Layout (Desktop Sidebar + Main Workspace):
+- A clean left sidebar (width ~260px, sticky) with brand mark "HELIORA Preventive Health AI",
+  categorized navigation items:
+  1. Menu Utama: "Ringkasan Klinis" (active), "Analisis Risiko" (collapsible with Diabetes, Hypertension, Cardiovascular).
+  2. Intervensi & Bukti: "Rencana Tindakan", "Pusat Bukti Medis".
+  3. Simulasi: "What-If Simulator", "Proyeksi Horison".
+  4. Profil & Akun: "Profil Saya", "Pengaturan Akun", user initials card, and logout.
 - Header row: "Halo, {Name}" greeting left, "Last assessment: {date}" right.
-- Two side-by-side solid cards: "Health Score" and "Lifestyle Score", each
-  with a large bold number and a short interpretation label beneath it
+- Row 1: Two side-by-side solid cards: "Health Score" and "Lifestyle Score", each
+  with a large bold tabular number and a short plain-text interpretation label beneath it
   (e.g. "Good", "Fair") — never just a bare number.
-- A solid card listing 3 risk rows — Diabetes, Hypertension,
-  Cardiovascular — each row has a colored status pill (icon + text: green
-  "Lower", amber "Moderate", warm clay-red "Higher" — avoid harsh siren
-  red) plus a "Detail" link on the right.
-- Two-column section: left solid card "Top Contributing Factors" as a
-  bullet list, right solid card "Recommended Actions" as a numbered list
-  with a "View all" link.
-- A floating glassmorphism action bar fixed near the bottom of the screen
-  (frosted-glass, translucent, blurred, stays visible while scrolling)
-  containing two buttons with icons: "Future Health Simulation" and
-  "What-if Simulation".
-- A thin solid disclaimer bar at the very bottom with a small info icon and
-  plain text noting this is not a medical diagnosis — not a chip, not
-  glass.
+- Row 2: 3 disease risk cards side-by-side — Diabetes, Hypertension, Cardiovascular —
+  each card displays the disease title, a colored editorial status line (Lucide outline icon
+  + bold uppercase monospace text: emerald "LOWER", amber "MODERATE", warm clay-red "HIGHER"),
+  estimated risk percentage (e.g. "42%"), a colored horizontal fill bar, trend label, and "Lihat rincian" link.
+- Row 3: Interactive Simulation Hub banner (dark forest green background) featuring
+  prominent CTAs for "What-If Simulator" and "Proyeksi Horison".
+- Row 4: Two-column clinical breakdown:
+  - Left column: "Top Contributing Factors (XAI)" with horizontal SHAP bars, impact tags,
+    and interactive click-to-scroll targeting linked recommendations.
+  - Right column: "Rencana Tindakan Teratas" with prioritized action cards, clinical targets,
+    and direct links to the Evidence Center.
+- Footer: A thin solid disclaimer bar at the bottom with verbatim FR-005 statutory plain text.
 ```
 
 ### 15.4 Follow-up — Dark Mode
