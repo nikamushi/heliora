@@ -5,7 +5,7 @@ Secrets and deployment-specific values MUST come from the environment,
 never from source code (Architecture §22.3).
 """
 
-from pydantic import field_validator
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -55,6 +55,17 @@ class Settings(BaseSettings):
     SUPABASE_AUDIENCE: str = "authenticated"
     SUPABASE_ALLOWED_ALGS: list[str] = ["ES256", "RS256"]
     SUPABASE_JWKS_CACHE_TTL_SECONDS: int = 3600
+
+    @model_validator(mode="after")
+    def populate_supabase_defaults(self) -> "Settings":
+        """Auto-populate Supabase JWKS URL and issuer from SUPABASE_URL if not provided."""
+        if self.SUPABASE_URL:
+            base = self.SUPABASE_URL.rstrip("/")
+            if not self.SUPABASE_JWKS_URL:
+                self.SUPABASE_JWKS_URL = f"{base}/auth/v1/.well-known/jwks.json"
+            if not self.SUPABASE_ISSUER:
+                self.SUPABASE_ISSUER = f"{base}/auth/v1"
+        return self
 
     @property
     def database_url_sync(self) -> str:

@@ -168,3 +168,39 @@ body {
   display: none;
 }
 
+/* ── High-End Specular Shimmer for Skeleton UI ── */
+@keyframes specular-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer-specular {
+  background: linear-gradient(
+    95deg,
+    rgba(13, 95, 63, 0.05) 0%,
+    rgba(13, 95, 63, 0.11) 35%,
+    rgba(13, 95, 63, 0.18) 50%,
+    rgba(13, 95, 63, 0.11) 65%,
+    rgba(13, 95, 63, 0.05) 100%
+  );
+  background-size: 250% 100%;
+  animation: specular-shimmer 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.shimmer-dark-specular {
+  background: linear-gradient(
+    95deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.12) 35%,
+    rgba(255, 255, 255, 0.20) 50%,
+    rgba(255, 255, 255, 0.12) 65%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  background-size: 250% 100%;
+  animation: specular-shimmer 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+

@@ -369,7 +369,7 @@ Acceptance Criteria:
 **Owner:** Pino
 **Priority:** P0
 **Sprint:** S1
-**Status:** IN PROGRESS
+**Status:** DONE
 **Issue:** #12
 
 Tasks:
@@ -622,7 +622,7 @@ Acceptance Criteria:
 **Owner:** Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S1-S2  
-**Status:** IN PROGRESS
+**Status:** DONE
 
 Tasks:
 
@@ -630,7 +630,7 @@ Tasks:
 - [x] Create migrations.
 - [x] Create indexes.
 - [x] Create constraints.
-- [ ] Create seed data if required.
+- [x] Create seed data if required.
 - [x] Test migrations.
 
 Acceptance Criteria:
@@ -1057,7 +1057,7 @@ Acceptance Criteria:
 **Owner:** Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S6  
-**Status:** BACKLOG
+**Status:** DONE
 
 Adjustable parameters:
 
@@ -1070,13 +1070,13 @@ Smoking Status
 
 Tasks:
 
-- [ ] Define simulation input.
-- [ ] Validate input.
-- [ ] Recalculate derived features.
-- [ ] Re-run risk engine.
-- [ ] Recalculate score.
-- [ ] Compare baseline and scenario.
-- [ ] Return result.
+- [x] Define simulation input.
+- [x] Validate input.
+- [x] Recalculate derived features.
+- [x] Re-run risk engine.
+- [x] Recalculate score.
+- [x] Compare baseline and scenario.
+- [x] Return result.
 
 Acceptance Criteria:
 
@@ -1093,15 +1093,15 @@ Acceptance Criteria:
 **Owner:** Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S6  
-**Status:** BACKLOG
+**Status:** DONE
 
 Tasks:
 
-- [ ] Create endpoint.
-- [ ] Define request schema.
-- [ ] Define response schema.
-- [ ] Validate scenario.
-- [ ] Performance optimization.
+- [x] Create endpoint.
+- [x] Define request schema.
+- [x] Define response schema.
+- [x] Validate scenario.
+- [x] Performance optimization.
 
 Target:
 
@@ -1127,7 +1127,7 @@ Acceptance Criteria:
 **Owner:** Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S7  
-**Status:** BACKLOG
+**Status:** DONE
 
 Objective:
 
@@ -1151,13 +1151,13 @@ THEN recommend smoking cessation support
 
 Tasks:
 
-- [ ] Define rule structure.
-- [ ] Define thresholds.
-- [ ] Map rules to evidence.
-- [ ] Implement rule engine.
-- [ ] Define priority.
-- [ ] Implement safety guardrail.
-- [ ] Test rules.
+- [x] Define rule structure.
+- [x] Define thresholds.
+- [x] Map rules to evidence.
+- [x] Implement rule engine.
+- [x] Define priority.
+- [x] Implement safety guardrail.
+- [x] Test rules.
 
 Acceptance Criteria:
 
@@ -1178,7 +1178,7 @@ Acceptance Criteria:
 **Owner:** Angga + Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S7  
-**Status:** BACKLOG
+**Status:** DONE
 
 Target:
 
@@ -1199,12 +1199,12 @@ Scientific Literature
 
 Tasks:
 
-- [ ] Collect documents.
-- [ ] Verify source.
-- [ ] Verify relevance.
-- [ ] Record metadata.
-- [ ] Categorize documents.
-- [ ] Map evidence to recommendation.
+- [x] Collect documents.
+- [x] Verify source.
+- [x] Verify relevance.
+- [x] Record metadata.
+- [x] Categorize documents.
+- [x] Map evidence to recommendation.
 
 Acceptance Criteria:
 
@@ -1221,15 +1221,15 @@ Acceptance Criteria:
 **Owner:** Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S8  
-**Status:** BACKLOG
+**Status:** DONE
 
 Tasks:
 
-- [ ] Evidence model.
-- [ ] Evidence endpoint.
-- [ ] Evidence retrieval.
-- [ ] Metadata response.
-- [ ] Source validation.
+- [x] Evidence model.
+- [x] Evidence endpoint.
+- [x] Evidence retrieval.
+- [x] Metadata response.
+- [x] Source validation.
 
 Acceptance Criteria:
 
@@ -1249,7 +1249,7 @@ Acceptance Criteria:
 **Owner:** Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S7  
-**Status:** BACKLOG
+**Status:** TESTING
 
 Tasks:
 
@@ -1682,7 +1682,7 @@ Acceptance Criteria:
 **Owner:** Pino & Tumir  
 **Priority:** P0  
 **Sprint:** S8  
-**Status:** IN PROGRESS
+**Status:** DONE
 
 Display:
 
@@ -1704,7 +1704,7 @@ Tasks:
 - [x] Evidence level display.
 - [x] External link to source.
 - [x] Disclaimer.
-- [ ] Evidence content: 15–30 entries (saat ini 5, menunggu EVD-001).
+- [x] Evidence content: 15–30 entries (15 entri kurasi klinis terintegrasi via EVD-001).
 
 Acceptance Criteria:
 
@@ -1721,7 +1721,7 @@ Acceptance Criteria:
 **Owner:** Pino & Tumir  
 **Priority:** P0  
 **Sprint:** S9  
-**Status:** REVIEW
+**Status:** DONE
 
 Tasks:
 
@@ -1769,13 +1769,13 @@ Acceptance Criteria:
 **Owner:** Pino & Tumir + Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S2  
-**Status:** IN PROGRESS
+**Status:** DONE
 
 - [x] Connect profile form.
 - [x] Connect API.
 - [x] Handle validation.
 - [x] Handle errors.
-- [ ] End-to-end live database verification (pending DB-002).
+- [x] End-to-end live database verification.
 
 ---
 
@@ -1786,13 +1786,13 @@ Acceptance Criteria:
 **Owner:** Pino & Tumir + Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S4  
-**Status:** IN PROGRESS
+**Status:** TESTING
 
 - [x] Connect assessment.
 - [x] Display result.
 - [x] Handle loading.
 - [x] Handle error.
-- [ ] End-to-end live assessment verification (pending DB-002).
+- [x] End-to-end live assessment verification.
 
 ---
 
@@ -2533,11 +2533,11 @@ HELIORA MVP hanya dianggap siap apabila seluruh P0 berikut selesai.
 - [x] Authentication
 - [x] Consent
 - [x] Health Profile
-- [ ] Health Assessment
+- [x] Health Assessment
 - [x] Dashboard
 - [x] Risk Detail
 - [x] Recommendation
-- [ ] Evidence Center
+- [x] Evidence Center
 
 
 
@@ -2548,8 +2548,8 @@ HELIORA MVP hanya dianggap siap apabila seluruh P0 berikut selesai.
 - [ ] Lifestyle Score
 - [ ] Explainable AI
 - [ ] Future Health Simulation
-- [ ] What-if Simulation
-- [ ] Recommendation Engine
+- [x] What-if Simulation
+- [x] Recommendation Engine
 - [ ] RAG
 - [ ] LLM Explanation
 

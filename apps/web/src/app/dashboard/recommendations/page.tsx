@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { Suspense, useState, useMemo, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
-  ArrowLeft,
   ArrowRight,
   BookOpen,
   Filter,
@@ -60,8 +60,8 @@ const PRIORITY_CONFIG: Record<
 > = {
   high: {
     label: "Prioritas Utama",
-    textClass: "text-red-700",
-    borderClass: "border-l-4 border-l-red-600/80",
+    textClass: "text-rose-700",
+    borderClass: "border-l-4 border-l-rose-700",
   },
   medium: {
     label: "Prioritas Sedang",
@@ -80,9 +80,23 @@ const PRIORITY_CONFIG: Record<
   },
 };
 
-export default function RecommendationsPage() {
+const FEATURE_TO_CATEGORY: Record<string, CategoryFilter> = {
+  sleep_duration: "sleep",
+  physical_activity: "activity",
+  bmi: "nutrition",
+  smoking_status: "activity",
+  family_history: "nutrition",
+  stress_level: "stress",
+};
+
+function RecommendationsContent() {
+  const searchParams = useSearchParams();
+  const refParam = searchParams.get("ref");
+  const factorParam = searchParams.get("factor");
+
   const { isAuthorized, isLoading, error, assessment } = useLatestAssessment();
   const [activeCategory, setActiveCategory] = useState<CategoryFilter>("all");
+  const [highlightedRecId, setHighlightedRecId] = useState<string | null>(null);
 
   // Enrich recommendations with clinical targets, priority levels, and rationales using data-driven config
   const enrichedRecommendations: EnrichedRecommendation[] = useMemo(() => {
@@ -112,6 +126,42 @@ export default function RecommendationsPage() {
     });
   }, [assessment]);
 
+  // Deep-link auto scroll and highlight handling for ?ref= or ?factor=
+  useEffect(() => {
+    if (!enrichedRecommendations.length) return;
+
+    let targetId: string | null = null;
+
+    if (refParam) {
+      const matched = enrichedRecommendations.find(
+        (r) =>
+          r.id.toLowerCase() === refParam.toLowerCase() ||
+          r.rule_id.toLowerCase() === refParam.toLowerCase()
+      );
+      if (matched) {
+        targetId = matched.id;
+      }
+    } else if (factorParam) {
+      const targetCategory = FEATURE_TO_CATEGORY[factorParam] || factorParam;
+      const matched = enrichedRecommendations.find((r) => r.category === targetCategory);
+      if (matched) {
+        targetId = matched.id;
+      }
+    }
+
+    if (targetId) {
+      setHighlightedRecId(targetId);
+      const el = document.getElementById(`rec-${targetId}`);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      const timer = setTimeout(() => {
+        setHighlightedRecId(null);
+      }, 3500);
+      return () => clearTimeout(timer);
+    }
+  }, [refParam, factorParam, enrichedRecommendations]);
+
   const filteredRecommendations = useMemo(() => {
     if (activeCategory === "all") return enrichedRecommendations;
     return enrichedRecommendations.filter((r) => r.category === activeCategory);
@@ -119,45 +169,41 @@ export default function RecommendationsPage() {
 
   if (!isAuthorized || isLoading) {
     return (
-      <div className="min-h-screen bg-brand-50/20 text-brand-900 flex items-center justify-center p-6">
+      <div className="flex-1 min-w-0 flex items-center justify-center p-6 min-h-[50vh]">
         <div className="text-center space-y-2">
           <p className="text-xs font-mono font-bold tracking-widest text-brand-900/50 uppercase">
             HELIORA
           </p>
-          <p className="text-sm font-medium text-brand-900/70">Memuat rencana intervensi klinis...</p>
+          <p className="text-sm font-medium text-brand-900/70">Memuat rencana rekomendasi...</p>
         </div>
       </div>
     );
   }
 
-  if (error || !assessment) {
+  if (error) {
     return (
-      <div className="min-h-screen bg-brand-50/20 text-brand-900 flex items-center justify-center p-6">
+      <div className="flex-1 min-w-0 flex items-center justify-center p-6 min-h-[50vh]">
         <div className="w-full max-w-md bg-white border border-brand-900/10 rounded-3xl p-8 shadow-xl text-center space-y-5">
-          <div className="w-12 h-12 rounded-2xl bg-brand-50 border border-brand-900/10 text-brand-900 flex items-center justify-center mx-auto text-lg font-bold">
-            H
+          <div className="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 flex items-center justify-center mx-auto text-lg font-bold">
+            !
           </div>
           <div className="space-y-2">
             <h1 className="text-xl font-bold tracking-tight text-brand-900">
               Belum Ada Rekomendasi
             </h1>
             <p className="text-xs sm:text-sm text-brand-900/65 leading-relaxed">
-              Lengkapi profil kesehatan Anda agar sistem dapat menyusun rencana tindakan preventif yang disesuaikan secara personal.
+              {error.kind === "not_found"
+                ? "Lengkapi profil kesehatan Anda terlebih dahulu agar sistem dapat memformulasikan rencana tindakan preventif."
+                : error.message}
             </p>
           </div>
-          <div className="pt-2 flex flex-col sm:flex-row gap-2 justify-center">
+          <div className="pt-2 flex justify-center gap-2">
             <Link
               href="/onboarding/health-profile"
-              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-brand-900 hover:bg-brand-900/90 text-white text-xs font-semibold shadow-md shadow-brand-900/15"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-900 hover:bg-brand-900/90 text-white text-xs font-semibold shadow-md shadow-brand-900/15"
             >
-              <span>Isi Profil Kesehatan</span>
+              <span>Lengkapi Profil Kesehatan</span>
               <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-            <Link
-              href="/dashboard"
-              className="inline-flex items-center justify-center px-4 py-2.5 rounded-xl border border-brand-900/15 text-xs font-semibold text-brand-900/70 hover:text-brand-900 hover:bg-neutral-50"
-            >
-              Kembali
             </Link>
           </div>
         </div>
@@ -165,42 +211,30 @@ export default function RecommendationsPage() {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-[#FBFDFB] text-brand-900 selection:bg-brand-100 flex flex-col">
-      {/* Top Header */}
-      <header className="border-b border-brand-900/10 bg-white/80 backdrop-blur-md sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link
-              href="/dashboard"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-900/60 hover:text-brand-900 transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Dashboard</span>
-            </Link>
-            <span className="text-brand-900/20">/</span>
-            <span className="text-xs font-mono font-bold tracking-wider text-brand-900 uppercase">
-              Rencana Tindakan
-            </span>
-          </div>
+  if (!assessment) {
+    return null;
+  }
 
-          <Link
-            href="/dashboard/evidence"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-900 hover:underline"
-          >
-            <BookOpen className="w-3.5 h-3.5 text-brand-900/60" />
-            <span>Pusat Bukti Medis →</span>
+  return (
+    <div className="flex-1 min-w-0 flex flex-col">
+      {/* Top Breadcrumb Header */}
+      <header className="h-16 border-b border-brand-900/10 bg-white/70 backdrop-blur-md sticky top-0 z-10 px-6 hidden lg:flex items-center">
+        <div className="flex items-center gap-2 text-xs font-mono">
+          <Link href="/dashboard" className="text-brand-900/50 uppercase hover:text-brand-900 transition-colors">
+            Dashboard
           </Link>
+          <span className="text-brand-900/30">/</span>
+          <span className="text-brand-900 font-bold uppercase">Rencana Tindakan</span>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 space-y-8 flex-1 w-full">
-        {/* Title Section */}
-        <section className="space-y-2">
-          <p className="text-[11px] font-mono font-bold tracking-widest text-brand-900/50 uppercase">
+      {/* Main Content Area */}
+      <main className="flex-1 p-6 sm:p-8 space-y-8 max-w-5xl w-full mx-auto">
+        {/* Page Heading & Context */}
+        <section className="space-y-2 border-b border-brand-900/10 pb-6">
+          <span className="text-xs font-mono font-bold tracking-widest text-brand-900/50 uppercase block">
             Intervensi Terarah
-          </p>
+          </span>
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
               <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-brand-900">
@@ -248,7 +282,7 @@ export default function RecommendationsPage() {
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveCategory(tab.id as CategoryFilter)}
-                className={`px-3.5 py-1.5 rounded-lg border text-xs font-semibold transition-all duration-150 ${
+                className={`px-3.5 py-1.5 rounded-lg border text-xs font-semibold transition-all duration-150 cursor-pointer ${
                   isActive
                     ? "bg-brand-900 text-white border-brand-900 shadow-xs"
                     : "bg-white text-brand-900/70 border-brand-900/15 hover:border-brand-900/30 hover:bg-neutral-50"
@@ -264,10 +298,19 @@ export default function RecommendationsPage() {
         <section className="space-y-4">
           {filteredRecommendations.length > 0 ? (
             filteredRecommendations.map((rec) => {
+              const isTargeted = highlightedRecId === rec.id;
+
               return (
                 <article
+                  id={`rec-${rec.id}`}
                   key={rec.id}
-                  className={`bg-white rounded-2xl border border-brand-900/10 p-6 sm:p-7 shadow-xs space-y-4 transition-all hover:border-brand-900/25 ${rec.priorityBorderClass}`}
+                  className={`bg-white rounded-2xl border p-6 sm:p-7 shadow-xs space-y-4 transition-all duration-300 ${
+                    rec.priorityBorderClass
+                  } ${
+                    isTargeted
+                      ? "border-brand-900/40 ring-2 ring-brand-900/25 bg-brand-50/20 shadow-md"
+                      : "border-brand-900/10 hover:border-brand-900/25"
+                  }`}
                 >
                   {/* Card Top Meta */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-brand-900/5 pb-3">
@@ -352,9 +395,25 @@ export default function RecommendationsPage() {
 
         {/* Footer Disclaimer */}
         <footer className="pt-6 border-t border-brand-900/10">
-          <DisclaimerBanner />
+          <DisclaimerBanner variant="banner" />
         </footer>
       </main>
     </div>
+  );
+}
+
+export default function RecommendationsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex-1 min-w-0 flex items-center justify-center p-6 min-h-[50vh]">
+          <p className="text-xs font-mono font-bold text-brand-900/50 uppercase">
+            Memuat Rencana Rekomendasi...
+          </p>
+        </div>
+      }
+    >
+      <RecommendationsContent />
+    </Suspense>
   );
 }

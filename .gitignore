@@ -194,3 +194,4 @@ graphify-out/
 brain/
 *testing*
 test_scripts/
+.scratch/

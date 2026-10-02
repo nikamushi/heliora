@@ -10,6 +10,7 @@ import {
   Sliders,
   TrendingUp,
   BookOpen,
+  CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLatestAssessment } from "@/lib/use-latest-assessment";
@@ -28,11 +29,13 @@ interface DiseaseDetailMeta {
     weight: number;
     impact: "increase" | "decrease";
     note: string;
+    actionIndex: number;
   }[];
   actionPlan: {
     title: string;
     description: string;
     impactLabel: string;
+    evidenceId: string;
   }[];
 }
 
@@ -49,44 +52,54 @@ const DISEASE_METADATA: Record<string, DiseaseDetailMeta> = {
         name: "Indeks Massa Tubuh (BMI)",
         weight: 35,
         impact: "increase",
-        note: "Akumulasi jaringan adiposa memicu resistensi reseptor insulin perifer."
+        note: "Akumulasi jaringan adiposa memicu resistensi reseptor insulin perifer.",
+        actionIndex: 2,
       },
       {
         name: "Aktivitas Fisik Rendah",
         weight: 28,
         impact: "increase",
-        note: "Kurangnya kontraksi otot menurunkan translokasi transporter GLUT-4."
+        note: "Kurangnya kontraksi otot menurunkan translokasi transporter GLUT-4.",
+        actionIndex: 0,
       },
       {
         name: "Durasi Tidur Kurang (< 6 Jam)",
         weight: 18,
         impact: "increase",
-        note: "Memicu peningkatan kortisol diurnal dan resistensi metabolik nocturnal."
+        note: "Memicu peningkatan kortisol diurnal dan resistensi metabolik nocturnal.",
+        actionIndex: 1,
       },
       {
         name: "Kebiasaan Tidak Merokok",
         weight: 19,
         impact: "decrease",
-        note: "Faktor protektif yang menurunkan stres oksidatif vaskular."
-      }
+        note: "Faktor protektif yang menurunkan stres oksidatif endotel vaskular.",
+        actionIndex: 0,
+      },
     ],
     actionPlan: [
       {
         title: "Aktivitas Aerobik 150 Menit/Minggu",
-        description: "Bagi dalam 3–5 sesi (seperti jalan cepat atau sepeda) untuk meningkatkan ambilan glukosa tanpa insulin.",
-        impactLabel: "Target: Panduan WHO 2020"
+        description:
+          "Bagi dalam 3–5 sesi (seperti jalan cepat atau sepeda) untuk meningkatkan ambilan glukosa tanpa insulin.",
+        impactLabel: "Target: Panduan WHO 2020",
+        evidenceId: "EVD-ACT-001",
       },
       {
         title: "Stabilisasi Jam Tidur (7–8 Jam)",
-        description: "Jaga jadwal tidur konsisten guna menormalkan ritme sirkadian dan regulasi nafsu makan leptin/ghrelin.",
-        impactLabel: "Target: Regulasi Sirkadian"
+        description:
+          "Jaga jadwal tidur konsisten guna menormalkan ritme sirkadian dan regulasi hormon metabolik.",
+        impactLabel: "Target: Regulasi Sirkadian",
+        evidenceId: "EVD-SLP-001",
       },
       {
-        title: "Manajemen Porsi & Karbohidrat Olahan",
-        description: "Ganti karbohidrat sederhana dengan serat pangan tinggi (biji-bijian, sayuran hijau) untuk memperlambat lonjakan glikemik.",
-        impactLabel: "Target: Konsensus PERKENI"
-      }
-    ]
+        title: "Manajemen Porsi & Karbohidrat Kompleks",
+        description:
+          "Ganti karbohidrat sederhana dengan serat pangan tinggi (biji-bijian, sayuran) untuk menstabilkan kurva glikemik.",
+        impactLabel: "Target: Konsensus PERKENI",
+        evidenceId: "EVD-NUT-001",
+      },
+    ],
   },
   hypertension: {
     title: "Hipertensi & Vaskular",
@@ -100,44 +113,54 @@ const DISEASE_METADATA: Record<string, DiseaseDetailMeta> = {
         name: "Tingkat Beban Stres Harian",
         weight: 32,
         impact: "increase",
-        note: "Hiperaktivitas sistem saraf simpatis memicu vasokonstriksi arteriol."
+        note: "Hiperaktivitas sistem saraf simpatis memicu vasokonstriksi arteriol persisten.",
+        actionIndex: 0,
       },
       {
         name: "Durasi & Kedalaman Istirahat",
         weight: 26,
         impact: "increase",
-        note: "Gangguan istirahat menghambat nocturnal dipping alami tekanan darah."
+        note: "Gangguan istirahat menghambat nocturnal dipping alami regulasi tekanan darah.",
+        actionIndex: 0,
       },
       {
         name: "Kebugaran Fisik Rutin",
         weight: 22,
         impact: "decrease",
-        note: "Mendukung kelenturan endotel pembuluh darah dan pelepasan nitric oxide."
+        note: "Mendukung kelenturan endotel pembuluh darah dan pelepasan nitric oxide.",
+        actionIndex: 2,
       },
       {
         name: "Riwayat Tekanan Darah Keluarga",
         weight: 20,
         impact: "increase",
-        note: "Predisposisi genetik terhadap regulasi natrium dan tonus vaskular."
-      }
+        note: "Predisposisi genetik terhadap regulasi natrium ginjal dan tonus vaskular.",
+        actionIndex: 1,
+      },
     ],
     actionPlan: [
       {
-        title: "Manajemen Stres & Protokol Pernapasan",
-        description: "Latihan pernapasan dalam terstruktur (4-7-8) 10 menit setiap malam untuk meredam tonus simpatis.",
-        impactLabel: "Target: Relaksasi Parasimpatis"
+        title: "Manajemen Stres & Protokol Relaksasi",
+        description:
+          "Latihan pernapasan dalam terstruktur (4-7-8) 10 menit setiap malam untuk meredam hiperaktivitas simpatis.",
+        impactLabel: "Target: Relaksasi Parasimpatis",
+        evidenceId: "EVD-STR-001",
       },
       {
         title: "Diet Rendah Natrium (Pola DASH)",
-        description: "Batasi asupan natrium harian di bawah 2.000 mg dan perbanyak kalium dari buah segar serta pisang/alpukat.",
-        impactLabel: "Target: Pola DASH & AHA"
+        description:
+          "Batasi asupan natrium harian di bawah 2.000 mg dan perbanyak kalium dari buah dan sayuran segar.",
+        impactLabel: "Target: Pola DASH & AHA",
+        evidenceId: "EVD-NUT-002",
       },
       {
         title: "Latihan Kardiorespirasi Konsisten",
-        description: "Jalan santai atau renang 30 menit sehari menjaga kelenturan dinding pembuluh arteri.",
-        impactLabel: "Target: 150 Menit/Minggu"
-      }
-    ]
+        description:
+          "Jalan cepat atau renang teratur 30 menit sehari menjaga kelenturan dinding pembuluh arteri.",
+        impactLabel: "Target: 150 Menit/Minggu",
+        evidenceId: "EVD-ACT-002",
+      },
+    ],
   },
   cardiovascular: {
     title: "Penyakit Kardiovaskular",
@@ -148,54 +171,65 @@ const DISEASE_METADATA: Record<string, DiseaseDetailMeta> = {
       "Panduan Pencegahan Primer Penyakit Kardiovaskular (PERKI & ESC Guidelines, 2021)",
     factors: [
       {
-        name: "Aktivitas Kardio & Sedentari",
+        name: "Aktivitas Kardio & Perilaku Sedentari",
         weight: 34,
         impact: "increase",
-        note: "Waktu duduk berkepanjangan memperlambat sirkulasi perifer dan profil lipid."
+        note: "Waktu duduk berkepanjangan memperlambat sirkulasi perifer dan metabolisme lipid.",
+        actionIndex: 0,
       },
       {
         name: "Status Bebas Rokok",
         weight: 28,
         impact: "decrease",
-        note: "Bebas dari karbon monoksida dan stres endotel yang diinduksi nikotin."
+        note: "Bebas dari paparan karbon monoksida dan stres endotel vaskular yang diinduksi nikotin.",
+        actionIndex: 2,
       },
       {
-        name: "Komposisi Massa Tubuh",
+        name: "Komposisi Massa Tubuh (BMI)",
         weight: 22,
         impact: "increase",
-        note: "Meningkatkan curah kerja jantung basal untuk memenuhi perfusi jaringan."
+        note: "Meningkatkan beban kerja curah jantung basal untuk memenuhi perfusi jaringan.",
+        actionIndex: 1,
       },
       {
         name: "Durasi Tidur Teratur",
         weight: 16,
         impact: "decrease",
-        note: "Memberikan periode istirahat pemulihan miokardium yang memadai."
-      }
+        note: "Memberikan periode istirahat pemulihan miokardium yang memadai setiap malam.",
+        actionIndex: 2,
+      },
     ],
     actionPlan: [
       {
         title: "Hindari Perilaku Sedentari Panjang",
-        description: "Berdiri dan regangkan tubuh minimal 3–5 menit setiap 60 menit duduk bekerja di meja.",
-        impactLabel: "Target: Interupsi Sedentari"
+        description:
+          "Berdiri dan regangkan tubuh minimal 3–5 menit setiap 60 menit duduk bekerja di meja.",
+        impactLabel: "Target: Interupsi Sedentari",
+        evidenceId: "EVD-ACT-003",
       },
       {
-        title: "Pertahankan Gaya Hidup Bebas Rokok",
-        description: "Pertahankan perlindungan vaskular maksimal dari paparan tar dan zat karsinogenik aerosol.",
-        impactLabel: "Target: Bebas Rokok (WHO)"
+        title: "Latihan Kardiorespirasi Terukur",
+        description:
+          "Lakukan olahraga aerobik intensitas sedang minimal 150 menit per minggu secara rutin.",
+        impactLabel: "Target: Panduan PERKI & ESC",
+        evidenceId: "EVD-ACT-001",
       },
       {
-        title: "Pemeriksaan Profil Metabolik Berkala",
-        description: "Cek tekanan darah dan profil kolesterol setahun sekali sebagai langkah pengawasan preventif.",
-        impactLabel: "Target: Skrining Berkala"
-      }
-    ]
-  }
+        title: "Konsistensi Istirahat & Relaksasi Vaskular",
+        description:
+          "Pertahankan durasi tidur 7–8 jam untuk pemulihan ritme sirkadian kardiometabolik optimal.",
+        impactLabel: "Target: Pemulihan Vaskular",
+        evidenceId: "EVD-SLP-001",
+      },
+    ],
+  },
 };
 
 const LEVEL_INTERPRETATION: Record<RiskLevel, string> = {
-  low: "Kebiasaan yang Anda isi saat ini mendukung estimasi risiko yang lebih rendah. Pertahankan.",
-  moderate: "Beberapa kebiasaan Anda masih bisa diperbaiki untuk menurunkan estimasi ini.",
-  high: "Estimasi ini relatif tinggi. Pertimbangkan untuk membicarakannya dengan tenaga kesehatan.",
+  low: "Estimasi risiko Anda berada pada kategori Lebih Rendah (Lower Risk). Terus pertahankan pola kebiasaan sehat saat ini.",
+  moderate:
+    "Estimasi risiko Anda berada pada kategori Moderat (Moderate Risk). Tindakan intervensi gaya hidup terencana sangat disarankan.",
+  high: "Estimasi risiko Anda berada pada kategori Lebih Tinggi (Higher Risk). Prioritaskan penyesuaian gaya hidup dan konsultasikan dengan tenaga medis profesional.",
 };
 
 export default function RiskDetailPage() {
@@ -212,13 +246,12 @@ export default function RiskDetailPage() {
   const [highlightedActionIdx, setHighlightedActionIdx] = useState<number | null>(null);
   const [activeFactorIdx, setActiveFactorIdx] = useState<number | null>(null);
 
-  const handleFactorClick = (factorIdx: number) => {
+  const handleFactorClick = (actionIndex: number, factorIdx: number) => {
     setActiveFactorIdx(factorIdx);
-    const targetIdx = factorIdx % (meta?.actionPlan.length || 1);
-    const el = document.getElementById(`action-step-${targetIdx}`);
+    const el = document.getElementById(`action-step-${actionIndex}`);
     if (el) {
       el.scrollIntoView({ behavior: "smooth", block: "center" });
-      setHighlightedActionIdx(targetIdx);
+      setHighlightedActionIdx(actionIndex);
       setTimeout(() => setHighlightedActionIdx(null), 2500);
     }
   };
@@ -259,7 +292,7 @@ export default function RiskDetailPage() {
                 href="/dashboard"
                 className="inline-flex items-center justify-center px-4 py-2.5 rounded-xl border border-brand-900/15 text-xs font-semibold text-brand-900/70 hover:text-brand-900 hover:bg-neutral-50"
               >
-                Kembali
+                Kembali ke Dashboard
               </Link>
             </div>
           </div>
@@ -326,7 +359,6 @@ export default function RiskDetailPage() {
     );
   }
 
-  // Level comes from the assessment itself so this page always agrees with the dashboard card.
   const rawScore = matchedRisk.estimated_risk_score ?? matchedRisk.probability;
   const pct =
     rawScore !== undefined
@@ -335,26 +367,29 @@ export default function RiskDetailPage() {
   const tone = getRiskTone(matchedRisk.risk_level);
 
   return (
-    <div className="min-h-screen bg-brand-50/20 text-brand-900 selection:bg-brand-200">
-      {/* Top Header */}
-      <header className="border-b border-brand-900/10 bg-white/80 backdrop-blur-md sticky top-0 z-30">
-        <div className="max-w-4xl mx-auto px-6 h-14 flex items-center justify-between">
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-2 text-xs font-semibold text-brand-900/70 hover:text-brand-900 transition-colors"
-          >
-            <ArrowLeft aria-hidden="true" className="w-4 h-4" />
-            <span>Kembali ke Dashboard</span>
+    <div className="flex-1 min-w-0 flex flex-col">
+      {/* Top Breadcrumb Header */}
+      <header className="h-16 border-b border-brand-900/10 bg-white/70 backdrop-blur-md sticky top-0 z-10 px-6 hidden lg:flex items-center">
+        <div className="flex items-center gap-2 text-xs font-mono">
+          <Link href="/dashboard" className="text-brand-900/50 uppercase hover:text-brand-900 transition-colors">
+            Dashboard
           </Link>
+          <span className="text-brand-900/30">/</span>
+          <span className="text-brand-900/50 uppercase">Analisis Risiko</span>
+          <span className="text-brand-900/30">/</span>
+          <span className="text-brand-900 font-bold uppercase">{meta.title}</span>
         </div>
       </header>
 
       {/* Main Container */}
-      <main className="max-w-4xl mx-auto px-6 py-8 space-y-8">
+      <main className="max-w-4xl mx-auto px-6 py-8 space-y-8 w-full">
         {assessment.is_mock && <MockDataNotice />}
 
+        {/* Section 1: Disease Identity & Clinical Definition */}
         <section className="space-y-2 border-b border-brand-900/10 pb-6">
-          <p className="text-sm text-muted-foreground">{meta.category}</p>
+          <span className="text-xs font-mono font-bold tracking-widest text-brand-900/50 uppercase block">
+            {meta.category}
+          </span>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-brand-900">
               {meta.title}
@@ -370,14 +405,22 @@ export default function RiskDetailPage() {
           </p>
         </section>
 
+        {/* Section 2: Scorecard & Clinical Level Interpretation */}
         <section className="bg-white border border-brand-900/10 rounded-2xl p-6 shadow-xs space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h2 className="text-sm font-semibold text-muted-foreground">Estimasi Skor Risiko</h2>
-              <p className="text-4xl font-bold tabular-nums text-brand-900 mt-1">{pct}%</p>
+              <h2 className="text-xs font-mono font-bold tracking-widest text-brand-900/50 uppercase">
+                Estimasi Skor Risiko
+              </h2>
+              <div className="flex items-baseline gap-2 mt-1">
+                <span className="text-4xl font-bold font-mono tracking-tight text-brand-900">
+                  {pct}%
+                </span>
+                <span className="text-xs font-mono text-brand-900/50">Estimasi Preventif</span>
+              </div>
             </div>
 
-            <p className="text-sm text-brand-900/70 max-w-sm sm:text-right">
+            <p className="text-xs text-brand-900/70 max-w-sm sm:text-right leading-relaxed">
               {LEVEL_INTERPRETATION[matchedRisk.risk_level]}
             </p>
           </div>
@@ -386,63 +429,52 @@ export default function RiskDetailPage() {
             <div
               role="img"
               aria-label={`Estimasi skor risiko ${pct} persen`}
-              className="h-3 w-full bg-brand-900/10 rounded-full overflow-hidden p-0.5"
+              className="h-2.5 w-full bg-brand-900/10 rounded-full overflow-hidden p-0.5"
             >
               <div style={{ width: `${pct}%` }} className={`h-full rounded-full ${tone.fillClass}`} />
             </div>
-            <div aria-hidden="true" className="flex justify-between text-xs text-muted-foreground tabular-nums">
-              <span>0%</span>
-              <span>100%</span>
+            <div aria-hidden="true" className="flex justify-between text-[11px] font-mono text-brand-900/50">
+              <span>0% Risiko Minimal</span>
+              <span>100% Beban Risiko Tinggi</span>
             </div>
           </div>
         </section>
 
-        {/* Contributing Factors */}
+        {/* Section 3: Disease-Specific Contributing Factors (Explainable AI / SHAP) */}
         <section className="space-y-4">
           <div>
-            <p className="text-xs font-mono font-bold tracking-widest text-brand-900/40 uppercase">
+            <span className="text-xs font-mono font-bold tracking-widest text-brand-900/50 uppercase block">
               Explainable AI (XAI)
-            </p>
-            <h2 className="text-lg font-bold text-brand-900 mt-1">
+            </span>
+            <h2 className="text-lg font-bold text-brand-900 mt-0.5">
               Faktor Gaya Hidup Penentu Estimasi Anda
             </h2>
             <p className="text-xs text-brand-900/60 mt-0.5">
-              Variabel gaya hidup yang paling berkontribusi terhadap kalkulasi estimasi risiko {meta.title}.
+              Analisis kontribusi faktor fisiologis terhadap estimasi risiko {meta.title}. Klik faktor untuk melihat langkah intervensi terkait.
             </p>
           </div>
 
           <div className="grid grid-cols-1 gap-3">
-            {(assessment.top_factors && assessment.top_factors.length > 0
-              ? assessment.top_factors
-              : meta.factors.map((f) => ({
-                  feature: f.name,
-                  label: f.name,
-                  impact: f.impact,
-                  weight_percentage: f.weight,
-                  description: f.note,
-                }))
-            ).map((factor, idx) => {
+            {meta.factors.map((factor, idx) => {
               const isBurden = factor.impact === "increase";
               const isSelected = activeFactorIdx === idx;
-              const weightVal = Math.round(factor.weight_percentage);
+              const weightVal = Math.round(factor.weight);
 
               return (
                 <button
-                  key={factor.feature || factor.label}
+                  key={factor.name}
                   type="button"
-                  onClick={() => handleFactorClick(idx)}
-                  className={`w-full text-left p-4 rounded-xl border space-y-2.5 shadow-xs transition-all duration-200 group ${
+                  onClick={() => handleFactorClick(factor.actionIndex, idx)}
+                  className={`w-full text-left p-4 rounded-xl border space-y-2.5 shadow-xs transition-all duration-200 group cursor-pointer ${
                     isSelected
                       ? "bg-brand-50/90 border-brand-900/30"
                       : "bg-white border-brand-900/10 hover:border-brand-900/25 hover:bg-neutral-50/60"
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-brand-900 group-hover:text-brand-900">
-                        {factor.label}
-                      </span>
-                    </div>
+                    <span className="text-sm font-semibold text-brand-900 group-hover:text-brand-900">
+                      {factor.name}
+                    </span>
                     <span
                       className={`text-xs font-mono font-bold ${
                         isBurden ? "text-amber-700" : "text-emerald-700"
@@ -463,7 +495,7 @@ export default function RiskDetailPage() {
                   </div>
 
                   <p className="text-xs text-brand-900/70 leading-relaxed">
-                    {factor.description}
+                    {factor.note}
                   </p>
 
                   <div className="pt-2 flex items-center justify-between border-t border-brand-900/5">
@@ -480,71 +512,67 @@ export default function RiskDetailPage() {
           </div>
         </section>
 
-        {/* Targeted Action Plan */}
-        <section id="action-plan-section" className="space-y-4">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-xs font-mono font-bold tracking-widest text-brand-900/40 uppercase">
-                Rencana Intervensi
-              </p>
-              <h2 className="text-lg font-bold text-brand-900 mt-1">
-                Target Perubahan Gaya Hidup Paling Efektif
-              </h2>
-            </div>
-            <Link
-              href="/dashboard/recommendations"
-              className="text-xs font-semibold text-brand-900 hover:underline flex items-center gap-1 shrink-0"
-            >
-              <span>Semua Rekomendasi</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
+        {/* Section 4: Disease-Specific Clinical Action Plan */}
+        <section className="space-y-4">
+          <div>
+            <span className="text-xs font-mono font-bold tracking-widest text-brand-900/50 uppercase block">
+              Rencana Tindakan Klinis
+            </span>
+            <h2 className="text-lg font-bold text-brand-900 mt-0.5">
+              Langkah Preventif Khusus {meta.title}
+            </h2>
+            <p className="text-xs text-brand-900/60 mt-0.5">
+              Intervensi berbasis konsensus panduan medis untuk menurunkan beban risiko.
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-3.5">
             {meta.actionPlan.map((action, idx) => {
-              const isHighlighted = highlightedActionIdx === idx;
+              const isTargeted = highlightedActionIdx === idx;
 
               return (
                 <div
                   id={`action-step-${idx}`}
                   key={action.title}
-                  className={`border rounded-2xl p-5 flex flex-col justify-between space-y-3 shadow-xs transition-all duration-300 ${
-                    isHighlighted
-                      ? "bg-brand-50/90 border-brand-700/50 ring-2 ring-brand-700/30 shadow-sm"
-                      : "bg-white border-brand-900/10 hover:border-brand-900/20"
+                  className={`p-5 rounded-2xl border transition-all duration-300 space-y-3 ${
+                    isTargeted
+                      ? "bg-brand-50/90 border-brand-900/40 ring-2 ring-brand-900/20 shadow-md"
+                      : "bg-white border-brand-900/10 shadow-xs"
                   }`}
                 >
-                  <div className="space-y-2">
-                    <span className="text-[11px] font-mono font-bold text-brand-900/40">
-                      Langkah 0{idx + 1}
-                    </span>
-                    <h3 className="text-sm font-bold text-brand-900 leading-snug">
-                      {action.title}
-                    </h3>
-                    <p className="text-xs text-brand-900/70 leading-relaxed">
-                      {action.description}
-                    </p>
-                  </div>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-3">
+                      <div className="size-6 rounded-lg bg-brand-900/10 text-brand-900 flex items-center justify-center font-mono font-bold text-xs shrink-0 mt-0.5">
+                        0{idx + 1}
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-bold text-brand-900">{action.title}</h3>
+                        <span className="text-[10px] font-mono font-semibold text-emerald-800 uppercase block mt-0.5">
+                          {action.impactLabel}
+                        </span>
+                      </div>
+                    </div>
 
-                  <div className="pt-2 border-t border-brand-900/5 flex items-center justify-between">
-                    <span className="text-[11px] font-mono font-bold text-emerald-800">
-                      {action.impactLabel}
-                    </span>
                     <Link
-                      href={`/dashboard/evidence?disease=${diseaseKey}`}
-                      className="text-[10px] font-mono font-bold text-brand-900/60 hover:text-brand-900"
+                      href={`/dashboard/evidence?ref=${action.evidenceId}`}
+                      className="inline-flex items-center gap-1 text-[11px] font-mono font-bold text-brand-900/70 hover:text-brand-900 hover:underline shrink-0"
                     >
-                      Bukti →
+                      <BookOpen className="w-3 h-3 text-brand-900/50" />
+                      <span>Bukti Medis →</span>
                     </Link>
                   </div>
+
+                  <p className="text-xs text-brand-900/70 leading-relaxed pl-9">
+                    {action.description}
+                  </p>
                 </div>
               );
             })}
           </div>
         </section>
 
-        {/* Action CTAs (Simulation Integrations) */}
-        <section className="p-6 rounded-2xl bg-brand-900 text-white space-y-5 shadow-sm">
+        {/* Section 5: Forward Navigation (What-If Simulator & Proyeksi Horison) */}
+        <section className="p-6 rounded-2xl bg-brand-900 text-white space-y-5 shadow-xs">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
             <div className="space-y-1">
               <span className="text-[10px] font-mono font-bold tracking-widest text-brand-200/60 uppercase">
@@ -552,60 +580,66 @@ export default function RiskDetailPage() {
               </span>
               <h2 className="text-lg font-bold text-white">Eksplorasi Skenario Gaya Hidup</h2>
               <p className="text-xs text-brand-200/80 leading-relaxed max-w-xl">
-                Nantinya Anda dapat menggeser variabel tidur, kebugaran fisik, dan berat badan untuk melihat dampaknya secara langsung terhadap estimasi risiko {meta.title}.
+                Uji perubahan durasi tidur, kebugaran aerobik, dan target berat badan secara interaktif untuk memproyeksikan lintasan risiko preventif Anda.
               </p>
             </div>
 
             <div className="text-left sm:text-right shrink-0">
               <span className="text-[10px] font-mono font-bold text-brand-200/60 uppercase block">
-                Status Modul
+                Simulator
               </span>
-              <span className="text-xs font-mono font-semibold text-brand-200">
-                Tahap Kalibrasi AI/ML
+              <span className="text-xs font-mono font-bold text-emerald-300 uppercase">
+                Tersedia Sekarang
               </span>
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-3">
-              <div className="flex items-center gap-2">
-                <Sliders aria-hidden="true" className="w-4 h-4 text-brand-200" />
-                <h3 className="text-sm font-bold text-white">What-If Simulator</h3>
+            {/* 1. What-If Simulator Card (Correctly routed to /dashboard/simulation/what-if) */}
+            <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-3 flex flex-col justify-between">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Sliders aria-hidden="true" className="w-4 h-4 text-brand-200" />
+                  <h3 className="text-sm font-bold text-white">What-If Simulator</h3>
+                </div>
+                <p className="text-xs text-brand-200/75 leading-relaxed">
+                  Uji skenario modifikasi parameter tidur, aktivitas, dan berat badan tanpa mengubah data profil asli Anda.
+                </p>
               </div>
-              <p className="text-xs text-brand-200/75 leading-relaxed">
-                Uji skenario modifikasi target gaya hidup Anda tanpa mengubah data profil asli.
-              </p>
-              <div className="pt-2 border-t border-white/10 flex items-center justify-between">
-                <span className="text-[10px] font-mono font-bold text-brand-200/60 uppercase">
-                  Tahap Kalibrasi Model
+              <div className="pt-3 border-t border-white/10 flex items-center justify-between">
+                <span className="text-[10px] font-mono font-bold text-emerald-300 uppercase">
+                  Interaktif
                 </span>
                 <Link
-                  href="/dashboard/recommendations"
+                  href="/dashboard/simulation/what-if"
                   className="text-xs font-semibold text-brand-200 hover:text-white underline underline-offset-2 flex items-center gap-1"
                 >
-                  <span>Rekomendasi Terarah</span>
+                  <span>Buka What-If Simulator</span>
                   <ArrowRight className="w-3 h-3" />
                 </Link>
               </div>
             </div>
 
-            <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-3">
-              <div className="flex items-center gap-2">
-                <TrendingUp aria-hidden="true" className="w-4 h-4 text-brand-200" />
-                <h3 className="text-sm font-bold text-white">Proyeksi Horison 180 Hari</h3>
+            {/* 2. Proyeksi Horison Card (Correctly routed to /dashboard/simulation/future) */}
+            <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-3 flex flex-col justify-between">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <TrendingUp aria-hidden="true" className="w-4 h-4 text-brand-200" />
+                  <h3 className="text-sm font-bold text-white">Proyeksi Horison 180 Hari</h3>
+                </div>
+                <p className="text-xs text-brand-200/75 leading-relaxed">
+                  Visualisasi proyeksi lintasan risiko dan skor kesehatan preventif 30, 90, dan 180 hari ke depan.
+                </p>
               </div>
-              <p className="text-xs text-brand-200/75 leading-relaxed">
-                Visualisasi estimasi lintasan risiko preventif 30, 90, dan 180 hari ke depan.
-              </p>
-              <div className="pt-2 border-t border-white/10 flex items-center justify-between">
-                <span className="text-[10px] font-mono font-bold text-brand-200/60 uppercase">
-                  Tahap Kalibrasi Model
+              <div className="pt-3 border-t border-white/10 flex items-center justify-between">
+                <span className="text-[10px] font-mono font-bold text-emerald-300 uppercase">
+                  Multi-Horison
                 </span>
                 <Link
-                  href={`/dashboard/evidence?disease=${diseaseKey}`}
+                  href="/dashboard/simulation/future"
                   className="text-xs font-semibold text-brand-200 hover:text-white underline underline-offset-2 flex items-center gap-1"
                 >
-                  <span>Dasar Ilmiah</span>
+                  <span>Buka Proyeksi Horison</span>
                   <ArrowRight className="w-3 h-3" />
                 </Link>
               </div>
@@ -613,13 +647,14 @@ export default function RiskDetailPage() {
           </div>
         </section>
 
-        <section className="pt-4 border-t border-brand-900/10 space-y-3">
-          <div className="flex items-center gap-2 text-xs text-brand-900/60">
-            <BookOpen aria-hidden="true" className="w-3.5 h-3.5 shrink-0" />
+        {/* Section 6: Guideline Reference & Medical Disclaimer */}
+        <section className="pt-4 border-t border-brand-900/10 space-y-4">
+          <div className="flex items-center gap-2 text-xs text-brand-900/60 font-mono">
+            <BookOpen aria-hidden="true" className="w-3.5 h-3.5 shrink-0 text-brand-900/50" />
             <span>Dasar Referensi: {meta.guidelineSource}</span>
           </div>
 
-          <DisclaimerBanner />
+          <DisclaimerBanner variant="banner" />
         </section>
       </main>
     </div>
