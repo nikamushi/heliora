@@ -49,10 +49,27 @@ export default function LoginPage() {
       // Check consent status to route appropriately
       try {
         const consentStatus = await apiClient.consent.getStatus();
-        if (consentStatus.has_active_consent) {
-          router.push("/dashboard");
-        } else {
+        if (!consentStatus?.has_active_consent) {
           router.push("/onboarding/consent");
+          return;
+        }
+
+        // Check health profile completion
+        try {
+          const profile = await apiClient.healthProfile.get();
+          if (
+            profile &&
+            profile.age &&
+            profile.gender &&
+            profile.height_cm &&
+            profile.weight_kg
+          ) {
+            router.push("/dashboard");
+          } else {
+            router.push("/onboarding/health-profile");
+          }
+        } catch {
+          router.push("/onboarding/health-profile");
         }
       } catch {
         router.push("/onboarding/consent");
