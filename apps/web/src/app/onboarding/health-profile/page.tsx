@@ -4,31 +4,17 @@ import React, { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
-import { 
-  User, 
-  Activity, 
-  Heart, 
-  ArrowRight, 
-  ArrowLeft, 
-  Check, 
-  Scale, 
-  Ruler, 
-  Moon, 
-  Cigarette, 
-  Flame, 
-  Brain, 
+import {
+  ArrowRight,
+  ArrowLeft,
+  Check,
   AlertCircle,
   Loader2,
-  Sparkles
+  Sparkles,
 } from "lucide-react";
-import { IconGenderMale, IconGenderFemale } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
 import { Slider } from "@/components/ui/slider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { DisclaimerBanner } from "@/components/disclaimer-banner";
 import { apiClient, ApiClientError } from "@/lib/api-client";
 import { HealthProfileCreateRequest } from "@/types/api";
 
@@ -44,10 +30,10 @@ interface SmokingOption {
 }
 
 const activityOptions: ActivityOption[] = [
-  { id: "sedentary", label: "Sedentari", desc: "Jarang olahraga (< 30 mnt/mgg)" },
+  { id: "sedentary", label: "Jarang berolahraga", desc: "" },
   { id: "light", label: "Ringan", desc: "1–2 kali per minggu" },
   { id: "moderate", label: "Sedang", desc: "3–4 kali per minggu" },
-  { id: "active", label: "Aktif", desc: "5+ kali per minggu / intensif" },
+  { id: "active", label: "Aktif", desc: "5+ kali per minggu" },
 ];
 
 const smokingOptions: SmokingOption[] = [
@@ -87,68 +73,98 @@ export default function HealthProfilePage() {
 
   useEffect(() => {
     let isMounted = true;
-    async function loadExistingProfile() {
+    async function initAndCheckAccess() {
       try {
-        if (!apiClient.getToken()) return;
-        const profile = await apiClient.healthProfile.get();
-        if (!isMounted || !profile) return;
-
-        if (profile.age) setAge(String(profile.age));
-        if (profile.gender) setGender(profile.gender);
-        if (profile.height_cm) setHeight(String(profile.height_cm));
-        if (profile.weight_kg) setWeight(String(profile.weight_kg));
-
-        if (profile.physical_activity_min_per_week !== undefined) {
-          const actVal = profile.physical_activity_min_per_week;
-          if (actVal <= 0) setActivity("sedentary");
-          else if (actVal <= 60) setActivity("light");
-          else if (actVal <= 150) setActivity("moderate");
-          else setActivity("active");
-        }
-
-        if (profile.sleep_duration_hours) {
-          setSleep(String(Math.round(profile.sleep_duration_hours)));
-        }
-        if (profile.smoking_status) {
-          setSmoking(profile.smoking_status);
-        }
-
-        if (profile.family_history) {
-          const details = profile.family_history_details || "";
-          setFamilyHistoryDetails(details);
-          const found: string[] = [];
-          if (details.toLowerCase().includes("diabet")) found.push("diabetes");
-          if (
-            details.toLowerCase().includes("hipertensi") ||
-            details.toLowerCase().includes("hypertension")
-          ) {
-            found.push("hypertension");
+        const token = await apiClient.getAccessToken();
+        if (!token) {
+          if (isMounted) {
+            router.replace("/login?redirect=/onboarding/health-profile");
           }
-          if (
-            details.toLowerCase().includes("jantung") ||
-            details.toLowerCase().includes("heart")
-          ) {
-            found.push("heart_disease");
-          }
-          setFamilyHistory(found.length > 0 ? found : ["diabetes"]);
-        } else {
-          setFamilyHistory(["none"]);
-          setFamilyHistoryDetails("");
+          return;
         }
 
-        if (profile.stress_level) {
-          setStress(String(profile.stress_level));
+        // Must have active consent before filling health profile
+        try {
+          const consentStatus = await apiClient.consent.getStatus();
+          if (!consentStatus?.has_active_consent) {
+            if (isMounted) {
+              router.replace("/onboarding/consent");
+            }
+            return;
+          }
+        } catch {
+          if (isMounted) {
+            router.replace("/onboarding/consent");
+          }
+          return;
+        }
+
+        // Load existing profile if any
+        try {
+          const profile = await apiClient.healthProfile.get();
+          if (!isMounted || !profile) return;
+
+          if (profile.age) setAge(String(profile.age));
+          if (profile.gender) setGender(profile.gender);
+          if (profile.height_cm) setHeight(String(profile.height_cm));
+          if (profile.weight_kg) setWeight(String(profile.weight_kg));
+
+          if (profile.physical_activity_min_per_week !== undefined) {
+            const actVal = profile.physical_activity_min_per_week;
+            if (actVal <= 0) setActivity("sedentary");
+            else if (actVal <= 60) setActivity("light");
+            else if (actVal <= 150) setActivity("moderate");
+            else setActivity("active");
+          }
+
+          if (profile.sleep_duration_hours) {
+            setSleep(String(Math.round(profile.sleep_duration_hours)));
+          }
+          if (profile.smoking_status) {
+            setSmoking(profile.smoking_status);
+          }
+
+          if (profile.family_history) {
+            const details = profile.family_history_details || "";
+            setFamilyHistoryDetails(details);
+            const found: string[] = [];
+            if (details.toLowerCase().includes("diabet")) found.push("diabetes");
+            if (
+              details.toLowerCase().includes("hipertensi") ||
+              details.toLowerCase().includes("hypertension")
+            ) {
+              found.push("hypertension");
+            }
+            if (
+              details.toLowerCase().includes("jantung") ||
+              details.toLowerCase().includes("heart")
+            ) {
+              found.push("heart_disease");
+            }
+            setFamilyHistory(found.length > 0 ? found : ["diabetes"]);
+          } else {
+            setFamilyHistory(["none"]);
+            setFamilyHistoryDetails("");
+          }
+
+          if (profile.stress_level) {
+            setStress(String(profile.stress_level));
+          }
+        } catch {
+          // No profile yet, start fresh
         }
       } catch {
-        // Silently skip if no existing profile exists or unauthorized
+        if (isMounted) {
+          router.replace("/login");
+        }
       }
     }
 
-    loadExistingProfile();
+    initAndCheckAccess();
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [router]);
 
   const toggleFamilyHistory = (id: string) => {
     if (id === "none") {
@@ -166,30 +182,11 @@ export default function HealthProfilePage() {
     });
   };
 
-  // Live BMI Calculation & Classification
-  const bmiInfo = useMemo(() => {
+  const bmiValue = useMemo(() => {
     const h = parseFloat(height) / 100;
     const w = parseFloat(weight);
     if (h > 0 && w > 0) {
-      const val = parseFloat((w / (h * h)).toFixed(1));
-      let category = "Normal";
-      let color = "text-emerald-800 bg-emerald-500/10 border-emerald-500/20";
-
-      if (val < 18.5) {
-        category = "Berat Kurang";
-        color = "text-blue-800 bg-blue-500/10 border-blue-500/20";
-      } else if (val >= 18.5 && val <= 24.9) {
-        category = "Normal / Sehat";
-        color = "text-emerald-800 bg-emerald-500/10 border-emerald-500/20";
-      } else if (val >= 25.0 && val <= 29.9) {
-        category = "Kelebihan Berat";
-        color = "text-amber-800 bg-amber-500/10 border-amber-500/20";
-      } else {
-        category = "Obesitas";
-        color = "text-rose-800 bg-rose-500/10 border-rose-500/20";
-      }
-
-      return { value: val, category, color };
+      return parseFloat((w / (h * h)).toFixed(1));
     }
     return null;
   }, [height, weight]);
@@ -244,7 +241,7 @@ export default function HealthProfilePage() {
         .map((opt) => opt.label)
         .join(", ");
       const resolvedDetails = hasFamilyHistory
-        ? (familyHistoryDetails.trim() || selectedLabels || "Riwayat keluarga dilaporkan")
+        ? familyHistoryDetails.trim() || selectedLabels || "Riwayat keluarga dilaporkan"
         : null;
 
       const payload: HealthProfileCreateRequest = {
@@ -258,20 +255,17 @@ export default function HealthProfilePage() {
         family_history: hasFamilyHistory,
         family_history_details: resolvedDetails,
         stress_level: stress ? parseInt(stress, 10) : 5,
-        bmi: bmiInfo?.value || null,
+        bmi: bmiValue,
       };
 
-      // Simpan langsung ke backend API — kegagalan tidak lagi ditelan diam-diam
       await apiClient.healthProfile.save(payload);
 
-      // Otomatis jalankan asesmen risiko awal berbasis profil kesehatan yang baru disimpan
       try {
         await apiClient.assessment.run();
       } catch (assessmentErr) {
         console.warn("Auto-assessment on onboarding warning:", assessmentErr);
       }
 
-      // Sinkronkan ke cache lokal untuk percepatan UI
       if (typeof window !== "undefined") {
         localStorage.setItem("heliora_health_profile", JSON.stringify(payload));
       }
@@ -294,59 +288,64 @@ export default function HealthProfilePage() {
   };
 
   return (
-    <div className="relative min-h-screen flex flex-col justify-center items-center px-4 py-12 bg-gradient-to-b from-brand-50/30 via-white to-brand-50/20 text-brand-900 selection:bg-brand-200 overflow-hidden">
-      {/* Ambient background glow */}
-      <div 
-        aria-hidden="true" 
-        className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[350px] bg-brand-400/10 blur-[130px] rounded-full pointer-events-none -z-10" 
-      />
-
-      <div className="w-full max-w-2xl">
-        {/* Header Badge & Brand */}
-        <div className="text-center mb-6 space-y-2">
-          <Link href="/" className="inline-flex items-center gap-2 font-bold text-xl tracking-tight text-brand-900 hover:opacity-80 transition-opacity">
-            <span className="w-8 h-8 rounded-xl bg-brand-900 text-white flex items-center justify-center text-sm font-semibold shadow-sm">
-              H
-            </span>
-            <span>HELIORA</span>
-          </Link>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-brand-900">
-            Profil Kesehatan & Gaya Hidup
-          </h1>
-          <p className="text-xs sm:text-sm text-brand-900/65 max-w-md mx-auto">
-            Informasi ini digunakan model AI untuk mengukur faktor risiko dan rekomendasi preventif yang akurat.
-          </p>
-        </div>
-
-        {/* Card Container */}
-        <div className="bg-white/80 backdrop-blur-xl border border-brand-900/10 rounded-3xl p-6 sm:p-8 shadow-xl shadow-brand-900/5 space-y-6">
-          {/* Stepper Header */}
-          <div className="space-y-2.5">
-            <div className="flex items-center justify-between text-xs font-semibold text-brand-900/70">
-              <span className="flex items-center gap-1.5 font-medium">
-                {step === 1 && <User className="w-3.5 h-3.5 text-brand-900" />}
-                {step === 2 && <Activity className="w-3.5 h-3.5 text-brand-900" />}
-                {step === 3 && <Heart className="w-3.5 h-3.5 text-brand-900" />}
-                <span>
-                  {step === 1 && "Langkah 1: Data Dasar Biometrik"}
-                  {step === 2 && "Langkah 2: Pola Gaya Hidup"}
-                  {step === 3 && "Langkah 3: Riwayat Medis & Stres"}
-                </span>
-              </span>
-              <span className="text-xs font-mono font-bold tracking-wider text-brand-900/60">
-                0{step} / 03
-              </span>
-            </div>
-
-            {/* Stepper Progress Bar via shadcn */}
-            <Progress value={(step / 3) * 100} className="h-1.5 bg-brand-900/10" />
+    <div className="min-h-screen bg-white text-[#111827] selection:bg-[#DCFCE9]">
+      <div className="w-full max-w-[700px] mx-auto px-6 py-14 sm:py-20 flex flex-col justify-between min-h-screen">
+        {/* Main Content Area */}
+        <motion.main
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+          className="flex-1 flex flex-col justify-center"
+        >
+          {/* Editorial Title & Subtitle */}
+          <div className="mb-10 sm:mb-12">
+            <h1 className="text-4xl sm:text-5xl lg:text-[52px] font-bold tracking-tight text-[#111827] leading-[1.12] mb-4">
+              {step === 1 && (
+                <>
+                  Mari mulai dari
+                  <br />
+                  kondisi Anda.
+                </>
+              )}
+              {step === 2 && (
+                <>
+                  Sekarang, ceritakan
+                  <br />
+                  keseharian Anda.
+                </>
+              )}
+              {step === 3 && (
+                <>
+                  Beberapa hal
+                  <br />
+                  terakhir.
+                </>
+              )}
+            </h1>
+            <p className="text-lg sm:text-[20px] text-[#6B7280] font-normal leading-[1.55] max-w-[620px]">
+              {step === 1 &&
+                "Beberapa informasi dasar akan membantu membentuk gambaran kesehatan yang lebih personal."}
+              {step === 2 &&
+                "Beberapa kebiasaan sehari-hari membantu membentuk gambaran kesehatan yang lebih lengkap."}
+              {step === 3 &&
+                "Informasi tambahan ini membantu melengkapi gambaran kesehatan Anda."}
+            </p>
           </div>
 
-          {/* Error Message via shadcn Alert */}
+          {/* Form Step Section Header */}
+          <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-[#9CA3AF] pb-3 border-b border-[#E5E7EB]/80 mb-8">
+            <span>
+              {step === 1 && "DATA DASAR"}
+              {step === 2 && "GAYA HIDUP"}
+              {step === 3 && "INFORMASI TAMBAHAN (OPSIONAL)"}
+            </span>
+            <span className="font-mono text-xs text-[#6B7280]">0{step} / 03</span>
+          </div>
+
           {error && (
-            <Alert className="bg-rose-500/10 border-rose-500/20 text-rose-900 rounded-2xl py-3 px-4 flex items-center gap-3">
-              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
-              <AlertDescription className="text-xs text-rose-900 font-medium">
+            <Alert className="mb-8 bg-red-50 border border-red-200 text-red-900 rounded-2xl py-3 px-4 flex items-center gap-3">
+              <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+              <AlertDescription className="text-xs text-red-900 font-medium">
                 {error}
               </AlertDescription>
             </Alert>
@@ -357,199 +356,183 @@ export default function HealthProfilePage() {
             {step === 1 && (
               <motion.div
                 key="step1"
-                initial={{ opacity: 0, x: 10 }}
+                initial={{ opacity: 0, x: 8 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
+                exit={{ opacity: 0, x: -8 }}
                 transition={{ duration: 0.25 }}
-                className="space-y-5"
+                className="space-y-7"
               >
-                {/* Usia & Gender Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label className="text-xs font-bold text-brand-900 uppercase tracking-wider">
-                      Usia (Tahun)
-                    </Label>
-                    <Input
+                {/* Usia */}
+                <div className="space-y-2">
+                  <label className="text-[15px] font-medium text-[#111827] block">
+                    Usia
+                  </label>
+                  <div className="relative">
+                    <input
                       type="number"
-                      placeholder="Contoh: 28"
+                      placeholder="28"
                       value={age}
                       onChange={(e) => setAge(e.target.value)}
-                      className="h-11 px-3.5 rounded-xl border-brand-900/15 bg-white text-brand-900 placeholder:text-neutral-400 text-sm focus-visible:ring-brand-900/20 focus-visible:border-brand-900"
+                      className="w-full h-13 px-4.5 pr-18 rounded-2xl bg-[#F9FAFB] border border-[#E5E7EB] text-[#111827] text-base font-normal placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#0D5F3F] focus:border-transparent transition-all"
                     />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="text-xs font-bold text-brand-900 uppercase tracking-wider">
-                      Jenis Kelamin
-                    </Label>
-                    <div className="grid grid-cols-2 gap-2 h-11">
-                      <button
-                        type="button"
-                        onClick={() => setGender("male")}
-                        className={`rounded-xl text-xs font-semibold border transition-all duration-150 flex items-center justify-center gap-2 ${
-                          gender === "male"
-                            ? "bg-brand-900 text-white border-brand-900 shadow-xs"
-                            : "bg-white text-brand-900 border-brand-900/15 hover:bg-neutral-50"
-                        }`}
-                      >
-                        <IconGenderMale className="w-4 h-4 shrink-0" stroke={2.2} />
-                        <span>Laki-laki</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setGender("female")}
-                        className={`rounded-xl text-xs font-semibold border transition-all duration-150 flex items-center justify-center gap-2 ${
-                          gender === "female"
-                            ? "bg-brand-900 text-white border-brand-900 shadow-xs"
-                            : "bg-white text-brand-900 border-brand-900/15 hover:bg-neutral-50"
-                        }`}
-                      >
-                        <IconGenderFemale className="w-4 h-4 shrink-0" stroke={2.2} />
-                        <span>Perempuan</span>
-                      </button>
-                    </div>
+                    <span className="absolute right-4.5 top-1/2 -translate-y-1/2 text-sm text-[#9CA3AF] pointer-events-none">
+                      tahun
+                    </span>
                   </div>
                 </div>
 
-                {/* Tinggi & Berat Badan */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label className="text-xs font-bold text-brand-900 uppercase tracking-wider flex items-center gap-1">
-                      <Ruler className="w-3.5 h-3.5 text-brand-900/70" />
-                      <span>Tinggi Badan (cm)</span>
-                    </Label>
-                    <Input
+                {/* Jenis Kelamin */}
+                <div className="space-y-2">
+                  <label className="text-[15px] font-medium text-[#111827] block">
+                    Jenis kelamin
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setGender("male")}
+                      className={`h-13 rounded-2xl border text-[15px] font-medium transition-all flex items-center justify-center cursor-pointer ${
+                        gender === "male"
+                          ? "bg-[#0D5F3F] text-white border-[#0D5F3F] shadow-xs"
+                          : "bg-[#F9FAFB] text-[#111827] border-[#E5E7EB] hover:bg-[#F3F4F6]"
+                      }`}
+                    >
+                      Laki-laki
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setGender("female")}
+                      className={`h-13 rounded-2xl border text-[15px] font-medium transition-all flex items-center justify-center cursor-pointer ${
+                        gender === "female"
+                          ? "bg-[#0D5F3F] text-white border-[#0D5F3F] shadow-xs"
+                          : "bg-[#F9FAFB] text-[#111827] border-[#E5E7EB] hover:bg-[#F3F4F6]"
+                      }`}
+                    >
+                      Perempuan
+                    </button>
+                  </div>
+                </div>
+
+                {/* Tinggi Badan */}
+                <div className="space-y-2">
+                  <label className="text-[15px] font-medium text-[#111827] block">
+                    Tinggi badan
+                  </label>
+                  <div className="relative">
+                    <input
                       type="number"
-                      placeholder="Contoh: 172"
+                      placeholder="172"
                       value={height}
                       onChange={(e) => setHeight(e.target.value)}
-                      className="h-11 px-3.5 rounded-xl border-brand-900/15 bg-white text-brand-900 placeholder:text-neutral-400 text-sm focus-visible:ring-brand-900/20 focus-visible:border-brand-900"
+                      className="w-full h-13 px-4.5 pr-14 rounded-2xl bg-[#F9FAFB] border border-[#E5E7EB] text-[#111827] text-base font-normal placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#0D5F3F] focus:border-transparent transition-all"
                     />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="text-xs font-bold text-brand-900 uppercase tracking-wider flex items-center gap-1">
-                      <Scale className="w-3.5 h-3.5 text-brand-900/70" />
-                      <span>Berat Badan (kg)</span>
-                    </Label>
-                    <Input
-                      type="number"
-                      placeholder="Contoh: 68"
-                      value={weight}
-                      onChange={(e) => setWeight(e.target.value)}
-                      className="h-11 px-3.5 rounded-xl border-brand-900/15 bg-white text-brand-900 placeholder:text-neutral-400 text-sm focus-visible:ring-brand-900/20 focus-visible:border-brand-900"
-                    />
+                    <span className="absolute right-4.5 top-1/2 -translate-y-1/2 text-sm text-[#9CA3AF] pointer-events-none">
+                      cm
+                    </span>
                   </div>
                 </div>
 
-                {/* Dynamic Real-time BMI Gauge Card */}
-                {bmiInfo && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.96 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className={`p-4 rounded-2xl border ${bmiInfo.color} transition-all space-y-2`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Sparkles className="w-4 h-4" />
-                        <span className="text-xs font-bold uppercase tracking-wider">
-                          Kalkulasi BMI Otomatis
-                        </span>
-                      </div>
-                      <div className="flex items-baseline gap-1.5">
-                        <span className="text-xl font-extrabold">{bmiInfo.value}</span>
-                        <span className="text-xs font-bold">kg/m²</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-semibold">Kategori: {bmiInfo.category}</span>
-                      <span className="opacity-80">Ideal: 18.5 – 24.9</span>
-                    </div>
-                  </motion.div>
-                )}
+                {/* Berat Badan */}
+                <div className="space-y-2">
+                  <label className="text-[15px] font-medium text-[#111827] block">
+                    Berat badan
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      placeholder="68"
+                      value={weight}
+                      onChange={(e) => setWeight(e.target.value)}
+                      className="w-full h-13 px-4.5 pr-14 rounded-2xl bg-[#F9FAFB] border border-[#E5E7EB] text-[#111827] text-base font-normal placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#0D5F3F] focus:border-transparent transition-all"
+                    />
+                    <span className="absolute right-4.5 top-1/2 -translate-y-1/2 text-sm text-[#9CA3AF] pointer-events-none">
+                      kg
+                    </span>
+                  </div>
+                </div>
               </motion.div>
             )}
 
             {step === 2 && (
               <motion.div
                 key="step2"
-                initial={{ opacity: 0, x: 10 }}
+                initial={{ opacity: 0, x: 8 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
+                exit={{ opacity: 0, x: -8 }}
                 transition={{ duration: 0.25 }}
-                className="space-y-5"
+                className="space-y-10"
               >
-                {/* Aktivitas Fisik Card Selection */}
-                <div className="space-y-2">
-                  <Label className="text-xs font-bold text-brand-900 uppercase tracking-wider flex items-center gap-1.5">
-                    <Flame className="w-3.5 h-3.5 text-brand-900" />
-                    <span>Aktivitas Fisik Mingguan</span>
-                  </Label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {/* Aktivitas Fisik */}
+                <div className="space-y-3">
+                  <label className="text-[15px] font-medium text-[#111827] block">
+                    Seberapa sering Anda berolahraga?
+                  </label>
+                  <div className="divide-y divide-[#F0F2F1] border-t border-b border-[#F0F2F1]">
                     {activityOptions.map((opt) => {
                       const isSelected = activity === opt.id;
                       return (
-                        <div
+                        <button
                           key={opt.id}
+                          type="button"
                           onClick={() => setActivity(opt.id)}
-                          className={`p-3.5 rounded-2xl border cursor-pointer transition-all duration-150 ${
-                            isSelected
-                              ? "bg-brand-50/70 border-brand-900 shadow-xs ring-2 ring-brand-900/10"
-                              : "bg-white border-brand-900/10 hover:border-brand-900/30 hover:bg-neutral-50/50"
-                          }`}
+                          className="w-full text-left py-4.5 sm:py-5 flex items-center justify-between group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0D5F3F] transition-colors hover:bg-neutral-50/40 px-1 cursor-pointer"
                         >
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm font-semibold text-brand-900">{opt.label}</span>
-                            {isSelected && <Check className="w-4 h-4 text-brand-900" />}
+                          <div>
+                            <h4 className="text-[16px] sm:text-[17px] font-semibold text-[#111827] leading-snug">
+                              {opt.label}
+                            </h4>
+                            {opt.desc && (
+                              <p className="text-xs sm:text-[13.5px] text-[#6B7280] mt-0.5 leading-normal">
+                                {opt.desc}
+                              </p>
+                            )}
                           </div>
-                          <p className="text-xs text-brand-900/60 mt-0.5">{opt.desc}</p>
-                        </div>
+                          <div
+                            className={`w-5.5 h-5.5 rounded-full flex items-center justify-center shrink-0 transition-all duration-150 ${
+                              isSelected
+                                ? "bg-[#0D5F3F] text-white shadow-xs"
+                                : "border-[1.8px] border-[#D1D5DB] bg-white group-hover:border-[#9CA3AF]"
+                            }`}
+                          >
+                            {isSelected && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                          </div>
+                        </button>
                       );
                     })}
                   </div>
                 </div>
 
-                {/* Durasi Tidur with shadcn Slider */}
-                <div className="space-y-3 p-4 rounded-2xl bg-brand-50/40 border border-brand-900/10">
+                {/* Durasi Tidur */}
+                <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <Label className="text-xs font-bold text-brand-900 uppercase tracking-wider flex items-center gap-1.5">
-                      <Moon className="w-3.5 h-3.5 text-brand-900" />
-                      <span>Rata-Rata Durasi Tidur Harian</span>
-                    </Label>
-                    <span className="text-sm font-bold text-brand-900 font-mono">
-                      {sleep} Jam / Hari
+                    <label className="text-[15px] font-medium text-[#111827]">
+                      Durasi tidur
+                    </label>
+                    <span className="text-[15px] tabular-nums font-medium text-[#111827]">
+                      <span className="font-semibold">{sleep}</span>{" "}
+                      <span className="text-[#6B7280]">jam / hari</span>
                     </span>
                   </div>
-                  <Slider
-                    value={[Number(sleep) || 7]}
-                    min={4}
-                    max={12}
-                    step={1}
-                    onValueChange={(val) => {
-                      const v = typeof val === "number" ? val : val[0]
-                      setSleep(String(v))
-                    }}
-                    className="py-1 cursor-pointer"
-                  />
-                  <div className="flex items-center justify-between text-[11px] text-brand-900/70">
-                    <span className="font-medium">
-                      {Number(sleep) < 6
-                        ? "Kurang dari anjuran (rentan risiko kardiovaskular)"
-                        : Number(sleep) <= 8
-                        ? "Durasi ideal untuk metabolisme dan pemulihan"
-                        : "Cukup / Panjang"}
-                    </span>
-                    <span className="font-mono text-brand-900/50">Rentang 4–12 Jam</span>
+                  <div className="pt-2 pb-1">
+                    <Slider
+                      value={[Number(sleep) || 7]}
+                      min={4}
+                      max={12}
+                      step={1}
+                      onValueChange={(val) => {
+                        const v = typeof val === "number" ? val : val[0];
+                        setSleep(String(v));
+                      }}
+                      className="cursor-pointer"
+                    />
                   </div>
                 </div>
 
                 {/* Status Merokok */}
-                <div className="space-y-2">
-                  <Label className="text-xs font-bold text-brand-900 uppercase tracking-wider flex items-center gap-1.5">
-                    <Cigarette className="w-3.5 h-3.5 text-brand-900" />
-                    <span>Kebiasaan Merokok</span>
-                  </Label>
-                  <div className="grid grid-cols-3 gap-2">
+                <div className="space-y-3">
+                  <label className="text-[15px] font-medium text-[#111827] block">
+                    Bagaimana kebiasaan merokok Anda?
+                  </label>
+                  <div className="grid grid-cols-3 gap-3">
                     {smokingOptions.map((opt) => {
                       const isSelected = smoking === opt.id;
                       return (
@@ -557,10 +540,10 @@ export default function HealthProfilePage() {
                           type="button"
                           key={opt.id}
                           onClick={() => setSmoking(opt.id)}
-                          className={`h-11 px-2 rounded-xl text-xs font-semibold border transition-all duration-150 flex items-center justify-center text-center ${
+                          className={`h-13 px-2 rounded-2xl text-xs sm:text-[13.5px] font-medium border transition-all flex items-center justify-center text-center cursor-pointer ${
                             isSelected
-                              ? "bg-brand-900 text-white border-brand-900 shadow-xs"
-                              : "bg-white text-brand-900 border-brand-900/15 hover:bg-neutral-50"
+                              ? "bg-[#0D5F3F] text-white border-[#0D5F3F] shadow-xs"
+                              : "bg-[#F9FAFB] text-[#111827] border-[#E5E7EB] hover:bg-[#F3F4F6]"
                           }`}
                         >
                           <span>{opt.label}</span>
@@ -575,134 +558,129 @@ export default function HealthProfilePage() {
             {step === 3 && (
               <motion.div
                 key="step3"
-                initial={{ opacity: 0, x: 10 }}
+                initial={{ opacity: 0, x: 8 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
+                exit={{ opacity: 0, x: -8 }}
                 transition={{ duration: 0.25 }}
-                className="space-y-5"
+                className="space-y-10"
               >
-                <div className="p-3.5 rounded-2xl bg-brand-50/50 border border-brand-900/10 text-xs text-brand-900/70">
-                  Bagian ini bersifat <strong>opsional</strong> untuk mempertajam estimasi AI. Anda dapat melewatinya bila tidak mengetahui riwayat pasti.
-                </div>
-
                 {/* Riwayat Penyakit Keluarga */}
-                <div className="space-y-2">
-                  <Label className="text-xs font-bold text-brand-900 uppercase tracking-wider flex items-center gap-1.5">
-                    <Heart className="w-3.5 h-3.5 text-brand-900" />
-                    <span>Riwayat Penyakit Keluarga</span>
-                  </Label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div className="space-y-3">
+                  <label className="text-[15px] font-medium text-[#111827] block">
+                    Riwayat Penyakit Keluarga
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {familyHistoryOptions.map((opt) => {
                       const isSelected = familyHistory.includes(opt.id);
                       return (
-                        <div
+                        <button
+                          type="button"
                           key={opt.id}
                           onClick={() => toggleFamilyHistory(opt.id)}
-                          className={`p-3 rounded-2xl border cursor-pointer transition-all duration-150 flex items-center justify-between ${
+                          className={`h-13 px-4 rounded-2xl border text-sm sm:text-[14.5px] font-medium transition-all flex items-center justify-between cursor-pointer ${
                             isSelected
-                              ? "bg-brand-50/70 border-brand-900 shadow-xs ring-2 ring-brand-900/10"
-                              : "bg-white border-brand-900/10 hover:border-brand-900/30 hover:bg-neutral-50"
+                              ? "bg-[#0D5F3F] text-white border-[#0D5F3F] shadow-xs"
+                              : "bg-[#F9FAFB] text-[#111827] border-[#E5E7EB] hover:bg-[#F3F4F6]"
                           }`}
                         >
-                          <span className="text-xs font-semibold text-brand-900">{opt.label}</span>
-                          {isSelected && <Check className="w-4 h-4 text-brand-900" />}
-                        </div>
+                          <span>{opt.label}</span>
+                          {isSelected && <Check className="w-4 h-4 text-white stroke-[2.5]" />}
+                        </button>
                       );
                     })}
                   </div>
-                  <p className="text-[11px] text-brand-900/55">
-                    Dapat memilih lebih dari satu kondisi riwayat penyakit keluarga.
-                  </p>
 
                   {/* Input Rincian Riwayat Keluarga */}
                   {!familyHistory.includes("none") && familyHistory.length > 0 && (
                     <div className="space-y-2 pt-2">
-                      <Label className="text-xs font-bold text-brand-900 uppercase tracking-wider">
+                      <label className="text-xs font-semibold text-[#6B7280] uppercase tracking-wider block">
                         Rincian Riwayat Keluarga (Opsional)
-                      </Label>
-                      <Input
+                      </label>
+                      <input
                         type="text"
-                        placeholder="Contoh: Ayah menderita diabetes tipe 2 sejak usia 45, kakek ada riwayat hipertensi"
+                        placeholder="Contoh: Ayah menderita diabetes tipe 2 sejak usia 45"
                         value={familyHistoryDetails}
                         onChange={(e) => setFamilyHistoryDetails(e.target.value)}
-                        className="h-11 px-3.5 rounded-xl border-brand-900/15 bg-white text-brand-900 placeholder:text-neutral-400 text-sm focus-visible:ring-brand-900/20 focus-visible:border-brand-900"
+                        className="w-full h-13 px-4.5 rounded-2xl bg-[#F9FAFB] border border-[#E5E7EB] text-[#111827] text-sm focus:outline-none focus:ring-2 focus:ring-[#0D5F3F] transition-all"
                       />
-                      <p className="text-[11px] text-brand-900/55">
-                        Catatan spesifik ini membantu model AI mengalibrasi faktor risiko metabolik & kardiovaskular secara akurat.
-                      </p>
                     </div>
                   )}
                 </div>
 
-                {/* Tingkat Stres with Slider */}
-                <div className="space-y-3 p-4 rounded-2xl bg-brand-50/40 border border-brand-900/10">
+                {/* Tingkat Stres */}
+                <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <Label className="text-xs font-bold text-brand-900 uppercase tracking-wider flex items-center gap-1.5">
-                      <Brain className="w-3.5 h-3.5 text-brand-900" />
-                      <span>Tingkat Stres Harian</span>
-                    </Label>
-                    <div className="flex items-baseline gap-1 font-mono">
-                      <span className="text-base font-bold text-brand-900">{stress || "5"}</span>
-                      <span className="text-xs text-brand-900/50">/ 10</span>
+                    <label className="text-[15px] font-medium text-[#111827]">
+                      Tingkat Stres Harian
+                    </label>
+                    <div className="flex items-baseline gap-1 tabular-nums">
+                      <span className="text-[15px] font-semibold text-[#111827]">
+                        {stress || "5"}
+                      </span>
+                      <span className="text-[15px] text-[#6B7280]">/ 10</span>
                     </div>
                   </div>
-                  <Slider
-                    value={[Number(stress) || 5]}
-                    min={1}
-                    max={10}
-                    step={1}
-                    onValueChange={(val) => {
-                      const v = typeof val === "number" ? val : val[0]
-                      setStress(String(v))
-                    }}
-                    className="py-1 cursor-pointer"
-                  />
-                  <div className="flex items-center justify-between text-[11px] text-brand-900/70">
-                    <span className="font-medium">
+                  <div className="pt-2 pb-1">
+                    <Slider
+                      value={[Number(stress) || 5]}
+                      min={1}
+                      max={10}
+                      step={1}
+                      onValueChange={(val) => {
+                        const v = typeof val === "number" ? val : val[0];
+                        setStress(String(v));
+                      }}
+                      className="cursor-pointer"
+                    />
+                  </div>
+                  <div className="text-xs sm:text-[13px] text-[#6B7280]">
+                    <span>
                       {Number(stress) <= 3
-                        ? "Rendah (Pikiran rileks dan terkendali)"
+                        ? "Rendah (Rileks dan terkendali)"
                         : Number(stress) <= 6
-                        ? "Sedang (Beban harian normal terkontrol)"
+                        ? "Sedang (Beban kerja normal)"
                         : "Tinggi (Sering tertekan / rentan burnout)"}
                     </span>
-                    <span className="font-mono text-brand-900/50">Skala 1–10</span>
                   </div>
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Action Footer Buttons */}
-          <div className="flex items-center justify-between pt-4 border-t border-brand-900/10">
+          {/* Form Bottom Divider */}
+          <div className="border-b border-[#E5E7EB]/80 pt-8 mb-8" />
+
+          {/* Navigation Action Buttons */}
+          <div className="flex items-center justify-between gap-4">
             {step > 1 ? (
               <button
                 type="button"
                 onClick={handleBack}
                 disabled={isLoading}
-                className="px-4 py-2 text-xs font-semibold text-brand-900/70 hover:text-brand-900 flex items-center gap-1 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="text-[15px] sm:text-[16px] font-medium text-[#6B7280] hover:text-[#111827] transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
-                <ArrowLeft className="w-3.5 h-3.5" />
+                <ArrowLeft className="w-4 h-4" />
                 <span>Kembali</span>
               </button>
             ) : (
               <Link
                 href="/onboarding/consent"
-                className={`px-4 py-2 text-xs font-semibold text-brand-900/70 hover:text-brand-900 flex items-center gap-1 transition-colors ${
+                className={`text-[15px] sm:text-[16px] font-medium text-[#6B7280] hover:text-[#111827] transition-colors flex items-center gap-1.5 ${
                   isLoading ? "pointer-events-none opacity-50" : ""
                 }`}
               >
-                <ArrowLeft className="w-3.5 h-3.5" />
+                <ArrowLeft className="w-4 h-4" />
                 <span>Consent</span>
               </Link>
             )}
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               {step === 3 && (
                 <button
                   type="button"
                   onClick={handleSubmit}
                   disabled={isLoading}
-                  className="px-4 py-2 text-xs font-semibold text-brand-900/60 hover:text-brand-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="text-[15px] font-medium text-[#6B7280] hover:text-[#111827] transition-colors cursor-pointer disabled:opacity-50"
                 >
                   Lewati
                 </button>
@@ -711,41 +689,35 @@ export default function HealthProfilePage() {
               {step < 3 ? (
                 <Button
                   onClick={handleNext}
-                  size="sm"
-                  className="px-5 py-2.5 rounded-xl bg-brand-900 hover:bg-brand-900/90 text-white font-semibold flex items-center gap-1.5 shadow-md shadow-brand-900/15 transition-all hover:scale-[1.01] active:scale-[0.99]"
+                  className="min-w-[130px] h-[46px] px-7 rounded-full font-semibold text-[15px] bg-[#0D5F3F] hover:bg-[#0B4F34] text-white shadow-sm active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <span>Lanjut</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <ArrowRight className="w-4 h-4" />
                 </Button>
               ) : (
                 <Button
                   onClick={handleSubmit}
                   disabled={isLoading}
-                  size="sm"
-                  className="px-6 py-2.5 rounded-xl bg-brand-900 hover:bg-brand-900/90 text-white font-semibold flex items-center gap-2 shadow-md shadow-brand-900/20 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="min-w-[160px] h-[46px] px-7 rounded-full font-semibold text-[15px] bg-[#0D5F3F] hover:bg-[#0B4F34] text-white shadow-sm active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
                 >
                   {isLoading ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Menyimpan Profil...</span>
+                      <span>Menyimpan...</span>
                     </>
                   ) : (
                     <>
-                      <span>Mulai Analisis AI</span>
-                      <Sparkles className="w-4 h-4 text-brand-200" />
+                      <span>Mulai Analisis</span>
+                      <Sparkles className="w-4 h-4 text-emerald-200" />
                     </>
                   )}
                 </Button>
               )}
             </div>
           </div>
-        </div>
-
-        {/* Banner Disclaimer Medis Onboarding */}
-        <div className="mt-4 px-2">
-          <DisclaimerBanner variant="note" className="text-brand-900/60 text-center justify-center" />
-        </div>
+        </motion.main>
       </div>
     </div>
   );
 }
+
