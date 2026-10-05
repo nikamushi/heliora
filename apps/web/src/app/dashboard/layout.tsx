@@ -28,25 +28,99 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const router = useRouter();
   const [user, setUser] = useState<UserResponse | null>(null);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [isAuthorized, setIsAuthorized] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isRiskMenuExpanded, setIsRiskMenuExpanded] = useState(
     pathname?.startsWith("/dashboard/risk") ?? false
   );
 
   useEffect(() => {
-    const stored = apiClient.getStoredUser();
-    if (stored) {
-      setUser(stored);
-    }
-  }, []);
+    let isMounted = true;
 
-  useEffect(() => {
-    if (pathname?.startsWith("/dashboard/risk")) {
-      setIsRiskMenuExpanded(true);
+    async function verifyMandatoryAccess() {
+      try {
+        const token = await apiClient.getAccessToken();
+        if (!token) {
+          if (isMounted) {
+            router.replace(`/login?redirect=${encodeURIComponent(pathname || "/dashboard")}`);
+          }
+          return;
+        }
+
+        // 1. Check user profile / auth
+        let currentUser = apiClient.getStoredUser();
+        if (!currentUser) {
+          try {
+            currentUser = await apiClient.auth.me();
+          } catch {
+            if (isMounted) {
+              apiClient.clearToken();
+              router.replace(`/login?redirect=${encodeURIComponent(pathname || "/dashboard")}`);
+            }
+            return;
+          }
+        }
+        if (isMounted && currentUser) {
+          setUser(currentUser);
+        }
+
+        // 2. Check Mandatory Consent
+        try {
+          const consentStatus = await apiClient.consent.getStatus();
+          if (!consentStatus?.has_active_consent) {
+            if (isMounted) {
+              router.replace("/onboarding/consent");
+            }
+            return;
+          }
+        } catch {
+          if (isMounted) {
+            router.replace("/onboarding/consent");
+          }
+          return;
+        }
+
+        // 3. Check Mandatory Health Profile (Step 1-3)
+        try {
+          const profile = await apiClient.healthProfile.get();
+          if (
+            !profile ||
+            !profile.age ||
+            !profile.gender ||
+            !profile.height_cm ||
+            !profile.weight_kg
+          ) {
+            if (isMounted) {
+              router.replace("/onboarding/health-profile");
+            }
+            return;
+          }
+        } catch {
+          if (isMounted) {
+            router.replace("/onboarding/health-profile");
+          }
+          return;
+        }
+
+        if (isMounted) {
+          setIsAuthorized(true);
+          setIsCheckingAuth(false);
+        }
+      } catch {
+        if (isMounted) {
+          router.replace("/login");
+        }
+      }
     }
-    // Close mobile drawer on route change
-    setIsMobileMenuOpen(false);
-  }, [pathname]);
+
+    verifyMandatoryAccess();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [router, pathname]);
+
 
   const handleLogout = async () => {
     try {
@@ -70,6 +144,22 @@ export default function DashboardLayout({
     }
     return pathname?.startsWith(route);
   };
+
+  if (isCheckingAuth || !isAuthorized) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-[#0D5F3F] text-white flex items-center justify-center font-bold text-xl shadow-xs animate-pulse">
+            H
+          </div>
+          <div className="space-y-1.5">
+            <h2 className="text-base font-semibold text-[#111827]">Memeriksa Sesi HELIORA</h2>
+            <p className="text-xs text-[#6B7280]">Menyiapkan data kesehatan Anda...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-brand-50/25 text-brand-900 selection:bg-brand-200 flex flex-col lg:flex-row">

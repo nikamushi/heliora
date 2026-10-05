@@ -101,13 +101,33 @@ function CallbackInner() {
         return;
       }
 
-      // ── 3. Routing sesuai status consent, sama seperti login email/password ──
+      // ── 3. Routing sesuai status consent & health profile ──
       try {
         const consentStatus = await apiClient.consent.getStatus();
         if (cancelled) return;
-        router.replace(
-          consentStatus.has_active_consent ? "/dashboard" : "/onboarding/consent"
-        );
+        if (!consentStatus?.has_active_consent) {
+          router.replace("/onboarding/consent");
+          return;
+        }
+
+        try {
+          const profile = await apiClient.healthProfile.get();
+          if (cancelled) return;
+          if (
+            profile &&
+            profile.age &&
+            profile.gender &&
+            profile.height_cm &&
+            profile.weight_kg
+          ) {
+            router.replace("/dashboard");
+          } else {
+            router.replace("/onboarding/health-profile");
+          }
+        } catch {
+          if (cancelled) return;
+          router.replace("/onboarding/health-profile");
+        }
       } catch {
         if (cancelled) return;
         router.replace("/onboarding/consent");

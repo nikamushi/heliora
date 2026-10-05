@@ -150,15 +150,21 @@ function RecommendationsContent() {
     }
 
     if (targetId) {
-      setHighlightedRecId(targetId);
-      const el = document.getElementById(`rec-${targetId}`);
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-      const timer = setTimeout(() => {
+      const target = targetId;
+      const highlightTimer = setTimeout(() => {
+        setHighlightedRecId(target);
+        const el = document.getElementById(`rec-${target}`);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 0);
+      const clearTimer = setTimeout(() => {
         setHighlightedRecId(null);
       }, 3500);
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(highlightTimer);
+        clearTimeout(clearTimer);
+      };
     }
   }, [refParam, factorParam, enrichedRecommendations]);
 

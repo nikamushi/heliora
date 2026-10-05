@@ -86,7 +86,7 @@ export default function ProfilePage() {
     if (val < 23.0) return { label: "Normal / Ideal (Asia)", className: "text-emerald-800" };
     if (val < 25.0) return { label: "Kelebihan Berat Badan", className: "text-amber-800" };
     return { label: "Risiko Obesitas", className: "text-rose-800" };
-  }, [profile?.bmi]);
+  }, [profile]);
 
   if (!isAuthorized || isLoading) {
     return (
