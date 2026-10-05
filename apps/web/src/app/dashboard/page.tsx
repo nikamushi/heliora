@@ -3,7 +3,6 @@
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "motion/react";
 import {
   SFSlidersHorizontal,
   SFChartUptrend,
@@ -192,7 +191,7 @@ export default function DashboardPage() {
       </header>
 
       {/* Scrollable Dashboard Body */}
-      <main className="flex-1 p-6 sm:p-8 space-y-8 max-w-6xl w-full mx-auto">
+      <main className="flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:p-8 space-y-6 sm:space-y-8 max-w-6xl w-full mx-auto">
           {/* Welcome Header */}
           <div className="space-y-4 border-b border-brand-900/10 pb-6">
             <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
@@ -239,7 +238,7 @@ export default function DashboardPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
               {assessment.risks.map((risk) => {
                 const rawScore = risk.estimated_risk_score ?? risk.probability;
                 const pct =

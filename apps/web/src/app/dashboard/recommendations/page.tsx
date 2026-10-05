@@ -235,7 +235,7 @@ function RecommendationsContent() {
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 p-6 sm:p-8 space-y-8 max-w-5xl w-full mx-auto">
+      <main className="flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:p-8 space-y-6 sm:space-y-8 max-w-5xl w-full mx-auto">
         {/* Page Heading & Context */}
         <section className="space-y-2 border-b border-brand-900/10 pb-6">
           <span className="text-xs font-mono font-bold tracking-widest text-brand-900/50 uppercase block">
