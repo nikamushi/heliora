@@ -10,6 +10,7 @@ import {
   SFChevronRight,
 } from "@/components/icons/sf-icons";
 import { DisclaimerBanner } from "@/components/disclaimer-banner";
+import { LogoEmblem } from "@/components/logo";
 
 export default function HelpAboutPage() {
   const systemSpecs = [
@@ -51,9 +52,7 @@ export default function HelpAboutPage() {
         {/* Header Banner */}
         <div className="rounded-3xl border border-neutral-200/80 bg-white p-6 sm:p-8 shadow-xs relative overflow-hidden space-y-4">
           <div className="flex items-center gap-3">
-            <span className="w-10 h-10 rounded-2xl bg-brand-900 text-white flex items-center justify-center text-base font-bold shadow-xs">
-              H
-            </span>
+            <LogoEmblem size={40} className="rounded-2xl shadow-xs" />
             <div>
               <span className="font-bold text-lg sm:text-xl tracking-tight text-neutral-900 block leading-tight">
                 HELIORA

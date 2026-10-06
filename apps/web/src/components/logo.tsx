@@ -1,0 +1,60 @@
+import type { SVGProps } from "react";
+import { cn } from "@/lib/utils";
+
+// HELIORA logo, concept A (Helix-H). Flat shapes with a real gap at the crossing, so the mark
+// stays clean on any background. Same geometry as apps/mobile/assets/brand/heliora-mark-white.svg.
+const MARK_PATHS = [
+  "M99.2002 5.60058C102.735 2.94989 107.75 3.66665 110.4 7.20116C113.051 10.7358 112.334 15.7505 108.8 18.4014C100.392 24.7072 96 28.4885 96 36.001V44.001C95.9998 52.5043 90.2447 58.2147 85.124 61.8418C79.887 65.5513 73.1273 68.6177 67.333 71.2734C61.1276 74.1176 55.8869 76.5515 52.124 79.2168C48.2451 81.9645 48 83.5045 48 84.001V118.001C47.9998 122.419 44.4181 126.001 40 126.001C35.5819 126.001 32.0003 122.419 32 118.001V84.001C32 75.4975 37.7553 69.7873 42.876 66.1601C48.113 62.4506 54.8727 59.3842 60.667 56.7285C66.8724 53.8844 72.1131 51.4504 75.876 48.7851C79.7539 46.0383 79.9999 44.4979 80 44.001V36.001C80 19.5137 91.6083 11.2945 99.2002 5.60058Z",
+  "M87.1709 67.707C91.6642 71.3434 96.0008 76.6195 96.001 84V118C96.001 122.418 92.4188 125.999 88.001 126C83.5827 126 80.001 122.418 80.001 118V84C80.0009 83.5031 79.7546 81.9626 75.877 79.2158C74.4367 78.1957 72.779 77.21 70.9346 76.2217C75.9354 73.9303 82.022 71.108 87.1709 67.707Z",
+  "M17.6006 7.20019C20.2516 3.6663 25.2664 2.94909 28.8008 5.5996C36.3926 11.2934 48.0008 19.5132 48.001 36V44C48.001 44.4964 48.2459 46.0364 52.125 48.7842C53.5651 49.8042 55.2223 50.7892 57.0664 51.7773C52.0656 54.0687 45.9783 56.8909 40.8291 60.292C36.3361 56.6556 32.001 51.3802 32.001 44V36C32.0008 28.4879 27.6087 24.706 19.2012 18.4004C15.6667 15.7495 14.9499 10.7348 17.6006 7.20019Z",
+];
+
+interface LogoMarkProps extends Omit<SVGProps<SVGSVGElement>, "width" | "height"> {
+  size?: number;
+}
+
+/** The bare mark. It takes the current text color. */
+export function LogoMark({ size = 24, ...props }: LogoMarkProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 128 128"
+      fill="currentColor"
+      aria-hidden="true"
+      focusable="false"
+      {...props}
+    >
+      {MARK_PATHS.map((d) => (
+        <path key={d} d={d} />
+      ))}
+    </svg>
+  );
+}
+
+interface LogoEmblemProps {
+  /** Tile size in px. The mark takes two thirds of it. */
+  size?: number;
+  /** solid: white mark on brand green. soft: brand mark on a light tile. */
+  tone?: "solid" | "soft";
+  className?: string;
+}
+
+/** The mark on its tile. Decorative: put the "HELIORA" text or an aria-label next to it. */
+export function LogoEmblem({ size = 36, tone = "solid", className }: LogoEmblemProps) {
+  return (
+    <span
+      aria-hidden="true"
+      style={{ width: size, height: size }}
+      className={cn(
+        "flex shrink-0 items-center justify-center rounded-xl",
+        tone === "solid"
+          ? "bg-brand-900 text-white"
+          : "border border-brand-900/10 bg-brand-50 text-brand-900",
+        className
+      )}
+    >
+      <LogoMark size={Math.round((size * 2) / 3)} />
+    </span>
+  );
+}

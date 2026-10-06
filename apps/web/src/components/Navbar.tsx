@@ -3,7 +3,8 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { IconHeartbeat, IconMenu2, IconX } from "@tabler/icons-react";
+import { IconMenu2, IconX } from "@tabler/icons-react";
+import { LogoEmblem } from "@/components/logo";
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -14,9 +15,7 @@ export function Navbar() {
         <div className="flex items-center justify-between">
           {/* Logo (Left) */}
           <Link href="/" className="flex items-center gap-2 group z-50">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-900 text-white shadow-sm transition-transform group-hover:scale-105">
-              <IconHeartbeat size={20} stroke={2} />
-            </div>
+            <LogoEmblem size={36} className="shadow-sm transition-transform group-hover:scale-105" />
             <span className="text-xl font-bold tracking-tight text-brand-900">
               HELIORA
             </span>
