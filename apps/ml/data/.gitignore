@@ -1,0 +1,7 @@
+# Raw downloads (BRFSS zips ~407 MB, NHANES xpt, SKI pdf). Re-download with the commands in README.md.
+raw/
+
+# BRFSS CSVs are 22-28 MB each (132 MB total). Rebuild with scripts/build_brfss.py.
+brfss_*.csv
+
+__pycache__/
