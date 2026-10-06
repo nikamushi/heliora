@@ -238,6 +238,7 @@ REC-xxx     Recommendation
 RAG-xxx     RAG
 LLM-xxx     LLM
 FE-xxx      Frontend
+MOB-xxx     Mobile
 INT-xxx     Integration
 QA-xxx      Quality Assurance
 SEC-xxx     Security
@@ -1739,6 +1740,213 @@ Acceptance Criteria:
 - Register/login/logout berjalan via Supabase Auth sebagai identity provider.
 - Seluruh request terautentikasi mengirim Bearer JWT Supabase (verifikasi JWKS di sisi backend).
 - Google OAuth berjalan via Supabase, bukan stub.
+
+---
+
+
+
+# 18.12 Mobile App (Usulan)
+
+Usulan berdasarkan `docs/PRD-Mobile.md`. Seluruh task MOB menunggu persetujuan Product & Project Manager sesuai §31 dan belum termasuk MVP Gate §29.
+
+
+
+## MOB-001 — Mobile PRD and Feature Proposal
+
+**Owner:** Pino & Tumir  
+**Priority:** P0  
+**Sprint:** S9  
+**Status:** IN PROGRESS
+
+Tasks:
+
+- [x] Write mobile PRD (`docs/PRD-Mobile.md`).
+- [ ] Submit feature proposal to Product & Project Manager.
+- [ ] Write ADR-012 for the Flutter app in the monorepo.
+- [ ] Add the Flutter/pub ecosystem to `docs/Monorepo.md`.
+
+Acceptance Criteria:
+
+- PRD mobile sudah direview Product & Project Manager.
+- Keputusan memasukkan mobile ke MVP tercatat.
+
+---
+
+
+
+## MOB-002 — Mobile Monorepo Foundation
+
+**Owner:** Pino & Tumir  
+**Priority:** P0  
+**Sprint:** S9  
+**Status:** BACKLOG
+
+Tasks:
+
+- [ ] Scaffold `apps/mobile` (Flutter, Android, application ID `id.heliora.app`).
+- [ ] Pin the Flutter version with FVM (`.fvmrc`).
+- [ ] Add a script-only `package.json` for Turborepo (dev, lint, test, build, gen:api).
+- [ ] Update `.gitignore` for Dart, Flutter, Gradle, and signing files.
+- [ ] Add mobile build outputs to `turbo.json`.
+- [ ] Document mobile setup in README.
+
+Acceptance Criteria:
+
+- `pnpm lint` dan `pnpm test` dari root ikut memeriksa mobile.
+- Aplikasi berjalan di emulator Android.
+
+---
+
+
+
+## MOB-003 — Mobile Authentication and API Client
+
+**Owner:** Pino & Tumir + Gilang & Aksal  
+**Priority:** P0  
+**Sprint:** S9  
+**Status:** BACKLOG
+
+Tasks:
+
+- [ ] Integrate `supabase_flutter` with the same Supabase project as web.
+- [ ] Email and password login and registration.
+- [ ] Google OAuth with deep link `id.heliora.app://login-callback`.
+- [ ] Register the redirect URL in Supabase.
+- [ ] Generate the API client from OpenAPI with `swagger_parser`.
+- [ ] Bearer token interceptor and API error mapping.
+- [ ] Environment configuration (API URL, Supabase URL, anon key).
+
+Acceptance Criteria:
+
+- Pengguna yang login bisa memanggil `GET /auth/me`.
+- Login Google berhasil di perangkat Android fisik.
+- Client API hasil regenerasi lolos kompilasi.
+
+---
+
+
+
+## MOB-004 — Mobile Theme and Base Components
+
+**Owner:** Pino & Tumir  
+**Priority:** P0  
+**Sprint:** S9  
+**Status:** BACKLOG
+
+Tasks:
+
+- [ ] Design tokens in `lib/theme/tokens.dart` using Figma variable names (Light and Dark).
+- [ ] Typography with Plus Jakarta Sans and JetBrains Mono.
+- [ ] Base widgets (button, input, checkbox, cards, risk status, disclaimer, app bar, bottom navigation, slider).
+- [x] Figma mobile design for all MVP screens in the *Mobile (MVP)* page, including Register, Consent, Assessment, and splash.
+- [ ] Launcher icon from the final logo concept A (adaptive icon with background, foreground, and monochrome layers) using `apps/mobile/assets/brand/`.
+- [ ] Android native splash: solid brand green with a transparent icon (Android 12+ and Android 8-11).
+- [ ] Animated splash in Flutter (about 1 second, 3 second hold then offline state, reduced-motion support) per MFR-012. Should Have and the first item cut if the schedule slips.
+
+Acceptance Criteria:
+
+- Komponen sesuai halaman Figma *Mobile (MVP)*.
+- Tidak ada pill chip atau oval badge.
+- Disclaimer statutori tampil kata per kata sesuai `Design.md` §2.6.
+- Ikon aplikasi memakai logo final konsep A, termasuk lapisan monokrom untuk ikon tema Android.
+- Splash tampil saat cold start, animasi selesai dalam waktu kurang dari 1,2 detik tanpa jeda buatan, dan pengaturan "kurangi animasi" dihormati.
+
+---
+
+
+
+## MOB-005 — Mobile Onboarding Screens
+
+**Owner:** Pino & Tumir  
+**Priority:** P0  
+**Sprint:** S9  
+**Status:** BACKLOG
+
+Tasks:
+
+- [ ] Register.
+- [ ] Login (email and Google).
+- [ ] Consent with statutory disclaimer.
+- [ ] Health profile form with validation and BMI.
+- [ ] Assessment processing and failure state.
+- [ ] Consent-aware routing.
+- [ ] First-launch routing: Register on the first launch after install and Login afterwards, using a local non-sensitive flag (MFR-012).
+
+Acceptance Criteria:
+
+- Pengguna baru menyelesaikan Register, Consent, Asesmen, sampai Beranda di perangkat Android fisik.
+- Asesmen tidak bisa dibuka sebelum consent tercatat.
+- Tanpa sesi, peluncuran pertama setelah instal masuk ke Register dan peluncuran berikutnya ke Login. Register peluncuran pertama tidak punya tombol kembali dan punya tombol "Masuk" di bar atas.
+
+---
+
+
+
+## MOB-006 — Mobile Home and What-if Simulation
+
+**Owner:** Pino & Tumir  
+**Priority:** P0  
+**Sprint:** S9  
+**Status:** BACKLOG
+
+Tasks:
+
+- [ ] Home: scores with interpretation, three risk estimates, empty state, and revoked-consent state.
+- [ ] What-if controls for sleep, activity, weight, and smoking with baseline values.
+- [ ] Simulation results per disease with direction text.
+- [ ] Reset scenario without changing the original profile.
+- [ ] Statutory disclaimer on Home and What-if.
+
+Acceptance Criteria:
+
+- Hasil simulasi tampil di bawah 1 detik sejauh environment memungkinkan.
+- Profil asli tidak berubah setelah simulasi.
+
+---
+
+
+
+## MOB-007 — Mobile Profile and Privacy
+
+**Owner:** Pino & Tumir  
+**Priority:** P0  
+**Sprint:** S9  
+**Status:** BACKLOG
+
+Tasks:
+
+- [ ] Identity from `GET /auth/me`.
+- [ ] Health profile summary and update.
+- [ ] Consent status and revoke with confirmation.
+- [ ] Logout.
+
+Acceptance Criteria:
+
+- Setelah consent dicabut, Beranda menampilkan status "Analisis dihentikan sesuai permintaanmu".
+- Logout menghapus sesi di perangkat.
+
+---
+
+
+
+## MOB-008 — Mobile CI and Release
+
+**Owner:** Pino & Tumir  
+**Priority:** P0  
+**Sprint:** S9-S10  
+**Status:** BACKLOG
+
+Tasks:
+
+- [ ] GitHub Actions workflow: analyze and test on pull requests.
+- [ ] Release APK build as an artifact on `main`.
+- [ ] Release signing key stored in GitHub Secrets.
+- [ ] Test the release APK on a physical device.
+
+Acceptance Criteria:
+
+- CI hijau di `main`.
+- APK rilis yang ditandatangani bisa dipasang di perangkat Android.
 
 ---
 
