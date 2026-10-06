@@ -1,10 +1,8 @@
 "use client";
 
 import { Suspense, useState, useMemo, useEffect } from "react";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
-  BookOpen,
   Search,
   ExternalLink,
   ShieldCheck,
@@ -534,25 +532,6 @@ export default function EvidenceCenterPage() {
 
   return (
     <div className="flex-1 min-w-0 flex flex-col">
-      {/* Top Header / Breadcrumb */}
-      <header className="h-16 border-b border-brand-900/10 bg-white/70 backdrop-blur-md sticky top-0 z-10 px-6 hidden lg:flex items-center justify-between">
-        <div className="flex items-center gap-2 text-xs font-mono">
-          <Link href="/dashboard" className="text-brand-900/50 uppercase hover:text-brand-900 transition-colors">
-            Dashboard
-          </Link>
-          <span className="text-brand-900/30">/</span>
-          <span className="text-brand-900 font-bold uppercase">Pusat Bukti Medis</span>
-        </div>
-
-        <Link
-          href="/dashboard/recommendations"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-900/70 hover:text-brand-900 transition-colors"
-        >
-          <BookOpen className="w-3.5 h-3.5 text-brand-900/60" />
-          <span>Rencana Tindakan</span>
-        </Link>
-      </header>
-
       {/* Main Container wrapped in Suspense for searchParams */}
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 flex-1 w-full">
         <Suspense

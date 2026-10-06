@@ -366,19 +366,6 @@ export default function RiskDetailPage() {
 
   return (
     <div className="flex-1 min-w-0 flex flex-col">
-      {/* Top Breadcrumb Header */}
-      <header className="h-16 border-b border-brand-900/10 bg-white/70 backdrop-blur-md sticky top-0 z-10 px-6 hidden lg:flex items-center">
-        <div className="flex items-center gap-2 text-xs font-mono">
-          <Link href="/dashboard" className="text-brand-900/50 uppercase hover:text-brand-900 transition-colors">
-            Dashboard
-          </Link>
-          <span className="text-brand-900/30">/</span>
-          <span className="text-brand-900/50 uppercase">Analisis Risiko</span>
-          <span className="text-brand-900/30">/</span>
-          <span className="text-brand-900 font-bold uppercase">{meta.title}</span>
-        </div>
-      </header>
-
       {/* Main Container */}
       <main className="flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:p-8 space-y-6 sm:space-y-8 max-w-4xl w-full mx-auto">
         {assessment.is_mock && <MockDataNotice />}

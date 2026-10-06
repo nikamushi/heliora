@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import {
-  TrendingUp,
   RotateCcw,
   Clock,
   Flame,
@@ -211,27 +210,6 @@ export default function WhatIfSimulationPage() {
 
   return (
     <div className="flex-1 min-w-0 flex flex-col">
-      {/* Top Header / Breadcrumb */}
-      <header className="h-16 border-b border-brand-900/10 bg-white/70 backdrop-blur-md sticky top-0 z-10 px-6 hidden lg:flex items-center justify-between">
-        <div className="flex items-center gap-2 text-xs font-mono">
-          <Link href="/dashboard" className="text-brand-900/50 uppercase hover:text-brand-900 transition-colors">
-            Dashboard
-          </Link>
-          <span className="text-brand-900/30">/</span>
-          <span className="text-brand-900/50 uppercase">Simulasi</span>
-          <span className="text-brand-900/30">/</span>
-          <span className="text-brand-900 font-bold uppercase">What-If Simulator</span>
-        </div>
-
-        <Link
-          href="/dashboard/simulation/future"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-900/70 hover:text-brand-900 transition-colors"
-        >
-          <TrendingUp className="w-3.5 h-3.5" />
-          <span>Proyeksi Horison</span>
-        </Link>
-      </header>
-
       {/* Scrollable Content Body */}
       <main className="flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:p-8 space-y-6 sm:space-y-8 max-w-6xl w-full mx-auto">
         {/* Header Section */}

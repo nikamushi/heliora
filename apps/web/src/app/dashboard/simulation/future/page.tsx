@@ -86,21 +86,8 @@ export default function FutureSimulationPage() {
 
   return (
     <div className="flex-1 min-w-0 flex flex-col">
-      {/* Top Header / Breadcrumb */}
-      <header className="h-16 border-b border-brand-900/10 bg-white/70 backdrop-blur-md sticky top-0 z-10 px-6 hidden lg:flex items-center">
-        <div className="flex items-center gap-2 text-xs font-mono">
-          <Link href="/dashboard" className="text-brand-900/50 uppercase hover:text-brand-900 transition-colors">
-            Dashboard
-          </Link>
-          <span className="text-brand-900/30">/</span>
-          <span className="text-brand-900/50 uppercase">Simulasi</span>
-          <span className="text-brand-900/30">/</span>
-          <span className="text-brand-900 font-bold uppercase">Proyeksi Horison</span>
-        </div>
-      </header>
-
-        {/* Scrollable Content Body */}
-        <main className="flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:p-8 space-y-6 sm:space-y-8 max-w-6xl w-full mx-auto">
+      {/* Scrollable Content Body */}
+      <main className="flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:p-8 space-y-6 sm:space-y-8 max-w-6xl w-full mx-auto">
           {/* Header Section */}
           <div className="space-y-2 border-b border-brand-900/10 pb-6">
             <span className="text-xs font-mono font-bold tracking-widest text-brand-900/50 uppercase block">

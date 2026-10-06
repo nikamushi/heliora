@@ -23,6 +23,7 @@ import {
   SFBubbleLeftRight,
   SFHeadphones,
   SFInfoCircle,
+  SFMagnifyingglass,
 } from "@/components/icons/sf-icons";
 import { motion, AnimatePresence } from "motion/react";
 import { apiClient } from "@/lib/api-client";
@@ -44,6 +45,21 @@ export default function DashboardLayout({
   const [isRiskMenuExpanded, setIsRiskMenuExpanded] = useState(
     pathname?.startsWith("/dashboard/risk") ?? false
   );
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setIsSearchOpen((prev) => !prev);
+      } else if (e.key === "Escape" && isSearchOpen) {
+        setIsSearchOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isSearchOpen]);
 
   useEffect(() => {
     let isMounted = true;
@@ -176,8 +192,8 @@ export default function DashboardLayout({
   return (
     <div className="min-h-screen bg-neutral-50/40 text-neutral-900 selection:bg-brand-100 flex flex-col lg:flex-row">
       {/* ── Mobile & Tablet Top Bar (< 1024px) ── */}
-      <header className="lg:hidden border-b border-neutral-200/80 bg-white/90 backdrop-blur-md sticky top-0 z-30 px-4 sm:px-6 h-15 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <header className="lg:hidden bg-white/90 backdrop-blur-md sticky top-0 z-30 px-4 sm:px-6 h-15 flex items-center justify-between">
+        <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => {
@@ -191,11 +207,8 @@ export default function DashboardLayout({
           >
             <SFLine3Horizontal className="w-6 h-6" />
           </button>
-          <Link href="/dashboard" className="flex items-center gap-2.5 font-bold text-base tracking-tight text-neutral-900">
-            <span className="w-7 h-7 rounded-lg bg-brand-900 text-white flex items-center justify-center text-xs font-bold shadow-xs">
-              H
-            </span>
-            <span>HELIORA</span>
+          <Link href="/dashboard" className="font-bold text-base tracking-tight text-neutral-900">
+            HELIORA
           </Link>
         </div>
 
@@ -223,6 +236,14 @@ export default function DashboardLayout({
         </div>
 
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setIsSearchOpen(true)}
+            className="size-9 text-neutral-800 hover:text-neutral-950 flex items-center justify-center transition-colors cursor-pointer"
+            aria-label="Buka pencarian"
+          >
+            <SFMagnifyingglass className="w-5.5 h-5.5" />
+          </button>
           <button
             type="button"
             onClick={() => {
@@ -625,7 +646,7 @@ export default function DashboardLayout({
       </AnimatePresence>
 
       {/* ── Desktop Primary Sidebar (Sidebar 1: Icon-Only Rail) ── */}
-      <aside className="hidden lg:flex w-16 shrink-0 flex-col items-center border-r border-neutral-200/80 bg-neutral-50/80 h-screen sticky top-0 py-4 px-2.5 z-20 select-none">
+      <aside className="hidden lg:flex w-16 shrink-0 flex-col items-center bg-brand-900 h-screen sticky top-0 py-4 px-2.5 z-20 select-none">
         <div className="flex flex-col items-center gap-6 w-full">
           {/* User Avatar Entry Point (Top) */}
           <Link
@@ -633,23 +654,23 @@ export default function DashboardLayout({
             title={user?.full_name || "Profil Saya"}
             className={`size-9 rounded-full font-semibold flex items-center justify-center text-xs transition-all ${
               activePrimaryTab === "personal"
-                ? "bg-neutral-900 text-white ring-2 ring-neutral-900/20 shadow-xs"
-                : "bg-neutral-200 text-neutral-800 hover:ring-2 hover:ring-brand-900/20"
+                ? "bg-white text-brand-900 ring-2 ring-white/40 shadow-xs"
+                : "bg-white/15 text-white hover:bg-white/25 hover:ring-2 hover:ring-white/30"
             }`}
           >
             {userInitials}
           </Link>
 
           {/* Top-Level Icon Navigation */}
-          <nav className="flex flex-col items-center gap-4 w-full">
+          <nav className="flex flex-col items-center gap-6 w-full">
             {/* Destination 1: Ringkasan */}
             <Link
               href="/dashboard"
               title="Ringkasan"
               className={`size-10 rounded-xl flex items-center justify-center transition-colors ${
                 activePrimaryTab === "ringkasan"
-                  ? "bg-neutral-900/[0.08] text-neutral-950 shadow-xs"
-                  : "text-neutral-500 hover:bg-neutral-900/[0.04] hover:text-neutral-900"
+                  ? "bg-white text-brand-900 shadow-xs"
+                  : "text-white/70 hover:text-white hover:bg-white/10"
               }`}
             >
               <SFHeartTextSquare className="w-5.5 h-5.5" />
@@ -661,8 +682,8 @@ export default function DashboardLayout({
               title="Jelajahi"
               className={`size-10 rounded-xl flex items-center justify-center transition-colors ${
                 activePrimaryTab === "fitur"
-                  ? "bg-neutral-900/[0.08] text-neutral-950 shadow-xs"
-                  : "text-neutral-500 hover:bg-neutral-900/[0.04] hover:text-neutral-900"
+                  ? "bg-white text-brand-900 shadow-xs"
+                  : "text-white/70 hover:text-white hover:bg-white/10"
               }`}
             >
               <SFCompass className="w-5.5 h-5.5" />
@@ -674,8 +695,8 @@ export default function DashboardLayout({
               title="Bantuan"
               className={`size-10 rounded-xl flex items-center justify-center transition-colors ${
                 activePrimaryTab === "bantuan"
-                  ? "bg-neutral-900/[0.08] text-neutral-950 shadow-xs"
-                  : "text-neutral-500 hover:bg-neutral-900/[0.04] hover:text-neutral-900"
+                  ? "bg-white text-brand-900 shadow-xs"
+                  : "text-white/70 hover:text-white hover:bg-white/10"
               }`}
             >
               <SFQuestionMarkCircle className="w-5.5 h-5.5" />
@@ -696,9 +717,9 @@ export default function DashboardLayout({
               duration: 0.28,
               ease: [0.32, 0.72, 0, 1],
             }}
-            className="hidden lg:flex shrink-0 flex-col h-screen sticky top-0 z-10 overflow-hidden bg-white border-r border-neutral-200/80"
+            className="hidden lg:flex shrink-0 flex-col h-screen sticky top-0 z-10 overflow-hidden bg-neutral-100"
           >
-            <div className="w-60 min-w-[240px] h-full p-4.5 overflow-y-auto flex flex-col justify-between">
+            <div className="w-60 min-w-[240px] h-full pt-4 px-4.5 pb-4.5 overflow-y-auto flex flex-col justify-between">
               <AnimatePresence mode="wait" initial={false}>
                 <motion.div
                   key={activePrimaryTab}
@@ -706,10 +727,9 @@ export default function DashboardLayout({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -4 }}
                   transition={{ duration: 0.15 }}
-                  className="space-y-5"
                 >
-                  {/* Header of Active Destination */}
-                  <div className="px-2 pt-1 pb-1.5 border-b border-neutral-100">
+                  {/* Header of Active Destination (Aligned with Avatar size-9) */}
+                  <div className="h-9 px-2 flex items-center">
                     <h2 className="text-sm font-bold uppercase tracking-wider text-neutral-800">
                       {activePrimaryTab === "fitur"
                         ? "Jelajahi"
@@ -721,7 +741,7 @@ export default function DashboardLayout({
 
               {/* Sub-Items for Jelajahi */}
               {activePrimaryTab === "fitur" && (
-                <nav className="space-y-6">
+                <nav className="mt-6 space-y-6">
                   {/* Cluster 1: Risiko */}
                   <div>
                     <button
@@ -840,7 +860,7 @@ export default function DashboardLayout({
 
               {/* Sub-Items for Bantuan */}
               {activePrimaryTab === "bantuan" && (
-                <nav className="space-y-2">
+                <nav className="mt-6 space-y-2">
                   <Link
                     href="/dashboard/help/about"
                     className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
@@ -890,7 +910,7 @@ export default function DashboardLayout({
 
               {/* Sub-Items for Personal */}
               {activePrimaryTab === "personal" && (
-                <nav className="space-y-6">
+                <nav className="mt-6 space-y-6">
                   <div className="space-y-2">
                     <Link
                       href="/dashboard/profile"
@@ -936,7 +956,161 @@ export default function DashboardLayout({
       </AnimatePresence>
 
       {/* ── Main Content Area (Column 3) ── */}
-      <div className="flex-1 min-w-0 flex flex-col">{children}</div>
+      <div className="flex-1 min-w-0 flex flex-col">
+        {/* Top Header with Global Search (Aligned h-12 with 2nd sidebar header) */}
+        <header className="h-12 bg-white/70 backdrop-blur-md sticky top-0 z-20 px-6 hidden lg:flex items-center justify-center shrink-0">
+          <button
+            type="button"
+            onClick={() => setIsSearchOpen(true)}
+            className="relative w-full max-w-md flex items-center text-left cursor-pointer group"
+          >
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-neutral-400 group-hover:text-neutral-600 transition-colors">
+              <SFMagnifyingglass className="w-4 h-4" />
+            </div>
+            <div className="w-full pl-9 pr-10 py-1.5 text-sm bg-transparent group-hover:bg-neutral-50/50 text-neutral-400 rounded-xl border border-neutral-200/70 group-hover:border-neutral-300/80 transition-all select-none">
+              Heliora
+            </div>
+            <div className="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none">
+              <kbd className="inline-flex items-center px-1.5 py-0.5 border border-neutral-200/70 rounded text-[10px] font-mono text-neutral-400 bg-neutral-50/60 shadow-2xs">
+                ⌘K
+              </kbd>
+            </div>
+          </button>
+        </header>
+        {children}
+      </div>
+
+      {/* ── Search Sheet Overlay (Apple Style Top Dropdown Sheet) ── */}
+      <AnimatePresence>
+        {isSearchOpen && (
+          <div className="fixed inset-0 z-50 overflow-hidden">
+            {/* Backdrop Blur */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="fixed inset-0 bg-neutral-950/25 backdrop-blur-md"
+              onClick={() => setIsSearchOpen(false)}
+              aria-hidden="true"
+            />
+
+            {/* Top Sheet Panel (Apple Fluid Spring - Ultra Smooth In & Out) */}
+            <motion.div
+              initial={{ y: "-100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "calc(-100% - 100px)" }}
+              transition={{
+                type: "spring",
+                damping: 38,
+                stiffness: 280,
+                mass: 0.9,
+              }}
+              className="relative w-full h-screen min-h-screen lg:h-auto lg:min-h-0 bg-white shadow-none lg:shadow-2xl lg:shadow-neutral-900/15 z-10 pt-5 pb-8 px-5 sm:px-8 lg:pt-7 lg:pb-10 lg:px-12 overflow-y-auto"
+            >
+              <div className="max-w-2xl mx-auto space-y-6">
+                {/* Search Input Row: Large, Borderless Typography with Staggered Entrance */}
+                <motion.div
+                  initial={{ opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.05, duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+                  className="flex items-center gap-3"
+                >
+                  <SFMagnifyingglass className="w-6 h-6 text-neutral-400 shrink-0" />
+                  <input
+                    type="text"
+                    autoFocus
+                    placeholder="Cari"
+                    className="flex-1 bg-transparent text-xl sm:text-2xl font-medium text-neutral-900 placeholder:text-neutral-400 focus:outline-none tracking-tight"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setIsSearchOpen(false)}
+                    className="lg:hidden size-8 text-neutral-400 hover:text-neutral-800 active:text-neutral-950 flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                    aria-label="Tutup pencarian"
+                  >
+                    <SFXmark className="w-5 h-5" />
+                  </button>
+                </motion.div>
+
+                {/* Quick Links Section with Staggered Reveal & Micro-Interactions */}
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1, duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+                  className="space-y-3 pt-1"
+                >
+                  <span className="text-xs font-semibold text-neutral-400 tracking-wide block">
+                    Quick Links
+                  </span>
+                  <div className="flex flex-col space-y-2.5">
+                    <Link
+                      href="/dashboard"
+                      onClick={() => setIsSearchOpen(false)}
+                      className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-neutral-800 hover:text-brand-900 transition-colors w-fit group"
+                    >
+                      <span className="text-neutral-400 group-hover:text-brand-900 group-hover:translate-x-1 inline-block transition-transform duration-200 ease-out">
+                        →
+                      </span>
+                      <span className="group-hover:translate-x-0.5 inline-block transition-transform duration-200 ease-out">
+                        Ringkasan Klinis
+                      </span>
+                    </Link>
+                    <Link
+                      href="/dashboard/risk/diabetes"
+                      onClick={() => setIsSearchOpen(false)}
+                      className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-neutral-800 hover:text-brand-900 transition-colors w-fit group"
+                    >
+                      <span className="text-neutral-400 group-hover:text-brand-900 group-hover:translate-x-1 inline-block transition-transform duration-200 ease-out">
+                        →
+                      </span>
+                      <span className="group-hover:translate-x-0.5 inline-block transition-transform duration-200 ease-out">
+                        Analisis Risiko Penyakit
+                      </span>
+                    </Link>
+                    <Link
+                      href="/dashboard/simulation/what-if"
+                      onClick={() => setIsSearchOpen(false)}
+                      className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-neutral-800 hover:text-brand-900 transition-colors w-fit group"
+                    >
+                      <span className="text-neutral-400 group-hover:text-brand-900 group-hover:translate-x-1 inline-block transition-transform duration-200 ease-out">
+                        →
+                      </span>
+                      <span className="group-hover:translate-x-0.5 inline-block transition-transform duration-200 ease-out">
+                        Simulasi Gaya Hidup (What-If)
+                      </span>
+                    </Link>
+                    <Link
+                      href="/dashboard/evidence"
+                      onClick={() => setIsSearchOpen(false)}
+                      className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-neutral-800 hover:text-brand-900 transition-colors w-fit group"
+                    >
+                      <span className="text-neutral-400 group-hover:text-brand-900 group-hover:translate-x-1 inline-block transition-transform duration-200 ease-out">
+                        →
+                      </span>
+                      <span className="group-hover:translate-x-0.5 inline-block transition-transform duration-200 ease-out">
+                        Pusat Bukti Medis
+                      </span>
+                    </Link>
+                    <Link
+                      href="/dashboard/help"
+                      onClick={() => setIsSearchOpen(false)}
+                      className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-neutral-800 hover:text-brand-900 transition-colors w-fit group"
+                    >
+                      <span className="text-neutral-400 group-hover:text-brand-900 group-hover:translate-x-1 inline-block transition-transform duration-200 ease-out">
+                        →
+                      </span>
+                      <span className="group-hover:translate-x-0.5 inline-block transition-transform duration-200 ease-out">
+                        Pusat Bantuan &amp; Panduan
+                      </span>
+                    </Link>
+                  </div>
+                </motion.div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
