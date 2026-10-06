@@ -611,12 +611,14 @@ Endpoint reset password dapat diperlakukan sebagai extension apabila requirement
 ## 6.4 Consent Endpoints
 
 ```text
-GET  /api/v1/consent
+GET  /api/v1/consent/status
 POST /api/v1/consent
-DELETE /api/v1/consent
+POST /api/v1/consent/revoke
 ```
 
 Consent harus tercatat sebelum assessment dapat diproses.
+
+Daftar ini mengikuti implementasi di `apps/api/app/api/routes/consent.py`. Pencabutan memakai `POST /consent/revoke`, bukan `DELETE`, dan client web memanggil endpoint yang sama. `POST /assessment`, `POST /simulation/future`, dan `POST /simulation/what-if` memakai dependency `require_active_consent` dan mengembalikan `403` tanpa consent aktif. `GET /assessment/latest` tidak memeriksa consent, sehingga klien wajib menjaga lewat consent-aware routing.
 
 ---
 
