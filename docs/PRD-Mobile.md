@@ -13,7 +13,7 @@
 | Judul          | HELIORA Mobile: Product Requirements Document                |
 | Produk         | HELIORA Mobile (bagian dari keluarga produk HELIORA)         |
 | Platform       | Android (Flutter)                                            |
-| Versi          | 0.2 (Draf)                                                   |
+| Versi          | 0.3 (Draf)                                                   |
 | Status         | Draf, menunggu review Product & Project Manager              |
 | Tanggal        | 7 Oktober 2026                                               |
 | Disusun oleh   | Tim Frontend & DevOps                                        |
@@ -46,6 +46,7 @@ Urutan sumber kebenaran mengikuti `TASK.md` §1.2. Jika dokumen ini bertentangan
 | --- | --- | --- | --- |
 | 0.1 | 5 Oktober 2026 | Tim Frontend & DevOps | Draf awal untuk review PM |
 | 0.2 | 7 Oktober 2026 | Tim Frontend & DevOps | Tambah MFR-012 (splash dan peluncuran pertama); logo final konsep A; desain Figma *Mobile (MVP)* menggantikan draf; pemotongan splash masuk batas potong; pertanyaan terbuka diperbarui |
+| 0.3 | 7 Oktober 2026 | Tim Frontend & DevOps | Gerbang persetujuan dijalankan di aplikasi (§7); `403` dan batas potong tingkat 4 mengarah ke layar "Lanjutkan di web" (MFR-011, §14); kriteria penerimaan persetujuan (§15); ketergantungan `GET /assessment/latest` tanpa cek persetujuan (§13) |
 
 ## 1.5 Persetujuan
 
@@ -180,6 +181,8 @@ Splash (animasi sekitar 1 detik, sambil memulihkan sesi)
 ```
 
 Aturan perutean mengikuti logika *consent-aware routing* di web (`Design.md` §5.3). Pengguna yang mencabut persetujuan melihat status netral "Analisis dihentikan sesuai permintaanmu" dan tombol untuk memberi persetujuan ulang (`Design.md` §8).
+
+Gerbang persetujuan dijalankan di aplikasi, tidak hanya mengandalkan respons `403`. `POST /assessment` dan endpoint simulasi menolak pengguna tanpa persetujuan aktif, tetapi `GET /assessment/latest` tidak memeriksa persetujuan. Karena itu Beranda dan What-if hanya dibuka setelah `GET /consent/status` mengembalikan `has_active_consent = true`. Status ini diperiksa saat cold start, setiap kali aplikasi kembali ke latar depan, dan langsung setelah pengguna mencabut persetujuan di Profil. Jika hasilnya `false`, data asesmen yang sudah dimuat dibuang dari memori dan pengguna diarahkan ke Consent (atau ke layar "Lanjutkan di web" bila batas potong tingkat 4 berlaku, §14).
 
 Untuk pengguna tanpa sesi, tujuan awal bergantung pada penanda lokal peluncuran pertama (MFR-012): Register pada peluncuran pertama setelah instal, Login pada peluncuran berikutnya. Aturan perutean lainnya tidak berubah.
 
@@ -364,7 +367,7 @@ Parameter yang bisa diubah mengikuti `TASK.md` SIM-003: durasi tidur, aktivitas 
 | Input tidak valid | Pesan di field terkait, tanpa dialog generik |
 | Tidak ada koneksi atau timeout | Pesan yang menjelaskan masalah koneksi dan tombol ulangi |
 | `401` | Sesi diakhiri, pengguna kembali ke Login |
-| `403` karena persetujuan belum ada | Pengguna diarahkan ke Consent |
+| `403` karena persetujuan belum ada atau sudah dicabut | Pengguna diarahkan ke Consent, atau ke layar "Lanjutkan di web" bila batas potong tingkat 4 berlaku (§14) |
 | `5xx` atau analisis gagal | Pesan "Analisis sedang tidak tersedia, coba lagi" dan tombol ulangi |
 
 ---
@@ -474,6 +477,7 @@ Ringkasan keputusan yang sudah disepakati. Detail arsitektur akan dicatat di ADR
 | Toolchain pengembang mobile | Masing-masing pengembang | Android Studio (SDK dan emulator), JDK 17 bawaan Android Studio, dan FVM |
 | Desain Figma Register, Consent, Asesmen, dan splash | Pino & Tumir | Selesai 7 Oktober 2026, menunggu review PM |
 | Persetujuan tambahan untuk MFR-012 dan opsi "Daftar dengan Google" di Register | Angga | Lihat §17 no. 9 dan 10 |
+| Pemeriksaan persetujuan di `GET /assessment/latest` | Gilang & Aksal | Endpoint ini belum memakai `require_active_consent`, sehingga hasil asesmen lama tetap bisa diambil setelah persetujuan dicabut. Mobile menjaganya di aplikasi (§7). Menambah pemeriksaan di server adalah keputusan tim backend dan ikut berdampak ke web. |
 
 ---
 
@@ -499,7 +503,7 @@ Jadwal di bawah mengasumsikan persetujuan PM paling lambat 7 Oktober 2026.
 1. Animasi splash (MFR-012) dilepas; aplikasi tetap memakai splash sistem hijau tanpa animasi tanda. Aturan "Register pada peluncuran pertama" tetap berlaku.
 2. Login Google ditunda; MVP memakai email dan kata sandi.
 3. Register dipindah ke web; mobile hanya Login, sehingga peluncuran pertama langsung ke Login.
-4. Asesmen dan Consent dipindah ke web; mobile menampilkan Beranda dan What-if untuk akun yang sudah selesai onboarding.
+4. Asesmen dan Consent dipindah ke web. Mobile hanya membuka Beranda dan What-if untuk akun dengan persetujuan aktif (`has_active_consent = true`). Akun tanpa persetujuan aktif, termasuk yang baru mencabutnya, diarahkan ke layar "Lanjutkan di web" berisi tautan ke onboarding web, dan tidak bisa membuka Beranda maupun What-if. "Cabut persetujuan" di Profil tetap tersedia; memberi persetujuan ulang dilakukan di web.
 
 ---
 
@@ -512,6 +516,7 @@ MVP mobile dianggap siap demo jika semua poin berikut terpenuhi:
 - Tidak ada crash selama tiga kali gladi demo berturut-turut.
 - Jika MFR-012 dikerjakan: splash tampil saat cold start, animasi selesai dalam waktu kurang dari 1,2 detik, dan pengaturan "kurangi animasi" dihormati.
 - Disclaimer statutori tampil kata per kata di Consent, Beranda, dan What-if.
+- Pengguna tanpa persetujuan aktif tidak pernah melihat Beranda atau What-if, di semua tingkat batas potong, termasuk setelah mencabut persetujuan di Profil atau di web.
 - Asesmen yang dibuat di mobile tampil di web dengan akun yang sama.
 - `pnpm lint` dan `pnpm test` dari root lolos, termasuk mobile.
 - APK rilis dibangun oleh CI dari `main`.
