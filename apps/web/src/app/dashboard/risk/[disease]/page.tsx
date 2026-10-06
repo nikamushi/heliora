@@ -4,13 +4,11 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import {
-  ArrowLeft,
   ArrowRight,
   AlertCircle,
   Sliders,
   TrendingUp,
   BookOpen,
-  CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLatestAssessment } from "@/lib/use-latest-assessment";
@@ -382,7 +380,7 @@ export default function RiskDetailPage() {
       </header>
 
       {/* Main Container */}
-      <main className="max-w-4xl mx-auto px-6 py-8 space-y-8 w-full">
+      <main className="flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:p-8 space-y-6 sm:space-y-8 max-w-4xl w-full mx-auto">
         {assessment.is_mock && <MockDataNotice />}
 
         {/* Section 1: Disease Identity & Clinical Definition */}

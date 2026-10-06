@@ -2,9 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
-  Sliders,
   TrendingUp,
   RotateCcw,
   Clock,
@@ -36,7 +34,6 @@ interface BaselineValues {
 }
 
 export default function WhatIfSimulationPage() {
-  const router = useRouter();
   const { isAuthorized, redirectToLogin } = useRequireAuth();
 
   // Baseline profile data
@@ -236,7 +233,7 @@ export default function WhatIfSimulationPage() {
       </header>
 
       {/* Scrollable Content Body */}
-      <main className="flex-1 p-6 sm:p-8 space-y-8 max-w-6xl w-full mx-auto">
+      <main className="flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:p-8 space-y-6 sm:space-y-8 max-w-6xl w-full mx-auto">
         {/* Header Section */}
         <div className="space-y-2 border-b border-brand-900/10 pb-6">
           <span className="text-xs font-mono font-bold tracking-widest text-brand-900/50 uppercase block">

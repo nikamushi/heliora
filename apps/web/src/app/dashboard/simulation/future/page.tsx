@@ -2,10 +2,8 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
   Sliders,
-  TrendingUp,
   ArrowRight,
   Info,
   Clock,
@@ -28,7 +26,6 @@ const HORIZON_OPTIONS: { days: SimulationHorizon; label: string; period: string 
 ];
 
 export default function FutureSimulationPage() {
-  const router = useRouter();
   const { isAuthorized, redirectToLogin } = useRequireAuth();
 
   const [selectedHorizon, setSelectedHorizon] = useState<SimulationHorizon>(90);
@@ -103,7 +100,7 @@ export default function FutureSimulationPage() {
       </header>
 
         {/* Scrollable Content Body */}
-        <main className="flex-1 p-6 sm:p-8 space-y-8 max-w-6xl w-full mx-auto">
+        <main className="flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:p-8 space-y-6 sm:space-y-8 max-w-6xl w-full mx-auto">
           {/* Header Section */}
           <div className="space-y-2 border-b border-brand-900/10 pb-6">
             <span className="text-xs font-mono font-bold tracking-widest text-brand-900/50 uppercase block">
