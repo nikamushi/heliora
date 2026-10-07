@@ -27,6 +27,7 @@ import {
 import { motion, AnimatePresence } from "motion/react";
 import { apiClient } from "@/lib/api-client";
 import { UserResponse } from "@/types/api";
+import { LogoEmblem } from "@/components/logo";
 
 export default function DashboardLayout({
   children,
@@ -161,9 +162,7 @@ export default function DashboardLayout({
     return (
       <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-[#0D5F3F] text-white flex items-center justify-center font-bold text-xl shadow-xs animate-pulse">
-            H
-          </div>
+          <LogoEmblem size={48} className="rounded-2xl shadow-xs animate-pulse" />
           <div className="space-y-1.5">
             <h2 className="text-base font-semibold text-[#111827]">Memeriksa Sesi HELIORA</h2>
             <p className="text-xs text-[#6B7280]">Menyiapkan data kesehatan Anda...</p>
@@ -192,9 +191,7 @@ export default function DashboardLayout({
             <SFLine3Horizontal className="w-6 h-6" />
           </button>
           <Link href="/dashboard" className="flex items-center gap-2.5 font-bold text-base tracking-tight text-neutral-900">
-            <span className="w-7 h-7 rounded-lg bg-brand-900 text-white flex items-center justify-center text-xs font-bold shadow-xs">
-              H
-            </span>
+            <LogoEmblem size={28} className="rounded-lg shadow-xs" />
             <span>HELIORA</span>
           </Link>
         </div>

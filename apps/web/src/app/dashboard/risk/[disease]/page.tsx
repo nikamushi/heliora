@@ -16,6 +16,7 @@ import { RiskAssessmentItem, RiskLevel } from "@/types/api";
 import { DisclaimerBanner } from "@/components/disclaimer-banner";
 import { MockDataNotice } from "@/components/mock-data-notice";
 import { RiskBadge, getRiskTone } from "@/components/risk-badge";
+import { LogoEmblem } from "@/components/logo";
 
 interface DiseaseDetailMeta {
   title: string;
@@ -267,9 +268,7 @@ export default function RiskDetailPage() {
       return (
         <div className="min-h-screen bg-brand-50/20 text-brand-900 flex items-center justify-center p-6">
           <div className="w-full max-w-md bg-white border border-brand-900/10 rounded-3xl p-8 shadow-xl text-center space-y-5">
-            <div className="w-12 h-12 rounded-2xl bg-brand-50 border border-brand-900/10 text-brand-900 flex items-center justify-center mx-auto text-lg font-bold">
-              H
-            </div>
+            <LogoEmblem size={48} tone="soft" className="mx-auto rounded-2xl" />
             <div className="space-y-2">
               <h1 className="text-xl font-bold tracking-tight text-brand-900">
                 Belum Ada Data Asesmen
