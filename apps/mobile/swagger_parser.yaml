@@ -1,0 +1,11 @@
+swagger_parser:
+  # Path to the OpenAPI schema file exported from FastAPI in docs/
+  schema_path: ../../docs/openapi.json
+  # Alternatively, use schema_url when backend runs locally:
+  # schema_url: http://localhost:8000/api/v1/openapi.json
+  output_directory: lib/core/api/generated
+  name: heliora_api
+  language: dart
+  json_serializer: json_serializable
+  root_client: true
+  root_client_name: HelioraApiClient

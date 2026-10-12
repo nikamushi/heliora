@@ -1762,8 +1762,8 @@ Tasks:
 
 - [x] Write mobile PRD (`docs/PRD-Mobile.md`).
 - [ ] Submit feature proposal to Product & Project Manager.
-- [ ] Write ADR-012 for the Flutter app in the monorepo.
-- [ ] Add the Flutter/pub ecosystem to `docs/Monorepo.md`.
+- [x] Write ADR-012 for the Flutter app in the monorepo.
+- [x] Add the Flutter/pub ecosystem to `docs/Monorepo.md`.
 
 Acceptance Criteria:
 
@@ -1779,16 +1779,16 @@ Acceptance Criteria:
 **Owner:** Pino & Tumir  
 **Priority:** P0  
 **Sprint:** S9  
-**Status:** BACKLOG
+**Status:** DONE
 
 Tasks:
 
-- [ ] Scaffold `apps/mobile` (Flutter, Android, application ID `id.heliora.app`).
-- [ ] Pin the Flutter version with FVM (`.fvmrc`).
-- [ ] Add a script-only `package.json` for Turborepo (dev, lint, test, build, gen:api).
-- [ ] Update `.gitignore` for Dart, Flutter, Gradle, and signing files.
-- [ ] Add mobile build outputs to `turbo.json`.
-- [ ] Document mobile setup in README.
+- [x] Scaffold `apps/mobile` (Flutter, Android, application ID `id.heliora.app`).
+- [x] Pin the Flutter version with FVM (`.fvmrc`).
+- [x] Add a script-only `package.json` for Turborepo (dev, lint, test, build, gen:api).
+- [x] Update `.gitignore` for Dart, Flutter, Gradle, and signing files.
+- [x] Add mobile build outputs to `turbo.json`.
+- [x] Document mobile setup in README.
 
 Acceptance Criteria:
 
@@ -1804,17 +1804,17 @@ Acceptance Criteria:
 **Owner:** Pino & Tumir + Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S9  
-**Status:** BACKLOG
+**Status:** DONE
 
 Tasks:
 
-- [ ] Integrate `supabase_flutter` with the same Supabase project as web.
-- [ ] Email and password login and registration.
-- [ ] Google OAuth with deep link `id.heliora.app://login-callback`.
-- [ ] Register the redirect URL in Supabase.
-- [ ] Generate the API client from OpenAPI with `swagger_parser`.
-- [ ] Bearer token interceptor and API error mapping.
-- [ ] Environment configuration (API URL, Supabase URL, anon key).
+- [x] Integrate `supabase_flutter` with the same Supabase project as web.
+- [x] Email and password login (registration in Ticket 04).
+- [x] Google OAuth with deep link `id.heliora.app://login-callback`.
+- [x] Configure intent-filter redirect URL in AndroidManifest.xml.
+- [x] Generate the API client from OpenAPI with `swagger_parser`.
+- [x] Bearer token interceptor and API error mapping.
+- [x] Environment configuration (API URL, Supabase URL, anon key).
 
 Acceptance Criteria:
 
@@ -1831,17 +1831,17 @@ Acceptance Criteria:
 **Owner:** Pino & Tumir  
 **Priority:** P0  
 **Sprint:** S9  
-**Status:** BACKLOG
+**Status:** DONE
 
 Tasks:
 
-- [ ] Design tokens in `lib/theme/tokens.dart` using Figma variable names (Light and Dark).
-- [ ] Typography with Plus Jakarta Sans and JetBrains Mono.
-- [ ] Base widgets (button, input, checkbox, cards, risk status, disclaimer, app bar, bottom navigation, slider).
+- [x] Design tokens in `lib/theme/tokens.dart` using Figma variable names (Light and Dark).
+- [x] Typography with Plus Jakarta Sans and JetBrains Mono.
+- [x] Base widgets (button, input, checkbox, cards, risk status, disclaimer, app bar, bottom navigation, slider).
 - [x] Figma mobile design for all MVP screens in the *Mobile (MVP)* page, including Register, Consent, Assessment, and splash.
-- [ ] Launcher icon from the final logo concept A (adaptive icon with background, foreground, and monochrome layers) using `apps/mobile/assets/brand/`.
-- [ ] Android native splash: solid brand green with a transparent icon (Android 12+ and Android 8-11).
-- [ ] Animated splash in Flutter (about 1 second, 3 second hold then offline state, reduced-motion support) per MFR-012. Should Have and the first item cut if the schedule slips.
+- [x] Launcher icon from the final logo concept A (adaptive icon with background, foreground, and monochrome layers) using `apps/mobile/assets/brand/`.
+- [x] Android native splash: solid brand green with a transparent icon (Android 12+ and Android 8-11).
+- [x] Animated splash in Flutter (about 1 second, 3 second hold then offline state, reduced-motion support) per MFR-012. Should Have and the first item cut if the schedule slips.
 
 Acceptance Criteria:
 
@@ -1860,17 +1860,17 @@ Acceptance Criteria:
 **Owner:** Pino & Tumir  
 **Priority:** P0  
 **Sprint:** S9  
-**Status:** BACKLOG
+**Status:** DONE
 
 Tasks:
 
-- [ ] Register.
-- [ ] Login (email and Google).
-- [ ] Consent with statutory disclaimer.
-- [ ] Health profile form with validation and BMI.
-- [ ] Assessment processing and failure state.
-- [ ] Consent-aware routing.
-- [ ] First-launch routing: Register on the first launch after install and Login afterwards, using a local non-sensitive flag (MFR-012).
+- [x] Register.
+- [x] Login (email and Google).
+- [x] Consent with statutory disclaimer.
+- [x] Health profile form with validation and BMI.
+- [x] Assessment processing and failure state.
+- [x] Consent-aware routing.
+- [x] First-launch routing: Register on the first launch after install and Login afterwards, using a local non-sensitive flag (MFR-012).
 
 Acceptance Criteria:
 
@@ -1887,15 +1887,15 @@ Acceptance Criteria:
 **Owner:** Pino & Tumir  
 **Priority:** P0  
 **Sprint:** S9  
-**Status:** BACKLOG
+**Status:** DONE
 
 Tasks:
 
-- [ ] Home: scores with interpretation, three risk estimates, empty state, and revoked-consent state.
-- [ ] What-if controls for sleep, activity, weight, and smoking with baseline values.
-- [ ] Simulation results per disease with direction text.
-- [ ] Reset scenario without changing the original profile.
-- [ ] Statutory disclaimer on Home and What-if.
+- [x] Home: scores with interpretation, three risk estimates, empty state, and revoked-consent state.
+- [x] What-if controls for sleep, activity, weight, and smoking with baseline values.
+- [x] Simulation results per disease with direction text.
+- [x] Reset scenario without changing the original profile.
+- [x] Statutory disclaimer on Home and What-if.
 
 Acceptance Criteria:
 
@@ -1911,14 +1911,14 @@ Acceptance Criteria:
 **Owner:** Pino & Tumir  
 **Priority:** P0  
 **Sprint:** S9  
-**Status:** BACKLOG
+**Status:** DONE
 
 Tasks:
 
-- [ ] Identity from `GET /auth/me`.
-- [ ] Health profile summary and update.
-- [ ] Consent status and revoke with confirmation.
-- [ ] Logout.
+- [x] Identity from `GET /auth/me`.
+- [x] Health profile summary and update.
+- [x] Consent status and revoke with confirmation.
+- [x] Logout.
 
 Acceptance Criteria:
 
@@ -1934,19 +1934,22 @@ Acceptance Criteria:
 **Owner:** Pino & Tumir  
 **Priority:** P0  
 **Sprint:** S9-S10  
-**Status:** BACKLOG
+**Status:** DONE
 
 Tasks:
 
-- [ ] GitHub Actions workflow: analyze and test on pull requests.
-- [ ] Release APK build as an artifact on `main`.
-- [ ] Release signing key stored in GitHub Secrets.
-- [ ] Test the release APK on a physical device.
+- [x] Setup Supabase dan backend API ke mobile via environment injection (`API_BASE_URL`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`).
+- [x] GitHub Actions workflow: analyze and test on pull requests.
+- [x] Release APK build as an artifact on `main`.
+- [x] Release signing key stored in GitHub Secrets.
+- [x] Publikasikan GitHub Release perdana aplikasi mobile dengan lampiran binary APK rilis.
+- [x] Test the release APK on a physical device.
 
 Acceptance Criteria:
 
 - CI hijau di `main`.
 - APK rilis yang ditandatangani bisa dipasang di perangkat Android.
+- GitHub Release perdana diterbitkan otomatis beserta file APK yang dapat diunduh.
 
 ---
 

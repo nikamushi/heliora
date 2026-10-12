@@ -1,0 +1,2456 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "HELIORA",
+    "description": "AI-Powered Preventive Health Intelligence Platform API. HELIORA is not a medical diagnosis tool.",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/v1/auth/register": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Register a new user (Deprecated)",
+        "description": "[DEPRECATED per ADR-011: Use Supabase Auth for user registration.] Registers a new user account with validated credentials and returns a legacy JWT access token.",
+        "operationId": "register_api_v1_auth_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserRegisterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "User login via JSON (Deprecated)",
+        "description": "[DEPRECATED per ADR-011: Use Supabase Auth for user authentication.] Authenticates user credentials provided via JSON body and returns a legacy JWT bearer token.",
+        "operationId": "login_api_v1_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserLoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/api/v1/auth/token": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "OAuth2 Password token endpoint (Deprecated)",
+        "description": "[DEPRECATED per ADR-011: Kept for OpenAPI Swagger UI and legacy local dev.] OAuth2-compatible form login endpoint for Swagger UI authorization.",
+        "operationId": "login_for_access_token_api_v1_auth_token_post",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_login_for_access_token_api_v1_auth_token_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/api/v1/auth/me": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Get current user profile",
+        "description": "Returns the profile data of the currently authenticated user.",
+        "operationId": "get_me_api_v1_auth_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/consent": {
+      "post": {
+        "tags": [
+          "consent"
+        ],
+        "summary": "Record user consent",
+        "description": "Records user affirmative agreement to privacy terms, data processing, and medical disclaimer.",
+        "operationId": "record_consent_api_v1_consent_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsentCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/consent/status": {
+      "get": {
+        "tags": [
+          "consent"
+        ],
+        "summary": "Get user consent status",
+        "description": "Retrieves active consent state for authenticated user along with current medical disclaimer text.",
+        "operationId": "get_consent_status_api_v1_consent_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsentStatusResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/consent/revoke": {
+      "post": {
+        "tags": [
+          "consent"
+        ],
+        "summary": "Revoke user consent",
+        "description": "Revokes active consent record for authenticated user in compliance with privacy regulations (UU PDP / GDPR).",
+        "operationId": "revoke_consent_api_v1_consent_revoke_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsentResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/health-profile": {
+      "get": {
+        "tags": [
+          "health-profile"
+        ],
+        "summary": "Get user health profile",
+        "description": "Retrieves the current active health profile of authenticated user.",
+        "operationId": "get_health_profile_api_v1_health_profile_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthProfileResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "health-profile"
+        ],
+        "summary": "Update existing health profile",
+        "description": "Updates specified biometric or lifestyle fields of the authenticated user's health profile, recalculating BMI and enforcing active consent.",
+        "operationId": "update_health_profile_api_v1_health_profile_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HealthProfileUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthProfileResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "health-profile"
+        ],
+        "summary": "Create or save user health profile",
+        "description": "Saves biometric, lifestyle, and clinical parameters for the authenticated user. Computes BMI and enforces consent requirement.",
+        "operationId": "create_health_profile_api_v1_health_profile_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HealthProfileCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthProfileResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/assessment": {
+      "post": {
+        "tags": [
+          "assessment"
+        ],
+        "summary": "Trigger and run new health assessment",
+        "description": "Executes the Preventive Lifestyle Risk Engine against the user's active health profile. Calculates multi-condition risks, scores, factors, and stores outcomes. Requires active consent agreement before processing.",
+        "operationId": "create_assessment_api_v1_assessment_post",
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssessmentSummaryResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/assessment/latest": {
+      "get": {
+        "tags": [
+          "assessment"
+        ],
+        "summary": "Get latest assessment summary",
+        "description": "Returns the most recent risk assessment outcome for the authenticated user. Returns 404 if the user has not completed any assessments.",
+        "operationId": "get_latest_assessment_api_v1_assessment_latest_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssessmentSummaryResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/assessment/{assessment_id}": {
+      "get": {
+        "tags": [
+          "assessment"
+        ],
+        "summary": "Get assessment by ID",
+        "description": "Retrieves a specific assessment session by UUID for the authenticated user.",
+        "operationId": "get_assessment_by_id_api_v1_assessment__assessment_id__get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "assessment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Assessment Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssessmentSummaryResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/simulation/future": {
+      "post": {
+        "tags": [
+          "simulation"
+        ],
+        "summary": "Run future health trajectory simulation",
+        "description": "Projects estimated health scores and multi-condition chronic disease risk trajectories over specified horizons (30, 90, 180 days) based on current habits. Operates in-memory without mutating persistent profile data (BR-SIM-007).",
+        "operationId": "simulate_future_health_api_v1_simulation_future_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FutureSimulationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FutureSimulationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/simulation/what-if": {
+      "post": {
+        "tags": [
+          "simulation"
+        ],
+        "summary": "Run what-if scenario simulation",
+        "description": "Recalculates multi-condition risks and health scores in real-time based on interactive lifestyle overrides (sleep, activity, weight, smoking). Zero permanent mutation to persistent user profile (BR-SIM-007).",
+        "operationId": "simulate_what_if_scenario_api_v1_simulation_what_if_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WhatIfSimulationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WhatIfSimulationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/evidence": {
+      "get": {
+        "tags": [
+          "evidence"
+        ],
+        "summary": "List clinical evidence entries",
+        "description": "Retrieves verified clinical evidence citations and international/national guidelines (WHO, PERKENI, CDC, ESC, AHA) with optional category, rule_id, and search keyword filtering (PRD FR-027, BR-EVIDENCE-001).",
+        "operationId": "get_clinical_evidence_api_v1_evidence_get",
+        "parameters": [
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by intervention domain category (e.g., 'activity', 'sleep', 'nutrition').",
+              "title": "Category"
+            },
+            "description": "Filter by intervention domain category (e.g., 'activity', 'sleep', 'nutrition')."
+          },
+          {
+            "name": "rule_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by associated clinical recommendation rule ID (e.g., 'REC-ACT-01').",
+              "title": "Rule Id"
+            },
+            "description": "Filter by associated clinical recommendation rule ID (e.g., 'REC-ACT-01')."
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Search query to filter by guideline title, organization, or clinical text.",
+              "title": "Search"
+            },
+            "description": "Search query to filter by guideline title, organization, or clinical text."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EvidenceListResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/health": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "summary": "Health check",
+        "description": "Returns application health status.",
+        "operationId": "health_check_api_v1_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthCheckResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AssessmentSummaryResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "user_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Id"
+          },
+          "health_score": {
+            "type": "number",
+            "title": "Health Score"
+          },
+          "lifestyle_score": {
+            "type": "number",
+            "title": "Lifestyle Score"
+          },
+          "risks": {
+            "items": {
+              "$ref": "#/components/schemas/RiskAssessmentItem"
+            },
+            "type": "array",
+            "title": "Risks"
+          },
+          "top_factors": {
+            "items": {
+              "$ref": "#/components/schemas/ContributingFactor"
+            },
+            "type": "array",
+            "title": "Top Factors"
+          },
+          "recommendations": {
+            "items": {
+              "$ref": "#/components/schemas/RecommendationItem"
+            },
+            "type": "array",
+            "title": "Recommendations"
+          },
+          "assessed_at": {
+            "type": "string",
+            "title": "Assessed At"
+          },
+          "is_mock": {
+            "type": "boolean",
+            "title": "Is Mock",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "health_score",
+          "lifestyle_score",
+          "risks",
+          "top_factors",
+          "recommendations",
+          "assessed_at"
+        ],
+        "title": "AssessmentSummaryResponse"
+      },
+      "Body_login_for_access_token_api_v1_auth_token_post": {
+        "properties": {
+          "grant_type": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^password$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grant Type"
+          },
+          "username": {
+            "type": "string",
+            "title": "Username"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "title": "Password"
+          },
+          "scope": {
+            "type": "string",
+            "title": "Scope",
+            "default": ""
+          },
+          "client_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Client Id"
+          },
+          "client_secret": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "format": "password",
+            "title": "Client Secret"
+          }
+        },
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "title": "Body_login_for_access_token_api_v1_auth_token_post"
+      },
+      "ClinicalEvidenceItem": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "Unique evidence identifier (e.g., 'evi-01')."
+          },
+          "rule_id": {
+            "type": "string",
+            "title": "Rule Id",
+            "description": "Referenced intervention rule ID (e.g., 'REC-ACT-01')."
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "Full title of the clinical guideline or study."
+          },
+          "organization": {
+            "type": "string",
+            "title": "Organization",
+            "description": "Authoring medical body or guideline publisher."
+          },
+          "year": {
+            "type": "integer",
+            "title": "Year",
+            "description": "Publication year."
+          },
+          "evidence_level": {
+            "type": "string",
+            "enum": [
+              "Level A (Kuat)",
+              "Level B (Sedang)",
+              "Level C (Konsensus Pakar)"
+            ],
+            "title": "Evidence Level",
+            "description": "Strength of clinical evidence grade."
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "activity",
+              "sleep",
+              "nutrition",
+              "cardiovascular",
+              "stress"
+            ],
+            "title": "Category",
+            "description": "Domain category of evidence."
+          },
+          "category_label": {
+            "type": "string",
+            "title": "Category Label",
+            "description": "Human-readable category title."
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary",
+            "description": "Structured clinical abstract / evidentiary justification."
+          },
+          "clinical_section": {
+            "type": "string",
+            "title": "Clinical Section",
+            "description": "Specific recommendation section or chapter."
+          },
+          "citation": {
+            "type": "string",
+            "title": "Citation",
+            "description": "Standard academic / clinical citation."
+          },
+          "external_url": {
+            "type": "string",
+            "title": "External Url",
+            "description": "Direct reference URL to source guideline publication."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "rule_id",
+          "title",
+          "organization",
+          "year",
+          "evidence_level",
+          "category",
+          "category_label",
+          "summary",
+          "clinical_section",
+          "citation",
+          "external_url"
+        ],
+        "title": "ClinicalEvidenceItem",
+        "description": "A verified clinical evidence or guideline citation entry."
+      },
+      "ConsentCreateRequest": {
+        "properties": {
+          "agreed": {
+            "type": "boolean",
+            "title": "Agreed",
+            "description": "Explicit agreement to data processing and medical disclaimer acknowledgement.",
+            "examples": [
+              true
+            ]
+          },
+          "consent_version": {
+            "type": "string",
+            "maxLength": 20,
+            "minLength": 1,
+            "title": "Consent Version",
+            "description": "Version string of the terms and disclaimer presented to user.",
+            "default": "1.0",
+            "examples": [
+              "1.0"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "agreed"
+        ],
+        "title": "ConsentCreateRequest",
+        "description": "Payload for recording user agreement to terms and medical disclaimer."
+      },
+      "ConsentResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "consent_version": {
+            "type": "string",
+            "title": "Consent Version"
+          },
+          "accepted_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Accepted At"
+          },
+          "revoked_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revoked At"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "user_id",
+          "consent_version",
+          "accepted_at",
+          "is_active"
+        ],
+        "title": "ConsentResponse",
+        "description": "Representation of an individual consent record."
+      },
+      "ConsentStatusResponse": {
+        "properties": {
+          "has_active_consent": {
+            "type": "boolean",
+            "title": "Has Active Consent"
+          },
+          "active_consent": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ConsentResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "terms_version": {
+            "type": "string",
+            "title": "Terms Version",
+            "default": "1.0"
+          },
+          "medical_disclaimer": {
+            "type": "string",
+            "title": "Medical Disclaimer",
+            "default": "HELIORA adalah alat bantu preventive health berbasis lifestyle dan AI. Hasil yang diberikan merupakan estimasi dan simulasi berdasarkan data dan model yang digunakan, bukan diagnosis medis dan bukan pengganti konsultasi tenaga kesehatan."
+          }
+        },
+        "type": "object",
+        "required": [
+          "has_active_consent"
+        ],
+        "title": "ConsentStatusResponse",
+        "description": "Status indicating whether user has active consent along with disclaimer copy."
+      },
+      "ContributingFactor": {
+        "properties": {
+          "feature": {
+            "type": "string",
+            "title": "Feature"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "impact": {
+            "type": "string",
+            "enum": [
+              "increase",
+              "decrease"
+            ],
+            "title": "Impact"
+          },
+          "weight_percentage": {
+            "type": "number",
+            "title": "Weight Percentage"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "feature",
+          "label",
+          "impact",
+          "weight_percentage",
+          "description"
+        ],
+        "title": "ContributingFactor"
+      },
+      "EvidenceListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ClinicalEvidenceItem"
+            },
+            "type": "array",
+            "title": "Items",
+            "description": "List of clinical evidence records."
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total",
+            "description": "Total count of returned items."
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "EvidenceListResponse",
+        "description": "Response payload containing clinical evidence citation items."
+      },
+      "FutureSimulationRequest": {
+        "properties": {
+          "horizon_days": {
+            "type": "integer",
+            "enum": [
+              30,
+              90,
+              180
+            ],
+            "title": "Horizon Days",
+            "description": "Projection horizon period in days (30, 90, or 180 days).",
+            "default": 90
+          }
+        },
+        "type": "object",
+        "title": "FutureSimulationRequest",
+        "description": "Payload to request model-based risk trajectory projections."
+      },
+      "FutureSimulationResponse": {
+        "properties": {
+          "horizon_days": {
+            "type": "integer",
+            "enum": [
+              30,
+              90,
+              180
+            ],
+            "title": "Horizon Days",
+            "description": "Simulated horizon in days (30, 90, 180)."
+          },
+          "assumptions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Assumptions",
+            "description": "Explicit modeling assumptions under this scenario."
+          },
+          "baseline_health_score": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Baseline Health Score",
+            "description": "Current overall health score."
+          },
+          "projected_health_score": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Projected Health Score",
+            "description": "Projected overall health score at horizon."
+          },
+          "baseline_lifestyle_score": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Baseline Lifestyle Score",
+            "description": "Current lifestyle score."
+          },
+          "projected_lifestyle_score": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Projected Lifestyle Score",
+            "description": "Projected lifestyle score at horizon."
+          },
+          "risk_trajectories": {
+            "items": {
+              "$ref": "#/components/schemas/RiskTrajectoryItem"
+            },
+            "type": "array",
+            "title": "Risk Trajectories",
+            "description": "Per-condition trajectory comparison items."
+          },
+          "is_model_estimated": {
+            "type": "boolean",
+            "title": "Is Model Estimated",
+            "description": "Mandatory flag indicating model-based simulation (PRD BR-SIM-004).",
+            "default": true
+          },
+          "disclaimer": {
+            "type": "string",
+            "title": "Disclaimer",
+            "description": "Mandatory verbatim disclaimer distinguishing simulation from clinical forecast (PRD FR-005).",
+            "default": "HELIORA adalah alat bantu preventive health berbasis lifestyle dan AI. Hasil yang diberikan merupakan estimasi dan simulasi berdasarkan data dan model yang digunakan, bukan diagnosis medis dan bukan pengganti konsultasi tenaga kesehatan."
+          }
+        },
+        "type": "object",
+        "required": [
+          "horizon_days",
+          "assumptions",
+          "baseline_health_score",
+          "projected_health_score",
+          "baseline_lifestyle_score",
+          "projected_lifestyle_score",
+          "risk_trajectories"
+        ],
+        "title": "FutureSimulationResponse",
+        "description": "Response containing future health projection scenario results."
+      },
+      "GenderEnum": {
+        "type": "string",
+        "enum": [
+          "male",
+          "female",
+          "other"
+        ],
+        "title": "GenderEnum",
+        "description": "Supported gender options for health biometric profiling."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HealthCheckResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "default": "ok"
+          },
+          "environment": {
+            "type": "string",
+            "title": "Environment"
+          },
+          "project": {
+            "type": "string",
+            "title": "Project",
+            "default": "HELIORA"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version",
+            "default": "0.1.0"
+          }
+        },
+        "type": "object",
+        "required": [
+          "environment"
+        ],
+        "title": "HealthCheckResponse",
+        "description": "Response schema for the health check endpoint."
+      },
+      "HealthProfileCreateRequest": {
+        "properties": {
+          "age": {
+            "type": "integer",
+            "maximum": 120.0,
+            "minimum": 1.0,
+            "title": "Age",
+            "description": "Age in years (1-120)"
+          },
+          "gender": {
+            "$ref": "#/components/schemas/GenderEnum",
+            "description": "Gender (male, female, other)"
+          },
+          "height_cm": {
+            "type": "number",
+            "maximum": 300.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Height Cm",
+            "description": "Height in cm"
+          },
+          "weight_kg": {
+            "type": "number",
+            "maximum": 500.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Weight Kg",
+            "description": "Weight in kg"
+          },
+          "physical_activity_min_per_week": {
+            "type": "number",
+            "maximum": 10080.0,
+            "minimum": 0.0,
+            "title": "Physical Activity Min Per Week",
+            "description": "Physical activity duration in minutes per week"
+          },
+          "sleep_duration_hours": {
+            "type": "number",
+            "maximum": 24.0,
+            "minimum": 0.0,
+            "title": "Sleep Duration Hours",
+            "description": "Average daily sleep duration in hours"
+          },
+          "smoking_status": {
+            "$ref": "#/components/schemas/SmokingStatusEnum",
+            "description": "Smoking status (never, former, current)"
+          },
+          "family_history": {
+            "type": "boolean",
+            "title": "Family History",
+            "description": "Family history of chronic disease (diabetes, CVD, hypertension)",
+            "default": false
+          },
+          "family_history_details": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Family History Details",
+            "description": "Granular family history details if available"
+          },
+          "stress_level": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 10.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stress Level",
+            "description": "Self-reported stress level (1-10 scale)"
+          },
+          "bmi": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bmi",
+            "description": "Optional precomputed BMI (auto-calculated if omitted)"
+          },
+          "waist_circumference_cm": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 300.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Waist Circumference Cm",
+            "description": "Waist circumference in cm"
+          },
+          "blood_pressure": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Blood Pressure",
+            "description": "Blood pressure reading (e.g. '120/80')"
+          },
+          "blood_sugar_mg_dl": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1000.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Blood Sugar Mg Dl",
+            "description": "Fasting blood sugar in mg/dL"
+          },
+          "cholesterol_mg_dl": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1000.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cholesterol Mg Dl",
+            "description": "Total cholesterol in mg/dL"
+          }
+        },
+        "type": "object",
+        "required": [
+          "age",
+          "gender",
+          "height_cm",
+          "weight_kg",
+          "physical_activity_min_per_week",
+          "sleep_duration_hours",
+          "smoking_status"
+        ],
+        "title": "HealthProfileCreateRequest",
+        "description": "Payload for creating a user's health profile (PRD FR-006/FR-007)."
+      },
+      "HealthProfileResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "age": {
+            "type": "integer",
+            "title": "Age"
+          },
+          "gender": {
+            "type": "string",
+            "title": "Gender"
+          },
+          "height_cm": {
+            "type": "number",
+            "title": "Height Cm"
+          },
+          "weight_kg": {
+            "type": "number",
+            "title": "Weight Kg"
+          },
+          "bmi": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bmi"
+          },
+          "bmi_category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bmi Category"
+          },
+          "physical_activity_min_per_week": {
+            "type": "number",
+            "title": "Physical Activity Min Per Week"
+          },
+          "sleep_duration_hours": {
+            "type": "number",
+            "title": "Sleep Duration Hours"
+          },
+          "smoking_status": {
+            "type": "string",
+            "title": "Smoking Status"
+          },
+          "family_history": {
+            "type": "boolean",
+            "title": "Family History"
+          },
+          "family_history_details": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Family History Details"
+          },
+          "stress_level": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stress Level"
+          },
+          "waist_circumference_cm": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Waist Circumference Cm"
+          },
+          "blood_pressure": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Blood Pressure"
+          },
+          "blood_sugar_mg_dl": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Blood Sugar Mg Dl"
+          },
+          "cholesterol_mg_dl": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cholesterol Mg Dl"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "user_id",
+          "age",
+          "gender",
+          "height_cm",
+          "weight_kg",
+          "physical_activity_min_per_week",
+          "sleep_duration_hours",
+          "smoking_status",
+          "family_history"
+        ],
+        "title": "HealthProfileResponse",
+        "description": "Public representation of a user's health profile."
+      },
+      "HealthProfileUpdateRequest": {
+        "properties": {
+          "age": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 120.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Age"
+          },
+          "gender": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GenderEnum"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "height_cm": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 300.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height Cm"
+          },
+          "weight_kg": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 500.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weight Kg"
+          },
+          "physical_activity_min_per_week": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 10080.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Physical Activity Min Per Week"
+          },
+          "sleep_duration_hours": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 24.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sleep Duration Hours"
+          },
+          "smoking_status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SmokingStatusEnum"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "family_history": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Family History"
+          },
+          "family_history_details": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Family History Details"
+          },
+          "stress_level": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 10.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stress Level"
+          },
+          "bmi": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bmi"
+          },
+          "waist_circumference_cm": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 300.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Waist Circumference Cm"
+          },
+          "blood_pressure": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Blood Pressure"
+          },
+          "blood_sugar_mg_dl": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1000.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Blood Sugar Mg Dl"
+          },
+          "cholesterol_mg_dl": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1000.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cholesterol Mg Dl"
+          }
+        },
+        "type": "object",
+        "title": "HealthProfileUpdateRequest",
+        "description": "Payload for updating an existing health profile."
+      },
+      "RecommendationItem": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "rule_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rule Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "sleep",
+              "activity",
+              "nutrition",
+              "stress"
+            ],
+            "title": "Category"
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "high",
+              "medium",
+              "low",
+              "protective"
+            ],
+            "title": "Priority",
+            "default": "medium"
+          },
+          "action": {
+            "type": "string",
+            "title": "Action"
+          },
+          "evidence_level": {
+            "type": "string",
+            "enum": [
+              "A",
+              "B",
+              "C"
+            ],
+            "title": "Evidence Level",
+            "default": "A"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "category",
+          "action",
+          "source"
+        ],
+        "title": "RecommendationItem"
+      },
+      "RiskAssessmentItem": {
+        "properties": {
+          "condition": {
+            "type": "string",
+            "enum": [
+              "diabetes",
+              "hypertension",
+              "cardiovascular"
+            ],
+            "title": "Condition"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "probability": {
+            "type": "number",
+            "title": "Probability"
+          },
+          "estimated_risk_score": {
+            "type": "number",
+            "title": "Estimated Risk Score"
+          },
+          "risk_level": {
+            "type": "string",
+            "enum": [
+              "low",
+              "moderate",
+              "high"
+            ],
+            "title": "Risk Level"
+          },
+          "risk_label": {
+            "type": "string",
+            "enum": [
+              "Lower",
+              "Moderate",
+              "Higher"
+            ],
+            "title": "Risk Label",
+            "default": "Lower"
+          },
+          "trend": {
+            "type": "string",
+            "enum": [
+              "stable",
+              "increasing",
+              "decreasing"
+            ],
+            "title": "Trend",
+            "default": "stable"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "condition",
+          "label",
+          "probability",
+          "estimated_risk_score",
+          "risk_level",
+          "description"
+        ],
+        "title": "RiskAssessmentItem"
+      },
+      "RiskTrajectoryItem": {
+        "properties": {
+          "condition": {
+            "type": "string",
+            "enum": [
+              "diabetes",
+              "hypertension",
+              "cardiovascular"
+            ],
+            "title": "Condition",
+            "description": "Standard condition identifier."
+          },
+          "label": {
+            "type": "string",
+            "title": "Label",
+            "description": "Human-readable condition title."
+          },
+          "baseline_probability": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Baseline Probability",
+            "description": "Current baseline risk probability."
+          },
+          "projected_probability": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Projected Probability",
+            "description": "Model-projected risk probability at horizon."
+          },
+          "baseline_score": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Baseline Score",
+            "description": "Current baseline score percentage (0-100)."
+          },
+          "projected_score": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Projected Score",
+            "description": "Projected score percentage (0-100)."
+          },
+          "delta_percentage": {
+            "type": "number",
+            "title": "Delta Percentage",
+            "description": "Net change in risk score (projected - baseline)."
+          },
+          "risk_level": {
+            "type": "string",
+            "enum": [
+              "low",
+              "moderate",
+              "high"
+            ],
+            "title": "Risk Level",
+            "description": "Clinical risk category level at projected horizon."
+          },
+          "risk_label": {
+            "type": "string",
+            "enum": [
+              "Lower",
+              "Moderate",
+              "Higher"
+            ],
+            "title": "Risk Label",
+            "description": "Standardized editorial label: Lower, Moderate, or Higher."
+          },
+          "trend": {
+            "type": "string",
+            "enum": [
+              "stable",
+              "increasing",
+              "decreasing"
+            ],
+            "title": "Trend",
+            "description": "Trajectory direction over horizon."
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "Clinical explanation of projected lifestyle trajectory."
+          }
+        },
+        "type": "object",
+        "required": [
+          "condition",
+          "label",
+          "baseline_probability",
+          "projected_probability",
+          "baseline_score",
+          "projected_score",
+          "delta_percentage",
+          "risk_level",
+          "risk_label",
+          "trend",
+          "description"
+        ],
+        "title": "RiskTrajectoryItem",
+        "description": "Estimated risk trajectory outcome for a specific chronic condition."
+      },
+      "SmokingStatusEnum": {
+        "type": "string",
+        "enum": [
+          "never",
+          "former",
+          "current"
+        ],
+        "title": "SmokingStatusEnum",
+        "description": "Categorized smoking habits for lifestyle risk factors."
+      },
+      "TokenResponse": {
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "title": "Access Token"
+          },
+          "token_type": {
+            "type": "string",
+            "title": "Token Type",
+            "default": "bearer"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserResponse"
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_token",
+          "user"
+        ],
+        "title": "TokenResponse",
+        "description": "Response returned upon successful authentication."
+      },
+      "UserLoginRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email",
+            "description": "User registered email address.",
+            "examples": [
+              "aksal@heliora.health"
+            ]
+          },
+          "password": {
+            "type": "string",
+            "title": "Password",
+            "description": "User account password.",
+            "examples": [
+              "SecurePass123!"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "title": "UserLoginRequest",
+        "description": "Payload for authenticating an existing user via JSON."
+      },
+      "UserRegisterRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email",
+            "description": "User email address (must be valid format).",
+            "examples": [
+              "aksal@heliora.health"
+            ]
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 8,
+            "title": "Password",
+            "description": "User password (minimum 8 characters).",
+            "examples": [
+              "SecurePass123!"
+            ]
+          },
+          "full_name": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Full Name",
+            "description": "User full name.",
+            "examples": [
+              "Aksal Pratama"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "password",
+          "full_name"
+        ],
+        "title": "UserRegisterRequest",
+        "description": "Payload for registering a new user."
+      },
+      "UserResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "full_name": {
+            "type": "string",
+            "title": "Full Name"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "email",
+          "full_name",
+          "created_at"
+        ],
+        "title": "UserResponse",
+        "description": "User profile response representation."
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "WhatIfConditionComparison": {
+        "properties": {
+          "condition": {
+            "type": "string",
+            "enum": [
+              "diabetes",
+              "hypertension",
+              "cardiovascular"
+            ],
+            "title": "Condition",
+            "description": "Condition identifier."
+          },
+          "label": {
+            "type": "string",
+            "title": "Label",
+            "description": "Condition human-readable title."
+          },
+          "baseline_probability": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Baseline Probability",
+            "description": "Baseline risk probability."
+          },
+          "simulated_probability": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Simulated Probability",
+            "description": "Simulated scenario risk probability."
+          },
+          "baseline_score": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Baseline Score",
+            "description": "Baseline risk percentage score."
+          },
+          "simulated_score": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Simulated Score",
+            "description": "Simulated risk percentage score."
+          },
+          "delta_percentage": {
+            "type": "number",
+            "title": "Delta Percentage",
+            "description": "Score change in percentage points (simulated - baseline)."
+          },
+          "risk_level": {
+            "type": "string",
+            "enum": [
+              "low",
+              "moderate",
+              "high"
+            ],
+            "title": "Risk Level",
+            "description": "Clinical risk level under simulated scenario."
+          },
+          "risk_label": {
+            "type": "string",
+            "enum": [
+              "Lower",
+              "Moderate",
+              "Higher"
+            ],
+            "title": "Risk Label",
+            "description": "Standardized editorial label: Lower, Moderate, or Higher."
+          },
+          "trend": {
+            "type": "string",
+            "enum": [
+              "stable",
+              "increasing",
+              "decreasing"
+            ],
+            "title": "Trend",
+            "description": "Direction of risk movement compared to baseline."
+          },
+          "impact_summary": {
+            "type": "string",
+            "title": "Impact Summary",
+            "description": "Concise explanation of parameter modification impacts."
+          }
+        },
+        "type": "object",
+        "required": [
+          "condition",
+          "label",
+          "baseline_probability",
+          "simulated_probability",
+          "baseline_score",
+          "simulated_score",
+          "delta_percentage",
+          "risk_level",
+          "risk_label",
+          "trend",
+          "impact_summary"
+        ],
+        "title": "WhatIfConditionComparison",
+        "description": "Comparative outcome between baseline and simulated scenario for a chronic disease."
+      },
+      "WhatIfSimulationRequest": {
+        "properties": {
+          "sleep_duration_hours": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 14.0,
+                "minimum": 3.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sleep Duration Hours",
+            "description": "Overridden daily sleep duration in hours (3.0 - 14.0)."
+          },
+          "physical_activity_min_per_week": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1000.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Physical Activity Min Per Week",
+            "description": "Overridden weekly physical activity minutes (0 - 1000)."
+          },
+          "weight_kg": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 300.0,
+                "minimum": 30.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weight Kg",
+            "description": "Overridden weight in kilograms (30.0 - 300.0)."
+          },
+          "smoking_status": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "never",
+                  "former",
+                  "current"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Smoking Status",
+            "description": "Overridden smoking habit status ('never', 'former', 'current')."
+          }
+        },
+        "type": "object",
+        "title": "WhatIfSimulationRequest",
+        "description": "Payload to simulate adjustments on modifiable lifestyle parameters."
+      },
+      "WhatIfSimulationResponse": {
+        "properties": {
+          "applied_parameters": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Applied Parameters",
+            "description": "Dictionary of active lifestyle parameters used in this scenario."
+          },
+          "derived_bmi": {
+            "type": "number",
+            "maximum": 80.0,
+            "minimum": 10.0,
+            "title": "Derived Bmi",
+            "description": "Recalculated BMI based on simulated weight."
+          },
+          "baseline_health_score": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Baseline Health Score",
+            "description": "Current baseline overall health score."
+          },
+          "simulated_health_score": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Simulated Health Score",
+            "description": "Overall health score under simulated scenario."
+          },
+          "health_score_delta": {
+            "type": "number",
+            "title": "Health Score Delta",
+            "description": "Change in health score (simulated - baseline)."
+          },
+          "baseline_lifestyle_score": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Baseline Lifestyle Score",
+            "description": "Current baseline lifestyle habits score."
+          },
+          "simulated_lifestyle_score": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Simulated Lifestyle Score",
+            "description": "Lifestyle habits score under simulated scenario."
+          },
+          "lifestyle_score_delta": {
+            "type": "number",
+            "title": "Lifestyle Score Delta",
+            "description": "Change in lifestyle score (simulated - baseline)."
+          },
+          "condition_comparisons": {
+            "items": {
+              "$ref": "#/components/schemas/WhatIfConditionComparison"
+            },
+            "type": "array",
+            "title": "Condition Comparisons",
+            "description": "Detailed per-condition comparative risk breakdown."
+          },
+          "is_model_estimated": {
+            "type": "boolean",
+            "title": "Is Model Estimated",
+            "description": "Mandatory flag indicating model-based simulation (PRD BR-SIM-004).",
+            "default": true
+          },
+          "disclaimer": {
+            "type": "string",
+            "title": "Disclaimer",
+            "description": "Mandatory verbatim disclaimer distinguishing simulation from clinical forecast (PRD FR-005).",
+            "default": "HELIORA adalah alat bantu preventive health berbasis lifestyle dan AI. Hasil yang diberikan merupakan estimasi dan simulasi berdasarkan data dan model yang digunakan, bukan diagnosis medis dan bukan pengganti konsultasi tenaga kesehatan."
+          }
+        },
+        "type": "object",
+        "required": [
+          "applied_parameters",
+          "derived_bmi",
+          "baseline_health_score",
+          "simulated_health_score",
+          "health_score_delta",
+          "baseline_lifestyle_score",
+          "simulated_lifestyle_score",
+          "lifestyle_score_delta",
+          "condition_comparisons"
+        ],
+        "title": "WhatIfSimulationResponse",
+        "description": "Response containing What-If simulation comparative results."
+      }
+    },
+    "securitySchemes": {
+      "OAuth2PasswordBearer": {
+        "type": "oauth2",
+        "flows": {
+          "password": {
+            "scopes": {},
+            "tokenUrl": "/api/v1/auth/token"
+          }
+        }
+      }
+    }
+  }
+}
