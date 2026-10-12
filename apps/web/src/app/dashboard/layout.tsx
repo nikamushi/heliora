@@ -4,27 +4,27 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  SFHeartTextSquare,
-  SFWaveformPathEcg,
-  SFChevronRight,
-  SFChevronLeft,
-  SFShieldCheckmark,
-  SFBookClosed,
-  SFSlidersHorizontal,
-  SFChartUptrend,
-  SFCompass,
-  SFPersonCropCircle,
-  SFLockShield,
-  SFDoorExit,
-  SFLine3Horizontal,
-  SFXmark,
-  SFQuestionMarkCircle,
-  SFDocText,
-  SFBubbleLeftRight,
-  SFHeadphones,
-  SFInfoCircle,
-  SFMagnifyingglass,
-} from "@/components/icons/sf-icons";
+  Heart as SFHeartTextSquare,
+  Activity as SFWaveformPathEcg,
+  ChevronRight as SFChevronRight,
+  ChevronLeft as SFChevronLeft,
+  ShieldCheck as SFShieldCheckmark,
+  BookOpen as SFBookClosed,
+  SlidersHorizontal as SFSlidersHorizontal,
+  TrendingUp as SFChartUptrend,
+  Compass as SFCompass,
+  User as SFPersonCropCircle,
+  ShieldAlert as SFLockShield,
+  LogOut as SFDoorExit,
+  Menu as SFLine3Horizontal,
+  X as SFXmark,
+  HelpCircle as SFQuestionMarkCircle,
+  FileText as SFDocText,
+  MessageSquare as SFBubbleLeftRight,
+  Headphones as SFHeadphones,
+  Info as SFInfoCircle,
+  Search as SFMagnifyingglass,
+} from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { apiClient } from "@/lib/api-client";
 import { UserResponse } from "@/types/api";
@@ -42,9 +42,6 @@ export default function DashboardLayout({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isPersonalMenuOpen, setIsPersonalMenuOpen] = useState(false);
   const [mobileNavLevel, setMobileNavLevel] = useState<"root" | "fitur" | "bantuan">("root");
-  const [isRiskMenuExpanded, setIsRiskMenuExpanded] = useState(
-    pathname?.startsWith("/dashboard/risk") ?? false
-  );
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   useEffect(() => {
@@ -386,59 +383,17 @@ export default function DashboardLayout({
                     >
                       {/* Cluster 1: Risiko */}
                       <div>
-                        <button
-                          type="button"
-                          onClick={() => setIsRiskMenuExpanded(!isRiskMenuExpanded)}
-                          className={`w-full flex items-center justify-between px-4 py-4 rounded-2xl text-xl font-bold transition-colors cursor-pointer ${
+                        <Link
+                          href="/dashboard/risk/diabetes"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className={`flex items-center px-4 py-4 rounded-2xl text-xl font-bold transition-colors ${
                             pathname?.startsWith("/dashboard/risk")
                               ? "bg-neutral-900/[0.08] text-neutral-950"
                               : "text-neutral-900 hover:bg-neutral-900/[0.04]"
                           }`}
                         >
                           <span>Risiko</span>
-                          <SFChevronRight
-                            className={`w-6 h-6 text-neutral-400 transition-transform duration-200 ${
-                              isRiskMenuExpanded ? "rotate-90" : ""
-                            }`}
-                          />
-                        </button>
-                        {isRiskMenuExpanded && (
-                          <div className="pl-4 pr-2 py-1 space-y-2 border-l-2 border-neutral-100 ml-4 my-2">
-                            <Link
-                              href="/dashboard/risk/diabetes"
-                              onClick={() => setIsMobileMenuOpen(false)}
-                              className={`block py-1.5 text-lg transition-colors ${
-                                pathname === "/dashboard/risk/diabetes"
-                                  ? "font-bold text-brand-900"
-                                  : "text-neutral-700 hover:text-neutral-950 font-semibold"
-                              }`}
-                            >
-                              Diabetes Melitus
-                            </Link>
-                            <Link
-                              href="/dashboard/risk/hypertension"
-                              onClick={() => setIsMobileMenuOpen(false)}
-                              className={`block py-1.5 text-lg transition-colors ${
-                                pathname === "/dashboard/risk/hypertension"
-                                  ? "font-bold text-brand-900"
-                                  : "text-neutral-700 hover:text-neutral-950 font-semibold"
-                              }`}
-                            >
-                              Hipertensi
-                            </Link>
-                            <Link
-                              href="/dashboard/risk/cardiovascular"
-                              onClick={() => setIsMobileMenuOpen(false)}
-                              className={`block py-1.5 text-lg transition-colors ${
-                                pathname === "/dashboard/risk/cardiovascular"
-                                  ? "font-bold text-brand-900"
-                                  : "text-neutral-700 hover:text-neutral-950 font-semibold"
-                              }`}
-                            >
-                              Kardiovaskular
-                            </Link>
-                          </div>
-                        )}
+                        </Link>
                       </div>
 
                       {/* Cluster 2: Tindakan */}
@@ -744,60 +699,17 @@ export default function DashboardLayout({
                 <nav className="mt-6 space-y-6">
                   {/* Cluster 1: Risiko */}
                   <div>
-                    <button
-                      type="button"
-                      onClick={() => setIsRiskMenuExpanded(!isRiskMenuExpanded)}
-                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm transition-colors cursor-pointer ${
+                    <Link
+                      href="/dashboard/risk/diabetes"
+                      className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
                         pathname?.startsWith("/dashboard/risk")
                           ? "bg-neutral-900/[0.08] text-neutral-950 font-bold"
                           : "text-neutral-700 hover:bg-neutral-900/[0.04] hover:text-neutral-900 font-medium"
                       }`}
                     >
-                      <div className="flex items-center gap-3">
-                        <SFWaveformPathEcg className="w-5 h-5 shrink-0 text-rose-600" />
-                        <span>Risiko</span>
-                      </div>
-                      <SFChevronRight
-                        className={`w-4 h-4 transition-transform duration-200 ${
-                          isRiskMenuExpanded ? "rotate-90" : ""
-                        }`}
-                      />
-                    </button>
-
-                    {isRiskMenuExpanded && (
-                      <div className="pl-9.5 pr-2 py-1 space-y-1">
-                        <Link
-                          href="/dashboard/risk/diabetes"
-                          className={`block py-1 text-[13px] transition-colors ${
-                            pathname === "/dashboard/risk/diabetes"
-                              ? "font-bold text-brand-900"
-                              : "text-neutral-500 hover:text-neutral-900"
-                          }`}
-                        >
-                          Diabetes Melitus
-                        </Link>
-                        <Link
-                          href="/dashboard/risk/hypertension"
-                          className={`block py-1 text-[13px] transition-colors ${
-                            pathname === "/dashboard/risk/hypertension"
-                              ? "font-bold text-brand-900"
-                              : "text-neutral-500 hover:text-neutral-900"
-                          }`}
-                        >
-                          Hipertensi
-                        </Link>
-                        <Link
-                          href="/dashboard/risk/cardiovascular"
-                          className={`block py-1 text-[13px] transition-colors ${
-                            pathname === "/dashboard/risk/cardiovascular"
-                              ? "font-bold text-brand-900"
-                              : "text-neutral-500 hover:text-neutral-900"
-                          }`}
-                        >
-                          Kardiovaskular
-                        </Link>
-                      </div>
-                    )}
+                      <SFWaveformPathEcg className="w-5 h-5 shrink-0 text-rose-600" />
+                      <span>Risiko</span>
+                    </Link>
                   </div>
 
                   {/* Cluster 2: Tindakan */}
@@ -957,8 +869,9 @@ export default function DashboardLayout({
 
       {/* ── Main Content Area (Column 3) ── */}
       <div className="flex-1 min-w-0 flex flex-col">
-        {/* Top Header with Global Search (Aligned h-12 with 2nd sidebar header) */}
-        <header className="h-12 bg-white/70 backdrop-blur-md sticky top-0 z-20 px-6 hidden lg:flex items-center justify-center shrink-0">
+        {/* Unified Top Header: Global Search and Disease Tabs inside 1 single sticky section */}
+        <header className="bg-white/70 backdrop-blur-md sticky top-0 z-20 px-6 hidden lg:flex flex-col items-center justify-center shrink-0 pt-3.5 pb-4 space-y-5">
+          {/* Top: Global Search Bar */}
           <button
             type="button"
             onClick={() => setIsSearchOpen(true)}
@@ -976,6 +889,45 @@ export default function DashboardLayout({
               </kbd>
             </div>
           </button>
+
+          {/* Bottom (in same header): Tab Switcher when navigating risk routes */}
+          {pathname?.startsWith("/dashboard/risk") && (
+            <nav
+              aria-label="Navigasi Kondisi Risiko"
+              className="inline-grid grid-cols-3 p-1.5 bg-neutral-100/90 rounded-full text-xs font-medium gap-1"
+            >
+              <Link
+                href="/dashboard/risk/diabetes"
+                className={`w-18 sm:w-20 py-1.5 px-2 text-center rounded-full transition-all select-none flex items-center justify-center shrink-0 ${
+                  pathname === "/dashboard/risk/diabetes"
+                    ? "bg-white text-neutral-900 font-bold shadow-xs"
+                    : "text-neutral-500 hover:text-black"
+                }`}
+              >
+                <span className="truncate">DM T2</span>
+              </Link>
+              <Link
+                href="/dashboard/risk/hypertension"
+                className={`w-18 sm:w-20 py-1.5 px-2 text-center rounded-full transition-all select-none flex items-center justify-center shrink-0 ${
+                  pathname === "/dashboard/risk/hypertension"
+                    ? "bg-white text-neutral-900 font-bold shadow-xs"
+                    : "text-neutral-500 hover:text-black"
+                }`}
+              >
+                <span className="truncate">HT</span>
+              </Link>
+              <Link
+                href="/dashboard/risk/cardiovascular"
+                className={`w-18 sm:w-20 py-1.5 px-2 text-center rounded-full transition-all select-none flex items-center justify-center shrink-0 ${
+                  pathname === "/dashboard/risk/cardiovascular"
+                    ? "bg-white text-neutral-900 font-bold shadow-xs"
+                    : "text-neutral-500 hover:text-black"
+                }`}
+              >
+                <span className="truncate">KV</span>
+              </Link>
+            </nav>
+          )}
         </header>
         {children}
       </div>

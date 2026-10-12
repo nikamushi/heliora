@@ -104,12 +104,17 @@ export interface HealthProfileResponse {
   height_cm: number;
   weight_kg: number;
   bmi: number;
+  bmi_category?: string | null;
   physical_activity_min_per_week: number;
   sleep_duration_hours: number;
   smoking_status: string;
   family_history: boolean;
   family_history_details?: string | null;
   stress_level?: number | null;
+  waist_circumference_cm?: number | null;
+  blood_pressure?: string | null;
+  blood_sugar_mg_dl?: number | null;
+  cholesterol_mg_dl?: number | null;
   created_at: string;
   updated_at?: string | null;
 }

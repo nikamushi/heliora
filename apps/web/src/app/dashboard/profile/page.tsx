@@ -3,15 +3,15 @@
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
-  SFArrowRight,
-  SFShieldCheckmark,
-  SFPencil,
-  SFCalendar,
-  SFScalemass,
-  SFFlame,
-  SFMoon,
-  SFCigarette,
-} from "@/components/icons/sf-icons";
+  ArrowRight as SFArrowRight,
+  ShieldCheck as SFShieldCheckmark,
+  Pencil as SFPencil,
+  Calendar as SFCalendar,
+  Scale as SFScalemass,
+  Flame as SFFlame,
+  Moon as SFMoon,
+  Cigarette as SFCigarette,
+} from "lucide-react";
 import { apiClient, ApiClientError } from "@/lib/api-client";
 import { useRequireAuth } from "@/lib/use-require-auth";
 import { HealthProfileResponse, UserResponse } from "@/types/api";

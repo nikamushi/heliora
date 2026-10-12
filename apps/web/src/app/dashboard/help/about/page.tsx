@@ -3,12 +3,12 @@
 import React from "react";
 import Link from "next/link";
 import {
-  SFInfoCircle,
-  SFSparkles,
-  SFShieldCheckmark,
-  SFBookClosed,
-  SFChevronRight,
-} from "@/components/icons/sf-icons";
+  Info as SFInfoCircle,
+  Sparkles as SFSparkles,
+  ShieldCheck as SFShieldCheckmark,
+  BookOpen as SFBookClosed,
+  ChevronRight as SFChevronRight,
+} from "lucide-react";
 import { DisclaimerBanner } from "@/components/disclaimer-banner";
 
 export default function HelpAboutPage() {

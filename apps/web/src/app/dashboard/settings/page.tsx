@@ -4,15 +4,15 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  SFShieldCheckmark,
-  SFKey,
-  SFDocText,
-  SFDoorExit,
-  SFCheckmarkCircle,
-  SFArrowUpRight,
-  SFLock,
-  SFEnvelope,
-} from "@/components/icons/sf-icons";
+  ShieldCheck as SFShieldCheckmark,
+  Key as SFKey,
+  FileText as SFDocText,
+  LogOut as SFDoorExit,
+  CheckCircle2 as SFCheckmarkCircle,
+  ArrowUpRight as SFArrowUpRight,
+  Lock as SFLock,
+  Mail as SFEnvelope,
+} from "lucide-react";
 import { apiClient } from "@/lib/api-client";
 import { useRequireAuth } from "@/lib/use-require-auth";
 import { ConsentStatusResponse, UserResponse } from "@/types/api";

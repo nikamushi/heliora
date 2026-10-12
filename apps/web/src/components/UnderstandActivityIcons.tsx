@@ -1,40 +1,39 @@
 import React from "react";
 import {
-  IconRun,
-  IconWalk,
-  IconMoon,
-  IconDroplet,
-  IconFlame,
-  IconHeart,
-  IconActivity,
-  IconBrain,
-  IconBike,
-  IconBarbell,
-  IconSun,
-  IconApple,
-  IconCoffee,
-  IconBatteryCharging,
-  IconWind,
-  IconScale,
-} from "@tabler/icons-react";
+  Moon,
+  Activity,
+  Heart,
+  Droplets,
+  Apple,
+  Footprints,
+  Flame,
+  Brain,
+  Sun,
+  Dumbbell,
+  BatteryCharging,
+  Coffee,
+  Bike,
+  Scale,
+  Wind,
+} from "lucide-react";
 
 const activityIcons = [
-  { id: "sleep", icon: IconMoon },
-  { id: "run", icon: IconRun },
-  { id: "heart", icon: IconHeart },
-  { id: "hydration", icon: IconDroplet },
-  { id: "nutrition", icon: IconApple },
-  { id: "steps", icon: IconWalk },
-  { id: "energy", icon: IconFlame },
-  { id: "mind", icon: IconBrain },
-  { id: "sun", icon: IconSun },
-  { id: "workout", icon: IconBarbell },
-  { id: "recovery", icon: IconBatteryCharging },
-  { id: "caffeine", icon: IconCoffee },
-  { id: "bike", icon: IconBike },
-  { id: "vitals", icon: IconActivity },
-  { id: "scale", icon: IconScale },
-  { id: "breath", icon: IconWind },
+  { id: "sleep", icon: Moon },
+  { id: "run", icon: Activity },
+  { id: "heart", icon: Heart },
+  { id: "hydration", icon: Droplets },
+  { id: "nutrition", icon: Apple },
+  { id: "steps", icon: Footprints },
+  { id: "energy", icon: Flame },
+  { id: "mind", icon: Brain },
+  { id: "sun", icon: Sun },
+  { id: "workout", icon: Dumbbell },
+  { id: "recovery", icon: BatteryCharging },
+  { id: "caffeine", icon: Coffee },
+  { id: "bike", icon: Bike },
+  { id: "vitals", icon: Activity },
+  { id: "scale", icon: Scale },
+  { id: "breath", icon: Wind },
 ];
 
 export function UnderstandActivityIcons() {
@@ -51,7 +50,7 @@ export function UnderstandActivityIcons() {
             >
               <IconComp 
                 className="w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11" 
-                stroke={1.5} 
+                strokeWidth={1.5} 
               />
             </div>
           );

@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { IconArrowLeft, IconHeartbeat } from "@tabler/icons-react";
+import { ArrowLeft, Activity } from "lucide-react";
 import { DisclaimerBanner } from "@/components/disclaimer-banner";
 
 interface AuthLayoutProps {
@@ -38,7 +38,7 @@ export function AuthLayout({
               href="/"
               className="mb-2 inline-flex items-center gap-1.5 rounded-md text-xs font-medium text-muted-foreground hover:text-brand-900 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             >
-              <IconArrowLeft size={15} aria-hidden="true" />
+              <ArrowLeft size={15} aria-hidden="true" />
               Kembali ke Beranda
             </Link>
 
@@ -157,7 +157,7 @@ export function AuthLayout({
               className="group mb-6 flex items-center gap-2 transition-transform group-hover:scale-105"
             >
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-900 text-white shadow-sm">
-                <IconHeartbeat size={26} stroke={2} />
+                <Activity size={26} strokeWidth={2} />
               </div>
             </Link>
             <h1 className="text-center text-[36px] leading-[42px] font-semibold tracking-tight text-foreground">

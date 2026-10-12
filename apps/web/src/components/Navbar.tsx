@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { IconHeartbeat, IconMenu2, IconX } from "@tabler/icons-react";
+import { Activity, Menu, X } from "lucide-react";
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -15,7 +15,7 @@ export function Navbar() {
           {/* Logo (Left) */}
           <Link href="/" className="flex items-center gap-2 group z-50">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-900 text-white shadow-sm transition-transform group-hover:scale-105">
-              <IconHeartbeat size={20} stroke={2} />
+              <Activity size={20} strokeWidth={2} />
             </div>
             <span className="text-xl font-bold tracking-tight text-brand-900">
               HELIORA
@@ -60,7 +60,7 @@ export function Navbar() {
             className="md:hidden relative z-50 p-2 text-brand-900"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
-            {mobileMenuOpen ? <IconX size={24} /> : <IconMenu2 size={24} />}
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
       </div>

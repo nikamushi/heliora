@@ -1,40 +1,40 @@
 import React from "react";
 import {
-  IconGitFork,
-  IconRoute,
-  IconArrowsSplit,
-  IconTimeline,
-  IconClockPlay,
-  IconCalendar,
-  IconSunset,
-  IconArrowsShuffle,
-  IconAdjustmentsHorizontal,
-  IconToggleRight,
-  IconPlayerPlay,
-  IconRefresh,
-  IconArrowsDiff,
-  IconVectorSpline,
-  IconLineDashed,
-  IconArrowRight,
-} from "@tabler/icons-react";
+  GitFork,
+  Route,
+  Split,
+  Milestone,
+  Clock,
+  Calendar,
+  Sunset,
+  Shuffle,
+  SlidersHorizontal,
+  ToggleRight,
+  Play,
+  RefreshCw,
+  ArrowLeftRight,
+  Spline,
+  Minus,
+  ArrowRight,
+} from "lucide-react";
 
 const simulationIcons = [
-  { id: "branch-fork", icon: IconGitFork },
-  { id: "path-route", icon: IconRoute },
-  { id: "arrow-split", icon: IconArrowsSplit },
-  { id: "timeline", icon: IconTimeline },
-  { id: "clock-future", icon: IconClockPlay },
-  { id: "calendar", icon: IconCalendar },
-  { id: "future-horizon", icon: IconSunset },
-  { id: "shuffle", icon: IconArrowsShuffle },
-  { id: "sliders", icon: IconAdjustmentsHorizontal },
-  { id: "toggle", icon: IconToggleRight },
-  { id: "play", icon: IconPlayerPlay },
-  { id: "refresh-cycle", icon: IconRefresh },
-  { id: "two-paths", icon: IconArrowsDiff },
-  { id: "trajectory-curve", icon: IconVectorSpline },
-  { id: "projection-dotted", icon: IconLineDashed },
-  { id: "arrow-forward", icon: IconArrowRight },
+  { id: "branch-fork", icon: GitFork },
+  { id: "path-route", icon: Route },
+  { id: "arrow-split", icon: Split },
+  { id: "timeline", icon: Milestone },
+  { id: "clock-future", icon: Clock },
+  { id: "calendar", icon: Calendar },
+  { id: "future-horizon", icon: Sunset },
+  { id: "shuffle", icon: Shuffle },
+  { id: "sliders", icon: SlidersHorizontal },
+  { id: "toggle", icon: ToggleRight },
+  { id: "play", icon: Play },
+  { id: "refresh-cycle", icon: RefreshCw },
+  { id: "two-paths", icon: ArrowLeftRight },
+  { id: "trajectory-curve", icon: Spline },
+  { id: "projection-dotted", icon: Minus },
+  { id: "arrow-forward", icon: ArrowRight },
 ];
 
 export function SimulationDirectionVisual() {
@@ -51,7 +51,7 @@ export function SimulationDirectionVisual() {
             >
               <IconComp 
                 className="w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11" 
-                stroke={1.5} 
+                strokeWidth={1.5} 
               />
             </div>
           );

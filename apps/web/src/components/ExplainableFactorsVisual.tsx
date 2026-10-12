@@ -1,40 +1,40 @@
 import React from "react";
 import {
-  IconPercentage,
-  IconGauge,
-  IconTarget,
-  IconProgress,
-  IconTrendingUp,
-  IconTrendingDown,
-  IconHeartbeat,
-  IconChartBar,
-  IconChartLine,
-  IconChartRadar,
-  IconChartDonut,
-  IconWaveSine,
-  IconChartDots,
-  IconSparkles,
-  IconCircleCheck,
-  IconAlertCircle,
-} from "@tabler/icons-react";
+  Percent,
+  Gauge,
+  Target,
+  CircleDashed,
+  TrendingUp,
+  TrendingDown,
+  Activity,
+  BarChart,
+  LineChart,
+  Compass,
+  PieChart,
+  Waves,
+  Network,
+  Sparkles,
+  CheckCircle2,
+  AlertCircle,
+} from "lucide-react";
 
 const analyticsIcons = [
-  { id: "percentage", icon: IconPercentage },
-  { id: "gauge", icon: IconGauge },
-  { id: "target", icon: IconTarget },
-  { id: "circular-progress", icon: IconProgress },
-  { id: "trend-up", icon: IconTrendingUp },
-  { id: "trend-down", icon: IconTrendingDown },
-  { id: "heartbeat", icon: IconHeartbeat },
-  { id: "bar-chart", icon: IconChartBar },
-  { id: "line-chart", icon: IconChartLine },
-  { id: "radar-chart", icon: IconChartRadar },
-  { id: "donut-chart", icon: IconChartDonut },
-  { id: "waveform", icon: IconWaveSine },
-  { id: "analytics-nodes", icon: IconChartDots },
-  { id: "spark-insight", icon: IconSparkles },
-  { id: "check-circle", icon: IconCircleCheck },
-  { id: "alert-circle", icon: IconAlertCircle },
+  { id: "percentage", icon: Percent },
+  { id: "gauge", icon: Gauge },
+  { id: "target", icon: Target },
+  { id: "circular-progress", icon: CircleDashed },
+  { id: "trend-up", icon: TrendingUp },
+  { id: "trend-down", icon: TrendingDown },
+  { id: "heartbeat", icon: Activity },
+  { id: "bar-chart", icon: BarChart },
+  { id: "line-chart", icon: LineChart },
+  { id: "radar-chart", icon: Compass },
+  { id: "donut-chart", icon: PieChart },
+  { id: "waveform", icon: Waves },
+  { id: "analytics-nodes", icon: Network },
+  { id: "spark-insight", icon: Sparkles },
+  { id: "check-circle", icon: CheckCircle2 },
+  { id: "alert-circle", icon: AlertCircle },
 ];
 
 export function ExplainableFactorsVisual() {
@@ -51,7 +51,7 @@ export function ExplainableFactorsVisual() {
             >
               <IconComp 
                 className="w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11" 
-                stroke={1.5} 
+                strokeWidth={1.5} 
               />
             </div>
           );

@@ -4,12 +4,12 @@ import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  SFSlidersHorizontal,
-  SFChartUptrend,
-  SFBookClosed,
-  SFArrowRight,
-  SFAlertCircle,
-} from "@/components/icons/sf-icons";
+  SlidersHorizontal as SFSlidersHorizontal,
+  TrendingUp as SFChartUptrend,
+  BookOpen as SFBookClosed,
+  ArrowRight as SFArrowRight,
+  AlertCircle as SFAlertCircle,
+} from "lucide-react";
 import { apiClient, ApiClientError } from "@/lib/api-client";
 import { useLatestAssessment } from "@/lib/use-latest-assessment";
 import { AssessmentSummaryResponse } from "@/types/api";

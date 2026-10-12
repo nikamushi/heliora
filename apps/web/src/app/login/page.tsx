@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { FormAlertTooltip } from "@/components/ui/alert-tooltip";
 import { AuthLayout } from "@/components/auth-layout";
 import { apiClient, ApiClientError } from "@/lib/api-client";
-import { IconEye, IconEyeOff } from "@tabler/icons-react";
+import { Eye as IconEye, EyeOff as IconEyeOff } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();

@@ -3,16 +3,16 @@
 import React from "react";
 import Link from "next/link";
 import {
-  SFDocText,
-  SFHeartTextSquare,
-  SFWaveformPathEcg,
-  SFShieldCheckmark,
-  SFSlidersHorizontal,
-  SFBookClosed,
-  SFSparkles,
-  SFArrowRight,
-  SFPersonCropCircle,
-} from "@/components/icons/sf-icons";
+  FileText as SFDocText,
+  Heart as SFHeartTextSquare,
+  Activity as SFWaveformPathEcg,
+  ShieldCheck as SFShieldCheckmark,
+  SlidersHorizontal as SFSlidersHorizontal,
+  BookOpen as SFBookClosed,
+  Sparkles as SFSparkles,
+  ArrowRight as SFArrowRight,
+  User as SFPersonCropCircle,
+} from "lucide-react";
 import { DisclaimerBanner } from "@/components/disclaimer-banner";
 
 export default function HelpGuidePage() {

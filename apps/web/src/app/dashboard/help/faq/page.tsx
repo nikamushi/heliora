@@ -3,11 +3,11 @@
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import {
-  SFBubbleLeftRight,
-  SFChevronDown,
-  SFMagnifyingglass,
-  SFHeadphones,
-} from "@/components/icons/sf-icons";
+  MessageSquare as SFBubbleLeftRight,
+  ChevronDown as SFChevronDown,
+  Search as SFMagnifyingglass,
+  Headphones as SFHeadphones,
+} from "lucide-react";
 import { DisclaimerBanner } from "@/components/disclaimer-banner";
 
 interface FAQItem {
