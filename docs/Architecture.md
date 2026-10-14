@@ -1128,6 +1128,14 @@ PRD menetapkan bahwa Health Score menggunakan formula weighted scoring sederhana
 
 ---
 
+## 9.3 Keputusan Implementasi (AI-004)
+
+Keputusan resmi metodologi, bobot final (35/35/30), rentang 0.0 – 100.0, serta deviasi
+dari §9.2 diratifikasi di `docs/Health-Score.md`. Dokumen tersebut adalah sumber
+kebenaran turunan untuk Health Score.
+
+---
+
 # 10. Lifestyle Score Architecture
 
 ## 10.1 Purpose

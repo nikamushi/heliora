@@ -901,21 +901,23 @@ Acceptance Criteria:
 **Owner:** Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S4  
-**Status:** BACKLOG
+**Status:** REVIEW
 
 Tasks:
 
-- [ ] Define methodology.
-- [ ] Define weighting.
-- [ ] Implement calculation.
-- [ ] Test calculation.
-- [ ] Document formula.
+- [x] Define methodology.
+- [x] Define weighting.
+- [x] Implement calculation.
+- [x] Test calculation.
+- [x] Document formula.
 
 Acceptance Criteria:
 
 - Health Score konsisten.
 - Formula terdokumentasi.
 - Tidak diklaim sebagai diagnosis.
+
+Evidence: `docs/Health-Score.md`, `apps/api/app/core/risk_engine.py` (`calculate_health_score`), `apps/api/tests/test_health_score.py` (8 passed), `docs/Architecture.md` §9.3.
 
 ---
 
@@ -2758,7 +2760,7 @@ HELIORA MVP hanya dianggap siap apabila seluruh P0 berikut selesai.
 ## AI
 
 - [ ] Preventive Lifestyle Risk Engine
-- [ ] Health Score
+- [x] Health Score
 - [ ] Lifestyle Score
 - [ ] Explainable AI
 - [ ] Future Health Simulation
