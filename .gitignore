@@ -172,8 +172,11 @@ COPILOT.md
 .gemini/
 .agent/
 .agents/
+.opencode/
+opencode.json
 skills/
 .skill/
+skills-lock.json
 .agent-skills/
 .ai/
 .ai-context/
