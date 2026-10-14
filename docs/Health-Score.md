@@ -57,8 +57,16 @@ Implementasi: `apps/api/app/core/risk_engine.py` → `calculate_health_score()`.
 
 ## 4. Bobot
 
-Nilai bobot final ditetapkan pada AI-004.02. Struktur formula memakai tiga bobot
-(`w_diabetes`, `w_hypertension`, `w_cardiovascular`) yang berjumlah 1.00.
+Bobot resmi yang diratifikasi AI-004.02 (jumlah = 1.00):
+
+| Komponen | Bobot | Poin deduksi maksimum |
+| --- | --- | --- |
+| `diabetes_risk` (`w_diabetes`) | 0.35 | 35.0 |
+| `hypertension_risk` (`w_hypertension`) | 0.35 | 35.0 |
+| `cardiovascular_risk` (`w_cardiovascular`) | 0.30 | 30.0 |
+
+Perubahan bobot di masa depan adalah keputusan produk (memerlukan review PM) dan wajib
+disertai pembaruan dokumen ini beserta penguncian ulang pada `test_health_score.py`.
 
 ---
 
