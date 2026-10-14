@@ -163,11 +163,26 @@ class TrainedModels:
     training_info: dict[str, Any] = field(default_factory=dict)
 
 
+def _neg_pos_ratio(y: np.ndarray) -> float:
+    """Return the negative-to-positive sample ratio for binary labels.
+
+    Used as XGBoost ``scale_pos_weight`` / LightGBM per-class weight so
+    minority (positive) samples carry proportionally more gradient.
+    Returns 1.0 when the positive class is absent (no weighting possible).
+    """
+    n_pos = int(np.sum(y == 1))
+    n_neg = int(np.sum(y == 0))
+    if n_pos == 0:
+        return 1.0
+    return round(n_neg / n_pos, 4)
+
+
 def train_risk_models(
     n_samples: int = 10000,
     seed: int = 42,
     use_xgboost: bool = True,
     save_path: Path | None = None,
+    balance_classes: bool = False,
 ) -> TrainedModels:
     """Train gradient boosting models for the three risk conditions.
 
@@ -176,29 +191,47 @@ def train_risk_models(
         seed: RNG seed for reproducibility.
         use_xgboost: If True, use XGBoost; otherwise LightGBM.
         save_path: Optional path to persist trained models.
+        balance_classes: If True, weight the positive class of each
+            condition by its negative/positive sample ratio (AI-003.04).
+            Defaults to False so the historical baseline stays reproducible.
 
     Returns:
         TrainedModels with trained model objects and metadata.
     """
     logger.info(
-        "Generating %d training samples (seed=%d, xgboost=%s)",
+        "Generating %d training samples (seed=%d, xgboost=%s, balance=%s)",
         n_samples,
         seed,
         use_xgboost,
+        balance_classes,
     )
 
     feature_matrix, y_dm, y_ht, y_cvd = generate_training_data(n_samples, seed)
 
     train_method = _train_xgboost if use_xgboost else _train_lightgbm
 
+    if balance_classes:
+        weights = {
+            "diabetes": _neg_pos_ratio(y_dm),
+            "hypertension": _neg_pos_ratio(y_ht),
+            "cardiovascular": _neg_pos_ratio(y_cvd),
+        }
+    else:
+        weights = {"diabetes": 1.0, "hypertension": 1.0, "cardiovascular": 1.0}
+    logger.info("Positive-class weights: %s", weights)
+
     logger.info("Training diabetes model...")
-    diabetes_model = train_method(feature_matrix, y_dm, "diabetes")
+    diabetes_model = train_method(feature_matrix, y_dm, "diabetes", weights["diabetes"])
 
     logger.info("Training hypertension model...")
-    hypertension_model = train_method(feature_matrix, y_ht, "hypertension")
+    hypertension_model = train_method(
+        feature_matrix, y_ht, "hypertension", weights["hypertension"]
+    )
 
     logger.info("Training CVD model...")
-    cvd_model = train_method(feature_matrix, y_cvd, "cardiovascular")
+    cvd_model = train_method(
+        feature_matrix, y_cvd, "cardiovascular", weights["cardiovascular"]
+    )
 
     models = TrainedModels(
         diabetes_model=diabetes_model,
@@ -210,6 +243,8 @@ def train_risk_models(
             "algorithm": "xgboost" if use_xgboost else "lightgbm",
             "n_features": len(FEATURE_NAMES),
             "feature_names": FEATURE_NAMES,
+            "balance_classes": balance_classes,
+            "class_weights": weights,
             "trained_at": datetime.now(UTC).isoformat(),
         },
     )
@@ -222,30 +257,40 @@ def train_risk_models(
 
 
 def _train_xgboost(
-    features: np.ndarray, y: np.ndarray, condition: str
+    features: np.ndarray, y: np.ndarray, condition: str, pos_weight: float = 1.0
 ) -> xgb.Booster:
-    """Train an XGBoost model for a specific condition."""
+    """Train an XGBoost model for a specific condition.
+
+    ``pos_weight`` maps to ``scale_pos_weight``; 1.0 means no weighting.
+    """
     dtrain = xgb.DMatrix(features, label=y)
 
-    params = {
+    params: dict[str, Any] = {
         "objective": "binary:logistic",
         "eval_metric": "logloss",
         "max_depth": 5,
         "learning_rate": 0.1,
-        "n_estimators": 100,
         "subsample": 0.8,
         "colsample_bytree": 0.8,
         "seed": 42,
     }
+    if pos_weight != 1.0:
+        params["scale_pos_weight"] = pos_weight
 
     model = xgb.train(params, dtrain, num_boost_round=100)
     return model
 
 
 def _train_lightgbm(
-    features: np.ndarray, y: np.ndarray, condition: str
+    features: np.ndarray, y: np.ndarray, condition: str, pos_weight: float = 1.0
 ) -> LGBMClassifier:
-    """Train a LightGBM model for a specific condition."""
+    """Train a LightGBM model for a specific condition.
+
+    ``pos_weight`` maps to a per-class weight dict; 1.0 means no weighting.
+    """
+    extra: dict[str, Any] = {}
+    if pos_weight != 1.0:
+        extra["class_weight"] = {0: 1.0, 1: pos_weight}
     model = LGBMClassifier(
         n_estimators=100,
         max_depth=5,
@@ -254,6 +299,7 @@ def _train_lightgbm(
         colsample_bytree=0.8,
         random_state=42,
         verbose=-1,
+        **extra,
     )
     model.fit(features, y)
     return model
@@ -296,6 +342,17 @@ def load_models(path: Path) -> TrainedModels:
 
 # ── Model-based inference ────────────────────────────────────────
 
+def _expected_default_signature() -> dict[str, Any]:
+    """Training signature that a reusable default cache must carry."""
+    return {
+        "n_samples": 10000,
+        "seed": 42,
+        "algorithm": "xgboost",
+        "n_features": len(FEATURE_NAMES),
+        "balance_classes": False,
+    }
+
+
 class ModelRiskEngine:
     """Risk engine backed by trained gradient boosting models.
 
@@ -309,11 +366,28 @@ class ModelRiskEngine:
             self.models = self._load_or_train_default()
 
     def _load_or_train_default(self) -> TrainedModels:
-        """Load cached models or train new ones if not available."""
+        """Load cached models or train new ones if not available.
+
+        A cached model is only reused when its training signature
+        (samples/seed/algorithm/features/weighting) matches the current
+        defaults; otherwise it is retrained so stale models can never
+        silently back an evaluation (AI-003 R4 guard).
+        """
         default_path = MODEL_DIR / "default"
-        if (default_path / "risk_models.pkl").exists():
-            logger.info("Loading cached models from %s", default_path)
-            return load_models(default_path)
+        pkl_path = default_path / "risk_models.pkl"
+        if pkl_path.exists():
+            try:
+                cached = load_models(default_path)
+                expected = _expected_default_signature()
+                info = cached.training_info
+                if all(info.get(key) == value for key, value in expected.items()):
+                    logger.info("Loading cached models from %s", default_path)
+                    return cached
+                logger.warning(
+                    "Cached models signature mismatch (config changed), retraining..."
+                )
+            except Exception as exc:  # corrupt cache must never block evaluation
+                logger.warning("Failed to load cached models (%s), retraining...", exc)
 
         logger.info("No cached models found, training new models...")
         models = train_risk_models(save_path=default_path)

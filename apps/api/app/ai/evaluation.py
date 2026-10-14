@@ -145,10 +145,33 @@ class EvaluationResult:
     eval_timestamp: str = ""
     sample_count: int = 0
     runtime_seconds: float = 0.0
+    class_balance: dict[str, Any] = field(default_factory=dict)
     disclaimer: str = (
         "Evaluation based on trained XGBoost models (10k samples). "
         "Metrics reflect model performance on synthetic data, not clinical validation."
     )
+
+
+def analyze_class_balance(labels: dict[str, list[float]]) -> dict[str, dict[str, Any]]:
+    """Compute class-balance statistics per condition from binary labels.
+
+    Returns per condition: positive/negative counts, prevalence, and the
+    negative-to-positive imbalance ratio (None when no positives exist).
+    This is the explicit AI-003 "Review class imbalance" evidence.
+    """
+    balance: dict[str, dict[str, Any]] = {}
+    for condition, values in labels.items():
+        y = np.asarray(values, dtype=float)
+        n_pos = int(np.sum(y >= 0.5))
+        n_neg = int(np.sum(y < 0.5))
+        total = n_pos + n_neg
+        balance[condition] = {
+            "n_positive": n_pos,
+            "n_negative": n_neg,
+            "prevalence": round(n_pos / total, 4) if total else 0.0,
+            "imbalance_ratio": round(n_neg / n_pos, 2) if n_pos > 0 else None,
+        }
+    return balance
 
 
 # ── Synthetic evaluation dataset ────────────────────────────────
@@ -351,6 +374,10 @@ def evaluate_risk_engine(
             predictions[cond].append(risks[f"{cond}_risk"])
             labels[cond].append(getattr(sample, f"{cond}_label"))
 
+    # Class-balance review (AI-003.04): prevalence and imbalance ratio
+    # per condition, computed on the evaluation labels.
+    class_balance = analyze_class_balance(labels)
+
     # Compute metrics per condition
     conditions: list[MetricsPerCondition] = []
     for cond_key, cond_name in [("diabetes", "Diabetes Melitus"), ("hypertension", "Hipertensi"), ("cardiovascular", "Penyakit Jantung")]:
@@ -390,6 +417,7 @@ def evaluate_risk_engine(
         eval_timestamp=datetime.now(UTC).isoformat(),
         sample_count=n_samples,
         runtime_seconds=round(runtime, 3),
+        class_balance=class_balance,
     )
 
     # Write report if path provided
@@ -409,6 +437,7 @@ def _serialize_report(result: EvaluationResult) -> dict[str, Any]:
         "sample_count": result.sample_count,
         "runtime_seconds": result.runtime_seconds,
         "overall_accuracy": result.overall_accuracy,
+        "class_balance": result.class_balance,
         "disclaimer": result.disclaimer,
         "conditions": [
             {
@@ -449,6 +478,13 @@ if __name__ == "__main__":
     print(f"Sample count: {result.sample_count}")
     print(f"Runtime     : {result.runtime_seconds:.3f}s")
     print(f"Overall acc : {result.overall_accuracy:.4f}")
+    print("\nClass balance (evaluation labels):")
+    for cond_key, bal in result.class_balance.items():
+        print(
+            f"  {cond_key}: pos={bal['n_positive']} "
+            f"neg={bal['n_negative']} prev={bal['prevalence']:.4f} "
+            f"ratio={bal['imbalance_ratio']}"
+        )
     print("\nPer-condition metrics (threshold=0.5):")
     for c in result.conditions:
         print(f"\n  {c.condition}:")
