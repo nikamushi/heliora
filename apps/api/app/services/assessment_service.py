@@ -203,7 +203,7 @@ class AssessmentService:
 
         # 1. Compute risks & composite scores
         risks = risk_engine.estimate_risks(profile)
-        health_score = risk_engine.calculate_health_score(risks)
+        health_score = risk_engine.calculate_health_score(profile, risks)
         lifestyle_score = risk_engine.calculate_lifestyle_score(profile)
 
         # XAI-001: SHAP-based feature attribution
