@@ -797,15 +797,15 @@ Acceptance Criteria:
 
 Tasks:
 
-- [ ] Data cleaning.
-- [ ] Missing value handling.
-- [ ] Duplicate handling.
-- [ ] Outlier review.
-- [ ] Encoding.
-- [ ] Feature transformation.
-- [ ] Train/test split.
-- [ ] Prevent data leakage.
-- [ ] Dataset versioning.
+- [x] Data cleaning.
+- [x] Missing value handling.
+- [x] Duplicate handling.
+- [x] Outlier review.
+- [x] Encoding.
+- [x] Feature transformation.
+- [x] Train/test split.
+- [x] Prevent data leakage.
+- [x] Dataset versioning.
 
 Acceptance Criteria:
 
