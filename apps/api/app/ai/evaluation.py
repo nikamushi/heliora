@@ -93,6 +93,57 @@ def _brier_score(y_true: np.ndarray, y_prob: np.ndarray) -> float:
     return round(float(np.mean((y_prob - y_true) ** 2)), 6)
 
 
+# ── Report metadata ──────────────────────────────────────────────
+# Frozen pre-AI-003 baseline (default config: XGBoost 10k/seed-42, thr=0.3).
+# Reproduced exactly in this environment before any AI-003 change.
+FROZEN_BASELINE: dict[str, Any] = {
+    "overall_accuracy": 0.8863,
+    "thresholds": {"diabetes": 0.3, "hypertension": 0.3, "cardiovascular": 0.3},
+    "conditions": {
+        "Diabetes Melitus": {
+            "precision": 0.6914, "recall": 0.4211, "f1": 0.5234,
+            "accuracy": 0.898, "roc_auc": 0.9044,
+        },
+        "Hipertensi": {
+            "precision": 0.8843, "recall": 0.5162, "f1": 0.6519,
+            "accuracy": 0.796, "roc_auc": 0.9059,
+        },
+        "Penyakit Jantung": {
+            "precision": 0.2632, "recall": 0.1923, "f1": 0.2222,
+            "accuracy": 0.965, "roc_auc": 0.9308,
+        },
+    },
+}
+
+# Class-weighting review outcome (AI-003.04, gate R1).
+# Experiment: scale_pos_weight per condition (DM 4.45 / HT 3.66 / CVD 9.25).
+# Result on n=5000 x seeds(42,7,123): ranking degrades (DM AUC -0.022,
+# CVD AUC -0.028 vs gate tolerance -0.02) and the CVD operating point is
+# unstable (F1 std +-0.068); CVD recall falls 0.398 -> 0.267.
+# Decision: REJECTED as default; kept as opt-in `balance_classes` flag.
+WEIGHTING_REVIEW: dict[str, Any] = {
+    "decision": "rejected",
+    "gate": "AUC tiap kondisi >= baseline-0.02 dan recall CVD naik",
+    "class_weights_tested": {"diabetes": 4.4466, "hypertension": 3.662, "cardiovascular": 9.2459},
+    "auc_delta_vs_baseline": {"diabetes": -0.0222, "hypertension": -0.0103, "cardiovascular": -0.0281},
+    "cvd_recall_baseline_tuned": 0.3975,
+    "cvd_recall_weighted_tuned": 0.2671,
+    "note": (
+        "Threshold tuning pada model baseline menaikkan F1 semua kondisi "
+        "(DM 0.52->0.59, HT 0.65->0.77, CVD 0.22->0.31) tanpa degradasi ranking; "
+        "weighting ditolak karena merusak ranking dan tidak stabil."
+    ),
+}
+
+# Tuned operating thresholds (max-F1 sweep, stabil lintas seed 42/7/123).
+TUNED_THRESHOLDS: dict[str, float] = {
+    "diabetes": 0.25, "hypertension": 0.2, "cardiovascular": 0.25,
+}
+
+MODEL_NAME = "heliora-risk-engine"
+MODEL_VERSION = "synthetic-xgb-10k-v1"
+
+
 # ── Evaluation data ─────────────────────────────────────────────
 
 @dataclass
@@ -337,7 +388,9 @@ def evaluate_risk_engine(
     ----------
     n_samples : Number of synthetic evaluation samples to generate.
     seed : RNG seed for reproducibility.
-    thresholds : Custom probability thresholds per condition (default 0.5).
+    thresholds : Custom probability thresholds per condition
+        (default TUNED_THRESHOLDS: diabetes 0.25, hypertension 0.2,
+        cardiovascular 0.25).
     output_path : Optional file path to write JSON evaluation report.
     engine : Optional pre-built ModelRiskEngine (e.g. a test stub).
         When omitted, the shared lazily-trained engine is used.
@@ -346,7 +399,7 @@ def evaluate_risk_engine(
     -------
     EvaluationResult with per-condition metrics and overall statistics.
     """
-    thresholds = thresholds or {"diabetes": 0.3, "hypertension": 0.3, "cardiovascular": 0.3}
+    thresholds = thresholds or dict(TUNED_THRESHOLDS)
     engine = engine if engine is not None else get_model_engine()
 
     start = time.perf_counter()
@@ -422,7 +475,7 @@ def evaluate_risk_engine(
 
     # Write report if path provided
     if output_path:
-        report = _serialize_report(result)
+        report = _serialize_report(result, engine)
         Path(output_path).parent.mkdir(parents=True, exist_ok=True)
         Path(output_path).write_text(json.dumps(report, indent=2), encoding="utf-8")
         logger.info("Evaluation report written to %s", output_path)
@@ -430,13 +483,41 @@ def evaluate_risk_engine(
     return result
 
 
-def _serialize_report(result: EvaluationResult) -> dict[str, Any]:
+def _model_card(engine: ModelRiskEngine | None) -> dict[str, Any]:
+    """Build the Architecture §29 model card from the engine's training info."""
+    info: dict[str, Any] = (
+        getattr(getattr(engine, "models", None), "training_info", None) or {}
+    )
+    return {
+        "model_name": MODEL_NAME,
+        "model_version": MODEL_VERSION,
+        "training_dataset": (
+            f"synthetic-epi-model-v1 (n={info.get('n_samples')}, "
+            f"seed={info.get('seed')})"
+        ),
+        "feature_version": (
+            f"model_training.FEATURE_NAMES v1 "
+            f"({info.get('n_features')} features)"
+        ),
+        "training_date": info.get("trained_at"),
+        "algorithm": info.get("algorithm"),
+        "balance_classes": info.get("balance_classes"),
+        "class_weights": info.get("class_weights"),
+    }
+
+
+def _serialize_report(
+    result: EvaluationResult, engine: ModelRiskEngine | None = None
+) -> dict[str, Any]:
     """Convert EvaluationResult to JSON-serializable dict."""
     return {
         "eval_timestamp": result.eval_timestamp,
         "sample_count": result.sample_count,
         "runtime_seconds": result.runtime_seconds,
         "overall_accuracy": result.overall_accuracy,
+        "model": _model_card(engine),
+        "baseline": FROZEN_BASELINE,
+        "weighting_review": WEIGHTING_REVIEW,
         "class_balance": result.class_balance,
         "disclaimer": result.disclaimer,
         "conditions": [
@@ -485,9 +566,9 @@ if __name__ == "__main__":
             f"neg={bal['n_negative']} prev={bal['prevalence']:.4f} "
             f"ratio={bal['imbalance_ratio']}"
         )
-    print("\nPer-condition metrics (threshold=0.5):")
+    print("\nPer-condition metrics (tuned thresholds):")
     for c in result.conditions:
-        print(f"\n  {c.condition}:")
+        print(f"\n  {c.condition} (thr={c.threshold}):")
         print(f"    Precision : {c.precision:.4f}")
         print(f"    Recall    : {c.recall:.4f}")
         print(f"    F1        : {c.f1:.4f}")

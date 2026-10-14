@@ -1,51 +1,136 @@
 {
-  "eval_timestamp": "2026-09-29T22:32:38.151944+00:00",
+  "eval_timestamp": "2026-10-14T10:41:13.698612+00:00",
   "sample_count": 1000,
-  "runtime_seconds": 1.186,
-  "overall_accuracy": 0.8863,
+  "runtime_seconds": 2.026,
+  "overall_accuracy": 0.8793,
+  "model": {
+    "model_name": "heliora-risk-engine",
+    "model_version": "synthetic-xgb-10k-v1",
+    "training_dataset": "synthetic-epi-model-v1 (n=10000, seed=42)",
+    "feature_version": "model_training.FEATURE_NAMES v1 (11 features)",
+    "training_date": "2026-10-14T10:25:33.949595+00:00",
+    "algorithm": "xgboost",
+    "balance_classes": false,
+    "class_weights": {
+      "diabetes": 1.0,
+      "hypertension": 1.0,
+      "cardiovascular": 1.0
+    }
+  },
+  "baseline": {
+    "overall_accuracy": 0.8863,
+    "thresholds": {
+      "diabetes": 0.3,
+      "hypertension": 0.3,
+      "cardiovascular": 0.3
+    },
+    "conditions": {
+      "Diabetes Melitus": {
+        "precision": 0.6914,
+        "recall": 0.4211,
+        "f1": 0.5234,
+        "accuracy": 0.898,
+        "roc_auc": 0.9044
+      },
+      "Hipertensi": {
+        "precision": 0.8843,
+        "recall": 0.5162,
+        "f1": 0.6519,
+        "accuracy": 0.796,
+        "roc_auc": 0.9059
+      },
+      "Penyakit Jantung": {
+        "precision": 0.2632,
+        "recall": 0.1923,
+        "f1": 0.2222,
+        "accuracy": 0.965,
+        "roc_auc": 0.9308
+      }
+    }
+  },
+  "weighting_review": {
+    "decision": "rejected",
+    "gate": "AUC tiap kondisi >= baseline-0.02 dan recall CVD naik",
+    "class_weights_tested": {
+      "diabetes": 4.4466,
+      "hypertension": 3.662,
+      "cardiovascular": 9.2459
+    },
+    "auc_delta_vs_baseline": {
+      "diabetes": -0.0222,
+      "hypertension": -0.0103,
+      "cardiovascular": -0.0281
+    },
+    "cvd_recall_baseline_tuned": 0.3975,
+    "cvd_recall_weighted_tuned": 0.2671,
+    "note": "Threshold tuning pada model baseline menaikkan F1 semua kondisi (DM 0.52->0.59, HT 0.65->0.77, CVD 0.22->0.31) tanpa degradasi ranking; weighting ditolak karena merusak ranking dan tidak stabil."
+  },
+  "class_balance": {
+    "diabetes": {
+      "n_positive": 133,
+      "n_negative": 867,
+      "prevalence": 0.133,
+      "imbalance_ratio": 6.52
+    },
+    "hypertension": {
+      "n_positive": 370,
+      "n_negative": 630,
+      "prevalence": 0.37,
+      "imbalance_ratio": 1.7
+    },
+    "cardiovascular": {
+      "n_positive": 26,
+      "n_negative": 974,
+      "prevalence": 0.026,
+      "imbalance_ratio": 37.46
+    }
+  },
   "disclaimer": "Evaluation based on trained XGBoost models (10k samples). Metrics reflect model performance on synthetic data, not clinical validation.",
   "conditions": [
     {
       "condition": "Diabetes Melitus",
       "label_count": 1000,
       "positive_count": 133,
-      "threshold": 0.3,
-      "precision": 0.6914,
-      "recall": 0.4211,
-      "f1": 0.5234,
-      "accuracy": 0.898,
+      "threshold": 0.25,
+      "precision": 0.5497,
+      "recall": 0.6241,
+      "f1": 0.5845,
+      "accuracy": 0.882,
       "roc_auc": 0.9044,
       "brier_score": 0.089176,
       "mean_predicted": 0.1541,
-      "mean_actual": 0.133
+      "mean_actual": 0.133,
+      "calibration_gap": 0.0211
     },
     {
       "condition": "Hipertensi",
       "label_count": 1000,
       "positive_count": 370,
-      "threshold": 0.3,
-      "precision": 0.8843,
-      "recall": 0.5162,
-      "f1": 0.6519,
-      "accuracy": 0.796,
+      "threshold": 0.2,
+      "precision": 0.6809,
+      "recall": 0.8649,
+      "f1": 0.7619,
+      "accuracy": 0.8,
       "roc_auc": 0.9059,
       "brier_score": 0.196726,
       "mean_predicted": 0.2055,
-      "mean_actual": 0.37
+      "mean_actual": 0.37,
+      "calibration_gap": 0.1645
     },
     {
       "condition": "Penyakit Jantung",
       "label_count": 1000,
       "positive_count": 26,
-      "threshold": 0.3,
-      "precision": 0.2632,
-      "recall": 0.1923,
-      "f1": 0.2222,
-      "accuracy": 0.965,
+      "threshold": 0.25,
+      "precision": 0.275,
+      "recall": 0.4231,
+      "f1": 0.3333,
+      "accuracy": 0.956,
       "roc_auc": 0.9308,
       "brier_score": 0.02472,
       "mean_predicted": 0.0718,
-      "mean_actual": 0.026
+      "mean_actual": 0.026,
+      "calibration_gap": 0.0458
     }
   ]
 }
