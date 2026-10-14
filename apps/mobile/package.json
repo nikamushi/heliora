@@ -1,0 +1,13 @@
+{
+  "name": "mobile",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "node ./run-flutter.mjs run",
+    "dev:chrome": "node ./run-flutter.mjs run -d chrome",
+    "lint": "node ./run-flutter.mjs analyze",
+    "test": "node ./run-flutter.mjs test",
+    "build": "node ./run-flutter.mjs build apk --release",
+    "gen:api": "node ./run-flutter.mjs dart run swagger_parser && node ./run-flutter.mjs dart run build_runner build --delete-conflicting-outputs"
+  }
+}

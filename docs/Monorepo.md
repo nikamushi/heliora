@@ -4,13 +4,14 @@
 
 Heliora uses a polyglot monorepo.
 
-The repository contains JavaScript/TypeScript applications and Python applications/workflows while keeping their dependency-management responsibilities separate.
+The repository contains JavaScript/TypeScript applications, Python applications/workflows, and Flutter mobile applications while keeping their dependency-management responsibilities separate.
 
 The monorepo uses:
 
 - Turborepo for task orchestration
 - pnpm for the JavaScript/TypeScript workspace
 - uv for the Python workspace
+- pub & FVM for the Flutter/Dart mobile workspace
 
 The responsibilities are intentionally separated:
 
@@ -19,12 +20,13 @@ The responsibilities are intentionally separated:
 | Turborepo | Task orchestration and task-level caching |
 | pnpm | JavaScript/TypeScript workspace and dependency management |
 | uv | Python workspace and dependency management |
+| pub & FVM | Dart/Flutter dependencies and Flutter SDK version pinning |
 
 ### Principle
 
-> Turborepo orchestrates; pnpm and uv manage their respective ecosystems.
+> Turborepo orchestrates; pnpm, uv, and pub manage their respective ecosystems.
 
-Turborepo must not be treated as a replacement for either package manager.
+Turborepo must not be treated as a replacement for the underlying package managers.
 
 ---
 
@@ -46,17 +48,25 @@ heliora/
 │   │   ├── package.json
 │   │   └── ...
 │   │
-│   └── api/                         # FastAPI backend application
-│       ├── app/
-│       │   ├── api/                 # API routes/controllers
-│       │   ├── core/                # Application configuration/core infrastructure
-│       │   ├── models/              # Persistence/domain models
-│       │   ├── schemas/             # API request/response schemas
-│       │   ├── services/            # Application/business services
-│       │   ├── repositories/        # Data-access layer
-│       │   └── main.py
-│       ├── tests/
-│       └── pyproject.toml
+│   ├── api/                         # FastAPI backend application
+│   │   ├── app/
+│   │   │   ├── api/                 # API routes/controllers
+│   │   │   ├── core/                # Application configuration/core infrastructure
+│   │   │   ├── models/              # Persistence/domain models
+│   │   │   ├── schemas/             # API request/response schemas
+│   │   │   ├── services/            # Application/business services
+│   │   │   ├── repositories/        # Data-access layer
+│   │   │   └── main.py
+│   │   ├── tests/
+│   │   └── pyproject.toml
+│   │
+│   └── mobile/                      # Flutter Android mobile application
+│       ├── android/                 # Native Android project configuration
+│       ├── lib/                     # Flutter application code
+│       ├── test/                    # Widget and unit tests
+│       ├── pubspec.yaml             # Dart dependencies (managed by pub)
+│       ├── .fvmrc                   # Pinned Flutter SDK version
+│       └── package.json             # Turborepo task bridging scripts
 │
 ├── packages/
 │   └── ml-core/                     # Shared Python ML package
@@ -122,12 +132,15 @@ Contains independently deployable applications.
 ```text
 apps/
 ├── web/
-└── api/
+├── api/
+└── mobile/
 ```
 
 `apps/web` owns the Next.js frontend.
 
 `apps/api` owns the FastAPI backend.
+
+`apps/mobile` owns the Flutter Android application.
 
 Applications own runtime-specific implementation.
 
@@ -259,6 +272,8 @@ packages:
 
 This workspace is intended for JavaScript/TypeScript projects.
 
+`apps/mobile` participates in the pnpm workspace strictly through a script-only `package.json` to bridge Turborepo task orchestration (dev, lint, test, build). It maintains zero npm runtime dependencies.
+
 `ai/` is not part of the pnpm workspace unless a concrete JavaScript/TypeScript package is introduced there.
 
 ---
@@ -279,6 +294,20 @@ Python dependency relationships are owned by uv.
 
 ---
 
+### Flutter/Dart Workspace
+
+The mobile application workspace is managed by Flutter pub and FVM.
+
+Workspace member:
+
+```text
+apps/mobile
+```
+
+Flutter dependencies and Dart SDK constraints are defined in `pubspec.yaml`. The Flutter SDK version is pinned via `.fvmrc`.
+
+---
+
 ## 5. Tooling Responsibilities
 
 ### Turborepo
@@ -290,7 +319,7 @@ Responsible for:
 * running tasks across workspace projects
 * task-level caching where applicable
 
-Turborepo does not manage Python dependencies.
+Turborepo does not manage Python or Flutter dependencies.
 
 ### pnpm
 
@@ -307,6 +336,14 @@ Responsible for:
 * Python workspace management
 * Python package relationships
 * Python environments
+
+### pub & FVM
+
+Responsible for:
+
+* Dart/Flutter dependencies via pub (`pubspec.yaml`, `pubspec.lock`)
+* Flutter SDK version pinning and consistency across environments (`.fvmrc`)
+* Dart static analysis and widget/unit testing execution
 
 ---
 
@@ -447,6 +484,21 @@ Owns:
 * feature engineering
 * reusable inference logic
 
+### Mobile
+
+```text
+apps/mobile
+```
+
+Owns:
+
+* mobile user interface (Android)
+* mobile routing and screen navigation
+* mobile application state and local caching
+* device-native integration (secure token storage, hardware capabilities, deep link handler)
+
+`apps/mobile` interacts with the rest of the system strictly via the HTTP API contract (`/api/v1/openapi.json`) and Supabase Auth. It must never import code or file paths from `apps/web` or `apps/api`.
+
 ---
 
 ## 9. Repository-Level Rules
@@ -471,6 +523,8 @@ The following rules apply to the monorepo:
 16. Turborepo should orchestrate project tasks rather than dictate application architecture.
 17. Do not use path hacks to connect Python workspace projects.
 18. Avoid unnecessary coupling between applications and packages.
+19. Dart/Flutter dependency management remains under pub and FVM.
+20. `apps/mobile` interacts with backend services strictly via OpenAPI HTTP contracts and Supabase Bearer JWTs without direct cross-app imports.
 
 ---
 
