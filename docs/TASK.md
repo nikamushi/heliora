@@ -928,19 +928,21 @@ Evidence: `docs/Health-Score.md`, `apps/api/app/core/risk_engine.py` (`calculate
 **Owner:** Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S4  
-**Status:** BACKLOG
+**Status:** REVIEW
 
 Tasks:
 
-- [ ] Define lifestyle factors.
-- [ ] Define scoring.
-- [ ] Implement calculation.
-- [ ] Test calculation.
+- [x] Define lifestyle factors.
+- [x] Define scoring.
+- [x] Implement calculation.
+- [x] Test calculation.
 
 Acceptance Criteria:
 
 - Lifestyle Score dapat dihitung.
 - Score dapat ditampilkan frontend.
+
+Evidence: `docs/Lifestyle-Score.md`, `apps/api/app/core/risk_engine.py` (`calculate_lifestyle_score`), `apps/api/tests/test_lifestyle_score.py` (10 passed).
 
 ---
 
@@ -2761,7 +2763,7 @@ HELIORA MVP hanya dianggap siap apabila seluruh P0 berikut selesai.
 
 - [ ] Preventive Lifestyle Risk Engine
 - [x] Health Score
-- [ ] Lifestyle Score
+- [x] Lifestyle Score
 - [ ] Explainable AI
 - [ ] Future Health Simulation
 - [x] What-if Simulation

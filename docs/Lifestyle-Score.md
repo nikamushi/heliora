@@ -1,6 +1,6 @@
 # Lifestyle Score
 
-**Status:** BACKLOG · **Task:** AI-005 · **Sprint:** S4 · **Owner:** Gilang & Aksal
+**Status:** REVIEW · **Task:** AI-005 · **Sprint:** S4 · **Owner:** Gilang & Aksal
 
 Dokumen ini adalah sumber kebenaran untuk faktor, normalisasi, bobot, rentang, dan interpretasi
 **Lifestyle Score** HELIORA. Dokumen ini selaras dengan `docs/PRD.md` (§11.5.2, BR-SCORE-004/005/006)
