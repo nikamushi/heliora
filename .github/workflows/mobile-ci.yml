@@ -8,6 +8,7 @@ on:
   push:
     branches:
       - main
+      - 'feature/**'
     tags:
       - 'v*'
     paths:
@@ -73,6 +74,15 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Free Up / Increase Swap Space
+        run: |
+          sudo swapoff -a || true
+          sudo fallocate -l 4G /swapfile || sudo dd if=/dev/zero of=/swapfile bs=1M count=4096
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+          free -h
+
       - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
@@ -90,28 +100,50 @@ jobs:
         working-directory: apps/mobile
         run: flutter pub get
 
-      - name: Configure Keystore (If Provided in Secrets)
+      - name: Configure Keystore
         id: keystore
         working-directory: apps/mobile
         env:
           KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          INPUT_STORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          INPUT_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          INPUT_KEY_PASS: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
+          STORE_PASS="${INPUT_STORE_PASS:-heliora-ci-keystore-pass}"
+          ALIAS="${INPUT_KEY_ALIAS:-heliora}"
+          KEY_PASS="${INPUT_KEY_PASS:-$STORE_PASS}"
+
           if [ -n "$KEYSTORE_BASE64" ]; then
             echo "Decoding release keystore from secrets..."
             echo "$KEYSTORE_BASE64" | base64 -d > android/app/upload-keystore.jks
-            echo "has_keystore=true" >> $GITHUB_OUTPUT
           else
-            echo "No custom release keystore provided; using default build configuration."
-            echo "has_keystore=false" >> $GITHUB_OUTPUT
+            echo "Generating release keystore for CI build..."
+            keytool -genkey -v \
+              -keystore android/app/upload-keystore.jks \
+              -storepass "$STORE_PASS" \
+              -alias "$ALIAS" \
+              -keypass "$KEY_PASS" \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -dname "CN=HELIORA, OU=Mobile, O=Heliora Health, L=Jakarta, ST=DKI Jakarta, C=ID"
           fi
+
+          mkdir -p ~/.android
+          cp android/app/upload-keystore.jks ~/.android/debug.keystore || true
+
+          echo "keystore_path=upload-keystore.jks" >> $GITHUB_OUTPUT
+          echo "keystore_password=$STORE_PASS" >> $GITHUB_OUTPUT
+          echo "key_alias=$ALIAS" >> $GITHUB_OUTPUT
+          echo "key_password=$KEY_PASS" >> $GITHUB_OUTPUT
 
       - name: Build Android Release APK
         working-directory: apps/mobile
         env:
-          ANDROID_KEYSTORE_PATH: ${{ steps.keystore.outputs.has_keystore == 'true' && 'upload-keystore.jks' || '' }}
-          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_KEYSTORE_PATH: ${{ steps.keystore.outputs.keystore_path }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ steps.keystore.outputs.keystore_password }}
+          ANDROID_KEY_ALIAS: ${{ steps.keystore.outputs.key_alias }}
+          ANDROID_KEY_PASSWORD: ${{ steps.keystore.outputs.key_password }}
           API_BASE_URL: ${{ secrets.API_BASE_URL || 'https://api.heliora.id' }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL || 'https://vhrwtzenemkswivwhwmt.supabase.co' }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZocnd0emVuZW1rc3dpdndod210Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyMTAzODcsImV4cCI6MjEwNDc4NjM4N30.r03LNmMnjL9X8prh93Suxzgr8KG0IGMCGjzeVWdv2T8' }}

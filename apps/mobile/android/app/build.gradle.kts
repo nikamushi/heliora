@@ -1,3 +1,4 @@
+import java.io.File
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -23,7 +24,18 @@ val keyAliasVal: String? = keystoreProperties.getProperty("keyAlias")
 val keyPasswordVal: String? = keystoreProperties.getProperty("keyPassword")
     ?: System.getenv("ANDROID_KEY_PASSWORD")
 
-val hasReleaseSigning = !keyStoreFilePath.isNullOrEmpty() && file(keyStoreFilePath).exists()
+// Resolve keystore file flexibly across relative and absolute locations
+val resolvedKeyStoreFile: File? = when {
+    !keyStoreFilePath.isNullOrEmpty() && file(keyStoreFilePath).exists() -> file(keyStoreFilePath)
+    !keyStoreFilePath.isNullOrEmpty() && rootProject.file(keyStoreFilePath).exists() -> rootProject.file(keyStoreFilePath)
+    !keyStoreFilePath.isNullOrEmpty() && rootProject.file("app/$keyStoreFilePath").exists() -> rootProject.file("app/$keyStoreFilePath")
+    !keyStoreFilePath.isNullOrEmpty() && File(keyStoreFilePath).exists() -> File(keyStoreFilePath)
+    file("upload-keystore.jks").exists() -> file("upload-keystore.jks")
+    rootProject.file("app/upload-keystore.jks").exists() -> rootProject.file("app/upload-keystore.jks")
+    else -> null
+}
+
+val hasReleaseSigning = resolvedKeyStoreFile != null && !keyAliasVal.isNullOrEmpty() && !keyStorePasswordVal.isNullOrEmpty()
 
 android {
     namespace = "id.heliora.app"
@@ -51,11 +63,11 @@ android {
 
     signingConfigs {
         create("release") {
-            if (hasReleaseSigning) {
-                storeFile = file(keyStoreFilePath!!)
+            if (hasReleaseSigning && resolvedKeyStoreFile != null) {
+                storeFile = resolvedKeyStoreFile
                 storePassword = keyStorePasswordVal
                 keyAlias = keyAliasVal
-                keyPassword = keyPasswordVal
+                keyPassword = keyPasswordVal ?: keyStorePasswordVal
             }
         }
     }
