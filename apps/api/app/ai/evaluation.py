@@ -23,8 +23,18 @@ from app.ai.model_training import ModelRiskEngine
 
 logger = logging.getLogger(__name__)
 
-# Use trained models when available; falls back to rule-based risk engine
-_model_engine = ModelRiskEngine()
+# Lazily-initialized model engine. Kept module-private so importing this
+# module never triggers expensive model training (AI-003 R2 guard);
+# use get_model_engine() or inject an engine explicitly.
+_model_engine: ModelRiskEngine | None = None
+
+
+def get_model_engine() -> ModelRiskEngine:
+    """Return the shared model engine, training it on first use."""
+    global _model_engine
+    if _model_engine is None:
+        _model_engine = ModelRiskEngine()
+    return _model_engine
 
 # ── Metric computation ──────────────────────────────────────────
 
@@ -121,6 +131,9 @@ class MetricsPerCondition:
     brier_score: float
     mean_predicted: float
     mean_actual: float
+    # Absolute gap between mean predicted risk and observed prevalence.
+    # Simple calibration signal: 0.0 means perfectly calibrated on average.
+    calibration_gap: float
 
 
 @dataclass
@@ -293,6 +306,7 @@ def evaluate_risk_engine(
     seed: int = 42,
     thresholds: dict[str, float] | None = None,
     output_path: str | None = None,
+    engine: ModelRiskEngine | None = None,
 ) -> EvaluationResult:
     """Run full evaluation of the risk engine against synthetic labeled data.
 
@@ -302,12 +316,15 @@ def evaluate_risk_engine(
     seed : RNG seed for reproducibility.
     thresholds : Custom probability thresholds per condition (default 0.5).
     output_path : Optional file path to write JSON evaluation report.
+    engine : Optional pre-built ModelRiskEngine (e.g. a test stub).
+        When omitted, the shared lazily-trained engine is used.
 
     Returns
     -------
     EvaluationResult with per-condition metrics and overall statistics.
     """
     thresholds = thresholds or {"diabetes": 0.3, "hypertension": 0.3, "cardiovascular": 0.3}
+    engine = engine if engine is not None else get_model_engine()
 
     start = time.perf_counter()
 
@@ -329,7 +346,7 @@ def evaluate_risk_engine(
 
     for sample in samples:
         profile = sample_to_profile(sample)
-        risks = _model_engine.estimate_risks(profile)
+        risks = engine.estimate_risks(profile)
         for cond in predictions:
             predictions[cond].append(risks[f"{cond}_risk"])
             labels[cond].append(getattr(sample, f"{cond}_label"))
@@ -344,6 +361,8 @@ def evaluate_risk_engine(
         bin_metrics = _binary_precision_recall_f1(y_true, y_prob, thr)
         roc_auc = _roc_auc_from_probs(y_true, y_prob)
         brier = _brier_score(y_true, y_prob)
+        mean_pred = round(float(np.mean(y_prob)), 4)
+        mean_true = round(float(np.mean(y_true)), 4)
 
         conditions.append(
             MetricsPerCondition(
@@ -357,8 +376,9 @@ def evaluate_risk_engine(
                 accuracy=bin_metrics["accuracy"],
                 roc_auc=roc_auc,
                 brier_score=brier,
-                mean_predicted=round(float(np.mean(y_prob)), 4),
-                mean_actual=round(float(np.mean(y_true)), 4),
+                mean_predicted=mean_pred,
+                mean_actual=mean_true,
+                calibration_gap=round(abs(mean_pred - mean_true), 4),
             )
         )
 
@@ -404,6 +424,7 @@ def _serialize_report(result: EvaluationResult) -> dict[str, Any]:
                 "brier_score": c.brier_score,
                 "mean_predicted": c.mean_predicted,
                 "mean_actual": c.mean_actual,
+                "calibration_gap": c.calibration_gap,
             }
             for c in result.conditions
         ],
@@ -439,5 +460,6 @@ if __name__ == "__main__":
         print(f"    Brier     : {c.brier_score:.6f}")
         print(f"    Mean pred : {c.mean_predicted:.4f}")
         print(f"    Mean true : {c.mean_actual:.4f}")
+        print(f"    Calib gap : {c.calibration_gap:.4f}")
     print(f"\nDisclaimer  : {result.disclaimer}")
     print(f"{'='*60}\n")
