@@ -1,0 +1,3 @@
+# Jupyter checkpoints and bytecode — never commit.
+.ipynb_checkpoints/
+__pycache__/

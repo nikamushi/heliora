@@ -1,6 +1,5 @@
 [tool.uv.workspace]
 members = [
     "apps/api",
-    "packages/ml-core",
-    "ai",
+    "apps/ml",
 ]
