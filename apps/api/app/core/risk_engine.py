@@ -29,6 +29,22 @@ LIFESTYLE_WEIGHT_SLEEP = 0.20
 LIFESTYLE_WEIGHT_SMOKING = 0.15
 LIFESTYLE_WEIGHT_OTHER = 0.10
 
+# Bobot resmi Health Score hybrid (docs/Health-Score.md §4, AI-004 rework,
+# PRD §11.5.3). Jumlah = 1.00.
+HEALTH_WEIGHT_LIFESTYLE = 0.50
+HEALTH_WEIGHT_RISK = 0.35
+HEALTH_WEIGHT_IMPROVEMENT = 0.15
+
+# Bobot deduksi komponen risiko Health Score (diwarisi AI-004). Jumlah = 1.00.
+HEALTH_RISK_WEIGHT_DIABETES = 0.35
+HEALTH_RISK_WEIGHT_HYPERTENSION = 0.35
+HEALTH_RISK_WEIGHT_CARDIOVASCULAR = 0.30
+
+# Skor protektif komponen Improvement Health Score (konteks riwayat keluarga,
+# faktor ke-5 BR-SCORE-003 yang tidak tercakup komponen Lifestyle).
+HEALTH_IMPROVEMENT_NO_HISTORY = 100.0
+HEALTH_IMPROVEMENT_WITH_HISTORY = 40.0
+
 
 class PreventiveLifestyleRiskEngine:
     """Core deterministic risk estimation and scoring engine for HELIORA."""
