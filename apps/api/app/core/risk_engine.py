@@ -11,6 +11,7 @@ from typing import Any
 from app.schemas.assessment import (
     ContributingFactor,
 )
+from app.schemas.health_profile import get_bmi_category
 
 
 def _sigmoid(x: float) -> float:
@@ -19,6 +20,14 @@ def _sigmoid(x: float) -> float:
         return 1.0 / (1.0 + math.exp(-x))
     except OverflowError:
         return 0.0 if x < 0 else 1.0
+
+
+# Bobot resmi Lifestyle Score (docs/Lifestyle-Score.md §5, AI-005). Jumlah = 1.00.
+LIFESTYLE_WEIGHT_BMI = 0.30
+LIFESTYLE_WEIGHT_ACTIVITY = 0.25
+LIFESTYLE_WEIGHT_SLEEP = 0.20
+LIFESTYLE_WEIGHT_SMOKING = 0.15
+LIFESTYLE_WEIGHT_OTHER = 0.10
 
 
 class PreventiveLifestyleRiskEngine:
@@ -183,7 +192,13 @@ class PreventiveLifestyleRiskEngine:
 
     @staticmethod
     def calculate_lifestyle_score(profile: Any) -> float:
-        """Calculate Lifestyle Score on 0.0 - 100.0 scale based on modifiable habits (Architecture §10)."""
+        """Calculate Lifestyle Score on 0.0 - 100.0 scale (docs/Lifestyle-Score.md, AI-005).
+
+        Weighted scoring over BMI, physical activity, sleep, smoking, and stress
+        (Other, when available). Deterministic: identical inputs always produce
+        identical output.
+        """
+        bmi_raw = float(profile.bmi) if profile.bmi else 22.0
         activity = float(profile.physical_activity_min_per_week)
         sleep = float(profile.sleep_duration_hours)
         smoking = str(
@@ -193,39 +208,60 @@ class PreventiveLifestyleRiskEngine:
         ).lower()
         stress = float(profile.stress_level) if profile.stress_level else None
 
-        # 1. Activity (0 - 30 pts)
-        act_score = min(30.0, (activity / 150.0) * 30.0)
+        # 1. BMI category sub-score (0 - 100)
+        bmi_category = get_bmi_category(bmi_raw)
+        bmi_score = {
+            "Normal": 100.0,
+            "Underweight": 60.0,
+            "Overweight": 55.0,
+            "Obesity": 20.0,
+        }.get(bmi_category, 100.0)
 
-        # 2. Sleep duration (0 - 30 pts)
-        if 7.0 <= sleep <= 8.5:
-            sleep_score = 30.0
-        elif 6.0 <= sleep < 7.0 or 8.5 < sleep <= 9.5:
-            sleep_score = 22.0
-        elif 5.0 <= sleep < 6.0 or 9.5 < sleep <= 10.5:
-            sleep_score = 14.0
+        # 2. Physical activity, linear against the 150 min/week reference (0 - 100)
+        activity_score = min(100.0, (activity / 150.0) * 100.0)
+
+        # 3. Sleep duration tiers (0 - 100)
+        if 7.0 <= sleep <= 9.0:
+            sleep_score = 100.0
+        elif 6.0 <= sleep < 7.0 or 9.0 < sleep <= 10.0:
+            sleep_score = 70.0
+        elif 5.0 <= sleep < 6.0 or 10.0 < sleep <= 11.0:
+            sleep_score = 40.0
         else:
-            sleep_score = 6.0
+            sleep_score = 10.0
 
-        # 3. Smoking habits (0 - 25 pts)
+        # 4. Smoking habits (0 - 100)
         if smoking == "never":
-            smoke_score = 25.0
+            smoking_score = 100.0
         elif smoking == "former":
-            smoke_score = 15.0
+            smoking_score = 60.0
         else:
-            smoke_score = 0.0
+            smoking_score = 0.0
 
-        # 4. Stress regulation (0 - 15 pts)
+        weighted_core = (
+            bmi_score * LIFESTYLE_WEIGHT_BMI
+            + activity_score * LIFESTYLE_WEIGHT_ACTIVITY
+            + sleep_score * LIFESTYLE_WEIGHT_SLEEP
+            + smoking_score * LIFESTYLE_WEIGHT_SMOKING
+        )
+
+        # 5. Stress regulation as Other (0 - 100); renormalize weights when absent
         if stress is not None:
             if stress <= 3.0:
-                stress_score = 15.0
+                other_score = 100.0
             elif stress <= 6.0:
-                stress_score = 10.0
+                other_score = 60.0
             else:
-                stress_score = 4.0
+                other_score = 30.0
+            total = weighted_core + other_score * LIFESTYLE_WEIGHT_OTHER
         else:
-            stress_score = 10.0
+            total = weighted_core / (
+                LIFESTYLE_WEIGHT_BMI
+                + LIFESTYLE_WEIGHT_ACTIVITY
+                + LIFESTYLE_WEIGHT_SLEEP
+                + LIFESTYLE_WEIGHT_SMOKING
+            )
 
-        total = act_score + sleep_score + smoke_score + stress_score
         return round(max(0.0, min(100.0, total)), 1)
 
     @staticmethod
