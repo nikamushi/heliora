@@ -169,7 +169,7 @@ class PreventiveLifestyleRiskEngine:
 
     @staticmethod
     def calculate_health_score(risks: dict[str, float]) -> float:
-        """Calculate overall Health Score on 0.0 - 100.0 scale (Architecture §9).
+        """Calculate overall Health Score on 0.0 - 100.0 scale (docs/Health-Score.md, AI-004).
 
         100 is optimal vitality; deductions are weighted across multi-organ risks.
         """
@@ -179,7 +179,7 @@ class PreventiveLifestyleRiskEngine:
             + risks["cardiovascular_risk"] * 30.0
         )
         score = 100.0 - deduction
-        return round(max(5.0, min(98.0, score)), 1)
+        return round(max(0.0, min(100.0, score)), 1)
 
     @staticmethod
     def calculate_lifestyle_score(profile: Any) -> float:
