@@ -103,12 +103,120 @@ Activity Score = min(100, menit_aktivitas / 150 * 100)
 | ≥ 7 | 30 |
 
 **Data kosong**: hanya Stress Level yang boleh kosong. Bila kosong, komponen Other dikeluarkan
-dan bobot faktor tersisa **direnormalisasi** (detail matematis pada §5), sehingga tidak ada
+dan bobot faktor tersisa **direnormalisasi** (detail matematis pada §6), sehingga tidak ada
 poin gratis dari data yang tidak diisi.
 
 ---
 
-## 5. Referensi
+## 5. Bobot
+
+Bobot resmi yang diratifikasi AI-005.02, mengadopsi contoh `PRD.md` §11.5.2 (jumlah = 1.00):
+
+| Komponen | Bobot | Sub-score maksimum |
+| --- | --- | --- |
+| BMI Score (`w_bmi`) | 0.30 | 100 |
+| Physical Activity Score (`w_activity`) | 0.25 | 100 |
+| Sleep Score (`w_sleep`) | 0.20 | 100 |
+| Smoking Score (`w_smoking`) | 0.15 | 100 |
+| Other Score / Stress (`w_other`) | 0.10 | 100 |
+
+Perubahan bobot di masa depan adalah keputusan produk (memerlukan review PM) dan wajib
+disertai pembaruan dokumen ini beserta penguncian ulang pada `test_lifestyle_score.py`.
+
+---
+
+## 6. Formula
+
+Bila Stress Level tersedia:
+
+```text
+Lifestyle Score = clamp(
+    BMI Score      * 0.30
+  + Activity Score * 0.25
+  + Sleep Score    * 0.20
+  + Smoking Score  * 0.15
+  + Other Score    * 0.10,
+  0.0, 100.0)
+```
+
+Bila Stress Level kosong, komponen Other dikeluarkan dan bobot tersisa direnormalisasi
+dengan pembagi 0.90:
+
+```text
+Lifestyle Score = clamp(
+    (BMI Score      * 0.30
+   + Activity Score * 0.25
+   + Sleep Score    * 0.20
+   + Smoking Score  * 0.15) / 0.90,
+  0.0, 100.0)
+```
+
+```text
+semua sub-score 100 (+ stress tersedia) -> Lifestyle Score = 100.0
+semua sub-score 0                       -> Lifestyle Score = 0.0
+```
+
+Implementasi: `apps/api/app/core/risk_engine.py` → `calculate_lifestyle_score()`.
+
+---
+
+## 7. Interpretasi
+
+Band interpretasi kanonik mengikuti BR-SCORE-006 (selalu teks, bukan hanya warna):
+
+| Rentang | Status |
+| --- | --- |
+| 80 – 100 | Excellent |
+| 60 – 79 | Good |
+| 40 – 59 | Needs Improvement |
+| 0 – 39 | High Attention |
+
+Label bersifat informatif dan preventif. Lifestyle Score **tidak boleh** dinyatakan sebagai
+"memiliki penyakit X" maupun "probabilitas mutlak"; selalu gunakan istilah *estimasi
+risiko* untuk luaran risk engine (`Design.md` §2.4). Sesuai BR-SCORE-006, label akhir harus
+konsisten di seluruh aplikasi — penyelarasan label web/mobile adalah tindak lanjut di luar
+AI-005.
+
+---
+
+## 8. Hubungan dengan Health Score
+
+| Aspek | Health Score | Lifestyle Score |
+| --- | --- | --- |
+| Basis | Estimasi risiko kardiometabolik | Kebiasaan hidup (BMI, activity, sleep, smoking, stress) |
+| Sumber | `calculate_health_score()` (`docs/Health-Score.md`) | `calculate_lifestyle_score()` |
+| Rentang | 0.0 – 100.0 | 0.0 – 100.0 |
+
+Keduanya sengaja dipisah: Health Score merangkum **luaran risiko**, Lifestyle Score
+merangkum **input gaya hidup** yang dapat dimodifikasi. Perubahan kebiasaan belum tentu
+langsung menaikkan Health Score sebelum diterjemahkan risk engine.
+
+---
+
+## 9. Keputusan & Temuan
+
+Keputusan resmi (AI-005):
+
+- Bobot contoh `PRD.md` §11.5.2 (BMI 30 / Activity 25 / Sleep 20 / Smoking 15 / Other 10)
+  diadopsi sebagai bobot resmi, memenuhi syarat "bobot final harus ditetapkan sebelum
+  implementasi model dan didokumentasikan";
+- Stress Level ditempatkan pada komponen Other dan bersifat opsional dengan renormalisasi
+  bobot, sehingga tidak ada poin gratis dari data yang tidak diisi;
+- skala implementasi Stress Level dipertahankan **1 – 10** (schema API, CHECK database,
+  dan band engine sudah 1 – 10);
+- tabel bobot BR-SCORE-003 (versi Health Score dengan Family History 10%) **tidak**
+  ditiru, karena Health Score resmi berbasis risiko (AI-004).
+
+Temuan untuk keputusan PM (tidak diubah pada AI-005 agar tidak breaking):
+
+- `PRD.md` menulis skala stress 1 – 5 (§11.5.1, §11.2.5) sementara schema API, CHECK
+  database, dan engine memakai 1 – 10;
+- ambang kategori BMI memakai WHO umum (18.5 / 25 / 30); ambang Asia-Pasifik/Kemenkes
+  (23 / 25) belum dipertimbangkan.
+
+---
+
+## 10. Referensi
 
 - `docs/PRD.md` — §3.11, §6.6, §10.6, §11.5.2, BR-SCORE-004/005/006.
 - `docs/Architecture.md` §10 (Lifestyle Score Architecture).
