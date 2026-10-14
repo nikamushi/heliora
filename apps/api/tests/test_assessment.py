@@ -46,7 +46,7 @@ def test_risk_engine_healthy_profile():
     assert 0.01 <= risks["hypertension_risk"] <= 0.20
     assert 0.01 <= risks["cardiovascular_risk"] <= 0.20
 
-    health_score = risk_engine.calculate_health_score(risks)
+    health_score = risk_engine.calculate_health_score(profile, risks)
     assert health_score >= 80.0
 
     lifestyle_score = risk_engine.calculate_lifestyle_score(profile)
@@ -76,7 +76,7 @@ def test_risk_engine_high_risk_profile():
     assert risks["hypertension_risk"] > 0.40
     assert risks["cardiovascular_risk"] > 0.40
 
-    health_score = risk_engine.calculate_health_score(risks)
+    health_score = risk_engine.calculate_health_score(profile, risks)
     assert health_score < 60.0
 
     lifestyle_score = risk_engine.calculate_lifestyle_score(profile)
