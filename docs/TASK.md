@@ -917,7 +917,7 @@ Acceptance Criteria:
 - Formula terdokumentasi.
 - Tidak diklaim sebagai diagnosis.
 
-Evidence: `docs/Health-Score.md`, `apps/api/app/core/risk_engine.py` (`calculate_health_score`), `apps/api/tests/test_health_score.py` (8 passed), `docs/Architecture.md` §9.3.
+Evidence: `docs/Health-Score.md` (hybrid PRD §11.5.3), `apps/api/app/core/risk_engine.py` (`calculate_health_score(profile, risks)`), `apps/api/tests/test_health_score.py` (11 passed), `docs/Architecture.md` §9.3.
 
 ---
 

@@ -29,6 +29,22 @@ LIFESTYLE_WEIGHT_SLEEP = 0.20
 LIFESTYLE_WEIGHT_SMOKING = 0.15
 LIFESTYLE_WEIGHT_OTHER = 0.10
 
+# Bobot resmi Health Score hybrid (docs/Health-Score.md §4, AI-004 rework,
+# PRD §11.5.3). Jumlah = 1.00.
+HEALTH_WEIGHT_LIFESTYLE = 0.50
+HEALTH_WEIGHT_RISK = 0.35
+HEALTH_WEIGHT_IMPROVEMENT = 0.15
+
+# Bobot deduksi komponen risiko Health Score (diwarisi AI-004). Jumlah = 1.00.
+HEALTH_RISK_WEIGHT_DIABETES = 0.35
+HEALTH_RISK_WEIGHT_HYPERTENSION = 0.35
+HEALTH_RISK_WEIGHT_CARDIOVASCULAR = 0.30
+
+# Skor protektif komponen Improvement Health Score (konteks riwayat keluarga,
+# faktor ke-5 BR-SCORE-003 yang tidak tercakup komponen Lifestyle).
+HEALTH_IMPROVEMENT_NO_HISTORY = 100.0
+HEALTH_IMPROVEMENT_WITH_HISTORY = 40.0
+
 
 class PreventiveLifestyleRiskEngine:
     """Core deterministic risk estimation and scoring engine for HELIORA."""
@@ -177,18 +193,31 @@ class PreventiveLifestyleRiskEngine:
         }
 
     @staticmethod
-    def calculate_health_score(risks: dict[str, float]) -> float:
-        """Calculate overall Health Score on 0.0 - 100.0 scale (docs/Health-Score.md, AI-004).
+    def calculate_health_score(profile: Any, risks: dict[str, float]) -> float:
+        """Calculate hybrid Health Score on 0.0 - 100.0 scale (docs/Health-Score.md, PRD §11.5.3).
 
-        100 is optimal vitality; deductions are weighted across multi-organ risks.
+        Combines the Lifestyle component (AI-005 output), the Risk component
+        (inverse of the weighted risk deduction), and the Improvement component
+        (family-history protective context). Deterministic: identical inputs
+        always produce identical output.
         """
-        deduction = (
-            risks["diabetes_risk"] * 35.0
-            + risks["hypertension_risk"] * 35.0
-            + risks["cardiovascular_risk"] * 30.0
+        lifestyle = PreventiveLifestyleRiskEngine.calculate_lifestyle_score(profile)
+        risk_component = 100.0 - (
+            risks["diabetes_risk"] * HEALTH_RISK_WEIGHT_DIABETES * 100.0
+            + risks["hypertension_risk"] * HEALTH_RISK_WEIGHT_HYPERTENSION * 100.0
+            + risks["cardiovascular_risk"] * HEALTH_RISK_WEIGHT_CARDIOVASCULAR * 100.0
         )
-        score = 100.0 - deduction
-        return round(max(0.0, min(100.0, score)), 1)
+        improvement = (
+            HEALTH_IMPROVEMENT_WITH_HISTORY
+            if bool(profile.family_history)
+            else HEALTH_IMPROVEMENT_NO_HISTORY
+        )
+        total = (
+            lifestyle * HEALTH_WEIGHT_LIFESTYLE
+            + risk_component * HEALTH_WEIGHT_RISK
+            + improvement * HEALTH_WEIGHT_IMPROVEMENT
+        )
+        return round(max(0.0, min(100.0, total)), 1)
 
     @staticmethod
     def calculate_lifestyle_score(profile: Any) -> float:
@@ -535,7 +564,7 @@ class PreventiveLifestyleRiskEngine:
         """
         # 1. Baseline risk and scores
         base_risks = self.estimate_risks(profile)
-        base_health = self.calculate_health_score(base_risks)
+        base_health = self.calculate_health_score(profile, base_risks)
         base_lifestyle = self.calculate_lifestyle_score(profile)
 
         # 2. Time factor: non-linear horizon scale
@@ -599,7 +628,7 @@ class PreventiveLifestyleRiskEngine:
             "cardiovascular_risk": proj_cvd,
         }
 
-        proj_health = self.calculate_health_score(proj_risks)
+        proj_health = self.calculate_health_score(profile, proj_risks)
         proj_lifestyle = base_lifestyle
 
         assumptions = [
@@ -697,7 +726,7 @@ class PreventiveLifestyleRiskEngine:
         """
         # Baseline calculations
         base_risks = self.estimate_risks(profile)
-        base_health = self.calculate_health_score(base_risks)
+        base_health = self.calculate_health_score(profile, base_risks)
         base_lifestyle = self.calculate_lifestyle_score(profile)
 
         # Extract values with overrides applied
@@ -751,7 +780,7 @@ class PreventiveLifestyleRiskEngine:
         )
 
         sim_risks = self.estimate_risks(sim_profile)
-        sim_health = self.calculate_health_score(sim_risks)
+        sim_health = self.calculate_health_score(sim_profile, sim_risks)
         sim_lifestyle = self.calculate_lifestyle_score(sim_profile)
 
         def to_level(p: float) -> str:
