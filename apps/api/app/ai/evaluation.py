@@ -15,11 +15,12 @@ import time
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from app.ai.model_training import ModelRiskEngine
+if TYPE_CHECKING:  # pragma: no cover - typing only; keeps this module xgboost-free
+    from app.ai.model_training import ModelRiskEngine
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +34,8 @@ def get_model_engine() -> ModelRiskEngine:
     """Return the shared model engine, training it on first use."""
     global _model_engine
     if _model_engine is None:
+        from app.ai.model_training import ModelRiskEngine
+
         _model_engine = ModelRiskEngine()
     return _model_engine
 
@@ -547,7 +550,7 @@ def _serialize_report(
 
 # ── CLI entry point ─────────────────────────────────────────────
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover - manual CLI entry point
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 
     result = evaluate_risk_engine(

@@ -524,7 +524,7 @@ def evaluate_trained_models(models: TrainedModels, n_test: int = 2000, seed: int
 
 # ── CLI entry point ──────────────────────────────────────────────
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover - manual CLI entry point
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 
     logger.info("Training risk prediction models...")
