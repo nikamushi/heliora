@@ -1,7 +1,7 @@
 {
-  "eval_timestamp": "2026-10-14T10:41:13.698612+00:00",
+  "eval_timestamp": "2026-10-14T10:43:54.934314+00:00",
   "sample_count": 1000,
-  "runtime_seconds": 2.026,
+  "runtime_seconds": 2.053,
   "overall_accuracy": 0.8793,
   "model": {
     "model_name": "heliora-risk-engine",
@@ -100,7 +100,13 @@
       "brier_score": 0.089176,
       "mean_predicted": 0.1541,
       "mean_actual": 0.133,
-      "calibration_gap": 0.0211
+      "calibration_gap": 0.0211,
+      "confusion": {
+        "tp": 83,
+        "fp": 68,
+        "fn": 50,
+        "tn": 799
+      }
     },
     {
       "condition": "Hipertensi",
@@ -115,7 +121,13 @@
       "brier_score": 0.196726,
       "mean_predicted": 0.2055,
       "mean_actual": 0.37,
-      "calibration_gap": 0.1645
+      "calibration_gap": 0.1645,
+      "confusion": {
+        "tp": 320,
+        "fp": 150,
+        "fn": 50,
+        "tn": 480
+      }
     },
     {
       "condition": "Penyakit Jantung",
@@ -130,7 +142,13 @@
       "brier_score": 0.02472,
       "mean_predicted": 0.0718,
       "mean_actual": 0.026,
-      "calibration_gap": 0.0458
+      "calibration_gap": 0.0458,
+      "confusion": {
+        "tp": 11,
+        "fp": 29,
+        "fn": 15,
+        "tn": 945
+      }
     }
   ]
 }

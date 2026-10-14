@@ -185,6 +185,8 @@ class MetricsPerCondition:
     # Absolute gap between mean predicted risk and observed prevalence.
     # Simple calibration signal: 0.0 means perfectly calibrated on average.
     calibration_gap: float
+    # Raw confusion counts {tp, fp, fn, tn} at the operating threshold.
+    confusion: dict[str, int] = field(default_factory=dict)
 
 
 @dataclass
@@ -459,6 +461,7 @@ def evaluate_risk_engine(
                 mean_predicted=mean_pred,
                 mean_actual=mean_true,
                 calibration_gap=round(abs(mean_pred - mean_true), 4),
+                confusion=bin_metrics["confusion"],
             )
         )
 
@@ -535,6 +538,7 @@ def _serialize_report(
                 "mean_predicted": c.mean_predicted,
                 "mean_actual": c.mean_actual,
                 "calibration_gap": c.calibration_gap,
+                "confusion": c.confusion,
             }
             for c in result.conditions
         ],
@@ -578,5 +582,10 @@ if __name__ == "__main__":
         print(f"    Mean pred : {c.mean_predicted:.4f}")
         print(f"    Mean true : {c.mean_actual:.4f}")
         print(f"    Calib gap : {c.calibration_gap:.4f}")
+        cf = c.confusion
+        print(
+            f"    Confusion : TP={cf.get('tp')} FP={cf.get('fp')} "
+            f"FN={cf.get('fn')} TN={cf.get('tn')}"
+        )
     print(f"\nDisclaimer  : {result.disclaimer}")
     print(f"{'='*60}\n")
