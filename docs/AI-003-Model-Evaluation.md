@@ -84,4 +84,22 @@ uv run --extra dev --extra ml pytest tests/test_evaluation.py tests/test_model_t
 
 ## 7. Keterbatasan (limitations)
 
-Lihat commit dokumentasi keterbatasan (AI-003.06).
+1. **Label sintetis & sirkularitas.** Label evaluasi dibangkitkan dari
+   aturan epidemiologis yang sama dengan yang didekati prediktor,
+   sehingga metrik mengukur konsistensi internal — bukan validasi klinis
+   dan bukan bukti performa pada data pasien nyata.
+2. **Sampel positif CVD sangat kecil** (26/1000 pada seed 42; ~116/5000).
+   Metrik CVD (khususnya precision/recall/F1) sensitif terhadap seed;
+   keputusan memakai multi-seed, tetapi laporan resmi tetap satu seed.
+3. **Hipertensi miskalibrasi.** `mean_predicted` 0.206 vs prevalensi
+   aktual 0.370 (gap 0.1645): risiko rata-rata diremehkan walaupun
+   ranking (AUC 0.906) baik. Jangan baca skor sebagai probabilitas
+   terkalibrasi (PRD §10.4.3).
+4. **Weighting ditolak.** Lihat §5 — ketidakseimbangan CVD belum
+   teratasi; mitigasi (resampling, penyesuaian ambang adaptif, data
+   nyata) adalah pekerjaan lanjutan.
+5. **Offline, belum ter-wire ke API.** Evaluasi berjalan sebagai CLI;
+   hanya SHAP yang terhubung ke `AssessmentService`. Satu seed latih
+   (42) untuk laporan resmi.
+6. **Akurasi menyesatkan pada data imbalance.** `overall_accuracy`
+   0.8793 didominasi true negative; baca selalu bersama F1/recall/AUC.

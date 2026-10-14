@@ -869,16 +869,19 @@ Acceptance Criteria:
 **Owner:** Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S4  
-**Status:** TESTING
+**Status:** REVIEW
 
 Tasks:
 
 - [x] Define metrics.
 - [x] Evaluate model.
 - [x] Perform error analysis.
-- [ ] Review class imbalance.
+- [x] Review class imbalance.
 - [x] Document performance.
 - [x] Document limitations.
+
+Evidence: `apps/api/evaluation_report.json`, `docs/AI-003-Model-Evaluation.md`,
+`apps/api/tests/test_evaluation.py`, `apps/api/tests/test_model_training.py`.
 
 Acceptance Criteria:
 
