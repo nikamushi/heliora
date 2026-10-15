@@ -1225,7 +1225,7 @@ Interpretasi bahasa natural harus dibatasi agar tidak menghasilkan klaim medis y
 
 HELIORA tidak menggunakan model simulation terpisah untuk MVP.
 
-Simulation menggunakan **ML re-inference** dengan input yang dimodifikasi.
+Simulation menggunakan **ML re-inference** — yakni scenario-based re-inference pada Risk Engine yang sama dengan baseline estimation, tanpa model ML terpisah (PRD BR-SIM-003 "Re-run Risk Engine") — dengan input skenario yang dimodifikasi.
 
 PRD menetapkan:
 
@@ -2831,9 +2831,11 @@ ADR-012 — Deployment Strategy
 
 ---
 
-## ADR-006 — ML Re-inference
+## ADR-006 — Simulation Strategy
 
 **Decision:** Simulation menggunakan ML re-inference.
+
+**Revision note:** "ML re-inference" berarti scenario-based re-inference pada Risk Engine yang sama dengan baseline estimation, tanpa model ML terpisah (PRD BR-SIM-003 "Re-run Risk Engine"). Judul section diselaraskan ke daftar ADR ("Simulation Strategy").
 
 **Reason:**
 
