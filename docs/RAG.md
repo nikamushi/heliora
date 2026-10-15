@@ -1,9 +1,10 @@
-# RAG — Retrieval Pipeline (RAG-002)
+# RAG — Knowledge Base & Retrieval Pipeline (RAG-001 + RAG-002)
 
-Dokumen ini menjelaskan **retrieval pipeline** HELIORA: bagaimana query pengguna
-diubah menjadi evidence klinis yang relevan beserta sumbernya. Cakupan dokumen
-ini adalah **RAG-002** (retrieval); ingestion knowledge base adalah **RAG-001**,
-generasi penjelasan LLM adalah **LLM-001**.
+Dokumen ini menjelaskan **knowledge base pipeline** HELIORA (ingestion: RAG-001)
+dan **retrieval pipeline** (RAG-002): bagaimana dokumen evidence klinis
+dimasukkan ke vector store, lalu query pengguna diubah menjadi evidence yang
+relevan beserta sumbernya. Generasi penjelasan LLM adalah **LLM-001**
+(di luar dokumen ini).
 
 ## 1. Tujuan dan Batasan
 
@@ -80,7 +81,62 @@ Setiap chunk menyimpan metadata (`rag_pipeline.build_document_chunks`):
 Architecture §15.4 (`document_id`, `title`, `publisher`, `source_url`,
 `publication_date`, `category`, `evidence_level`, `chunk_id`).
 
-## 4. Retrieval Testing
+## 4. Ingestion Pipeline (RAG-001)
+
+Mengikuti alur resmi Architecture §15.3: Official Documents → Collection →
+Cleaning → Chunking → Metadata → Embedding → Vector Storage → Retriever.
+
+### 4.1 Cleaning & chunking
+
+- `clean_document`: strip + collapse semua whitespace menjadi spasi.
+- `chunk_text`: jendela geser `CHUNK_SIZE=512` karakter, `CHUNK_OVERLAP=64`
+  (chunk ke-2 mulai offset 448). Teks ≤ 512 karakter → satu chunk.
+- Sumber dokumen: `CLINICAL_EVIDENCE_REGISTRY` — 18 item (WHO, PERKENI,
+  CDC & Kemenkes RI, …), memenuhi target Architecture §15.2 "15–30 dokumen
+  berkualitas dan terkurasi".
+- Hasil live: **31 chunk** dari 18 item evidence.
+
+### 4.2 Embedding & storage
+
+- Embedding `all-MiniLM-L6-v2` (lazy load, `convert_to_numpy=True`,
+  diuji kontraknya oleh `test_ingest_encodes_all_chunk_texts`).
+- ChromaDB `PersistentClient` di `app/data/rag_storage` (**gitignored**;
+  folder dibuat malas oleh `_get_client`, import modul tanpa side effect).
+- Koleksi `heliora_evidence`. `ingest_all_evidence()` skip bila KB sudah
+  terisi; `ingest_all_evidence(reset=True)` / `reset_knowledge_base()`
+  membangun ulang dari nol (penting saat registry bertambah).
+- `get_knowledge_base_status()` → `document_count`, `collection_name`,
+  `persist_dir`, `embedding_model`, `ready`.
+
+### 4.3 CLI runbook
+
+Dari `apps/api`:
+
+```text
+uv run python -m app.ai.rag_pipeline status          # cek KB
+uv run python -m app.ai.rag_pipeline ingest          # ingest (skip bila terisi)
+uv run python -m app.ai.rag_pipeline ingest --reset  # bangun ulang
+uv run python -m app.ai.rag_pipeline reset           # hapus koleksi
+```
+
+Exit code 0 sukses, 1 gagal. **Tidak membutuhkan API key**; unduhan pertama
+bobot model (~90MB) butuh network — sekali saja, selanjutnya offline.
+
+### 4.4 Bukti live (AC "Knowledge base tersedia")
+
+Ingest `ingest --reset` pada mesin dev: **31 dokumen terindeks**,
+status `Ready: True`. Smoke retrieval (3 query Bahasa Indonesia):
+
+| Query | Hit | Kategori | Similarity top |
+|---|---|---|---|
+| aktivitas fisik untuk kesehatan jantung | 2 | activity | 0.77 |
+| tidur yang baik untuk tekanan darah | 2 | sleep | 0.45 |
+| rekomendasi diet untuk diabetes | 3 | nutrition | 0.86 |
+
+`get_source("evi-01")` terisi lengkap (citation/url/summary/section).
+Hasil dicatat apa adanya — **bukan validasi klinis**.
+
+## 5. Retrieval Testing
 
 Pengujian deterministik dan offline (`apps/api/tests/test_retrieval.py`,
 18 test): fake embedding model + fake collection di-inject, sehingga **tanpa
@@ -94,18 +150,31 @@ Harness CLI `retrieval.test_retrieval()` (5 query Indonesia lintas kategori
 activity/cardiovascular/sleep/nutrition/stress) tetap tersedia untuk smoke
 manual setelah KB di-ingest — bukan bagian CI.
 
-## 5. Batasan Saat Ini
+## 6. Batasan Saat Ini
 
-- Knowledge base **belum di-ingest** (`app/data/rag_storage` belum ada,
-  gitignored) dan bobot `all-MiniLM-L6-v2` belum diunduh → retrieval live
-  membutuhkan langkah ingestion manual (di luar CI).
-- Retrieval pipeline **belum ter-wire ke API** (tidak ada route/service yang
-  memakainya) — offline/CLI, sama seperti RAG-001.
+- Knowledge base **ter-ingest secara lokal** (`app/data/rag_storage`,
+  gitignored) setelah langkah manual §4.3 — bukan artefak repo; tiap mesin/CI
+  perlu ingest sendiri (atau tetap memakai test offline).
+- Retrieval + ingestion **belum ter-wire ke API** (tidak ada route/service
+  yang memakainya) — offline/CLI.
 - Tanpa LLM: grounding untuk LLM-001 disiapkan lewat `search_evidence` +
   `get_source` (AC-LLM-02: retrieval sebelum generation, referensi evidence,
   tidak mengklaim sumber yang tidak tersedia).
 
-## 6. Kesesuaian Kotak RAG-002
+## 7. Kesesuaian Kotak TASK.md
+
+### RAG-001
+
+| Kotak TASK.md RAG-001 | Bukti |
+|---|---|
+| Document ingestion | `ingest_all_evidence` + skip/reset + live 31 dokumen |
+| Document cleaning | `clean_document` + `test_clean_document_*` |
+| Chunking | `chunk_text` 512/64 + `test_chunk_text_*` |
+| Embedding generation | encode contract + lazy model load |
+| Vector storage | `collection.add` contract + lazy persist dir + status |
+| Metadata storage | 14 field + sweep 18 item registry |
+
+### RAG-002
 
 | Kotak TASK.md RAG-002 | Bukti |
 |---|---|
@@ -115,7 +184,7 @@ manual setelah KB di-ingest — bukan bagian CI.
 | Source preservation | 14 field hit + `get_source` + integrasi 18 item registry |
 | Retrieval testing | `tests/test_retrieval.py` (18 passed), harness `test_retrieval()` |
 
-## 7. Referensi
+## 8. Referensi
 
 - Architecture §15 RAG Architecture (§15.1 tujuan, §15.2 knowledge base,
   §15.3 pipeline, §15.4 metadata, §15.5 vector storage), §33.4 RAG Tests,
@@ -123,5 +192,6 @@ manual setelah KB di-ingest — bukan bagian CI.
 - PRD §6.14 RAG Knowledge Base, FR-027 Evidence Retrieval, FR-028, FR-029,
   §15.13 AC-EVIDENCE-01, §15.14 AC-LLM-02.
 - Kode: `apps/api/app/ai/retrieval.py`, `apps/api/app/ai/rag_pipeline.py`,
-  `apps/api/app/services/evidence_service.py`, `apps/api/tests/test_retrieval.py`.
-- TASK.md RAG-002 (P0, S7).
+  `apps/api/app/services/evidence_service.py`,
+  `apps/api/tests/test_retrieval.py`, `apps/api/tests/test_rag_pipeline.py`.
+- TASK.md RAG-001 (P0, S7), RAG-002 (P0, S7).
