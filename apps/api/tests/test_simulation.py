@@ -11,6 +11,7 @@ Covers:
 - Non-mutation of user's persistent profile (BR-SIM-007, BR-WHATIF-003).
 """
 
+import time
 import uuid
 from decimal import Decimal
 from unittest.mock import AsyncMock, patch
@@ -946,5 +947,63 @@ async def test_what_if_route_response_contract_consistent():
                     assert c["trend"] in ("stable", "increasing", "decreasing")
                     assert isinstance(c["impact_summary"], str)
                     assert len(c["impact_summary"]) > 0
+    finally:
+        app.dependency_overrides.clear()
+
+
+@pytest.mark.asyncio
+async def test_what_if_route_performance_target():
+    """What-if endpoint answers within the <1s NFR (SIM-004, PRD §13.2.2)."""
+    user_id = uuid.uuid4()
+    dummy_user = User(
+        id=user_id,
+        email="whatif_perf@heliora.health",
+        password_hash="hashed",
+        full_name="What-If Perf Tester",
+    )
+    dummy_consent = Consent(id=uuid.uuid4(), user_id=user_id, consent_version="1.0")
+    profile = HealthProfile(
+        id=uuid.uuid4(),
+        user_id=user_id,
+        age=40,
+        gender="female",
+        height_cm=Decimal("160.0"),
+        weight_kg=Decimal("78.0"),
+        bmi=Decimal("30.5"),
+        physical_activity_min_per_week=Decimal("60.0"),
+        sleep_duration_hours=Decimal("6.0"),
+        smoking_status="current",
+        family_history=False,
+    )
+
+    from app.api.dependencies import get_current_user, get_db, require_active_consent
+
+    app.dependency_overrides[get_current_user] = lambda: dummy_user
+    app.dependency_overrides[require_active_consent] = lambda: dummy_consent
+    app.dependency_overrides[get_db] = lambda: AsyncMock()
+
+    try:
+        with patch(
+            "app.services.simulation_service.health_profile_repo.get_by_user_id",
+            new_callable=AsyncMock,
+            return_value=profile,
+        ):
+            async with AsyncClient(
+                transport=ASGITransport(app=app), base_url="http://testserver"
+            ) as client:
+                start = time.perf_counter()
+                res = await client.post(
+                    "/api/v1/simulation/what-if",
+                    json={
+                        "weight_kg": 65.0,
+                        "physical_activity_min_per_week": 180.0,
+                        "sleep_duration_hours": 8.0,
+                        "smoking_status": "never",
+                    },
+                )
+                elapsed = time.perf_counter() - start
+
+                assert res.status_code == 200
+                assert elapsed < 1.0, f"What-if exceeded 1s budget: {elapsed:.3f}s"
     finally:
         app.dependency_overrides.clear()
