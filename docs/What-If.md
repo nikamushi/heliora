@@ -204,8 +204,8 @@ teruji (`test_what_if_repeated_changes_stable`).
 
 ## 8. Batasan (di luar SIM-003)
 
-- Permukaan API (`POST /api/v1/simulation/what-if`, kontrak status-code,
-  target performa `< 1s`) adalah **SIM-004**.
+- Kontrak API what-if (`POST /api/v1/simulation/what-if`, status-code,
+  target performa `< 1s`) didefinisikan di **§9 (SIM-004)**.
 - Helper `to_level`/`to_label` terduplikasi dengan future engine (SIM-001);
   dedup ditunda agar SIM-003 tetap lokal.
 - Tabel `simulations` (persistensi hasil) di luar cakupan; engine in-memory.
@@ -215,12 +215,102 @@ teruji (`test_what_if_repeated_changes_stable`).
 
 ---
 
-## 9. Referensi
+## 9. SIM-004 — What-if API (kontrak backend)
 
+Seksi ini hanya mencakup **SIM-004 (What-if API)**. Semua klaim merujuk
+sumber kebenaran: `docs/PRD.md` §9.10 (FR-020–023), §14.12
+(BR-WHATIF-001–006, AC-WHATIF-01/02), §13.2.2 + §15.18 (performa `< 1s`),
+dan `docs/Architecture.md` §6.9 (endpoint), §12.3 (flow), §18 (data flow),
+§23 (validasi), §24 (error handling), §25/§25.1 (strategi performa).
+
+### 9.1 Endpoint
+
+`POST /api/v1/simulation/what-if` (`Architecture.md` §6.9) — body
+`WhatIfSimulationRequest`, respons `WhatIfSimulationResponse`
+(`apps/api/app/schemas/simulation.py`), status `200 OK`.
+Dependensi: `get_current_user` (401 bila tanpa token),
+`require_active_consent` (403 bila consent tidak aktif, BR-CONSENT-001),
+`get_db`.
+
+### 9.2 Skema request
+
+`WhatIfSimulationRequest`: 4 field opsional (FR-020; BR-WHATIF-002),
+`null` = mengikuti profil (§3.2):
+
+- `sleep_duration_hours`: 3.0–14.0
+- `physical_activity_min_per_week`: 0.0–1000.0
+- `weight_kg`: 30.0–300.0
+- `smoking_status`: `never` / `former` / `current`
+
+### 9.3 Skema respons (konsisten)
+
+Respons mentah `response_model` tanpa envelope — konvensi yang sama dengan
+endpoint assessment/health-profile dan future simulation (repo tidak memakai
+envelope `ApiResponse`). Kunci stabil (11): `applied_parameters`,
+`derived_bmi`, pasangan `baseline_*`/`simulated_*` (health + lifestyle),
+`health_score_delta`, `lifestyle_score_delta`, `condition_comparisons`
+(3 kondisi; perbandingan Current-vs-What-if, FR-022),
+`is_model_estimated: true`, `disclaimer` verbatim (PRD FR-005).
+Narasi memakai istilah *disimulasi/diestimasi*, bukan kepastian (FR-023).
+Diverifikasi test kontrak respons
+(`test_what_if_route_response_contract_consistent`).
+
+### 9.4 Validasi skenario
+
+Nilai di luar batas ditolak Pydantic → `422`. Validasi backend adalah
+authority utama (`Architecture.md` §23); validasi frontend meningkatkan
+UX tetapi bukan pengganti.
+
+### 9.5 Error handling
+
+| Kondisi | Status | Sumber |
+|---|---|---|
+| Tanpa token | 401 | `get_current_user` |
+| Tanpa consent aktif | 403 | `require_active_consent` |
+| Tanpa profil kesehatan | 404 | `simulation_service` ("profil kesehatan belum ditemukan") |
+| Parameter tidak valid | 422 | Pydantic |
+
+Pola error mengikuti `Architecture.md` §24. Tidak ada mutasi persisten
+pada jalur mana pun (BR-WHATIF-003; test non-mutasi).
+
+### 9.6 Performance
+
+Target: what-if `< 1 detik` (PRD §13.2.2, §15.18; `Architecture.md` §25).
+Strategi (`§25.1`): request sinkron ringan, service reusable
+(`simulation_service`), tanpa retraining / rebuild pipeline / external
+LLM call — flow Stored Model → Modified Input → Inference → Result.
+Perhitungan murni in-memory di atas rule engine; terukur ±0,01 s per
+panggilan pada mesin dev lokal (test `test_what_if_route_performance_target`,
+assert `< 1.0s`) — margin ±100× dari target.
+
+### 9.7 Kesesuaian kotak SIM-004
+
+| Kotak `docs/TASK.md` | Bukti |
+|---|---|
+| Create endpoint | `routes/simulation.py:47-65`, terdaftar `/api/v1/simulation` |
+| Define request schema | `WhatIfSimulationRequest` (§9.2); test 422 + parsial + echo |
+| Define response schema | `WhatIfSimulationResponse` (§9.3); test kontrak SIM-004 |
+| Validate scenario | Batas Pydantic + `derived_bmi` 10–80; test 422 dua batas |
+| Performance optimization | Tanpa LLM/retraining; in-memory; smoke test `< 1s` (§9.6) |
+
+### 9.8 Acceptance Criteria
+
+| AC | Status |
+|---|---|
+| Simulation dapat dipanggil secara interaktif | Terpenuhi: satu POST per perubahan, `exclude_unset`, tanpa proses manual; stabilitas berulang teruji (`test_what_if_repeated_changes_stable`) |
+| Response memenuhi target performance sejauh environment memungkinkan | Terpenuhi: terukur ±0,01 s lokal (target `< 1s`); smoke test menjaga regresi; target memakai kualifikasi environment sesuai PRD AC SIM-004 dan `Architecture.md:2622` |
+
+---
+
+## 10. Referensi
+
+- `docs/PRD.md` §9.10: FR-020, FR-021, FR-022, FR-023.
 - `docs/PRD.md` §14.12: BR-WHATIF-001–006; AC-WHATIF-01, AC-WHATIF-02;
   FR-WHATIF; BR-SIM-007 (tanpa mutasi).
-- `docs/Architecture.md` §12.3 (What-if Simulation), §18 (What-if Data Flow),
-  §12.4/§14 (safety), §23 (validasi), §24 (error handling).
+- `docs/PRD.md` §13.2.2, §15.18 (performa what-if `< 1s`).
+- `docs/Architecture.md` §6.9 (endpoint), §12.3 (What-if Simulation),
+  §18 (What-if Data Flow), §12.4/§14 (safety), §23 (validasi),
+  §24 (error handling), §25/§25.1 (performa).
 - `docs/Simulation.md` (future engine SIM-001, kontrak SIM-002).
 - `apps/api/app/core/risk_engine.py` `simulate_what_if`.
 - `apps/api/app/services/simulation_service.py`,
