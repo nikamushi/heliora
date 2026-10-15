@@ -1013,13 +1013,13 @@ Supported horizon:
 
 Tasks:
 
-- [ ] Define simulation methodology.
-- [ ] Define assumptions.
-- [ ] Define baseline state.
-- [ ] Define projected state.
-- [ ] Integrate risk engine.
-- [ ] Generate simulation result.
-- [ ] Validate result.
+- [x] Define simulation methodology.
+- [x] Define assumptions.
+- [x] Define baseline state.
+- [x] Define projected state.
+- [x] Integrate risk engine.
+- [x] Generate simulation result.
+- [x] Validate result.
 
 Acceptance Criteria:
 

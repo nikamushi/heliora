@@ -559,7 +559,7 @@ class PreventiveLifestyleRiskEngine:
     ) -> dict[str, Any]:
         """Project future risk and score trajectories over defined horizons (30, 90, 180 days).
 
-        Implements Architecture §8, §14, PRD BR-SIM-001–004, AC-SIM-01/02.
+        Implements Architecture §12, §19, PRD BR-SIM-001–004, AC-SIM-01/02.
         Operates without database mutation (PRD BR-SIM-007).
         """
         # 1. Baseline risk and scores
