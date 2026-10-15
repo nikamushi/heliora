@@ -3,7 +3,9 @@
 Document ingestion, cleaning, chunking, embedding, and vector storage.
 Uses sentence-transformers for embeddings + ChromaDB for vector storage.
 
-Architecture §8, PRD RAG-001.
+Architecture §15 (RAG Architecture: §15.2 knowledge base, §15.3 pipeline,
+§15.4 metadata, §15.5 vector storage), ADR-010 (vector storage decision),
+PRD §6.14, TASK.md RAG-001.
 """
 
 from __future__ import annotations
@@ -125,6 +127,8 @@ def build_document_chunks(evidence: dict[str, Any]) -> list[dict[str, Any]]:
                 "category": evidence['category'],
                 "category_label": evidence['category_label'],
                 "evidence_level": evidence['evidence_level'],
+                "summary": evidence['summary'],
+                "clinical_section": evidence['clinical_section'],
                 "citation": evidence['citation'],
                 "external_url": evidence['external_url'],
                 "chunk_index": i,
