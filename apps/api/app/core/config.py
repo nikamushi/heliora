@@ -44,6 +44,11 @@ class Settings(BaseSettings):
         "http://127.0.0.1:3001",
     ]
 
+    # ── LLM Provider (Gemini — ADR-009, Architecture §41) ────────────
+    GEMINI_API_KEY: str | None = None
+    GEMINI_MODEL: str = "gemini-3.5-flash-lite"
+    LLM_TIMEOUT_SECONDS: int = 10
+
     # ── Auth (Legacy & FastAPI Native) ───────────────────────────
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 24 hours
     TOKEN_ALGORITHM: str = "HS256"

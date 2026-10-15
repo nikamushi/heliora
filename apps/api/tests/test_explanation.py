@@ -22,7 +22,6 @@ from app.ai.llm_client import GeminiClient, LLMUnavailableError
 from app.core.config import Settings
 from app.services import explanation_service as es
 
-
 # ── Fixtures ─────────────────────────────────────────────────────────────
 _SAMPLE_RISKS = [
     {
@@ -153,7 +152,10 @@ def test_user_message_renders_context_sections():
 
 
 # ── Config ───────────────────────────────────────────────────────────────
-def test_llm_config_defaults():
+def test_llm_config_defaults(monkeypatch):
+    # Hermetic: ambient env (e.g. a real GEMINI_API_KEY) must not leak in.
+    for var in ("GEMINI_API_KEY", "GEMINI_MODEL", "LLM_TIMEOUT_SECONDS"):
+        monkeypatch.delenv(var, raising=False)
     settings = Settings()
     assert settings.GEMINI_API_KEY is None
     assert settings.GEMINI_MODEL == "gemini-3.5-flash-lite"
@@ -258,11 +260,11 @@ async def test_valid_grounded_output_accepted(monkeypatch):
     ],
 )
 def test_diagnosis_or_prescription_claims_rejected(bad_text):
-    assert ep.validate_llm_output(
-        '{"ringkasan": "%s", "penjelasan_faktor": "x", '
-        '"rekomendasi": "y", "kutipan_evidence": []}' % bad_text,
-        [],
-    ) is None
+    payload = (
+        '{"ringkasan": "' + bad_text + '", "penjelasan_faktor": "x", '
+        '"rekomendasi": "y", "kutipan_evidence": []}'
+    )
+    assert ep.validate_llm_output(payload, []) is None
 
 
 def test_hallucinated_citation_rejected():
@@ -296,6 +298,9 @@ async def test_guardrail_failure_falls_back(monkeypatch):
 
 # ── Fallback response ────────────────────────────────────────────────────
 async def test_no_api_key_uses_fallback_without_network(monkeypatch):
+    # Explicit api_key=None plus no ambient key → no retrieval, no HTTP.
+    monkeypatch.setattr(es.settings, "GEMINI_API_KEY", None)
+
     def fail_search(*args, **kwargs):  # pragma: no cover - must not run
         raise AssertionError("retrieval must not run without key")
 
