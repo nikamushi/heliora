@@ -73,12 +73,14 @@ def search_evidence(
     # Query the collection using L2 distance (ChromaDB default).
     # Since embeddings are normalized, L2 distance relates to cosine similarity:
     #   L2_dist² = 2 - 2*cos_sim  →  cos_sim = 1 - L2_dist²/2
-    # Build where filter for metadata
+    # Build where filter for metadata.
+    # Registry stores category lowercase ("activity") and rule_id uppercase
+    # ("REC-ACT-01"), so normalize each side to its stored case.
     where_filter: dict[str, Any] = {}
     if category:
         where_filter["category"] = category.lower()
     if rule_id:
-        where_filter["rule_id"] = rule_id.lower()
+        where_filter["rule_id"] = rule_id.upper()
 
     results = collection.query(
         query_embeddings=[query_embedding],

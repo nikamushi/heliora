@@ -125,6 +125,8 @@ def build_document_chunks(evidence: dict[str, Any]) -> list[dict[str, Any]]:
                 "category": evidence['category'],
                 "category_label": evidence['category_label'],
                 "evidence_level": evidence['evidence_level'],
+                "summary": evidence['summary'],
+                "clinical_section": evidence['clinical_section'],
                 "citation": evidence['citation'],
                 "external_url": evidence['external_url'],
                 "chunk_index": i,
