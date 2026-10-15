@@ -111,7 +111,6 @@ def test_chunk_text_covers_full_text_without_gaps():
     text = "z" * 1500
     chunks = rp.chunk_text(text)
     assert chunks[0][0] == "z" and chunks[-1][-1] == "z"
-    covered = set()
     offset = 0
     for chunk in chunks:
         assert text[offset : offset + len(chunk)] in text
@@ -272,16 +271,33 @@ def test_reset_knowledge_base_deletes_collection(fakes, monkeypatch):
     assert rp._collection is None
 
 
-def test_ingest_with_reset_rebuilds_populated_kb(fakes):
+def test_ingest_with_reset_rebuilds_populated_kb(fakes, monkeypatch):
     """ingest(reset=True) clears a populated KB then ingests fresh."""
     model, collection, client = fakes
     collection._count_value = 7
+    # After delete_collection the old handle is dead; _get_collection()
+    # recreates a fresh empty one — emulate that here.
+    fresh = _FakeCollection(count_value=0)
+    state = {"reset_done": False}
+    real_reset = rp.reset_knowledge_base
+
+    def _get():
+        return fresh if state["reset_done"] else collection
+
+    def _reset():
+        out = real_reset()
+        state["reset_done"] = True
+        return out
+
+    monkeypatch.setattr(rp, "_get_collection", _get)
+    monkeypatch.setattr(rp, "reset_knowledge_base", _reset)
 
     count = rp.ingest_all_evidence(reset=True)
 
     assert client.deleted == ["heliora_evidence"]
     assert len(model.encode_calls) == 1
     assert count > 0
+    assert fresh.count() == count
 
 
 # ── Knowledge base status ──────────────────────────────────────────────────
