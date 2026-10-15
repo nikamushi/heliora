@@ -721,7 +721,7 @@ class PreventiveLifestyleRiskEngine:
     ) -> dict[str, Any]:
         """Simulate real-time risk recalculation for modifiable lifestyle overrides.
 
-        Implements Architecture §8, §14, PRD BR-WHATIF-001–004, BR-SIM-007, SIM-003.
+        Implements Architecture §12.3, §18, PRD BR-WHATIF-001–006, BR-SIM-007, SIM-003.
         Operates without modifying the user's persisted health profile.
         """
         # Baseline calculations

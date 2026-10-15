@@ -8,9 +8,9 @@ mengikuti `docs/PRD.md` §14.11 (BR-SIM-001–004, AC-SIM-01/02) dan
 `docs/Architecture.md` §12.2, §12.4, §19.
 
 Cakupan dokumen ini adalah **SIM-001 (Simulation Engine, §1–§8)** dan
-**SIM-002 (Future Simulation API, §9)**. What-if engine (SIM-003) dan
-what-if API (SIM-004) mengikuti prinsip yang sama tetapi didokumentasikan
-terpisah.
+**SIM-002 (Future Simulation API, §9)**. What-if engine (SIM-003,
+`docs/What-If.md`) dan what-if API (SIM-004) mengikuti prinsip yang sama
+tetapi didokumentasikan terpisah.
 
 ---
 
