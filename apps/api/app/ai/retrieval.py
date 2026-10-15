@@ -3,7 +3,8 @@
 Query construction, similarity search, relevance filtering, and source preservation.
 Uses the ChromaDB vector store populated by rag_pipeline.py.
 
-Architecture §8, PRD RAG-002.
+Architecture §15 (RAG Architecture: §15.3 pipeline), ADR-008 (RAG = retrieval,
+LLM = explanation). PRD §6.14, FR-027, AC-EVIDENCE-01, AC-LLM-02, TASK.md RAG-002.
 """
 
 from __future__ import annotations
@@ -53,7 +54,7 @@ def search_evidence(
     query : Natural language search query.
     top_k : Maximum number of results to return.
     category : Optional category filter (activity, sleep, nutrition, cardiovascular, stress).
-    rule_id : Optional rule ID filter (e.g., REC-ACT-01).
+    rule_id : Optional rule ID filter (e.g., REC-ACT-01, case-insensitive).
     threshold : Minimum similarity score (0-1) for a result to be considered relevant.
 
     Returns

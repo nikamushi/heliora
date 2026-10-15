@@ -1282,7 +1282,7 @@ Acceptance Criteria:
 **Owner:** Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S7-S8  
-**Status:** TESTING
+**Status:** DONE
 
 Tasks:
 
@@ -1290,7 +1290,7 @@ Tasks:
 - [x] Similarity search.
 - [x] Relevance filtering.
 - [x] Source preservation.
-- [ ] Retrieval testing.
+- [x] Retrieval testing.
 
 Acceptance Criteria:
 
