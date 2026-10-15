@@ -648,3 +648,200 @@ async def test_what_if_route_success_and_zero_mutation():
                 assert profile.smoking_status == "current"
     finally:
         app.dependency_overrides.clear()
+
+
+@pytest.mark.asyncio
+async def test_what_if_route_require_consent_403():
+    """POST /simulation/what-if without active consent returns 403 Forbidden."""
+    user_id = uuid.uuid4()
+    dummy_user = User(
+        id=user_id,
+        email="consent_whatif@heliora.health",
+        password_hash="hashed",
+        full_name="What-If Consent Tester",
+    )
+
+    from app.api.dependencies import get_current_user, get_db, require_active_consent
+
+    app.dependency_overrides[get_current_user] = lambda: dummy_user
+
+    async def override_missing_consent():
+        raise HTTPException(
+            status_code=403,
+            detail="Active consent and medical disclaimer agreement required",
+        )
+
+    app.dependency_overrides[require_active_consent] = override_missing_consent
+    app.dependency_overrides[get_db] = lambda: AsyncMock()
+
+    try:
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://testserver"
+        ) as client:
+            res = await client.post(
+                "/api/v1/simulation/what-if", json={"weight_kg": 70.0}
+            )
+            assert res.status_code == 403
+            assert "consent" in res.json()["detail"].lower()
+    finally:
+        app.dependency_overrides.clear()
+
+
+@pytest.mark.asyncio
+async def test_what_if_route_profile_not_found_404():
+    """POST /simulation/what-if returns 404 when user has no health profile."""
+    user_id = uuid.uuid4()
+    dummy_user = User(
+        id=user_id,
+        email="whatif_noprof@heliora.health",
+        password_hash="hashed",
+        full_name="What-If No-Profile Tester",
+    )
+    dummy_consent = Consent(id=uuid.uuid4(), user_id=user_id, consent_version="1.0")
+
+    from app.api.dependencies import get_current_user, get_db, require_active_consent
+
+    app.dependency_overrides[get_current_user] = lambda: dummy_user
+    app.dependency_overrides[require_active_consent] = lambda: dummy_consent
+    app.dependency_overrides[get_db] = lambda: AsyncMock()
+
+    try:
+        with patch(
+            "app.services.simulation_service.health_profile_repo.get_by_user_id",
+            new_callable=AsyncMock,
+            return_value=None,
+        ):
+            async with AsyncClient(
+                transport=ASGITransport(app=app), base_url="http://testserver"
+            ) as client:
+                res = await client.post(
+                    "/api/v1/simulation/what-if", json={"weight_kg": 70.0}
+                )
+                assert res.status_code == 404
+                assert "profil kesehatan" in res.json()["detail"].lower()
+    finally:
+        app.dependency_overrides.clear()
+
+
+@pytest.mark.asyncio
+async def test_what_if_applied_parameters_echo():
+    """Only sent overrides are applied; the rest follow the profile (AC-WHATIF-01)."""
+    user_id = uuid.uuid4()
+    dummy_user = User(
+        id=user_id,
+        email="whatif_echo@heliora.health",
+        password_hash="hashed",
+        full_name="What-If Echo Tester",
+    )
+    dummy_consent = Consent(id=uuid.uuid4(), user_id=user_id, consent_version="1.0")
+    profile = HealthProfile(
+        id=uuid.uuid4(),
+        user_id=user_id,
+        age=40,
+        gender="female",
+        height_cm=Decimal("160.0"),
+        weight_kg=Decimal("78.0"),
+        bmi=Decimal("30.5"),
+        physical_activity_min_per_week=Decimal("60.0"),
+        sleep_duration_hours=Decimal("6.0"),
+        smoking_status="current",
+        family_history=False,
+    )
+
+    from app.api.dependencies import get_current_user, get_db, require_active_consent
+
+    app.dependency_overrides[get_current_user] = lambda: dummy_user
+    app.dependency_overrides[require_active_consent] = lambda: dummy_consent
+    app.dependency_overrides[get_db] = lambda: AsyncMock()
+
+    try:
+        with patch(
+            "app.services.simulation_service.health_profile_repo.get_by_user_id",
+            new_callable=AsyncMock,
+            return_value=profile,
+        ):
+            async with AsyncClient(
+                transport=ASGITransport(app=app), base_url="http://testserver"
+            ) as client:
+                res = await client.post(
+                    "/api/v1/simulation/what-if",
+                    json={"sleep_duration_hours": 8.0},
+                )
+                assert res.status_code == 200
+                data = res.json()
+
+                applied = data["applied_parameters"]
+                assert applied["sleep_duration_hours"] == 8.0
+                assert applied["physical_activity_min_per_week"] == 60.0
+                assert applied["weight_kg"] == 78.0
+                assert applied["smoking_status"] == "current"
+                assert data["derived_bmi"] == 30.5
+                assert data["is_model_estimated"] is True
+    finally:
+        app.dependency_overrides.clear()
+
+
+@pytest.mark.asyncio
+async def test_what_if_repeated_changes_stable():
+    """Repeated what-if calls are stable and never mutate the profile (AC-WHATIF-02)."""
+    user_id = uuid.uuid4()
+    dummy_user = User(
+        id=user_id,
+        email="whatif_repeat@heliora.health",
+        password_hash="hashed",
+        full_name="What-If Repeat Tester",
+    )
+    dummy_consent = Consent(id=uuid.uuid4(), user_id=user_id, consent_version="1.0")
+    profile = HealthProfile(
+        id=uuid.uuid4(),
+        user_id=user_id,
+        age=40,
+        gender="female",
+        height_cm=Decimal("160.0"),
+        weight_kg=Decimal("78.0"),
+        bmi=Decimal("30.5"),
+        physical_activity_min_per_week=Decimal("60.0"),
+        sleep_duration_hours=Decimal("6.0"),
+        smoking_status="current",
+        family_history=False,
+    )
+
+    from app.api.dependencies import get_current_user, get_db, require_active_consent
+
+    app.dependency_overrides[get_current_user] = lambda: dummy_user
+    app.dependency_overrides[require_active_consent] = lambda: dummy_consent
+    app.dependency_overrides[get_db] = lambda: AsyncMock()
+
+    payload = {
+        "weight_kg": 65.0,
+        "physical_activity_min_per_week": 180.0,
+        "sleep_duration_hours": 8.0,
+        "smoking_status": "never",
+    }
+
+    try:
+        with patch(
+            "app.services.simulation_service.health_profile_repo.get_by_user_id",
+            new_callable=AsyncMock,
+            return_value=profile,
+        ):
+            async with AsyncClient(
+                transport=ASGITransport(app=app), base_url="http://testserver"
+            ) as client:
+                results = []
+                for _ in range(3):
+                    res = await client.post("/api/v1/simulation/what-if", json=payload)
+                    assert res.status_code == 200
+                    results.append(res.json())
+
+                assert results[0] == results[1] == results[2]
+                assert results[0]["health_score_delta"] > 0
+
+                # Profile remains strictly unmodified across repeated calls.
+                assert profile.weight_kg == Decimal("78.0")
+                assert profile.bmi == Decimal("30.5")
+                assert profile.physical_activity_min_per_week == Decimal("60.0")
+                assert profile.sleep_duration_hours == Decimal("6.0")
+                assert profile.smoking_status == "current"
+    finally:
+        app.dependency_overrides.clear()
