@@ -1,4 +1,4 @@
-# Simulation — Future Health (SIM-001)
+# Simulation — Future Health (SIM-001 · SIM-002)
 
 **Status:** REVIEW · **Task:** SIM-001 · **Sprint:** S5 · **Owner:** Gilang & Aksal
 
@@ -7,9 +7,10 @@ Dokumen ini adalah sumber kebenaran untuk metodologi, asumsi, dan interpretasi
 mengikuti `docs/PRD.md` §14.11 (BR-SIM-001–004, AC-SIM-01/02) dan
 `docs/Architecture.md` §12.2, §12.4, §19.
 
-Cakupan dokumen ini adalah **SIM-001 (Simulation Engine)**. What-if engine (SIM-003)
-dan API simulasi (SIM-002, SIM-004) mengikuti prinsip yang sama tetapi
-didokumentasikan terpisah.
+Cakupan dokumen ini adalah **SIM-001 (Simulation Engine, §1–§8)** dan
+**SIM-002 (Future Simulation API, §9)**. What-if engine (SIM-003) dan
+what-if API (SIM-004) mengikuti prinsip yang sama tetapi didokumentasikan
+terpisah.
 
 ---
 
@@ -247,14 +248,87 @@ adalah keputusan terbuka **di luar SIM-001**.
   `Architecture.md` §12.2 dan §19 **dibiarkan**: untuk future simulation ia
   dibaca sebagai input skenario yang disesuaikan asumsi + horizon, sejalan
   dengan langkah *"Modify Lifestyle Parameters"* pada BR-SIM-003.
-- Pembukuan SIM-002/SIM-003/SIM-004, tabel `simulations`,
+- Pembukuan SIM-003/SIM-004, tabel `simulations`,
   dan konsistensi kontrak AI terhadap konsumen non-SIM
   (`assessment_service`, `shap_explainer`, `evaluation`) berada di luar
   cakupan dokumen ini.
 
 ---
 
-## 9. Referensi
+## 9. SIM-002 — Future Simulation API (kontrak backend)
+
+Seksi ini hanya mencakup **SIM-002 (Future Simulation API)**. Semua klaim
+merujuk sumber kebenaran: PRD §14.11 (BR-SIM-001–004, BR-SIM-007, BR-SIM-008,
+AC-SIM-01/02) dan `Architecture.md` §6.9 (endpoint), §12.2 (flow), §23
+(validasi), §24 (error handling). PRD tidak mendefinisikan BR-SIM-005/006,
+sehingga rentang tersebut tidak dipakai di mana pun.
+
+### 9.1 Endpoint
+
+`POST /api/v1/simulation/future` (`Architecture.md` §6.9) — body
+`FutureSimulationRequest`, respons `FutureSimulationResponse`
+(`apps/api/app/schemas/simulation.py`), status `200 OK`.
+Dependensi: `get_current_user` (401 bila tanpa token),
+`require_active_consent` (403 bila consent tidak aktif, BR-CONSENT-001),
+`get_db`.
+
+### 9.2 Validasi input & horizon
+
+- `horizon_days`: `Literal[30, 90, 180]`, default `90`
+  (PRD BR-SIM-002; `Architecture.md` §6.9). Nilai lain ditolak Pydantic → `422`.
+- Validasi backend adalah authority utama (`Architecture.md` §23);
+  validasi frontend meningkatkan UX tetapi bukan pengganti.
+
+### 9.3 Perhitungan risiko
+
+Service mendelegasikan ke engine yang sama dengan baseline
+(`risk_engine.simulate_future_trajectory`; metodologi SIM-001 §3) —
+memenuhi *"Re-run Risk Engine"* (PRD BR-SIM-003) dan langkah pembanding
+baseline-vs-simulasi pada AC-SIM-01.
+
+### 9.4 Skema respons (konsisten)
+
+Respons mentah `response_model` tanpa envelope — konvensi yang sama dengan
+endpoint assessment/health-profile (repo tidak memakai envelope
+`ApiResponse`). Kunci stabil: `horizon_days` (di-echo), pasangan
+`baseline_*`/`projected_*`, `risk_trajectories` (3 kondisi), `assumptions`,
+`is_model_estimated: true`, `disclaimer` verbatim (PRD FR-005, BR-SIM-004).
+Diverifikasi test kontrak respons
+(`test_route_future_response_contract_consistent`).
+
+### 9.5 Error handling
+
+| Kondisi | Status | Sumber |
+|---|---|---|
+| Tanpa token | 401 | `get_current_user` |
+| Tanpa consent aktif | 403 | `require_active_consent` |
+| Tanpa profil kesehatan | 404 | `simulation_service` ("profil kesehatan belum ditemukan") |
+| Horizon tidak valid | 422 | Pydantic `Literal` |
+
+Pola error mengikuti `Architecture.md` §24. Tidak ada mutasi persisten pada
+jalur mana pun (BR-SIM-007; test non-mutasi).
+
+### 9.6 Kesesuaian kotak SIM-002
+
+| Kotak `docs/TASK.md` | Bukti |
+|---|---|
+| Simulation endpoint | `routes/simulation.py:24-44`, terdaftar `/api/v1/simulation` |
+| Input validation | `FutureSimulationRequest` + `Architecture.md` §23 |
+| Horizon validation | `SimulationHorizon`, default 90; test 422 + default |
+| Risk calculation | delegasi engine SIM-001 (§3); test 30/90/180 |
+| Response schema | `FutureSimulationResponse`; test kontrak AC2 |
+| Error handling | 401/403/404/422; tiap jalur teruji + §24 |
+
+### 9.7 Acceptance Criteria
+
+| AC | Status |
+|---|---|
+| Frontend dapat memanggil simulation API | **Backend-only**: kontrak `POST /api/v1/simulation/future` tersedia dan callable; wiring FE di luar scope backend |
+| Response konsisten | Terpenuhi: skema mentah stabil + test kontrak |
+
+---
+
+## 10. Referensi
 
 - `docs/PRD.md` §14.11: BR-SIM-001, BR-SIM-002, BR-SIM-003, BR-SIM-004;
   AC-SIM-01, AC-SIM-02; BR-SIM-007 (tanpa mutasi); BR-SIM-008 (reset simulasi).

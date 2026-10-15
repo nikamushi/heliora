@@ -1036,16 +1036,16 @@ Acceptance Criteria:
 **Owner:** Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S5  
-**Status:** BACKLOG
+**Status:** TESTING
 
 Tasks:
 
-- [ ] Simulation endpoint.
-- [ ] Input validation.
-- [ ] Horizon validation.
-- [ ] Risk calculation.
-- [ ] Response schema.
-- [ ] Error handling.
+- [x] Simulation endpoint.
+- [x] Input validation.
+- [x] Horizon validation.
+- [x] Risk calculation.
+- [x] Response schema.
+- [x] Error handling.
 
 Acceptance Criteria:
 

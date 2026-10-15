@@ -1,10 +1,11 @@
-"""Tests for Future Health Simulation API (SIM-001, SIM-002, PRD BR-SIM-001–008, AC-SIM-01/02).
+"""Tests for Future Health Simulation API (SIM-001, SIM-002, PRD BR-SIM-001–004, 007, 008, AC-SIM-01/02).
 
 Covers:
 - Simulation engine logic across horizons (30, 90, 180 days).
 - Service-level error handling and profile validation.
 - Route security (401 unauthenticated, 403 missing consent, 404 missing profile).
-- Request validation (422 invalid horizon).
+- Request validation (422 invalid horizon) and default horizon (90 days).
+- Response contract consistency (AC-SIM-02: "Response konsisten").
 - Non-mutation of user's persistent profile (BR-SIM-007).
 """
 
@@ -241,6 +242,206 @@ async def test_route_simulation_success_and_no_mutation():
                 assert profile.bmi == Decimal("23.5")
                 assert profile.physical_activity_min_per_week == Decimal("150.0")
                 assert profile.smoking_status == "never"
+    finally:
+        app.dependency_overrides.clear()
+
+
+@pytest.mark.asyncio
+async def test_route_future_require_consent_403():
+    """POST /simulation/future without active consent returns 403 Forbidden."""
+    user_id = uuid.uuid4()
+    dummy_user = User(
+        id=user_id,
+        email="consent_sim@heliora.health",
+        password_hash="hashed",
+        full_name="Simulation Consent Tester",
+    )
+
+    from app.api.dependencies import get_current_user, get_db, require_active_consent
+
+    app.dependency_overrides[get_current_user] = lambda: dummy_user
+
+    async def override_missing_consent():
+        raise HTTPException(
+            status_code=403,
+            detail="Active consent and medical disclaimer agreement required",
+        )
+
+    app.dependency_overrides[require_active_consent] = override_missing_consent
+    app.dependency_overrides[get_db] = lambda: AsyncMock()
+
+    try:
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://testserver"
+        ) as client:
+            res = await client.post(
+                "/api/v1/simulation/future", json={"horizon_days": 90}
+            )
+            assert res.status_code == 403
+            assert "consent" in res.json()["detail"].lower()
+    finally:
+        app.dependency_overrides.clear()
+
+
+@pytest.mark.asyncio
+async def test_route_future_profile_not_found_404():
+    """POST /simulation/future returns 404 when user has no health profile."""
+    user_id = uuid.uuid4()
+    dummy_user = User(
+        id=user_id,
+        email="sim_noprof@heliora.health",
+        password_hash="hashed",
+        full_name="Simulation No-Profile Tester",
+    )
+    dummy_consent = Consent(id=uuid.uuid4(), user_id=user_id, consent_version="1.0")
+
+    from app.api.dependencies import get_current_user, get_db, require_active_consent
+
+    app.dependency_overrides[get_current_user] = lambda: dummy_user
+    app.dependency_overrides[require_active_consent] = lambda: dummy_consent
+    app.dependency_overrides[get_db] = lambda: AsyncMock()
+
+    try:
+        with patch(
+            "app.services.simulation_service.health_profile_repo.get_by_user_id",
+            new_callable=AsyncMock,
+            return_value=None,
+        ):
+            async with AsyncClient(
+                transport=ASGITransport(app=app), base_url="http://testserver"
+            ) as client:
+                res = await client.post(
+                    "/api/v1/simulation/future", json={"horizon_days": 90}
+                )
+                assert res.status_code == 404
+                assert "profil kesehatan" in res.json()["detail"].lower()
+    finally:
+        app.dependency_overrides.clear()
+
+
+@pytest.mark.asyncio
+async def test_route_future_default_horizon_90():
+    """POST /simulation/future without horizon_days defaults to 90 days."""
+    user_id = uuid.uuid4()
+    dummy_user = User(
+        id=user_id,
+        email="sim_defh@heliora.health",
+        password_hash="hashed",
+        full_name="Simulation Default Horizon Tester",
+    )
+    dummy_consent = Consent(id=uuid.uuid4(), user_id=user_id, consent_version="1.0")
+    profile = HealthProfile(
+        id=uuid.uuid4(),
+        user_id=user_id,
+        age=35,
+        gender="male",
+        height_cm=Decimal("172.0"),
+        weight_kg=Decimal("70.0"),
+        bmi=Decimal("23.6"),
+        physical_activity_min_per_week=Decimal("180.0"),
+        sleep_duration_hours=Decimal("7.5"),
+        smoking_status="never",
+        family_history=False,
+    )
+
+    from app.api.dependencies import get_current_user, get_db, require_active_consent
+
+    app.dependency_overrides[get_current_user] = lambda: dummy_user
+    app.dependency_overrides[require_active_consent] = lambda: dummy_consent
+    app.dependency_overrides[get_db] = lambda: AsyncMock()
+
+    try:
+        with patch(
+            "app.services.simulation_service.health_profile_repo.get_by_user_id",
+            new_callable=AsyncMock,
+            return_value=profile,
+        ):
+            async with AsyncClient(
+                transport=ASGITransport(app=app), base_url="http://testserver"
+            ) as client:
+                res = await client.post("/api/v1/simulation/future", json={})
+                assert res.status_code == 200
+                assert res.json()["horizon_days"] == 90
+    finally:
+        app.dependency_overrides.clear()
+
+
+@pytest.mark.asyncio
+async def test_route_future_response_contract_consistent():
+    """POST /simulation/future returns a stable response contract (AC-SIM-02)."""
+    user_id = uuid.uuid4()
+    dummy_user = User(
+        id=user_id,
+        email="sim_contract@heliora.health",
+        password_hash="hashed",
+        full_name="Simulation Contract Tester",
+    )
+    dummy_consent = Consent(id=uuid.uuid4(), user_id=user_id, consent_version="1.0")
+    profile = HealthProfile(
+        id=uuid.uuid4(),
+        user_id=user_id,
+        age=35,
+        gender="male",
+        height_cm=Decimal("172.0"),
+        weight_kg=Decimal("70.0"),
+        bmi=Decimal("23.6"),
+        physical_activity_min_per_week=Decimal("180.0"),
+        sleep_duration_hours=Decimal("7.5"),
+        smoking_status="never",
+        family_history=False,
+    )
+
+    from app.api.dependencies import get_current_user, get_db, require_active_consent
+
+    app.dependency_overrides[get_current_user] = lambda: dummy_user
+    app.dependency_overrides[require_active_consent] = lambda: dummy_consent
+    app.dependency_overrides[get_db] = lambda: AsyncMock()
+
+    try:
+        with patch(
+            "app.services.simulation_service.health_profile_repo.get_by_user_id",
+            new_callable=AsyncMock,
+            return_value=profile,
+        ):
+            async with AsyncClient(
+                transport=ASGITransport(app=app), base_url="http://testserver"
+            ) as client:
+                res = await client.post(
+                    "/api/v1/simulation/future", json={"horizon_days": 30}
+                )
+                assert res.status_code == 200
+                data = res.json()
+
+                # Top-level contract: horizon echoed, score pairs, trajectories,
+                # assumptions, model-estimated flag, and mandatory disclaimer.
+                expected_keys = {
+                    "horizon_days",
+                    "baseline_health_score",
+                    "projected_health_score",
+                    "baseline_lifestyle_score",
+                    "projected_lifestyle_score",
+                    "risk_trajectories",
+                    "assumptions",
+                    "is_model_estimated",
+                    "disclaimer",
+                }
+                assert expected_keys <= set(data.keys())
+                assert data["horizon_days"] == 30
+                assert data["is_model_estimated"] is True
+                assert len(data["assumptions"]) >= 3
+                assert "Simulasi" in data["disclaimer"]
+
+                # Per-condition contract mirrors the FutureSimulationResponse schema.
+                assert len(data["risk_trajectories"]) == 3
+                for item in data["risk_trajectories"]:
+                    assert {
+                        "condition",
+                        "baseline_probability",
+                        "projected_probability",
+                        "risk_level",
+                        "risk_label",
+                        "trend",
+                    } <= set(item.keys())
     finally:
         app.dependency_overrides.clear()
 

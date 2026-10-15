@@ -1,7 +1,7 @@
 """HELIORA API — Simulation schemas.
 
 Request and response schemas for Future Health Simulation and What-if analysis.
-Implements Architecture §8, §14, PRD BR-SIM-001–008, AC-SIM-01/02, SIM-001, SIM-002.
+Implements Architecture §12, §19, PRD BR-SIM-001–004, 007, 008, AC-SIM-01/02, SIM-001, SIM-002.
 """
 
 from typing import Literal
