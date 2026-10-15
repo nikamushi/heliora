@@ -1,7 +1,7 @@
 """HELIORA API — Simulation service.
 
 Orchestrates model-based future health simulation and scenario exploration.
-Implements Architecture §8, §14, PRD BR-SIM-001–008, AC-SIM-01/02.
+Implements Architecture §12, §19, PRD BR-SIM-001–004, 007, 008, AC-SIM-01/02, SIM-001, SIM-002.
 Enforces non-mutation of persistent health profiles (BR-SIM-007).
 """
 
