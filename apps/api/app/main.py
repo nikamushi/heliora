@@ -77,9 +77,38 @@ async def os_error_handler(request: Request, exc: OSError) -> JSONResponse:
     is_socket_conn_failure = (
         isinstance(exc, ConnectionRefusedError)
         or "connection refused" in err_str
+        or "connect call failed" in err_str
         or "1225" in err_str
+        or "10061" in err_str
     )
     if is_socket_conn_failure:
+        return JSONResponse(
+            status_code=503,
+            content={
+                "detail": (
+                    "Koneksi ke database gagal. Pastikan service database PostgreSQL aktif dan kredensial valid."
+                )
+            },
+        )
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Terjadi kesalahan internal sistem."},
+    )
+
+
+@app.exception_handler(__import__("sqlalchemy.exc", fromlist=["SQLAlchemyError"]).SQLAlchemyError)
+async def sqlalchemy_error_handler(request: Request, exc: Exception) -> JSONResponse:
+    """Handle database operational/connection errors from SQLAlchemy."""
+    err_str = str(exc).lower()
+    is_conn_failure = (
+        "connection refused" in err_str
+        or "connect call failed" in err_str
+        or "cannot connect" in err_str
+        or "connection error" in err_str
+        or "10061" in err_str
+        or "1225" in err_str
+    )
+    if is_conn_failure:
         return JSONResponse(
             status_code=503,
             content={
