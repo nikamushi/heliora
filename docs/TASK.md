@@ -1972,7 +1972,7 @@ Acceptance Criteria:
 Tasks:
 
 - [x] Define mobile and backend development runner contract.
-- [ ] Implement health-gated backend spawner and process tree teardown.
+- [x] Implement health-gated backend spawner and process tree teardown.
 - [ ] Implement interactive flutter runner and root package script.
 
 Acceptance Criteria:
