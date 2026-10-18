@@ -15,6 +15,7 @@ from typing import Any
 import numpy as np
 import shap
 
+from app.core.attribute_profile import AttributeProfile
 from app.core.risk_engine import risk_engine
 
 logger = logging.getLogger(__name__)
@@ -143,11 +144,7 @@ class RiskModelWrapper:
         """Convert a feature vector back to a mock profile object."""
         smoking_map_rev = {0: "never", 1: "former", 2: "current"}
 
-        class MockProfile:
-            def __init__(self, **kwargs: Any):
-                self.__dict__.update(kwargs)
-
-        return MockProfile(
+        return AttributeProfile(
             age=int(vec[0]),
             gender="male",
             height_cm=170.0,

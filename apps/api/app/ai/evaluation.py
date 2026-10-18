@@ -19,6 +19,8 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from app.core.attribute_profile import AttributeProfile
+
 if TYPE_CHECKING:  # pragma: no cover - typing only; keeps this module xgboost-free
     from app.ai.model_training import ModelRiskEngine
 
@@ -355,11 +357,7 @@ def sample_to_profile(sample: EvaluationSample) -> Any:
     """Convert an EvaluationSample to a mock HealthProfile-like object for the risk engine."""
     from decimal import Decimal
 
-    class MockProfile:
-        def __init__(self, **kwargs: Any) -> None:
-            self.__dict__.update(kwargs)
-
-    return MockProfile(
+    return AttributeProfile(
         age=sample.age,
         gender="male",
         height_cm=Decimal("170.0"),

@@ -8,6 +8,7 @@ deterministic guideline-backed recommendations (Architecture §8, §9, §10, §1
 import math
 from typing import Any
 
+from app.core.attribute_profile import AttributeProfile
 from app.core.risk_levels import to_risk_label, to_risk_level
 from app.schemas.assessment import (
     ContributingFactor,
@@ -746,11 +747,7 @@ class PreventiveLifestyleRiskEngine:
             ).lower()
         )
 
-        class VirtualProfile:
-            def __init__(self, **kwargs: Any) -> None:
-                self.__dict__.update(kwargs)
-
-        sim_profile = VirtualProfile(
+        sim_profile = AttributeProfile(
             age=profile.age,
             gender=profile.gender,
             height_cm=height_cm,
