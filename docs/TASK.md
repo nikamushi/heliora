@@ -1967,13 +1967,13 @@ Acceptance Criteria:
 **Owner:** Pino & Tumir  
 **Priority:** P1  
 **Sprint:** S9-S10  
-**Status:** IN PROGRESS
+**Status:** DONE
 
 Tasks:
 
 - [x] Define mobile and backend development runner contract.
 - [x] Implement health-gated backend spawner and process tree teardown.
-- [ ] Implement interactive flutter runner and root package script.
+- [x] Implement interactive flutter runner and root package script.
 
 Acceptance Criteria:
 
