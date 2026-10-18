@@ -1310,7 +1310,7 @@ Acceptance Criteria:
 **Owner:** Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S8  
-**Status:** BACKLOG
+**Status:** DONE
 
 LLM responsibility:
 
