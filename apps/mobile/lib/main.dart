@@ -86,24 +86,29 @@ class _HelioraAppState extends ConsumerState<HelioraApp> {
       debugShowCheckedModeBanner: false,
       theme: HelioraTheme.lightTheme,
       darkTheme: HelioraTheme.darkTheme,
-      home: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 200),
-        child: _splashActive
-            ? SplashScreen(
-                key: const ValueKey('splash_screen'),
-                onSplashComplete: () {
-                  if (mounted) {
-                    setState(() => _splashActive = false);
-                  }
-                },
-              )
-            : (isAuthenticated
-                ? const _AuthenticatedFlowRouter(
-                    key: ValueKey('authenticated_router'),
+      home: Builder(
+        builder: (context) {
+          final reduceMotion = MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+          return AnimatedSwitcher(
+            duration: Duration(milliseconds: reduceMotion ? 150 : 200),
+            child: _splashActive
+                ? SplashScreen(
+                    key: const ValueKey('splash_screen'),
+                    onSplashComplete: () {
+                      if (mounted) {
+                        setState(() => _splashActive = false);
+                      }
+                    },
                   )
-                : const _UnauthenticatedNavigationFlow(
-                    key: ValueKey('unauthenticated_router'),
-                  )),
+                : (isAuthenticated
+                    ? const _AuthenticatedFlowRouter(
+                        key: ValueKey('authenticated_router'),
+                      )
+                    : const _UnauthenticatedNavigationFlow(
+                        key: ValueKey('unauthenticated_router'),
+                      )),
+          );
+        },
       ),
     );
   }

@@ -24,7 +24,6 @@ abstract class HelioraTokens {
   // Corner Radii (Design.md §15.1: 12px corners, strictly no pill chips)
   static const double radiusXl = 12.0;
   static const double radiusSm = 6.0;
-  static const double radiusFull = 9999.0;
 
   // Typography Styles
   static const TextStyle mobileTitle = TextStyle(

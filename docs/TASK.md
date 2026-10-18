@@ -1985,6 +1985,31 @@ Acceptance Criteria:
 
 
 
+## MOB-010 — Mobile UI-UX Refinement and Local Backend Integration
+
+**Owner:** Pino & Tumir  
+**Priority:** P0  
+**Sprint:** S9-S10  
+**Status:** IN PROGRESS
+
+Tasks:
+
+- [x] Align tokens, typography, and statutory disclaimer with Figma Design System.
+- [ ] Remove fake fallback risk scores and implement honest error handling in HomeScreen.
+- [ ] Implement health profile form pre-fill when editing from ProfileScreen.
+- [ ] Connect mobile client to local FastAPI backend and validate end-to-end flow.
+
+Acceptance Criteria:
+
+- Tidak ada elemen pill chip atau token `radiusFull`; ambang skor mengikuti standar kanonik 80/60/40.
+- HomeScreen tidak menampilkan skor tiruan saat asesmen kosong dan menampilkan pesan error resmi dengan tombol muat ulang jika API gagal.
+- Form profil kesehatan terisi otomatis saat pengguna menekan "Perbarui profil kesehatan" di layar Profil.
+- Aplikasi mobile dapat terhubung ke backend FastAPI lokal (emulator 10.0.2.2 atau web localhost:8000) dan menyelesaikan alur autentikasi hingga simulasi secara mulus.
+
+---
+
+
+
 # 19. Integration Tasks
 
 
