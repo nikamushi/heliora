@@ -78,64 +78,94 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogCtx) {
-        return AlertDialog(
+        return Dialog(
           backgroundColor: Colors.white,
+          surfaceTintColor: Colors.transparent,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16.0),
-            side: BorderSide(color: HelioraTokens.border, width: 1.0),
+            borderRadius: BorderRadius.circular(24.0),
+            side: const BorderSide(color: HelioraTokens.border, width: 1.0),
           ),
-          title: const Text(
-            'Cabut Persetujuan Data Medis?',
-            style: TextStyle(
-              fontFamily: 'Plus Jakarta Sans',
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: HelioraTokens.foreground,
-            ),
-          ),
-          content: const Text(
-            'Pencabutan persetujuan akan membatalkan izin pemrosesan data preventif Anda sesuai regulasi privasi. Data asesmen dan estimasi risiko di perangkat Anda akan segera dihapus dari memori aplikasi, dan Anda tidak dapat mengakses Beranda atau simulasi risiko hingga persetujuan baru diberikan kembali.',
-            style: TextStyle(
-              fontFamily: 'Plus Jakarta Sans',
-              fontSize: 14,
-              color: HelioraTokens.mutedForeground,
-              height: 1.5,
-            ),
-          ),
-          actionsPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogCtx).pop(false),
-              child: const Text(
-                'Batal',
-                style: TextStyle(
-                  fontFamily: 'Plus Jakarta Sans',
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: HelioraTokens.foreground,
-                ),
+          insetPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 340),
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Cabut persetujuan?',
+                    style: TextStyle(
+                      fontFamily: 'Plus Jakarta Sans',
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: HelioraTokens.foreground,
+                      height: 1.3,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'HELIORA akan berhenti memproses data kesehatan Anda. Hasil asesmen tidak tampil sampai Anda memberi persetujuan lagi. Anda bisa melakukannya kapan saja.',
+                    style: TextStyle(
+                      fontFamily: 'Plus Jakarta Sans',
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                      color: Color(0xFF4A5568),
+                      height: 1.5,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.of(dialogCtx).pop(true),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: HelioraTokens.rose700,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(HelioraTokens.radiusXl),
+                        ),
+                      ),
+                      child: const Text(
+                        'Cabut persetujuan',
+                        style: TextStyle(
+                          fontFamily: 'Plus Jakarta Sans',
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(dialogCtx).pop(false),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: HelioraTokens.foreground,
+                        side: const BorderSide(color: Color(0xFFDEE5E1), width: 1.0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(HelioraTokens.radiusXl),
+                        ),
+                      ),
+                      child: const Text(
+                        'Batal',
+                        style: TextStyle(
+                          fontFamily: 'Plus Jakarta Sans',
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-            ElevatedButton(
-              onPressed: () => Navigator.of(dialogCtx).pop(true),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: HelioraTokens.rose700,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.0),
-                ),
-              ),
-              child: const Text(
-                'Ya, Cabut Persetujuan',
-                style: TextStyle(
-                  fontFamily: 'Plus Jakarta Sans',
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
+          ),
         );
       },
     );
@@ -174,64 +204,94 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogCtx) {
-        return AlertDialog(
+        return Dialog(
           backgroundColor: Colors.white,
+          surfaceTintColor: Colors.transparent,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16.0),
-            side: BorderSide(color: HelioraTokens.border, width: 1.0),
+            borderRadius: BorderRadius.circular(24.0),
+            side: const BorderSide(color: HelioraTokens.border, width: 1.0),
           ),
-          title: const Text(
-            'Keluar dari Heliora?',
-            style: TextStyle(
-              fontFamily: 'Plus Jakarta Sans',
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: HelioraTokens.foreground,
-            ),
-          ),
-          content: const Text(
-            'Seluruh sesi dan token pada perangkat ini akan dihapus dengan aman.',
-            style: TextStyle(
-              fontFamily: 'Plus Jakarta Sans',
-              fontSize: 14,
-              color: HelioraTokens.mutedForeground,
-              height: 1.5,
-            ),
-          ),
-          actionsPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogCtx).pop(false),
-              child: const Text(
-                'Batal',
-                style: TextStyle(
-                  fontFamily: 'Plus Jakarta Sans',
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: HelioraTokens.foreground,
-                ),
+          insetPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 340),
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Keluar dari Heliora?',
+                    style: TextStyle(
+                      fontFamily: 'Plus Jakarta Sans',
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: HelioraTokens.foreground,
+                      height: 1.3,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Seluruh sesi dan token pada perangkat ini akan dihapus dengan aman.',
+                    style: TextStyle(
+                      fontFamily: 'Plus Jakarta Sans',
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                      color: Color(0xFF4A5568),
+                      height: 1.5,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.of(dialogCtx).pop(true),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: HelioraTokens.foreground,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(HelioraTokens.radiusXl),
+                        ),
+                      ),
+                      child: const Text(
+                        'Keluar',
+                        style: TextStyle(
+                          fontFamily: 'Plus Jakarta Sans',
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(dialogCtx).pop(false),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: HelioraTokens.foreground,
+                        side: const BorderSide(color: Color(0xFFDEE5E1), width: 1.0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(HelioraTokens.radiusXl),
+                        ),
+                      ),
+                      child: const Text(
+                        'Batal',
+                        style: TextStyle(
+                          fontFamily: 'Plus Jakarta Sans',
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-            ElevatedButton(
-              onPressed: () => Navigator.of(dialogCtx).pop(true),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: HelioraTokens.foreground,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.0),
-                ),
-              ),
-              child: const Text(
-                'Keluar',
-                style: TextStyle(
-                  fontFamily: 'Plus Jakarta Sans',
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
+          ),
         );
       },
     );

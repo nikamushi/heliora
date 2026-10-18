@@ -2002,6 +2002,7 @@ Tasks:
 - [x] Standardize ChoiceOption full-width alignment and fix Simulation action button text wrapping.
 - [x] Implement smooth bouncing scroll behavior across touch, mouse, and trackpad devices.
 - [x] Fix assessment flow family history textarea contrast, border, and enforce canonical light themeMode.
+- [x] Implement Figma Mobile/Dialog (node 81:1363) for consent revocation and account sign out.
 
 Acceptance Criteria:
 
@@ -2012,6 +2013,7 @@ Acceptance Criteria:
 - Preflight request `OPTIONS` dari Flutter Web (port dinamis `127.0.0.1:*` / `localhost:*`) berhasil diizinkan dengan status 200 OK.
 - Seluruh kartu pilihan simulasi membentang seragam (100% lebar kontainer), tombol "Atur ulang" tidak mengalami patah kata, dan scrolling aplikasi responsif serta mulus.
 - Textarea detail riwayat keluarga pada alur asesmen memiliki latar belakang putih bersih, kontras placeholder tajam (`#94A3B8`), dan fokus border hijau tanpa kotak hitam anomali.
+- Modal dialog konfirmasi cabut persetujuan dan keluar akun mengikuti spesifikasi Figma (node 81:1363): radius 24px, judul dan deskripsi ringkas, tombol aksi destruktif penuh di atas, dan tombol batal outlined di bawah.
 
 ---
 

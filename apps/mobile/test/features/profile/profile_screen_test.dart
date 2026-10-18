@@ -199,12 +199,12 @@ void main() {
       await tester.pumpAndSettle();
 
       // Dialog opens
-      expect(find.text('Cabut Persetujuan Data Medis?'), findsOneWidget);
+      expect(find.text('Cabut persetujuan?'), findsOneWidget);
       expect(find.text('Batal'), findsOneWidget);
-      expect(find.text('Ya, Cabut Persetujuan'), findsOneWidget);
+      expect(find.widgetWithText(ElevatedButton, 'Cabut persetujuan'), findsOneWidget);
 
       // Confirm revocation
-      await tester.tap(find.text('Ya, Cabut Persetujuan'));
+      await tester.tap(find.widgetWithText(ElevatedButton, 'Cabut persetujuan'));
       await tester.pumpAndSettle();
 
       expect(fakeConsent.revokeCalled, isTrue);
