@@ -21,7 +21,13 @@ import numpy as np
 import xgboost as xgb
 from lightgbm import LGBMClassifier
 
-from app.core.risk_engine import risk_engine
+from app.ai.synthetic_data import (
+    cardiovascular_probability,
+    diabetes_probability,
+    hypertension_probability,
+    sample_features,
+)
+from app.core.vitals import normalize_smoking_status, parse_blood_pressure
 
 logger = logging.getLogger(__name__)
 
@@ -44,9 +50,14 @@ FEATURE_NAMES = [
     "diastolic_bp",
 ]
 
+SMOKING_CODE = {"never": 0, "former": 1, "current": 2}
+
 
 def generate_training_data(n_samples: int = 10000, seed: int = 42) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Generate synthetic labeled training data for risk prediction.
+
+    Uses the shared synthetic cohort generator (app.ai.synthetic_data) so
+    features and epidemiological probabilities match the evaluation pipeline.
 
     Returns:
         X: Feature matrix (n_samples, 11)
@@ -57,95 +68,32 @@ def generate_training_data(n_samples: int = 10000, seed: int = 42) -> tuple[np.n
     rng = np.random.default_rng(seed)
 
     feature_matrix = np.zeros((n_samples, len(FEATURE_NAMES)))
-
-    for i in range(n_samples):
-        feature_matrix[i, 0] = rng.uniform(20, 80)
-        feature_matrix[i, 1] = rng.uniform(18, 40)
-        feature_matrix[i, 2] = rng.uniform(0, 300)
-        feature_matrix[i, 3] = rng.uniform(4, 10)
-        feature_matrix[i, 4] = float(rng.choice([0, 1, 2]))
-        feature_matrix[i, 5] = float(rng.choice([0, 1]))
-        feature_matrix[i, 6] = rng.uniform(1, 10) if rng.random() < 0.7 else 0
-        feature_matrix[i, 7] = rng.uniform(70, 160) if rng.random() < 0.4 else 90
-        feature_matrix[i, 8] = rng.uniform(140, 260) if rng.random() < 0.4 else 180
-        feature_matrix[i, 9] = rng.uniform(100, 160)
-        feature_matrix[i, 10] = rng.uniform(60, 100)
-
-    # Generate labels based on epidemiological correlations
     y_diabetes = np.zeros(n_samples)
     y_hypertension = np.zeros(n_samples)
     y_cvd = np.zeros(n_samples)
 
     for i in range(n_samples):
-        age = feature_matrix[i, 0]
-        bmi = feature_matrix[i, 1]
-        activity = feature_matrix[i, 2]
-        sleep = feature_matrix[i, 3]
-        smoking = int(feature_matrix[i, 4])
-        famhist = int(feature_matrix[i, 5])
-        stress = feature_matrix[i, 6] if feature_matrix[i, 6] > 0 else 5
-        blood_sugar = feature_matrix[i, 7]
-        cholesterol = feature_matrix[i, 8]
-        systolic = feature_matrix[i, 9]
-        diastolic = feature_matrix[i, 10]
+        features = sample_features(rng)
+        feature_matrix[i] = [
+            float(features.age),
+            features.bmi,
+            features.physical_activity,
+            features.sleep_duration,
+            float(SMOKING_CODE[features.smoking_status]),
+            float(features.family_history),
+            features.stress_level if features.stress_level is not None else 0.0,
+            features.blood_sugar_mg_dl if features.blood_sugar_mg_dl is not None else 90.0,
+            features.cholesterol_mg_dl if features.cholesterol_mg_dl is not None else 180.0,
+            features.systolic_bp,
+            features.diastolic_bp,
+        ]
 
-        # Diabetes probability
-        dm_prob = 0.02 + 0.008 * max(0, age - 30) / 10
-        if bmi >= 30:
-            dm_prob += 0.12
-        elif bmi >= 25:
-            dm_prob += 0.06
-        if activity < 60:
-            dm_prob += 0.05
-        elif activity >= 150:
-            dm_prob -= 0.03
-        if famhist:
-            dm_prob += 0.08
-        if smoking == 2:
-            dm_prob += 0.05
-        if blood_sugar >= 126:
-            dm_prob += 0.15
-        elif blood_sugar >= 100:
-            dm_prob += 0.07
-        dm_prob = min(0.95, dm_prob)
+        dm_prob = diabetes_probability(features)
+        ht_prob = hypertension_probability(features)
+        cvd_prob = cardiovascular_probability(features, ht_prob)
+
         y_diabetes[i] = 1 if rng.random() < dm_prob else 0
-
-        # Hypertension probability
-        ht_prob = 0.03 + 0.009 * max(0, age - 30) / 10
-        if sleep < 6:
-            ht_prob += 0.06
-        elif 6.5 <= sleep <= 8.5:
-            ht_prob -= 0.02
-        if stress >= 7:
-            ht_prob += 0.05
-        if smoking == 2:
-            ht_prob += 0.05
-        elif smoking == 0:
-            ht_prob -= 0.02
-        if bmi >= 25:
-            ht_prob += 0.05
-        if systolic >= 140 or diastolic >= 90:
-            ht_prob += 0.18
-        ht_prob = min(0.95, ht_prob)
         y_hypertension[i] = 1 if rng.random() < ht_prob else 0
-
-        # CVD probability
-        cvd_prob = 0.02 + 0.01 * max(0, age - 30) / 10
-        if smoking == 2:
-            cvd_prob += 0.12
-        elif smoking == 1:
-            cvd_prob += 0.04
-        elif smoking == 0:
-            cvd_prob -= 0.03
-        if cholesterol >= 240:
-            cvd_prob += 0.12
-        elif cholesterol >= 200:
-            cvd_prob += 0.05
-        if activity < 60:
-            cvd_prob += 0.05
-        elif activity >= 150:
-            cvd_prob -= 0.03
-        cvd_prob = min(0.95, cvd_prob)
         y_cvd[i] = 1 if rng.random() < cvd_prob else 0
 
     return feature_matrix, y_diabetes, y_hypertension, y_cvd
@@ -411,11 +359,7 @@ class ModelRiskEngine:
         bmi = float(profile.bmi) if profile.bmi else 22.0
         activity = float(profile.physical_activity_min_per_week)
         sleep = float(profile.sleep_duration_hours)
-        smoking = str(
-            profile.smoking_status.value
-            if hasattr(profile.smoking_status, "value")
-            else profile.smoking_status
-        ).lower()
+        smoking = normalize_smoking_status(profile.smoking_status)
         family_history = bool(profile.family_history)
         stress = float(profile.stress_level) if profile.stress_level else 5.0
         blood_sugar = (
@@ -424,12 +368,11 @@ class ModelRiskEngine:
         cholesterol = (
             float(profile.cholesterol_mg_dl) if profile.cholesterol_mg_dl else 180.0
         )
-        systolic, diastolic = risk_engine._parse_bp(profile.blood_pressure)
+        systolic, diastolic = parse_blood_pressure(profile.blood_pressure)
         systolic = systolic if systolic is not None else 120.0
         diastolic = diastolic if diastolic is not None else 80.0
 
-        smoking_map = {"never": 0, "former": 1, "current": 2}
-        smoking_val = smoking_map.get(smoking, 0)
+        smoking_val = SMOKING_CODE.get(smoking, 0)
 
         return np.array(
             [

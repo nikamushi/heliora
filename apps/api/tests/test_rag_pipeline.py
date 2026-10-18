@@ -198,6 +198,24 @@ def test_registry_all_items_produce_valid_chunks():
 
 
 # ── Embedding generation ───────────────────────────────────────────────────
+def test_embedding_model_lazy_singleton(monkeypatch):
+    """_get_embedding_model loads all-MiniLM-L6-v2 once and caches it."""
+    loaded: list[str] = []
+
+    class _CountingModel:
+        def __init__(self, name):
+            loaded.append(name)
+
+    monkeypatch.setattr(rp, "_embedding_model", None)
+    monkeypatch.setattr(rp, "SentenceTransformer", _CountingModel)
+
+    first = rp._get_embedding_model()
+    second = rp._get_embedding_model()
+
+    assert first is second
+    assert loaded == [rp.EMBEDDING_MODEL_NAME]
+
+
 def test_ingest_encodes_all_chunk_texts(fakes):
     """Encode receives every chunk text with numpy output requested."""
     model, _, _ = fakes

@@ -19,6 +19,15 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from app.ai.synthetic_data import (
+    ELEVATED_RISK_THRESHOLD,
+    cardiovascular_probability,
+    diabetes_probability,
+    hypertension_probability,
+    sample_features,
+)
+from app.core.attribute_profile import AttributeProfile
+
 if TYPE_CHECKING:  # pragma: no cover - typing only; keeps this module xgboost-free
     from app.ai.model_training import ModelRiskEngine
 
@@ -252,97 +261,26 @@ def generate_synthetic_evaluation_data(
 
     data: list[EvaluationSample] = []
     for _ in range(n_samples):
-        age = int(rng.uniform(20, 75))
-        bmi = float(rng.uniform(18.0, 38.0))
-        activity = float(rng.uniform(0, 300))
-        sleep = float(rng.uniform(4.0, 10.0))
-        smoking_roll = rng.random()
-        smoking = (
-            "current" if smoking_roll < 0.25 else ("former" if smoking_roll < 0.45 else "never")
-        )
-        family_history = bool(rng.random() < 0.30)
-        stress = float(rng.uniform(1, 10)) if rng.random() < 0.7 else None
-        blood_sugar = float(rng.uniform(70, 160)) if rng.random() < 0.4 else None
-        cholesterol = float(rng.uniform(140, 260)) if rng.random() < 0.4 else None
-        systolic = float(rng.uniform(105, 160))
-        diastolic = float(rng.uniform(65, 100))
-        bp = f"{int(systolic)}/{int(diastolic)}"
-
-        # Generate ground truth probabilities based on epidemiological model
-        # (correlated with the same factors the risk engine uses)
-
-        # Diabetes
-        dm_base = 0.02 + 0.008 * max(0, age - 30) / 10
-        dm_bmi = 0.0
-        if bmi >= 30:
-            dm_bmi = 0.12 + 0.02 * (bmi - 30) / 10
-        elif bmi >= 25:
-            dm_bmi = 0.06
-        elif bmi < 23:
-            dm_bmi = -0.03
-        dm_activity = -0.04 if activity >= 150 else (0.05 if activity < 60 else -0.01)
-        dm_famhist = 0.08 if family_history else 0.0
-        dm_smoke = 0.05 if smoking == "current" else (0.02 if smoking == "former" else -0.02)
-        dm_sleep = 0.03 if sleep < 6 else (-0.02 if sleep >= 7 else 0.0)
-        dm_bs = 0.0
-        if blood_sugar is not None:
-            if blood_sugar >= 126:
-                dm_bs = 0.15
-            elif blood_sugar >= 100:
-                dm_bs = 0.07
-            elif blood_sugar < 90:
-                dm_bs = -0.02
-        dm_prob = max(0.01, min(0.95, dm_base + dm_bmi + dm_activity + dm_famhist + dm_smoke + dm_sleep + dm_bs))
-        dm_label = 1 if dm_prob >= 0.25 else 0  # Binary label: elevated risk threshold
-
-        # Hypertension
-        ht_base = 0.03 + 0.009 * max(0, age - 30) / 10
-        ht_sleep = 0.06 if sleep < 6 else (-0.03 if 6.5 <= sleep <= 8.5 else 0.0)
-        ht_stress = 0.05 if stress is not None and stress >= 7 else (-0.02 if stress is not None and stress <= 3 else 0.0)
-        ht_smoke = 0.05 if smoking == "current" else (-0.02 if smoking == "never" else 0.0)
-        ht_bmi = 0.05 if bmi >= 25 else 0.0
-        ht_bp = 0.0
-        if systolic >= 140 or diastolic >= 90:
-            ht_bp = 0.18
-        elif systolic >= 130 or diastolic >= 85:
-            ht_bp = 0.07
-        elif systolic < 120 and diastolic < 80:
-            ht_bp = -0.04
-        ht_prob = max(0.01, min(0.95, ht_base + ht_sleep + ht_stress + ht_smoke + ht_bmi + ht_bp))
-        ht_label = 1 if ht_prob >= 0.25 else 0
-
-        # Cardiovascular
-        cvd_base = 0.02 + 0.01 * max(0, age - 30) / 10
-        cvd_smoke = 0.12 if smoking == "current" else (0.04 if smoking == "former" else -0.04)
-        cvd_chol = 0.0
-        if cholesterol is not None:
-            if cholesterol >= 240:
-                cvd_chol = 0.12
-            elif cholesterol >= 200:
-                cvd_chol = 0.05
-            elif cholesterol < 180:
-                cvd_chol = -0.03
-        cvd_activity = -0.04 if activity >= 150 else (0.05 if activity < 60 else -0.01)
-        cvd_bmi = 0.02 if bmi < 24 else (-0.05 if bmi >= 28 else -0.01)
-        cvd_ht = 0.04 if ht_prob > 0.25 else 0.0
-        cvd_prob = max(0.01, min(0.95, cvd_base + cvd_smoke + cvd_chol + cvd_activity + cvd_bmi + cvd_ht))
-        cvd_label = 1 if cvd_prob >= 0.25 else 0
+        features = sample_features(rng)
+        dm_prob = diabetes_probability(features)
+        ht_prob = hypertension_probability(features)
+        cvd_prob = cardiovascular_probability(features, ht_prob)
 
         data.append(
             EvaluationSample(
-                age=age,
-                bmi=bmi,
-                physical_activity=activity,
-                sleep_duration=sleep,
-                smoking_status=smoking,
-                family_history=family_history,
-                stress_level=stress,
-                blood_sugar_mg_dl=blood_sugar,
-                cholesterol_mg_dl=cholesterol,
-                blood_pressure=bp,
-                diabetes_label=float(dm_label),
-                hypertension_label=float(ht_label),
-                cardiovascular_label=float(cvd_label),
+                age=features.age,
+                bmi=features.bmi,
+                physical_activity=features.physical_activity,
+                sleep_duration=features.sleep_duration,
+                smoking_status=features.smoking_status,
+                family_history=features.family_history,
+                stress_level=features.stress_level,
+                blood_sugar_mg_dl=features.blood_sugar_mg_dl,
+                cholesterol_mg_dl=features.cholesterol_mg_dl,
+                blood_pressure=features.blood_pressure,
+                diabetes_label=float(1 if dm_prob >= ELEVATED_RISK_THRESHOLD else 0),
+                hypertension_label=float(1 if ht_prob >= ELEVATED_RISK_THRESHOLD else 0),
+                cardiovascular_label=float(1 if cvd_prob >= ELEVATED_RISK_THRESHOLD else 0),
             )
         )
 
@@ -355,11 +293,7 @@ def sample_to_profile(sample: EvaluationSample) -> Any:
     """Convert an EvaluationSample to a mock HealthProfile-like object for the risk engine."""
     from decimal import Decimal
 
-    class MockProfile:
-        def __init__(self, **kwargs: Any) -> None:
-            self.__dict__.update(kwargs)
-
-    return MockProfile(
+    return AttributeProfile(
         age=sample.age,
         gender="male",
         height_cm=Decimal("170.0"),

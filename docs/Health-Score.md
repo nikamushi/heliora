@@ -64,7 +64,7 @@ profil optimal + risiko semua 1.0                     -> Health Score = 65.0
 profil terburuk + risiko semua 1.0 + ada riwayat      -> Health Score = 11.5
 ```
 
-Implementasi: `apps/api/app/core/risk_engine.py` → `calculate_health_score(profile, risks)`.
+Implementasi: `apps/api/app/core/risk_engine/scoring.py` → `calculate_health_score(profile, risks)`.
 
 ---
 
@@ -164,5 +164,5 @@ Keputusan resmi (rework AI-004):
 - `docs/PRD.md` — §11.5.3, §10.5, §6.5, §3.10, §20.9, BR-SCORE-001/002/003/006, AC-SCORE-01.
 - `docs/Architecture.md` §9 (Health Score), §10 (Lifestyle Score).
 - `docs/Database.md` — `risk_results.health_score NUMERIC(5,2)`.
-- `apps/api/app/core/risk_engine.py` — `calculate_health_score(profile, risks)`.
+- `apps/api/app/core/risk_engine/scoring.py` — `calculate_health_score(profile, risks)`.
 - `apps/api/tests/test_health_score.py` — pengujian AC-SCORE-01 (11 passed).
