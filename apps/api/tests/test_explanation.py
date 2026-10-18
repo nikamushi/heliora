@@ -153,10 +153,10 @@ def test_user_message_renders_context_sections():
 
 # ── Config ───────────────────────────────────────────────────────────────
 def test_llm_config_defaults(monkeypatch):
-    # Hermetic: ambient env (e.g. a real GEMINI_API_KEY) must not leak in.
+    # Hermetic: ambient env and apps/api/.env (real key) must not leak in.
     for var in ("GEMINI_API_KEY", "GEMINI_MODEL", "LLM_TIMEOUT_SECONDS"):
         monkeypatch.delenv(var, raising=False)
-    settings = Settings()
+    settings = Settings(_env_file=None)
     assert settings.GEMINI_API_KEY is None
     assert settings.GEMINI_MODEL == "gemini-3.5-flash-lite"
     assert settings.LLM_TIMEOUT_SECONDS == 10
@@ -279,6 +279,26 @@ def test_malformed_output_rejected():
         '"rekomendasi": "y", "kutipan_evidence": []}',
         [],
     ) is None
+
+
+def test_fenced_json_with_trailing_disclaimer_accepted():
+    # Observed live: Gemini wraps the JSON in a code fence and appends the
+    # statutory disclaimer after it. The embedded JSON must still validate.
+    raw = "```json\n" + _VALID_LLM_JSON + "\n```\n\n" + ep.STATUTORY_DISCLAIMER
+    parsed = ep.validate_llm_output(raw, ["evi-03"])
+    assert parsed is not None
+    assert parsed.kutipan_evidence == ["evi-03"]
+
+
+def test_json_embedded_in_prose_accepted():
+    raw = "Berikut penjelasannya: " + _VALID_LLM_JSON + " Semoga membantu."
+    parsed = ep.validate_llm_output(raw, ["evi-03"])
+    assert parsed is not None
+    assert "sedang" in parsed.ringkasan
+
+
+def test_text_with_braces_but_invalid_json_rejected():
+    assert ep.validate_llm_output("hasil: {bukan json}", ["evi-03"]) is None
 
 
 async def test_guardrail_failure_falls_back(monkeypatch):
