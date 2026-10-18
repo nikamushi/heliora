@@ -1,11 +1,11 @@
 """Build harmonized per-year BRFSS CSVs (2021-2025) from the CDC LLCP XPT files.
 
-Input : <raw>/brfss/LLCP{year}XPT.zip   (raw = $ML_RAW_DIR or apps/ml/data/raw)
-Output: apps/ml/data/brfss_{year}.csv
+Input : <raw>/brfss/LLCP{year}XPT.zip   (raw = $ML_RAW_DIR or ai/datasets/raw)
+Output: ai/datasets/brfss_{year}.csv
 
 Column names follow the HELIORA health-profile API where an equivalent exists. A variable that a
 given year did not ask is written as an empty column, so the five files concatenate without surprises.
-Run:  uv run --no-project --with pandas --with numpy python apps/ml/data/scripts/build_brfss.py [year ...]
+Run:  uv run --no-project --with pandas --with numpy python ai/datasets/scripts/build_brfss.py [year ...]
 """
 import os
 import sys

@@ -1,74 +1,53 @@
-# %% [markdown]
-# AI-001 — Dataset Preprocessing (NHANES-2021-2023-v1)
-#
-# End-to-end preprocessing: NHANES 2021–2023 microdata → train/val/test
-# parquet + fitted preprocessor + manifest + evaluation report.
-#
-# Locked decisions (see TASK.md AI-001):
-# - Source: NHANES only (`apps/ml/data/nhanes_2021_2023.csv`). SKI is
-#   reference; no downloads; BRFSS excluded.
-# - Feature contract (9 measured fields): age, bmi,
-#   physical_activity_min_per_week, sleep_duration_hours, smoking_status,
-#   blood_sugar_mg_dl (from fasting_glucose_mg_dl), cholesterol_mg_dl
-#   (from total_cholesterol_mg_dl), systolic_bp_mean, diastolic_bp_mean.
-# - `family_history` / `stress_level` are NOT in NHANES/BRFSS → handled
-#   rule-based outside the model (documented limitation).
-# - Blood sugar: train-only median imputation + missing indicator.
-#   `hba1c_pct` is kept in the dataset but EXCLUDED from model features
-#   (avoids train/serve skew — HbA1c is not collected at serving time).
-# - `sex` excluded from the model matrix (serving-side FEATURE_NAMES in
-#   `apps/api/app/ai/shap_explainer.py` does not use it).
-# - Targets: diabetes, hypertension, cardiovascular.
-# - Split 70/15/15, stratified on the joint 3-target key, seed 42.
-# - Duplicate handling (.03): exact `seqn` duplicates dropped first;
-#   0 found in NHANES-2021-2023-v1.
-# - Outlier review (.04): systematic IQR + physiologic hard-bound review
-#   recorded in `dataset_report["outlier_review"]`; policy = keep
-#   (tree models are outlier-robust, flags are clinically plausible),
-#   only activity entries above the cap are clipped.
-# - Encoding (.05): `smoking_status` is an explicit NHANES ordinal
-#   (0=never, 1=former, 2=current), validated, never one-hot (tree
-#   models handle ordinals and the 9-field serving contract stays 1:1).
-# - Leakage guard: imputation statistics fit on TRAIN only; `seqn`
-#   disjoint across splits; label/medication columns never enter X.
-# - Train↔serve parity: ML feature names differ from serving names
-#   (e.g. `blood_sugar_mg_dl` vs `blood_sugar`); the exact mapping is
-#   recorded in `manifest["feature_contract"]` so AI-002 can bind them.
+"""Shared NHANES preprocessing and feature contract (AI-001).
 
-# %%
-"""AI-001 dataset preprocessing pipeline (importable + jupytext-paired).
+Train/serve-identical logic for the HELIORA risk model. This module is
+deliberately free of dataset paths and experiment orchestration: the
+datasets, notebooks and artifact persistence live in the ``ai`` workspace
+member (``heliora_ai``), which depends on ``ml_core`` — never the other
+way around (docs/Monorepo.md).
 
-The notebook `ai_001_dataset_preprocessing.ipynb` is generated from this
-file via ``jupytext --to ipynb`` and kept in sync with ``jupytext --sync``.
+Locked decisions (see docs/TASK.md AI-001):
+- Feature contract (9 measured fields): age, bmi,
+  physical_activity_min_per_week, sleep_duration_hours, smoking_status,
+  blood_sugar_mg_dl (from fasting_glucose_mg_dl), cholesterol_mg_dl
+  (from total_cholesterol_mg_dl), systolic_bp_mean, diastolic_bp_mean.
+- `family_history` / `stress_level` are NOT in NHANES/BRFSS → handled
+  rule-based outside the model (documented limitation).
+- Blood sugar: train-only median imputation + missing indicator.
+  `hba1c_pct` is kept in the dataset but EXCLUDED from model features
+  (avoids train/serve skew — HbA1c is not collected at serving time).
+- `sex` excluded from the model matrix (serving-side FEATURE_NAMES in
+  `apps/api/app/ai/shap_explainer.py` does not use it).
+- Targets: diabetes, hypertension, cardiovascular.
+- Split 70/15/15, stratified on the joint 3-target key, seed 42.
+- Duplicate handling (.03): exact `seqn` duplicates dropped first.
+- Outlier review (.04): systematic IQR + physiologic hard-bound review
+  recorded in `dataset_report["outlier_review"]`; policy = keep
+  (tree models are outlier-robust, flags are clinically plausible),
+  only activity entries above the cap are clipped.
+- Encoding (.05): `smoking_status` is an explicit NHANES ordinal
+  (0=never, 1=former, 2=current), validated, never one-hot (tree
+  models handle ordinals and the 9-field serving contract stays 1:1).
+- Leakage guard: imputation statistics fit on TRAIN only; `seqn`
+  disjoint across splits; label/medication columns never enter X.
+- Train↔serve parity: ML feature names differ from serving names
+  (e.g. `blood_sugar_mg_dl` vs `blood_sugar`); the exact mapping is
+  recorded in `SERVING_FEATURE_MAP` so AI-002 can bind them.
 """
 
 from __future__ import annotations
 
-import json
-import platform
 from pathlib import Path
 
-import joblib
 import pandas as pd
-import sklearn
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import train_test_split
 
-# %% [markdown]
-# ## 0. Configuration
-
-# %%
-VERSION = "NHANES-2021-2023-v1"
 SEED = 42
 TRAIN_RATIO = 0.70
 VAL_RATIO = 0.15
 TEST_RATIO = 0.15
-
-MODULE_DIR = Path(__file__).resolve().parent
-REPO_ROOT = MODULE_DIR.parent.parent
-RAW_CSV = MODULE_DIR.parent / "data" / "nhanes_2021_2023.csv"
-DEFAULT_OUT = MODULE_DIR.parent / "data" / "processed" / VERSION
 
 TARGETS = ["diabetes", "hypertension", "cardiovascular"]
 
@@ -189,11 +168,8 @@ OUTLIER_HARD_BOUNDS = {
     "physical_activity_min_per_week": (0.0, ACTIVITY_CAP),
 }
 
-# %% [markdown]
-# ## 1. Loader + missingness indicator (§11.11)
 
-# %%
-def load_nhanes(path: str | Path = RAW_CSV) -> pd.DataFrame:
+def load_nhanes(path: str | Path) -> pd.DataFrame:
     """Load raw NHANES CSV and attach the blood-sugar missing indicator.
 
     The indicator is derived from the raw fasting column BEFORE any
@@ -234,11 +210,7 @@ def evaluate_dataset(df: pd.DataFrame) -> dict:
         "out_of_range": out_of_range,
     }
 
-# %% [markdown]
-# ## 2. Cleaning (§11.10 + .03): dedup on `seqn`, drop label-missing
-# rows, cap activity artefacts, rename labs
 
-# %%
 def clean(df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     """Clean a copy of the raw frame; never mutates the input."""
     out = df.copy()
@@ -272,10 +244,7 @@ def clean(df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     }
     return out, info
 
-# %% [markdown]
-# ## 2b. Outlier review (.04) + explicit encoding (.05)
 
-# %%
 def encode_features(df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     """Validate and lock the smoking ordinal (.05).
 
@@ -362,10 +331,7 @@ def review_outliers(df: pd.DataFrame) -> dict:
         },
     }
 
-# %% [markdown]
-# ## 3. Stratified split (§11.30): joint target key, `seqn`-disjoint by construction
 
-# %%
 def _stratify_key(df: pd.DataFrame) -> pd.Series:
     return df[TARGETS].astype(int).astype(str).agg("-".join, axis=1)
 
@@ -408,10 +374,7 @@ def split_stratified(
         test.reset_index(drop=True),
     )
 
-# %% [markdown]
-# ## 4. Transform (§11.12): train-only imputation, no leakage
 
-# %%
 def build_preprocessor() -> ColumnTransformer:
     """Imputer fitted on TRAIN only: median for numerics, mode for smoking."""
     return ColumnTransformer(
@@ -444,162 +407,3 @@ def transform_split(
          df[TARGETS].reset_index(drop=True)],
         axis=1,
     )
-
-# %% [markdown]
-# ## 5. Persist + versioning (§11.29)
-
-# %%
-def _source_label(path: str | Path) -> str:
-    """Repo-relative source label when inside the repo, else absolute."""
-    resolved = Path(path).resolve()
-    try:
-        return resolved.relative_to(REPO_ROOT).as_posix()
-    except ValueError:
-        return resolved.as_posix()
-
-
-def _manifest(
-    n_raw: int,
-    n_clean: int,
-    sizes: dict[str, int],
-    cleaning_info: dict,
-    encoding_info: dict,
-    source: str,
-) -> dict:
-    return {
-        "version": VERSION,
-        "seed": SEED,
-        "split_ratios": {
-            "train": TRAIN_RATIO,
-            "val": VAL_RATIO,
-            "test": TEST_RATIO,
-        },
-        "stratify_key": "joint:diabetes-hypertension-cardiovascular",
-        "source_file": source,
-        "n_rows_raw": int(n_raw),
-        "n_rows_clean": int(n_clean),
-        "n_rows_split": {k: int(v) for k, v in sizes.items()},
-        "row_id": (
-            "seqn (NHANES respondent id, de-identified public data; "
-            "kept in splits for traceability, excluded from model input)"
-        ),
-        "feature_names": list(FEATURE_NAMES),
-        "target_names": list(TARGETS),
-        "excluded_columns": list(EXCLUDED_COLUMNS),
-        "feature_contract": {
-            "ml_to_serving": dict(SERVING_FEATURE_MAP),
-            "serving_only_rule_based": list(SERVING_ONLY_RULE_BASED),
-        },
-        "library_versions": {
-            "python": platform.python_version(),
-            "pandas": pd.__version__,
-            "scikit-learn": sklearn.__version__,
-        },
-        "cleaning": cleaning_info,
-        "encoding": encoding_info,
-        "decisions": {
-            "family_history_stress_level": "rule-based outside model",
-            "hba1c_pct": "excluded from features (train/serve skew)",
-            "sex": "excluded (not used by serving risk engine)",
-            "blood_sugar": "train-only median + missing indicator",
-            "duplicates": "drop exact seqn duplicates first (0 found)",
-            "outliers": (
-                "recorded IQR + hard-bound review; keep "
-                "(only activity capped)"
-            ),
-            "encoding": (
-                "smoking ordinal 0/1/2 validated, no one-hot "
-                "(tree models)"
-            ),
-        },
-    }
-
-
-def persist_artifacts(
-    train: pd.DataFrame,
-    val: pd.DataFrame,
-    test: pd.DataFrame,
-    preprocessor: ColumnTransformer,
-    manifest: dict,
-    report: dict,
-    out_dir: str | Path,
-) -> Path:
-    """Write parquet splits, joblib preprocessor, manifest and report."""
-    out = Path(out_dir)
-    out.mkdir(parents=True, exist_ok=True)
-    train.to_parquet(out / "train.parquet", index=False)
-    val.to_parquet(out / "val.parquet", index=False)
-    test.to_parquet(out / "test.parquet", index=False)
-    joblib.dump(preprocessor, out / "preprocessor.joblib")
-    (out / "manifest.json").write_text(
-        json.dumps(manifest, indent=2), encoding="utf-8"
-    )
-    (out / "dataset_report.json").write_text(
-        json.dumps(report, indent=2), encoding="utf-8"
-    )
-    return out
-
-
-def run_pipeline(
-    raw_csv: str | Path = RAW_CSV,
-    out_dir: str | Path = DEFAULT_OUT,
-) -> dict:
-    """Run load → evaluate → clean → split → transform → persist."""
-    raw = load_nhanes(raw_csv)
-    report = evaluate_dataset(raw)
-
-    df, cleaning_info = clean(raw)
-    report["n_rows_clean"] = cleaning_info["n_rows_clean"]
-    report["cleaning"] = cleaning_info
-
-    df, encoding_info = encode_features(df)
-    report["encoding"] = encoding_info
-    report["outlier_review"] = review_outliers(df)
-
-    train_raw, val_raw, test_raw = split_stratified(df)
-
-    preprocessor = build_preprocessor()
-    preprocessor.fit(train_raw[MODEL_INPUT_COLUMNS])
-
-    train = transform_split(preprocessor, train_raw)
-    val = transform_split(preprocessor, val_raw)
-    test = transform_split(preprocessor, test_raw)
-
-    splits = {"train": train, "val": val, "test": test}
-    report["split_prevalence"] = {
-        name: {t: float(s[t].mean()) for t in TARGETS}
-        for name, s in splits.items()
-    }
-
-    manifest = _manifest(
-        n_raw=len(raw),
-        n_clean=len(df),
-        sizes={k: len(v) for k, v in splits.items()},
-        cleaning_info=cleaning_info,
-        encoding_info=encoding_info,
-        source=_source_label(raw_csv),
-    )
-    out = persist_artifacts(
-        train, val, test, preprocessor, manifest, report, out_dir
-    )
-    return {
-        "train": train,
-        "val": val,
-        "test": test,
-        "preprocessor": preprocessor,
-        "manifest": manifest,
-        "report": report,
-        "out_dir": out,
-    }
-
-# %% [markdown]
-# ## 6. Main — executed only as a script / notebook run-all, never on import
-
-# %%
-if __name__ == "__main__":
-    result = run_pipeline()
-    print(f"version: {result['manifest']['version']}")
-    print(f"out_dir: {result['out_dir']}")
-    for name in ("train", "val", "test"):
-        split = result[name]
-        print(f"{name}: rows={len(split)} cols={len(split.columns)}")

@@ -5,7 +5,7 @@ raw/
 brfss_*.csv
 
 # AI-001 processed outputs (parquet splits + joblib preprocessor + reports).
-# Rebuild by running apps/ml/notebooks/ai_001_dataset_preprocessing.ipynb.
+# Rebuild by running ai/notebooks/ai_001_dataset_preprocessing.ipynb.
 processed/
 *.parquet
 *.joblib
