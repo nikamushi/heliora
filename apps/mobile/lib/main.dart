@@ -88,6 +88,7 @@ class _HelioraAppState extends ConsumerState<HelioraApp> {
       scrollBehavior: const HelioraScrollBehavior(),
       theme: HelioraTheme.lightTheme,
       darkTheme: HelioraTheme.darkTheme,
+      themeMode: ThemeMode.light,
       home: Builder(
         builder: (context) {
           final reduceMotion = MediaQuery.maybeOf(context)?.disableAnimations ?? false;

@@ -574,33 +574,26 @@ class _AssessmentFlowScreenState extends ConsumerState<AssessmentFlowScreen> {
           ),
         ),
         const SizedBox(height: 8),
-        Container(
-          height: 96,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: const Color(0xFFDEE5E1), width: 1.0),
-            borderRadius: BorderRadius.circular(12.0),
+        TextFormField(
+          controller: _notesController,
+          maxLines: 3,
+          minLines: 3,
+          style: const TextStyle(
+            fontFamily: 'Plus Jakarta Sans',
+            fontSize: 14.0,
+            color: Color(0xFF14201A),
           ),
-          child: TextFormField(
-            controller: _notesController,
-            maxLines: 3,
-            style: const TextStyle(
+          decoration: _inputDecoration(
+            hintText: 'Contoh: ayah terdiagnosis diabetes tipe 2 pada usia 50 tahun.',
+          ).copyWith(
+            hintStyle: const TextStyle(
               fontFamily: 'Plus Jakarta Sans',
               fontSize: 14.0,
-              color: Color(0xFF14201A),
+              color: Color(0xFF94A3B8),
             ),
-            decoration: const InputDecoration(
-              hintText: 'Contoh: ayah terdiagnosis diabetes tipe 2 pada usia 50 tahun.',
-              hintStyle: TextStyle(
-                fontFamily: 'Plus Jakarta Sans',
-                fontSize: 14.0,
-                color: Color(0xFF3A423D),
-              ),
-              border: InputBorder.none,
-              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            ),
-            onChanged: (val) => controller.setFamilyNotes(val),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
+          onChanged: (val) => controller.setFamilyNotes(val),
         ),
         const SizedBox(height: 16),
 
