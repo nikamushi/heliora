@@ -40,7 +40,7 @@ dan **bukan** keluaran model ML.
 - Hasil selalu diberi label sebagai estimasi model
   (`is_model_estimated: true` + disclaimer), tidak pernah sebagai kepastian.
 
-Implementasi: `apps/api/app/core/risk_engine.py`
+Implementasi: `apps/api/app/core/risk_engine/simulation.py`
 `PreventiveLifestyleRiskEngine.simulate_what_if`.
 
 ---
@@ -312,7 +312,7 @@ assert `< 1.0s`) — margin ±100× dari target.
   §18 (What-if Data Flow), §12.4/§14 (safety), §23 (validasi),
   §24 (error handling), §25/§25.1 (performa).
 - `docs/Simulation.md` (future engine SIM-001, kontrak SIM-002).
-- `apps/api/app/core/risk_engine.py` `simulate_what_if`.
+- `apps/api/app/core/risk_engine/simulation.py` `simulate_what_if`.
 - `apps/api/app/services/simulation_service.py`,
   `apps/api/app/api/routes/simulation.py`,
   `apps/api/app/schemas/simulation.py`.

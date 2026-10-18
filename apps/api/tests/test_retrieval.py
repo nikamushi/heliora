@@ -22,10 +22,7 @@ from app.services.evidence_service import CLINICAL_EVIDENCE_REGISTRY
 class _FakeModel:
     """Deterministic stub for SentenceTransformer."""
 
-    instances = 0
-
     def __init__(self, *args, **kwargs):
-        type(self).instances += 1
         self.encode_calls: list[dict] = []
 
     def encode(self, texts, convert_to_numpy=False, normalize_embeddings=False, **kwargs):
@@ -95,23 +92,17 @@ def wired(monkeypatch):
     """Patch retrieval module globals with fakes; returns (model, collection)."""
     model = _FakeModel()
     collection = _FakeCollection()
-    monkeypatch.setattr(retrieval, "_query_model", model)
+    monkeypatch.setattr(retrieval, "_get_embedding_model", lambda: model)
     monkeypatch.setattr(retrieval, "_get_collection", lambda: collection)
     return model, collection
 
 
 # ── Query construction ─────────────────────────────────────────────────────
-def test_query_model_lazy_singleton(monkeypatch):
-    """_get_query_model loads all-MiniLM-L6-v2 once and caches it."""
-    _FakeModel.instances = 0
-    monkeypatch.setattr(retrieval, "_query_model", None)
-    monkeypatch.setattr(retrieval, "SentenceTransformer", _FakeModel)
+def test_query_embeddings_share_pipeline_model_loader():
+    """Retrieval embeds queries via rag_pipeline's shared model singleton."""
+    from app.ai import rag_pipeline
 
-    first = retrieval._get_query_model()
-    second = retrieval._get_query_model()
-
-    assert first is second
-    assert _FakeModel.instances == 1
+    assert retrieval._get_embedding_model is rag_pipeline._get_embedding_model
 
 
 def test_search_embeds_query_with_normalized_embeddings(wired):
