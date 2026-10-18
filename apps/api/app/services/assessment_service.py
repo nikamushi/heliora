@@ -13,6 +13,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.risk_engine import risk_engine
+from app.core.risk_levels import RISK_LABELS, to_risk_level
 from app.db.models.assessment import Assessment
 from app.repositories.assessment_repo import assessment_repo
 from app.repositories.health_profile_repo import health_profile_repo
@@ -34,15 +35,6 @@ except ImportError:
 class AssessmentService:
     """Service executing health assessment workflows and outcome formatting."""
 
-    @staticmethod
-    def _to_risk_level(prob: float) -> Literal["low", "moderate", "high"]:
-        """Map risk probability to categorical clinical level."""
-        if prob >= 0.50:
-            return "high"
-        if prob >= 0.25:
-            return "moderate"
-        return "low"
-
     @classmethod
     def _format_assessment_response(
         cls, assessment: Assessment, top_factors: list[ContributingFactor] | None = None
@@ -61,19 +53,14 @@ class AssessmentService:
             prob: float,
             description: str,
         ) -> RiskAssessmentItem:
-            level = cls._to_risk_level(prob)
-            label_map: dict[str, Literal["Lower", "Moderate", "Higher"]] = {
-                "low": "Lower",
-                "moderate": "Moderate",
-                "high": "Higher",
-            }
+            level = to_risk_level(prob)
             return RiskAssessmentItem(
                 condition=condition,
                 label=label,
                 probability=prob,
                 estimated_risk_score=round(prob * 100.0, 1),
                 risk_level=level,
-                risk_label=label_map[level],
+                risk_label=RISK_LABELS[level],
                 trend="stable",
                 description=description,
             )

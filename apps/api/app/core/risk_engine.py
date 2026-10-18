@@ -8,6 +8,7 @@ deterministic guideline-backed recommendations (Architecture §8, §9, §10, §1
 import math
 from typing import Any
 
+from app.core.risk_levels import to_risk_label, to_risk_level
 from app.schemas.assessment import (
     ContributingFactor,
 )
@@ -639,18 +640,6 @@ class PreventiveLifestyleRiskEngine:
             "Proyeksi berbasis simulasi tren model kardiometabolik, bukan hasil diagnosis klinis mutlak.",
         ]
 
-        def to_level(p: float) -> str:
-            if p >= 0.50:
-                return "high"
-            if p >= 0.25:
-                return "moderate"
-            return "low"
-
-        def to_label(lvl: str) -> str:
-            return {"low": "Lower", "moderate": "Moderate", "high": "Higher"}.get(
-                lvl, "Lower"
-            )
-
         def to_trend(base_p: float, proj_p: float) -> str:
             diff = proj_p - base_p
             if diff < -0.005:
@@ -680,8 +669,8 @@ class PreventiveLifestyleRiskEngine:
 
         trajectories = []
         for cond, label, bp, pp in conditions_meta:
-            lvl = to_level(pp)
-            lbl = to_label(lvl)
+            lvl = to_risk_level(pp)
+            lbl = to_risk_label(lvl)
             tr = to_trend(bp, pp)
             b_score = round(bp * 100.0, 1)
             p_score = round(pp * 100.0, 1)
@@ -781,18 +770,6 @@ class PreventiveLifestyleRiskEngine:
         sim_health = self.calculate_health_score(sim_profile, sim_risks)
         sim_lifestyle = self.calculate_lifestyle_score(sim_profile)
 
-        def to_level(p: float) -> str:
-            if p >= 0.50:
-                return "high"
-            if p >= 0.25:
-                return "moderate"
-            return "low"
-
-        def to_label(lvl: str) -> str:
-            return {"low": "Lower", "moderate": "Moderate", "high": "Higher"}.get(
-                lvl, "Lower"
-            )
-
         def make_impact_summary(cond: str, delta: float) -> str:
             if delta < -0.5:
                 return f"Penyesuaian gaya hidup mereduksi estimasi risiko {cond} sebesar {abs(delta):.1f}%."
@@ -813,8 +790,8 @@ class PreventiveLifestyleRiskEngine:
             b_score = round(bp * 100.0, 1)
             s_score = round(sp * 100.0, 1)
             delta = round(s_score - b_score, 1)
-            lvl = to_level(sp)
-            lbl = to_label(lvl)
+            lvl = to_risk_level(sp)
+            lbl = to_risk_label(lvl)
             tr = (
                 "decreasing"
                 if delta < -0.3
