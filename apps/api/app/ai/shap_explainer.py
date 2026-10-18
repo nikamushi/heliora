@@ -17,6 +17,7 @@ import shap
 
 from app.core.attribute_profile import AttributeProfile
 from app.core.risk_engine import risk_engine
+from app.core.vitals import normalize_smoking_status, parse_blood_pressure
 
 logger = logging.getLogger(__name__)
 
@@ -86,11 +87,7 @@ class RiskModelWrapper:
         bmi = float(profile.bmi) if profile.bmi else 22.0
         activity = float(profile.physical_activity_min_per_week)
         sleep = float(profile.sleep_duration_hours)
-        smoking = str(
-            profile.smoking_status.value
-            if hasattr(profile.smoking_status, "value")
-            else profile.smoking_status
-        ).lower()
+        smoking = normalize_smoking_status(profile.smoking_status)
         family_history = bool(profile.family_history)
         stress = float(profile.stress_level) if profile.stress_level else 5.0
         blood_sugar = (
@@ -99,7 +96,7 @@ class RiskModelWrapper:
         cholesterol = (
             float(profile.cholesterol_mg_dl) if profile.cholesterol_mg_dl else 180.0
         )
-        systolic, diastolic = risk_engine._parse_bp(profile.blood_pressure)
+        systolic, diastolic = parse_blood_pressure(profile.blood_pressure)
         systolic = systolic if systolic is not None else 120.0
         diastolic = diastolic if diastolic is not None else 80.0
 

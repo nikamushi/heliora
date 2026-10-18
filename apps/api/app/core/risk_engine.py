@@ -10,6 +10,7 @@ from typing import Any
 
 from app.core.attribute_profile import AttributeProfile
 from app.core.risk_levels import to_risk_label, to_risk_level
+from app.core.vitals import normalize_smoking_status, parse_blood_pressure
 from app.schemas.assessment import (
     ContributingFactor,
 )
@@ -52,17 +53,6 @@ HEALTH_IMPROVEMENT_WITH_HISTORY = 40.0
 class PreventiveLifestyleRiskEngine:
     """Core deterministic risk estimation and scoring engine for HELIORA."""
 
-    @staticmethod
-    def _parse_bp(bp_str: str | None) -> tuple[float | None, float | None]:
-        """Parse blood pressure string like '120/80' into (systolic, diastolic)."""
-        if not bp_str or "/" not in bp_str:
-            return None, None
-        try:
-            parts = bp_str.split("/")
-            return float(parts[0].strip()), float(parts[1].strip())
-        except (ValueError, IndexError):
-            return None, None
-
     def estimate_risks(self, profile: Any) -> dict[str, float]:
         """Estimate 3 chronic disease probabilities based on biometric and lifestyle factors.
 
@@ -74,11 +64,7 @@ class PreventiveLifestyleRiskEngine:
         bmi = float(profile.bmi) if profile.bmi else 22.0
         activity = float(profile.physical_activity_min_per_week)
         sleep = float(profile.sleep_duration_hours)
-        smoking = str(
-            profile.smoking_status.value
-            if hasattr(profile.smoking_status, "value")
-            else profile.smoking_status
-        ).lower()
+        smoking = normalize_smoking_status(profile.smoking_status)
         family_history = bool(profile.family_history)
         stress = float(profile.stress_level) if profile.stress_level else None
         blood_sugar = (
@@ -87,7 +73,7 @@ class PreventiveLifestyleRiskEngine:
         cholesterol = (
             float(profile.cholesterol_mg_dl) if profile.cholesterol_mg_dl else None
         )
-        systolic, diastolic = self._parse_bp(profile.blood_pressure)
+        systolic, diastolic = parse_blood_pressure(profile.blood_pressure)
 
         # ── 1. Diabetes Melitus Risk Log-Odds ─────────────────────────
         dm_log_odds = -3.2 + 0.028 * max(0.0, age - 20.0)
@@ -233,11 +219,7 @@ class PreventiveLifestyleRiskEngine:
         bmi_raw = float(profile.bmi) if profile.bmi else 22.0
         activity = float(profile.physical_activity_min_per_week)
         sleep = float(profile.sleep_duration_hours)
-        smoking = str(
-            profile.smoking_status.value
-            if hasattr(profile.smoking_status, "value")
-            else profile.smoking_status
-        ).lower()
+        smoking = normalize_smoking_status(profile.smoking_status)
         stress = float(profile.stress_level) if profile.stress_level else None
 
         # 1. BMI category sub-score (0 - 100)
@@ -305,11 +287,7 @@ class PreventiveLifestyleRiskEngine:
         bmi = float(profile.bmi) if profile.bmi else 22.0
         activity = float(profile.physical_activity_min_per_week)
         sleep = float(profile.sleep_duration_hours)
-        smoking = str(
-            profile.smoking_status.value
-            if hasattr(profile.smoking_status, "value")
-            else profile.smoking_status
-        ).lower()
+        smoking = normalize_smoking_status(profile.smoking_status)
         family_history = bool(profile.family_history)
 
         if bmi >= 25.0:
@@ -469,11 +447,7 @@ class PreventiveLifestyleRiskEngine:
         bmi = float(profile.bmi) if profile.bmi else 22.0
         activity = float(profile.physical_activity_min_per_week)
         sleep = float(profile.sleep_duration_hours)
-        smoking = str(
-            profile.smoking_status.value
-            if hasattr(profile.smoking_status, "value")
-            else profile.smoking_status
-        ).lower()
+        smoking = normalize_smoking_status(profile.smoking_status)
         stress = float(profile.stress_level) if profile.stress_level else None
 
         if activity < 150.0:
@@ -576,11 +550,7 @@ class PreventiveLifestyleRiskEngine:
         # Extract modifiable parameters
         activity = float(profile.physical_activity_min_per_week)
         sleep = float(profile.sleep_duration_hours)
-        smoking = str(
-            profile.smoking_status.value
-            if hasattr(profile.smoking_status, "value")
-            else profile.smoking_status
-        ).lower()
+        smoking = normalize_smoking_status(profile.smoking_status)
         bmi = float(profile.bmi) if profile.bmi else 22.0
         stress = float(profile.stress_level) if profile.stress_level else 5.0
 
@@ -738,13 +708,9 @@ class PreventiveLifestyleRiskEngine:
             else float(profile.sleep_duration_hours)
         )
         smoking = (
-            str(overrides["smoking_status"]).lower()
+            normalize_smoking_status(overrides["smoking_status"])
             if overrides.get("smoking_status") is not None
-            else str(
-                profile.smoking_status.value
-                if hasattr(profile.smoking_status, "value")
-                else profile.smoking_status
-            ).lower()
+            else normalize_smoking_status(profile.smoking_status)
         )
 
         sim_profile = AttributeProfile(
