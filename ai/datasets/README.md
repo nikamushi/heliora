@@ -14,7 +14,7 @@ Berkas di sini adalah data publik dari CDC dan Kemenkes yang diunduh langsung da
 
 ## Membuat ulang
 
-Unduh ke `apps/ml/data/raw/` (sudah di-gitignore) atau ke folder lain lewat `ML_RAW_DIR`:
+Unduh ke `ai/datasets/raw/` (sudah di-gitignore) atau ke folder lain lewat `ML_RAW_DIR`:
 
 ```text
 raw/brfss/LLCP{tahun}XPT.zip   https://www.cdc.gov/brfss/annual_data/{tahun}/files/LLCP{tahun}XPT.zip   (2021 sampai 2025, total sekitar 407 MB)
@@ -26,9 +26,9 @@ raw/ski/ski_2023_dalam_angka_id.pdf   tautan "Indonesian version" di https://www
 Jalankan dari root repo. `--no-project` mencegah uv mengubah `uv.lock`.
 
 ```bash
-uv run --no-project --with pandas --with numpy python apps/ml/data/scripts/build_brfss.py [tahun ...]
-uv run --no-project --with pandas --with numpy python apps/ml/data/scripts/build_nhanes.py
-uv run --no-project --with pypdf python apps/ml/data/scripts/extract_ski.py
+uv run --no-project --with pandas --with numpy python ai/datasets/scripts/build_brfss.py [tahun ...]
+uv run --no-project --with pandas --with numpy python ai/datasets/scripts/build_nhanes.py
+uv run --no-project --with pypdf python ai/datasets/scripts/extract_ski.py
 ```
 
 Uji ulang pada 5 Okt 2026: `brfss_2025.csv` dan `ski_2023_indicators.csv` identik byte demi byte dengan hasil sebelumnya.
@@ -101,7 +101,7 @@ Sel kosong berarti tidak ditanyakan, tidak tahu, atau menolak menjawab.
 - Jumlah baris BRFSS sama dengan jumlah responden di codebook CDC tiap tahun.
 - 18 persentase berbobot (tidak pernah merokok, olahraga ya, serangan jantung, hipertensi) dihitung ulang dari file mentah dan cocok dengan codebook resmi CDC untuk tiap tahun 2021 sampai 2025, sampai 2 desimal, tanpa selisih. Contoh 2025: 60,27 / 77,29 / 4,27 / 34,99.
 - Lima zip BRFSS lolos uji CRC. Unduh ulang dari cdc.gov pada 5 Okt 2026 (BRFSS 2025, NHANES `DEMO_L` dan `BMX_L`) menghasilkan SHA-256 yang identik.
-- Prevalensi angina/PJK BRFSS 2024 per negara bagian dibandingkan dengan `apps/ml/kardiovaskular2.csv`: 52 negara bagian, selisih maksimum 0,1 poin persentase (pembulatan).
+- Prevalensi angina/PJK BRFSS 2024 per negara bagian dibandingkan dengan `ai/datasets/dump/kardiovaskular2.csv`: 52 negara bagian, selisih maksimum 0,1 poin persentase (pembulatan).
 - Menit aktivitas BRFSS 2023 konsisten dengan `pa150_category`: kategori 3 selalu 0 menit, kategori 2 antara 2 dan 149, kategori 1 minimal 150.
 - NHANES: `DEMO_L` berisi 11.933 responden, sama dengan dokumentasi CDC. Jumlah dewasa (8.153) dan jumlah data per variabel sama dengan file sumber.
 - SKI: 13 nilai diperiksa manual terhadap teks laporan tanpa selisih. Angka nasional hipertensi terukur 29,2% (≥15) dan 30,8% (≥18), diabetes menurut gula darah 11,7%, semuanya sama dengan halaman resmi "Hasil Utama SKI 2023".

@@ -1,13 +1,13 @@
 """Extract national / age-group / sex rows of key indicators from the SKI 2023 'Dalam Angka' PDF.
 
-Input : <raw>/ski/ski_2023_dalam_angka_id.pdf   (raw = $ML_RAW_DIR or apps/ml/data/raw)
-Output: apps/ml/data/ski_2023_indicators.csv     (tidy: one row per indicator x group)
+Input : <raw>/ski/ski_2023_dalam_angka_id.pdf   (raw = $ML_RAW_DIR or ai/datasets/raw)
+Output: ai/datasets/ski_2023_indicators.csv     (tidy: one row per indicator x group)
 
 Group rows (age, sex) come from the "menurut Karakteristik" table. The national total comes from the
 same table when it has an INDONESIA row, otherwise from the paired "menurut Provinsi" table, which
 always ends with the national row for the same population.
 Weighted N is deliberately not extracted: its thousand separators are inconsistent in the PDF text.
-Run:  uv run --no-project --with pypdf python apps/ml/data/scripts/extract_ski.py
+Run:  uv run --no-project --with pypdf python ai/datasets/scripts/extract_ski.py
 """
 import csv
 import json

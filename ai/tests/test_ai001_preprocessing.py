@@ -5,8 +5,9 @@ and the locked AI-001 decisions (NHANES-only, 9-feature contract,
 blood-sugar train-only median + missing indicator, hba1c excluded,
 70/15/15 split stratified on the joint target key).
 
-TDD: RED = module ``ai_001_dataset_preprocessing`` belum ada
-(ModuleNotFoundError = missing implementation, bukan setup rusak).
+Runs the real workflow (``heliora_ai.workflows``) end-to-end on the
+dataset under ``ai/datasets/``; unit-level train/serve logic is covered
+by ``packages/ml-core/tests``.
 """
 
 from __future__ import annotations
@@ -14,21 +15,22 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-import ai_001_dataset_preprocessing as m
+import ml_core.preprocessing as m
 import numpy as np
 import pandas as pd
 import pytest
+
+from heliora_ai.workflows import ai_001_dataset_preprocessing as w
 
 
 @pytest.fixture(scope="session")
 def pipeline(tmp_path_factory: pytest.TempPathFactory) -> dict:
     """Run the full pipeline once per session into a temp dir.
 
-    Uses a temp OUT_DIR so tests never depend on committed artifacts,
-    then asserts the real notebook run reproduces the same manifest.
+    Uses a temp OUT_DIR so tests never depend on committed artifacts.
     """
     out = tmp_path_factory.mktemp("ai001")
-    return m.run_pipeline(raw_csv=m.RAW_CSV, out_dir=out)
+    return w.run_pipeline(raw_csv=w.RAW_CSV, out_dir=out)
 
 
 def _splits(pipeline: dict) -> dict[str, pd.DataFrame]:
@@ -36,7 +38,7 @@ def _splits(pipeline: dict) -> dict[str, pd.DataFrame]:
 
 
 def test_raw_load_shape_and_columns() -> None:
-    df = m.load_nhanes(m.RAW_CSV)
+    df = m.load_nhanes(w.RAW_CSV)
     assert len(df) > 8000
     assert set(m.RAW_REQUIRED_COLUMNS) <= set(df.columns)
 
@@ -96,7 +98,7 @@ def test_stratification_preserved(pipeline: dict) -> None:
 def test_blood_sugar_indicator_and_no_hba1c(pipeline: dict) -> None:
     assert "blood_sugar_missing" in m.FEATURE_NAMES
     assert "hba1c_pct" not in m.FEATURE_NAMES
-    raw = m.load_nhanes(m.RAW_CSV)
+    raw = m.load_nhanes(w.RAW_CSV)
     assert set(raw["blood_sugar_missing"].unique().tolist()) <= {0, 1}
     assert int(raw["blood_sugar_missing"].sum()) > 0
 
@@ -132,7 +134,7 @@ def test_preprocessor_transforms_sample(pipeline: dict) -> None:
 
 
 def _train_raw() -> pd.DataFrame:
-    raw = m.load_nhanes(m.RAW_CSV)
+    raw = m.load_nhanes(w.RAW_CSV)
     df, _ = m.clean(raw)
     train_raw, _, _ = m.split_stratified(df)
     return train_raw
@@ -159,7 +161,7 @@ def test_transform_fills_real_missing_values() -> None:
     pre = m.build_preprocessor()
     pre.fit(train_raw[m.MODEL_INPUT_COLUMNS])
 
-    raw = m.load_nhanes(m.RAW_CSV)
+    raw = m.load_nhanes(w.RAW_CSV)
     df, _ = m.clean(raw)
     missing_row = df[df["blood_sugar_mg_dl"].isna()].head(1)
     assert len(missing_row) == 1
@@ -172,7 +174,7 @@ def test_transform_fills_real_missing_values() -> None:
 
 def test_clean_rules_on_synthetic_frame() -> None:
     """Clipping + label-missing drop, and input must not be mutated."""
-    base = m.load_nhanes(m.RAW_CSV).head(3).copy()
+    base = m.load_nhanes(w.RAW_CSV).head(3).copy()
     for target in m.TARGETS:
         base[target] = 0
     base.loc[base.index[0], "physical_activity_min_per_week"] = 99999.0
@@ -208,7 +210,7 @@ def test_manifest_feature_contract(pipeline: dict) -> None:
 
 def test_clean_drops_duplicate_seqn() -> None:
     """.03: exact seqn duplicates are dropped first and counted."""
-    base = m.load_nhanes(m.RAW_CSV).head(5).copy()
+    base = m.load_nhanes(w.RAW_CSV).head(5).copy()
     for target in m.TARGETS:
         base[target] = 0
     dup = pd.concat([base, base.iloc[[0]]], ignore_index=True)
@@ -224,7 +226,7 @@ def test_clean_drops_duplicate_seqn() -> None:
 
 def test_encode_features_validates_smoking_domain() -> None:
     """.05: smoking ordinal mapping locked; same rows in and out."""
-    raw = m.load_nhanes(m.RAW_CSV)
+    raw = m.load_nhanes(w.RAW_CSV)
     df, _ = m.clean(raw)
 
     out, info = m.encode_features(df)
@@ -239,7 +241,7 @@ def test_encode_features_validates_smoking_domain() -> None:
 
 def test_encode_features_rejects_unknown_smoking() -> None:
     """.05: smoking values outside {0,1,2} must fail loudly."""
-    raw = m.load_nhanes(m.RAW_CSV)
+    raw = m.load_nhanes(w.RAW_CSV)
     df, _ = m.clean(raw)
     bad = df.head(3).copy()
     bad.loc[bad.index[0], "smoking_status"] = 9
