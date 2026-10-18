@@ -1962,6 +1962,29 @@ Acceptance Criteria:
 
 
 
+## MOB-009 — Mobile and Backend Development Runner
+
+**Owner:** Pino & Tumir  
+**Priority:** P1  
+**Sprint:** S9-S10  
+**Status:** DONE
+
+Tasks:
+
+- [x] Define mobile and backend development runner contract.
+- [x] Implement health-gated backend spawner and process tree teardown.
+- [x] Implement interactive flutter runner and root package script.
+
+Acceptance Criteria:
+
+- Menjalankan `pnpm dev:mobile` menyalakan backend FastAPI dan menunggu hingga `/api/v1/health` siap.
+- Flutter mobile berjalan dengan terminal interaktif penuh (hot reload `r` dan `R` berfungsi).
+- Menutup Flutter (`q` atau Ctrl+C) mematikan proses backend secara bersih dan membebaskan port 8000.
+
+---
+
+
+
 # 19. Integration Tasks
 
 

@@ -126,6 +126,16 @@ pnpm dev
 
 ---
 
+### 5. Menjalankan Mobile & Backend Sekaligus (One-Click Dev Runner)
+
+Dari root direktori repositori:
+```bash
+pnpm dev:mobile
+```
+*(Menjalankan FastAPI backend secara otomatis, menunggu hingga endpoint `/api/v1/health` siap (HTTP 200), kemudian membuka Flutter mobile dengan TTY interaktif penuh untuk hot reload `r` dan `R`. Saat keluar dengan `q` atau Ctrl+C, proses backend dibersihkan secara otomatis tanpa meninggalkan zombie process).*
+
+---
+
 ## Menjalankan Linting & Pengujian
 
 ### Backend

@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "turbo run dev --filter=!mobile",
+    "dev:mobile": "node ./scripts/dev-mobile.mjs",
     "build": "turbo run build",
     "lint": "turbo run lint",
     "test": "turbo run test"
