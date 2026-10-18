@@ -12,6 +12,7 @@ from app.schemas.assessment import (
     ContributingFactor,
 )
 from app.schemas.health_profile import get_bmi_category
+from app.schemas.simulation import MANDATORY_MEDICAL_DISCLAIMER
 
 
 def _sigmoid(x: float) -> float:
@@ -710,10 +711,7 @@ class PreventiveLifestyleRiskEngine:
             "projected_lifestyle_score": proj_lifestyle,
             "risk_trajectories": trajectories,
             "is_model_estimated": True,
-            "disclaimer": (
-                "Simulasi merupakan proyeksi skenario model gaya hidup terarah, "
-                "bukan prognosis medis atau jaminan luaran klinis."
-            ),
+            "disclaimer": MANDATORY_MEDICAL_DISCLAIMER,
         }
 
     def simulate_what_if(
@@ -857,11 +855,7 @@ class PreventiveLifestyleRiskEngine:
             "lifestyle_score_delta": round(sim_lifestyle - base_lifestyle, 1),
             "condition_comparisons": comparisons,
             "is_model_estimated": True,
-            "disclaimer": (
-                "HELIORA adalah alat bantu preventive health berbasis lifestyle dan AI. "
-                "Hasil yang diberikan merupakan estimasi dan simulasi berdasarkan data dan model "
-                "yang digunakan, bukan diagnosis medis dan bukan pengganti konsultasi tenaga kesehatan."
-            ),
+            "disclaimer": MANDATORY_MEDICAL_DISCLAIMER,
         }
 
 

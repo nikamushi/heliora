@@ -59,7 +59,7 @@ def test_simulation_engine_30_90_180_days():
         assert 0.0 <= result["baseline_lifestyle_score"] <= 100.0
         assert 0.0 <= result["projected_lifestyle_score"] <= 100.0
         assert result["is_model_estimated"] is True
-        assert "Simulasi" in result["disclaimer"]
+        assert result["disclaimer"] == MANDATORY_MEDICAL_DISCLAIMER
 
         trajectories = result["risk_trajectories"]
         assert len(trajectories) == 3
@@ -436,7 +436,7 @@ async def test_route_future_response_contract_consistent():
                 assert data["horizon_days"] == 30
                 assert data["is_model_estimated"] is True
                 assert len(data["assumptions"]) >= 3
-                assert "Simulasi" in data["disclaimer"]
+                assert data["disclaimer"] == MANDATORY_MEDICAL_DISCLAIMER
 
                 # Per-condition contract mirrors the FutureSimulationResponse schema.
                 assert len(data["risk_trajectories"]) == 3
@@ -485,7 +485,7 @@ def test_what_if_simulation_lifestyle_improvement():
     assert result["simulated_lifestyle_score"] > result["baseline_lifestyle_score"]
     assert result["health_score_delta"] > 0
     assert result["is_model_estimated"] is True
-    assert "bukan diagnosis medis" in result["disclaimer"]
+    assert result["disclaimer"] == MANDATORY_MEDICAL_DISCLAIMER
 
     # All condition risks should decrease
     for comp in result["condition_comparisons"]:
