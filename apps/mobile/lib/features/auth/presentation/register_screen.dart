@@ -513,7 +513,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               color: isActive
                                   ? _strengthBarActiveColor
                                   : HelioraTokens.border,
-                              borderRadius: BorderRadius.circular(HelioraTokens.radiusFull),
+                              borderRadius: BorderRadius.circular(2.0),
                             ),
                           ),
                         );

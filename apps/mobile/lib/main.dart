@@ -12,6 +12,7 @@ import 'features/auth/presentation/register_screen.dart';
 import 'features/consent/presentation/consent_controller.dart';
 import 'features/consent/presentation/consent_screen.dart';
 import 'features/assessment/data/assessment_repository.dart';
+import 'features/assessment/data/health_profile_repository.dart';
 import 'features/assessment/presentation/assessment_flow_screen.dart';
 import 'features/home/presentation/home_screen.dart';
 import 'features/profile/presentation/profile_screen.dart';
@@ -212,14 +213,17 @@ class _AuthenticatedFlowRouterState
     }
 
     final consentStatusAsync = ref.watch(consentStatusProvider);
+    final healthProfileAsync = ref.watch(healthProfileProvider);
 
     return consentStatusAsync.when(
       data: (status) {
-        // If user never had any consent recorded at all (brand new user onboarding)
-        if (!status.hasActiveConsent && status.activeConsent == null) {
+        // If user never had any consent recorded AND has no health profile yet (brand new onboarding)
+        final hasProfile = healthProfileAsync.asData?.value != null;
+        if (!status.hasActiveConsent && !hasProfile && status.activeConsent == null) {
           return ConsentScreen(
             onConsentGranted: () {
               ref.invalidate(consentStatusProvider);
+              ref.invalidate(healthProfileProvider);
             },
           );
         }

@@ -282,5 +282,71 @@ void main() {
       await tester.pumpAndSettle();
       expect(reconsentTapped, isTrue);
     });
+
+    testWidgets('renders honest empty container when assessment risks list is empty without fake scores',
+        (tester) async {
+      const emptyRisksAssessment = AssessmentSummaryResponse(
+        id: 'test-assessment-empty-risks',
+        healthScore: 82,
+        lifestyleScore: 79,
+        risks: [],
+        topFactors: [],
+        recommendations: [],
+        assessedAt: '2026-10-14T00:00:00Z',
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            consentStatusProvider.overrideWith(
+              (ref) => Future.value(const ConsentStatusResponse(hasActiveConsent: true)),
+            ),
+            latestAssessmentProvider.overrideWith(
+              (ref) => Future.value(emptyRisksAssessment),
+            ),
+          ],
+          child: const MaterialApp(
+            home: HomeScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Belum ada rincian kondisi risiko yang tercatat pada asesmen ini.'), findsOneWidget);
+      // Strictly verify no fake risk percentages appear
+      expect(find.text('12%'), findsNothing);
+      expect(find.text('24%'), findsNothing);
+      expect(find.text('8%'), findsNothing);
+    });
+
+    testWidgets('renders official error state with reload action when assessment API fails',
+        (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            consentStatusProvider.overrideWith(
+              (ref) => Future.value(const ConsentStatusResponse(hasActiveConsent: true)),
+            ),
+            latestAssessmentProvider.overrideWith(
+              (ref) => Future.error(Exception('500 Server Error')),
+            ),
+          ],
+          child: const MaterialApp(
+            home: HomeScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Analisis Sedang Tidak Tersedia'), findsOneWidget);
+      expect(
+        find.text(
+          'Analisis sedang tidak tersedia, coba lagi. Heliora tidak pernah menampilkan estimasi atau skor rekaan saat sistem sedang mengalami kendala.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Muat Ulang'), findsOneWidget);
+      expect(find.byType(StatutoryDisclaimerCard), findsOneWidget);
+    });
   });
 }
