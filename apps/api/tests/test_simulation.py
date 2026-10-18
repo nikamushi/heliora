@@ -59,7 +59,7 @@ def test_simulation_engine_30_90_180_days():
         assert 0.0 <= result["baseline_lifestyle_score"] <= 100.0
         assert 0.0 <= result["projected_lifestyle_score"] <= 100.0
         assert result["is_model_estimated"] is True
-        assert "Simulasi" in result["disclaimer"]
+        assert result["disclaimer"] == MANDATORY_MEDICAL_DISCLAIMER
 
         trajectories = result["risk_trajectories"]
         assert len(trajectories) == 3
