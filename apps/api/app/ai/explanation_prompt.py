@@ -131,18 +131,35 @@ def build_user_message(context: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def _extract_json_object(text: str) -> str | None:
+    """Return the embedded JSON object, tolerating fences and surrounding prose.
+
+    Live Gemini responses sometimes wrap the JSON in a code fence and append
+    the statutory disclaimer as plain text after it.
+    """
+    cleaned = text.strip()
+    if cleaned.startswith("```"):
+        cleaned = re.sub(r"^```(?:json)?\s*", "", cleaned)
+        cleaned = re.sub(r"\s*```", "", cleaned)
+    try:
+        json.loads(cleaned)
+        return cleaned
+    except (ValueError, TypeError):
+        match = re.search(r"\{.*\}", cleaned, re.DOTALL)
+        return match.group(0) if match else None
+
+
 def validate_llm_output(text: str, evidence_ids: list[str]) -> ExplanationOutput | None:
     """Validate raw LLM text. Returns parsed output, or None (→ fallback).
 
     Rejects: non-JSON, schema violations, empty sections, citations to
     evidence not provided, and forbidden diagnosis/prescription phrases.
     """
-    cleaned = text.strip()
-    if cleaned.startswith("```"):
-        cleaned = re.sub(r"^```(?:json)?\s*", "", cleaned)
-        cleaned = re.sub(r"\s*```$", "", cleaned)
+    candidate = _extract_json_object(text)
+    if candidate is None:
+        return None
     try:
-        parsed = ExplanationOutput.model_validate(json.loads(cleaned))
+        parsed = ExplanationOutput.model_validate(json.loads(candidate))
     except (ValueError, TypeError):
         return None
 
