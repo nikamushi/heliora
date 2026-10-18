@@ -1990,14 +1990,14 @@ Acceptance Criteria:
 **Owner:** Pino & Tumir  
 **Priority:** P0  
 **Sprint:** S9-S10  
-**Status:** IN PROGRESS
+**Status:** DONE
 
 Tasks:
 
 - [x] Align tokens, typography, and statutory disclaimer with Figma Design System.
-- [ ] Remove fake fallback risk scores and implement honest error handling in HomeScreen.
-- [ ] Implement health profile form pre-fill when editing from ProfileScreen.
-- [ ] Connect mobile client to local FastAPI backend and validate end-to-end flow.
+- [x] Remove fake fallback risk scores and implement honest error handling in HomeScreen.
+- [x] Implement health profile form pre-fill when editing from ProfileScreen.
+- [x] Connect mobile client to local FastAPI backend and validate end-to-end flow.
 
 Acceptance Criteria:
 
