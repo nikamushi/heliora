@@ -12,28 +12,10 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from sentence_transformers import SentenceTransformer
-
 from app.ai.rag_pipeline import (
     _get_collection,
+    _get_embedding_model,
 )
-
-logger = logging.getLogger(__name__)
-
-# ── Query embedding ──────────────────────────────────────────────────────
-# Lazy-load model (shared with pipeline)
-_query_model: SentenceTransformer | None = None
-
-
-def _get_query_model() -> SentenceTransformer:
-    """Get or load the sentence transformer model for queries."""
-    global _query_model
-    if _query_model is None:
-        logger.info("Loading query embedding model...")
-        _query_model = SentenceTransformer("all-MiniLM-L6-v2")
-        logger.info("Query embedding model loaded")
-    return _query_model
-
 
 # ── Similarity search ────────────────────────────────────────────────────
 # Cosine similarity threshold for relevance filtering
@@ -66,7 +48,7 @@ def search_evidence(
     - similarity_score, chunk_index
     """
     collection = _get_collection()
-    model = _get_query_model()
+    model = _get_embedding_model()
 
     # Embed the query
     query_embedding = model.encode([query], convert_to_numpy=True, normalize_embeddings=True)[0]
