@@ -1339,13 +1339,13 @@ Invent Evidence
 
 Tasks:
 
-- [ ] Prompt design.
-- [ ] Context construction.
-- [ ] RAG integration.
-- [ ] Explanation generation.
-- [ ] Output validation.
-- [ ] Hallucination guardrail.
-- [ ] Fallback response.
+- [x] Prompt design.
+- [x] Context construction.
+- [x] RAG integration.
+- [x] Explanation generation.
+- [x] Output validation.
+- [x] Hallucination guardrail.
+- [x] Fallback response.
 
 Acceptance Criteria:
 
