@@ -45,15 +45,9 @@ class _AssessmentFlowScreenState extends ConsumerState<AssessmentFlowScreen> {
   }
 
   void _syncControllersFromProfile(HealthProfileResponse profile) {
-    if (profile.age != null) {
-      _ageController.text = profile.age.toString();
-    }
-    if (profile.heightCm != null) {
-      _heightController.text = profile.heightCm!.toStringAsFixed(profile.heightCm! % 1 == 0 ? 0 : 1);
-    }
-    if (profile.weightKg != null) {
-      _weightController.text = profile.weightKg!.toStringAsFixed(profile.weightKg! % 1 == 0 ? 0 : 1);
-    }
+    _ageController.text = profile.age.toString();
+    _heightController.text = profile.heightCm.toStringAsFixed(profile.heightCm % 1 == 0 ? 0 : 1);
+    _weightController.text = profile.weightKg.toStringAsFixed(profile.weightKg % 1 == 0 ? 0 : 1);
     final details = profile.familyHistoryDetails;
     if (details != null && details.contains('Catatan: ')) {
       final idx = details.indexOf('Catatan: ');
