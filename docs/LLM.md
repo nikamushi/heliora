@@ -63,7 +63,9 @@ Human-Friendly Explanation  ATAU  Fallback deterministik
   `rekomendasi`, `kutipan_evidence`); **tanpa field skor/diagnosis**.
 - `validate_llm_output()` — tolak bila: bukan JSON, schema invalid, section
   kosong, kutipan di luar `evidence_ids`, atau mengandung pola terlarang
-  (diagnosis/resep/penyakit/dosis/klaim kepastian).
+  (diagnosis/resep/penyakit/dosis/klaim kepastian). Toleran terhadap code
+  fence dan teks di sekitar JSON (perilaku nyata Gemini): objek `{...}`
+  diekstrak bila parse langsung gagal.
 
 ## 4. Generation & Guardrail
 
@@ -98,24 +100,49 @@ recommendation baru.
 ## 6. Testing
 
 Pengujian deterministik dan offline (`apps/api/tests/test_explanation.py`,
-23 test): fake httpx `MockTransport` untuk Gemini + monkeypatch retrieval,
+26 test): fake httpx `MockTransport` untuk Gemini + monkeypatch retrieval,
 sehingga **tanpa API key, tanpa network, tanpa KB ter-ingest**. Tercakup
 (Architecture §33.5): explanation generation, context adherence, no risk
 score modification (schema tanpa field skor), no diagnosis claims
 (parametrized frasa diagnosis/resep), evidence-grounded response (kutipan
 halu `evi-99` ditolak), fallback (tanpa key tanpa network, timeout, 429,
-500, output invalid, KB kosong → respons aman tanpa kutipan).
+500, output invalid, KB kosong → respons aman tanpa kutipan), serta
+toleransi output (code fence + teks sekitar).
 
-## 7. Batasan Saat Ini
+## 7. Smoke Live (2026-10-18)
 
-- **Belum smoke live**: kualitas bahasa output Gemini nyata belum diuji
-  (butuh `GEMINI_API_KEY` di `apps/api/.env`); yang terbukti offline hanya
-  kontrak, grounding, guardrail, dan fallback.
+Dijalankan dengan `GEMINI_API_KEY` nyata (key dari `apps/api/.env`), model
+`gemini-3.5-flash-lite`, KB lokal ter-ingest (18 item → 31 dokumen). Data uji:
+1 risiko (Diabetes Tipe 2, moderate) + 1 faktor (Durasi Tidur) + 1 rekomendasi.
+
+| Skenario | Hasil | Latensi | Catatan |
+|---|---|---|---|
+| KB tersedia (retrieval dapat `evi-08`) | `source: llm`, `refs: [evi-08]`, kutipan `[evi-08]` ada di teks | 7.6s warm | Disclaimer verbatim; bahasa Indonesia natural; sitasi grounded |
+| Evidence kosong (retrieval `[]`) | `source: llm`, `refs: []`, **tanpa** kutipan | 1.3s | Prompt "jangan mengutip" dipatuhi |
+| Cold start (request pertama) | `source: fallback` | 10.1s | Timeout default 10s → fallback deterministik (BR-LLM-000 bekerja live) |
+
+Temuan dan tindak lanjut:
+
+- **Validator diperbaiki (LLM-001.05)**: Gemini membungkus JSON dalam code
+  fence lalu menambahkan disclaimer setelahnya; parse ketat menolak payload
+  valid → fallback. Kini objek JSON diekstrak dari teks sekitarnya; 3 test
+  baru ditambahkan (RED→GREEN).
+- **Latensi**: warm 1.3–7.6s. Cold start dapat melewati timeout default 10s
+  → fallback (by design, non-blocking); `LLM_TIMEOUT_SECONDS` dapat
+  dinaikkan bila kualitas LLM pada cold start lebih diutamakan.
+- **Kualitas**: pada satu run model menulis "Diabetes Tipe" (tanpa "2") —
+  glitch minor pada narasi, bukan kebocoran guardrail; dicatat apa adanya.
+
+## 8. Batasan Saat Ini
+
+- Smoke live = **verifikasi teknis kontrak, bukan validasi klinis**; hasil di
+  §7 dicatat apa adanya, tanpa klaim kualitas medis.
 - Explanation service **belum ter-wire ke endpoint/API maupun assessment
   flow** — dipakai sebagai modul (endpoint di luar scope LLM-001).
-- Tanpa validasi klinis: hasil smoke live dicatat apa adanya saat key tersedia.
+- Latensi LLM belum diuji pada beban/variasi prompt besar (target PERF
+  < 5 detik: warm terpenuhi pada skenario sederhana, cold start belum).
 
-## 8. Kesesuaian Kotak LLM-001
+## 9. Kesesuaian Kotak LLM-001
 
 | Kotak TASK.md LLM-001 | Bukti |
 |---|---|
@@ -123,11 +150,11 @@ halu `evi-99` ditolak), fallback (tanpa key tanpa network, timeout, 429,
 | Context construction | `build_explanation_context` + `test_context_contains_all_inputs` |
 | RAG integration | retrieval-sebelum-generation + `test_retrieval_runs_before_generation` |
 | Explanation generation | `GeminiClient.generate_text` + kontrak fake transport |
-| Output validation | `validate_llm_output` + `test_malformed_output_rejected` |
+| Output validation | `validate_llm_output` + `test_malformed_output_rejected`, `test_fenced_json_with_trailing_disclaimer_accepted` |
 | Hallucination guardrail | pola terlarang + cek kutipan + `test_*_rejected` |
-| Fallback response | `build_fallback_explanation` + 5 skenario fallback |
+| Fallback response | `build_fallback_explanation` + 5 skenario fallback (live: cold-start timeout §7) |
 
-## 9. Referensi
+## 10. Referensi
 
 - Architecture §16 LLM Architecture (§16.1–§16.4), §33.5 LLM Tests, §39.3,
   §41, ADR-008, ADR-009 (`docs/ADR/ADR-009-llm-provider.md`), ADR-010.
