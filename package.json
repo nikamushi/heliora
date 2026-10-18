@@ -3,6 +3,8 @@
   "private": true,
   "scripts": {
     "dev": "turbo run dev --filter=!mobile",
+    "dev:backend": "pnpm --filter api dev",
+    "dev:api": "pnpm --filter api dev",
     "dev:mobile": "node ./scripts/dev-mobile.mjs",
     "build": "turbo run build",
     "lint": "turbo run lint",
