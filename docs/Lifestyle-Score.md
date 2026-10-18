@@ -156,7 +156,7 @@ semua sub-score 100 (+ stress tersedia) -> Lifestyle Score = 100.0
 semua sub-score 0                       -> Lifestyle Score = 0.0
 ```
 
-Implementasi: `apps/api/app/core/risk_engine.py` → `calculate_lifestyle_score()`.
+Implementasi: `apps/api/app/core/risk_engine/scoring.py` → `calculate_lifestyle_score()`.
 
 ---
 
@@ -221,5 +221,5 @@ Temuan untuk keputusan PM (tidak diubah pada AI-005 agar tidak breaking):
 - `docs/PRD.md` — §3.11, §6.6, §10.6, §11.5.2, BR-SCORE-004/005/006.
 - `docs/Architecture.md` §10 (Lifestyle Score Architecture).
 - `docs/Database.md` — `risk_results.lifestyle_score NUMERIC(5,2)`.
-- `apps/api/app/core/risk_engine.py` — `calculate_lifestyle_score()`.
+- `apps/api/app/core/risk_engine/scoring.py` — `calculate_lifestyle_score()`.
 - `apps/api/app/schemas/health_profile.py` — `get_bmi_category()`.

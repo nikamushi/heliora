@@ -43,7 +43,7 @@ dan **bukan** keluaran model ML.
 - Hasil selalu diberi label sebagai proyeksi/estimasi model
   (`is_model_estimated: true` + disclaimer), tidak pernah sebagai kepastian.
 
-Implementasi: `apps/api/app/core/risk_engine.py`
+Implementasi: `apps/api/app/core/risk_engine/simulation.py`
 `PreventiveLifestyleRiskEngine.simulate_future_trajectory`
 (valid values: 30, 90, 180 — selain itu `SimulationHorizon` menolak pada
 lapisan skema).
@@ -335,7 +335,7 @@ jalur mana pun (BR-SIM-007; test non-mutasi).
 - `docs/Architecture.md` §12 (Simulation Architecture), §19 (Data Flow),
   ADR-006 (Simulation Strategy).
 - `docs/Health-Score.md`, `docs/Lifestyle-Score.md` (komponen skor).
-- `apps/api/app/core/risk_engine.py` `simulate_future_trajectory`.
+- `apps/api/app/core/risk_engine/simulation.py` `simulate_future_trajectory`.
 - `apps/api/app/services/simulation_service.py`,
   `apps/api/app/api/routes/simulation.py`,
   `apps/api/app/schemas/simulation.py`.
