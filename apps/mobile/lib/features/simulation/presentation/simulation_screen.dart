@@ -173,6 +173,7 @@ class SimulationScreen extends ConsumerWidget {
                         ),
                         const SizedBox(height: 8),
                         Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             ChoiceOption<SmokingStatusEnum>(
                               value: SmokingStatusEnum.never,
@@ -212,24 +213,31 @@ class SimulationScreen extends ConsumerWidget {
                   Row(
                     children: [
                       Expanded(
+                        flex: 2,
                         child: SizedBox(
                           height: 48,
                           child: OutlinedButton(
                             onPressed: isLoading ? null : controller.resetToBaseline,
                             style: OutlinedButton.styleFrom(
                               foregroundColor: HelioraTokens.foreground,
+                              padding: const EdgeInsets.symmetric(horizontal: 12.0),
                               side: const BorderSide(color: HelioraTokens.border, width: 1.0),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(HelioraTokens.radiusXl),
                               ),
                             ),
-                            child: const Text('Atur ulang', style: HelioraTokens.labelButtonSecondary),
+                            child: const Text(
+                              'Atur ulang',
+                              maxLines: 1,
+                              softWrap: false,
+                              style: HelioraTokens.labelButtonSecondary,
+                            ),
                           ),
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        flex: 2,
+                        flex: 3,
                         child: SizedBox(
                           height: 48,
                           child: ElevatedButton(
@@ -237,6 +245,7 @@ class SimulationScreen extends ConsumerWidget {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: HelioraTokens.primary,
                               foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(horizontal: 12.0),
                               elevation: 0,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(HelioraTokens.radiusXl),
@@ -251,7 +260,12 @@ class SimulationScreen extends ConsumerWidget {
                                       valueColor: AlwaysStoppedAnimation(Colors.white),
                                     ),
                                   )
-                                : const Text('Jalankan simulasi', style: HelioraTokens.labelButton),
+                                : const Text(
+                                    'Jalankan simulasi',
+                                    maxLines: 1,
+                                    softWrap: false,
+                                    style: HelioraTokens.labelButton,
+                                  ),
                           ),
                         ),
                       ),

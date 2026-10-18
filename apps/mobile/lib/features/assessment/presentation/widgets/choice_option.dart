@@ -11,6 +11,7 @@ class ChoiceOption<T> extends StatelessWidget {
     required this.label,
     required this.onChanged,
     this.subtitle,
+    this.width = double.infinity,
   });
 
   final T value;
@@ -18,6 +19,7 @@ class ChoiceOption<T> extends StatelessWidget {
   final String label;
   final ValueChanged<T> onChanged;
   final String? subtitle;
+  final double? width;
 
   bool get isSelected => value == groupValue;
 
@@ -29,6 +31,7 @@ class ChoiceOption<T> extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         curve: Curves.easeInOut,
+        width: width,
         constraints: const BoxConstraints(minHeight: 48.0),
         padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
         decoration: BoxDecoration(
@@ -41,7 +44,7 @@ class ChoiceOption<T> extends StatelessWidget {
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: MainAxisSize.max,
           children: [
             if (isSelected) ...[
               const HelioraIcon(

@@ -85,6 +85,7 @@ class _HelioraAppState extends ConsumerState<HelioraApp> {
     return MaterialApp(
       title: 'HELIORA',
       debugShowCheckedModeBanner: false,
+      scrollBehavior: const HelioraScrollBehavior(),
       theme: HelioraTheme.lightTheme,
       darkTheme: HelioraTheme.darkTheme,
       home: Builder(

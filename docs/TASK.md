@@ -1998,6 +1998,9 @@ Tasks:
 - [x] Remove fake fallback risk scores and implement honest error handling in HomeScreen.
 - [x] Implement health profile form pre-fill when editing from ProfileScreen.
 - [x] Connect mobile client to local FastAPI backend and validate end-to-end flow.
+- [x] Configure backend CORS regex to support Flutter Web dev ports and preflight OPTIONS requests.
+- [x] Standardize ChoiceOption full-width alignment and fix Simulation action button text wrapping.
+- [x] Implement smooth bouncing scroll behavior across touch, mouse, and trackpad devices.
 
 Acceptance Criteria:
 
@@ -2005,6 +2008,8 @@ Acceptance Criteria:
 - HomeScreen tidak menampilkan skor tiruan saat asesmen kosong dan menampilkan pesan error resmi dengan tombol muat ulang jika API gagal.
 - Form profil kesehatan terisi otomatis saat pengguna menekan "Perbarui profil kesehatan" di layar Profil.
 - Aplikasi mobile dapat terhubung ke backend FastAPI lokal (emulator 10.0.2.2 atau web localhost:8000) dan menyelesaikan alur autentikasi hingga simulasi secara mulus.
+- Preflight request `OPTIONS` dari Flutter Web (port dinamis `127.0.0.1:*` / `localhost:*`) berhasil diizinkan dengan status 200 OK.
+- Seluruh kartu pilihan simulasi membentang seragam (100% lebar kontainer), tombol "Atur ulang" tidak mengalami patah kata, dan scrolling aplikasi responsif serta mulus.
 
 ---
 
