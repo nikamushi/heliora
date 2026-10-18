@@ -13,10 +13,14 @@ import 'widgets/step_bar.dart';
 class AssessmentFlowScreen extends ConsumerStatefulWidget {
   const AssessmentFlowScreen({
     super.key,
+    this.initialProfile,
     this.onAssessmentCompleted,
+    this.onBack,
   });
 
+  final HealthProfileResponse? initialProfile;
   final VoidCallback? onAssessmentCompleted;
+  final VoidCallback? onBack;
 
   @override
   ConsumerState<AssessmentFlowScreen> createState() => _AssessmentFlowScreenState();
@@ -27,6 +31,35 @@ class _AssessmentFlowScreenState extends ConsumerState<AssessmentFlowScreen> {
   final _heightController = TextEditingController();
   final _weightController = TextEditingController();
   final _notesController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialProfile != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ref.read(assessmentControllerProvider.notifier).prefillFromProfile(widget.initialProfile!);
+        _syncControllersFromProfile(widget.initialProfile!);
+      });
+    }
+  }
+
+  void _syncControllersFromProfile(HealthProfileResponse profile) {
+    if (profile.age != null) {
+      _ageController.text = profile.age.toString();
+    }
+    if (profile.heightCm != null) {
+      _heightController.text = profile.heightCm!.toStringAsFixed(profile.heightCm! % 1 == 0 ? 0 : 1);
+    }
+    if (profile.weightKg != null) {
+      _weightController.text = profile.weightKg!.toStringAsFixed(profile.weightKg! % 1 == 0 ? 0 : 1);
+    }
+    final details = profile.familyHistoryDetails;
+    if (details != null && details.contains('Catatan: ')) {
+      final idx = details.indexOf('Catatan: ');
+      _notesController.text = details.substring(idx + 9).trim();
+    }
+  }
 
   @override
   void dispose() {
@@ -315,6 +348,23 @@ class _AssessmentFlowScreenState extends ConsumerState<AssessmentFlowScreen> {
             ),
           ),
         ),
+        if (widget.onBack != null) ...[
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 48,
+            child: OutlinedButton(
+              onPressed: widget.onBack,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: HelioraTokens.foreground,
+                side: const BorderSide(color: HelioraTokens.border, width: 1.0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(HelioraTokens.radiusXl),
+                ),
+              ),
+              child: const Text('Batal & Kembali ke Profil', style: HelioraTokens.labelButtonSecondary),
+            ),
+          ),
+        ],
       ],
     );
   }

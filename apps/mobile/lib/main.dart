@@ -131,6 +131,7 @@ class _AuthenticatedFlowRouterState
   bool _inConsentFlow = false;
   bool _inSimulationFlow = false;
   bool _inProfileFlow = false;
+  bool _editingProfileFromProfile = false;
 
   @override
   void initState() {
@@ -155,10 +156,29 @@ class _AuthenticatedFlowRouterState
   @override
   Widget build(BuildContext context) {
     if (_inAssessmentFlow) {
+      final currentProfile = ref.watch(healthProfileProvider).asData?.value;
       return AssessmentFlowScreen(
+        initialProfile: _editingProfileFromProfile ? currentProfile : null,
+        onBack: _editingProfileFromProfile
+            ? () {
+                setState(() {
+                  _inAssessmentFlow = false;
+                  _editingProfileFromProfile = false;
+                  _inProfileFlow = true;
+                });
+              }
+            : null,
         onAssessmentCompleted: () {
-          setState(() => _inAssessmentFlow = false);
+          final wasEditing = _editingProfileFromProfile;
+          setState(() {
+            _inAssessmentFlow = false;
+            _editingProfileFromProfile = false;
+            if (wasEditing) {
+              _inProfileFlow = true;
+            }
+          });
           ref.invalidate(latestAssessmentProvider);
+          ref.invalidate(healthProfileProvider);
         },
       );
     }
@@ -200,6 +220,7 @@ class _AuthenticatedFlowRouterState
         onEditHealthProfile: () {
           setState(() {
             _inProfileFlow = false;
+            _editingProfileFromProfile = true;
             _inAssessmentFlow = true;
           });
         },
