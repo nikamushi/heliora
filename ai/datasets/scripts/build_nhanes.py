@@ -1,13 +1,13 @@
 """Build one adult-level NHANES 2021-2023 CSV from the CDC XPT component files.
 
 Input : <raw>/nhanes/{DEMO_L,BMX_L,BPXO_L,GLU_L,GHB_L,TCHOL_L,HDL_L,SMQ_L,SLQ_L,PAQ_L,DIQ_L,BPQ_L,MCQ_L}.xpt
-        (raw = $ML_RAW_DIR or apps/ml/data/raw)
-Output: apps/ml/data/nhanes_2021_2023.csv
+        (raw = $ML_RAW_DIR or ai/datasets/raw)
+Output: ai/datasets/nhanes_2021_2023.csv
 
 Column names mirror the BRFSS CSVs (and the HELIORA health-profile API) where an equivalent exists.
 Measured values (blood pressure, glucose, HbA1c, cholesterol) are kept as numbers; no clinical
 cut-off is applied here.
-Run:  uv run --no-project --with pandas --with numpy python apps/ml/data/scripts/build_nhanes.py
+Run:  uv run --no-project --with pandas --with numpy python ai/datasets/scripts/build_nhanes.py
 """
 import os
 from pathlib import Path
