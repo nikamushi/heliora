@@ -250,15 +250,24 @@ class AssessmentService:
             factors_data=top_factors_data,
         )
 
-        await assessment_repo.commit_assessment_transaction(session, assessment)
+        persisted_assessment = await assessment_repo.commit_assessment_transaction(
+            session, assessment
+        )
 
-        # Attach relations in memory for immediate formatting
-        risk_res.xai_results = xai_records
-        assessment.risk_result = risk_res
-        assessment.recommendations = rec_records
-        assessment.health_profile = profile
+        # Attach relations in memory if not already eagerly loaded (e.g. in mocked test environments)
+        if persisted_assessment.__dict__.get("risk_result") is None:
+            persisted_assessment.risk_result = risk_res
+        if (
+            persisted_assessment.risk_result
+            and persisted_assessment.risk_result.__dict__.get("xai_results") is None
+        ):
+            persisted_assessment.risk_result.xai_results = xai_records
+        if persisted_assessment.__dict__.get("recommendations") is None:
+            persisted_assessment.recommendations = rec_records
+        if persisted_assessment.__dict__.get("health_profile") is None:
+            persisted_assessment.health_profile = profile
 
-        return self._format_assessment_response(assessment, top_factors_data)
+        return self._format_assessment_response(persisted_assessment, top_factors_data)
 
     async def get_latest_assessment(
         self, session: AsyncSession, user_id: uuid.UUID

@@ -6,7 +6,7 @@ top factor attribution, recommendation generation, and API endpoint security/acc
 
 import uuid
 from decimal import Decimal
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from fastapi import HTTPException
@@ -21,6 +21,7 @@ from app.db.models.risk_result import RiskResult
 from app.db.models.user import User
 from app.db.models.xai_result import XAIResult
 from app.main import app
+from app.repositories.assessment_repo import assessment_repo
 from app.services.assessment_service import assessment_service
 
 # ── 1. Risk Engine Unit Tests ────────────────────────────────────────────────
@@ -224,6 +225,110 @@ async def test_service_run_assessment_success():
         for r in result.risks:
             assert r.estimated_risk_score == round(r.probability * 100.0, 1)
             assert r.risk_label in ["Lower", "Moderate", "Higher"]
+
+
+@pytest.mark.asyncio
+async def test_repo_commit_assessment_transaction():
+    """commit_assessment_transaction commits session and reloads assessment with eager relations."""
+    mock_session = AsyncMock()
+    mock_assessment = Assessment(
+        id=uuid.uuid4(),
+        user_id=uuid.uuid4(),
+        health_profile_id=uuid.uuid4(),
+        status="completed",
+    )
+    mock_result = MagicMock()
+    mock_result.scalars.return_value.first.return_value = mock_assessment
+    mock_session.execute = AsyncMock(return_value=mock_result)
+
+    loaded = await assessment_repo.commit_assessment_transaction(
+        mock_session, mock_assessment
+    )
+
+    mock_session.commit.assert_awaited_once()
+    mock_session.execute.assert_awaited_once()
+    assert loaded == mock_assessment
+
+
+@pytest.mark.asyncio
+async def test_service_run_assessment_with_eager_loaded_relations():
+    """run_assessment completes without reassigning relations when already loaded by commit_assessment_transaction."""
+    user_id = uuid.uuid4()
+    assessment_id = uuid.uuid4()
+    profile_id = uuid.uuid4()
+    mock_session = AsyncMock()
+
+    profile = HealthProfile(
+        id=profile_id,
+        user_id=user_id,
+        age=28,
+        gender="female",
+        height_cm=Decimal("165.0"),
+        weight_kg=Decimal("55.0"),
+        bmi=Decimal("20.2"),
+        physical_activity_min_per_week=Decimal("180.0"),
+        sleep_duration_hours=Decimal("8.0"),
+        smoking_status="never",
+        family_history=False,
+    )
+
+    risk_result = RiskResult(
+        assessment_id=assessment_id,
+        diabetes_risk=Decimal("0.0500"),
+        hypertension_risk=Decimal("0.0800"),
+        cardiovascular_risk=Decimal("0.0400"),
+        health_score=Decimal("90.0"),
+        lifestyle_score=Decimal("92.0"),
+    )
+    risk_result.xai_results = []
+
+    persisted_assessment = Assessment(
+        id=assessment_id,
+        user_id=user_id,
+        health_profile_id=profile_id,
+        status="completed",
+    )
+    # Simulate relations already loaded in memory by selectinload
+    persisted_assessment.risk_result = risk_result
+    persisted_assessment.recommendations = []
+    persisted_assessment.health_profile = profile
+
+    with (
+        patch(
+            "app.services.assessment_service.health_profile_repo.get_by_user_id",
+            new_callable=AsyncMock,
+            return_value=profile,
+        ),
+        patch(
+            "app.services.assessment_service.assessment_repo.create_assessment",
+            new_callable=AsyncMock,
+            return_value=persisted_assessment,
+        ),
+        patch(
+            "app.services.assessment_service.assessment_repo.create_risk_result",
+            new_callable=AsyncMock,
+            return_value=risk_result,
+        ),
+        patch(
+            "app.services.assessment_service.assessment_repo.create_recommendations",
+            new_callable=AsyncMock,
+            return_value=[],
+        ),
+        patch(
+            "app.services.assessment_service.assessment_repo.create_xai_results",
+            new_callable=AsyncMock,
+            return_value=[],
+        ),
+        patch(
+            "app.services.assessment_service.assessment_repo.commit_assessment_transaction",
+            new_callable=AsyncMock,
+            return_value=persisted_assessment,
+        ),
+    ):
+        result = await assessment_service.run_assessment(mock_session, user_id)
+        assert result.id == str(assessment_id)
+        assert result.user_id == str(user_id)
+        assert result.health_score == 90.0
 
 
 @pytest.mark.asyncio
