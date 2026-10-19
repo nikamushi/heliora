@@ -52,6 +52,17 @@ void main() {
       expect(find.text('Cukup Seimbang'), findsOneWidget);
     });
 
+    test('scoreColor returns canonical 80/60/40 palette', () {
+      const card85 = ScoreCard(title: 'Score', score: 85, isHealthScore: true);
+      const card65 = ScoreCard(title: 'Score', score: 65, isHealthScore: true);
+      const card45 = ScoreCard(title: 'Score', score: 45, isHealthScore: true);
+      const card25 = ScoreCard(title: 'Score', score: 25, isHealthScore: true);
+
+      expect(card85.scoreColor, equals(const Color(0xFF0F7A4E))); // primary
+      expect(card65.scoreColor, equals(const Color(0xFF047857))); // emerald700
+      expect(card45.scoreColor, equals(const Color(0xFFB45309))); // amber700
+      expect(card25.scoreColor, equals(const Color(0xFFBE123C))); // rose700
+    });
   });
 
   group('RiskCard Widget Tests', () {

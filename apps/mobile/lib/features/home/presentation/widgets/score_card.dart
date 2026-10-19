@@ -43,7 +43,8 @@ class ScoreCard extends StatelessWidget {
 
   Color get scoreColor {
     final value = score.toDouble();
-    if (value >= 60) return HelioraTokens.primary;
+    if (value >= 80) return HelioraTokens.primary;
+    if (value >= 60) return HelioraTokens.emerald700;
     if (value >= 40) return HelioraTokens.amber700;
     return HelioraTokens.rose700;
   }
