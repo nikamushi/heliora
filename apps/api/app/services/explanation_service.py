@@ -11,6 +11,7 @@ Gemini generation → output validation/guardrail → LLM text, else
 deterministic template (source="fallback").
 """
 
+import logging
 from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict
@@ -19,6 +20,8 @@ from app.ai import explanation_prompt as ep
 from app.ai import retrieval
 from app.ai.llm_client import GeminiClient, LLMUnavailableError
 from app.core.config import settings
+
+logger = logging.getLogger(__name__)
 
 
 class ExplanationResult(BaseModel):
@@ -128,12 +131,19 @@ async def explain_assessment(
 
     evidence: list[dict[str, Any]] = []
     seen_ids: set[str] = set()
-    for query in _derive_queries(factors, recommendations):
-        for hit in retrieval.search_evidence(query, top_k=3):
-            evidence_id = hit.get("evidence_id")
-            if evidence_id and evidence_id not in seen_ids:
-                seen_ids.add(evidence_id)
-                evidence.append(hit)
+    try:
+        for query in _derive_queries(factors, recommendations):
+            for hit in retrieval.search_evidence(query, top_k=3):
+                evidence_id = hit.get("evidence_id")
+                if evidence_id and evidence_id not in seen_ids:
+                    seen_ids.add(evidence_id)
+                    evidence.append(hit)
+    except Exception as exc:
+        logger.warning(
+            "Evidence retrieval encountered an error, proceeding with empty evidence: %s",
+            exc,
+        )
+        evidence = []
 
     context = ep.build_explanation_context(risks, factors, recommendations, evidence)
     user_message = ep.build_user_message(context)
@@ -148,7 +158,14 @@ async def explain_assessment(
     )
     try:
         raw = await active_client.generate_text(ep.SYSTEM_PROMPT, user_message)
-    except LLMUnavailableError:
+    except LLMUnavailableError as exc:
+        logger.info("LLM unavailable, falling back to deterministic explanation: %s", exc)
+        return build_fallback_explanation(risks, factors, recommendations, evidence)
+    except Exception as exc:
+        logger.warning(
+            "Unexpected error during LLM generation, falling back to deterministic explanation: %s",
+            exc,
+        )
         return build_fallback_explanation(risks, factors, recommendations, evidence)
 
     parsed = ep.validate_llm_output(raw, context["evidence_ids"])

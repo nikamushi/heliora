@@ -209,6 +209,30 @@ async def test_client_maps_timeout_to_unavailable():
         await client.generate_text("sys", "user")
 
 
+async def test_client_maps_connect_error_to_unavailable():
+    def handler(request: httpx.Request) -> httpx.Response:
+        raise httpx.ConnectError("Connection refused", request=request)
+
+    client = GeminiClient(api_key="key-abc", transport=httpx.MockTransport(handler))
+    with pytest.raises(LLMUnavailableError):
+        await client.generate_text("sys", "user")
+
+
+async def test_client_maps_network_error_to_unavailable():
+    def handler(request: httpx.Request) -> httpx.Response:
+        raise httpx.NetworkError("Network unreachable", request=request)
+
+    client = GeminiClient(api_key="key-abc", transport=httpx.MockTransport(handler))
+    with pytest.raises(LLMUnavailableError):
+        await client.generate_text("sys", "user")
+
+
+async def test_client_maps_service_unavailable_503_to_unavailable():
+    client = GeminiClient(api_key="key-abc", transport=_error_transport(503))
+    with pytest.raises(LLMUnavailableError):
+        await client.generate_text("sys", "user")
+
+
 # ── RAG integration + service orchestration ──────────────────────────────
 async def test_retrieval_runs_before_generation(monkeypatch):
     order: list[str] = []
@@ -357,3 +381,85 @@ async def test_fallback_does_not_invent_evidence():
     assert result.source == "fallback"
     assert result.evidence_refs == ["evi-03"]
     assert "Kemenkes RI" in result.text
+
+
+async def test_retrieval_failure_degrades_gracefully_without_error_500(monkeypatch):
+    """If ChromaDB vector retrieval throws an error, system degrades gracefully without 500."""
+
+    def fail_search(*args, **kwargs):
+        raise RuntimeError("ChromaDB vector collection corrupted or disk lock failed")
+
+    monkeypatch.setattr(es.retrieval, "search_evidence", fail_search)
+
+    class FakeClient:
+        async def generate_text(self, system_prompt, user_message):
+            return _VALID_LLM_JSON.replace('["evi-03"]', "[]").replace(" [evi-03]", "")
+
+    result = await es.explain_assessment(
+        _SAMPLE_RISKS, _SAMPLE_FACTORS, _SAMPLE_RECS, api_key="key", client=FakeClient()
+    )
+    assert result.source == "llm"
+    assert result.evidence_refs == []
+    assert "evi-" not in result.text
+
+
+async def test_empty_rag_with_hallucinated_evidence_falls_back_without_fake_citations(
+    monkeypatch,
+):
+    """If ChromaDB is empty and LLM tries to cite evidence, guardrail rejects and falls back."""
+    monkeypatch.setattr(es.retrieval, "search_evidence", lambda *a, **k: [])
+
+    class HallucinatingClient:
+        async def generate_text(self, system_prompt, user_message):
+            # Model attempts to hallucinate citation evi-99
+            return _VALID_LLM_JSON.replace("evi-03", "evi-99")
+
+    result = await es.explain_assessment(
+        _SAMPLE_RISKS,
+        _SAMPLE_FACTORS,
+        _SAMPLE_RECS,
+        api_key="key",
+        client=HallucinatingClient(),
+    )
+    assert result.source == "fallback"
+    assert result.evidence_refs == []
+    assert "evi-" not in result.text
+    assert "Evidence pendukung:" not in result.text
+
+
+async def test_gemini_connection_failure_triggers_fallback_without_error_500(monkeypatch):
+    """If Gemini connection fails (DNS/network/ConnectError), fallback triggers cleanly."""
+    monkeypatch.setattr(
+        es.retrieval, "search_evidence", lambda *a, **k: _SAMPLE_EVIDENCE
+    )
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        raise httpx.ConnectError("Failed to connect to Google API", request=request)
+
+    client = GeminiClient(api_key="key-abc", transport=httpx.MockTransport(handler))
+    result = await es.explain_assessment(
+        _SAMPLE_RISKS, _SAMPLE_FACTORS, _SAMPLE_RECS, client=client, api_key="key-abc"
+    )
+    assert result.source == "fallback"
+    assert ep.STATUTORY_DISCLAIMER in result.text
+
+
+async def test_simultaneous_rag_and_llm_failure_triggers_fallback(monkeypatch):
+    """If both ChromaDB AND Gemini fail at the same time, system still returns fallback."""
+
+    def fail_search(*args, **kwargs):
+        raise RuntimeError("ChromaDB down")
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        raise httpx.ConnectError("Gemini down", request=request)
+
+    monkeypatch.setattr(es.retrieval, "search_evidence", fail_search)
+    client = GeminiClient(api_key="key-abc", transport=httpx.MockTransport(handler))
+
+    result = await es.explain_assessment(
+        _SAMPLE_RISKS, _SAMPLE_FACTORS, _SAMPLE_RECS, client=client, api_key="key-abc"
+    )
+    assert result.source == "fallback"
+    assert result.evidence_refs == []
+    assert ep.STATUTORY_DISCLAIMER in result.text
+
