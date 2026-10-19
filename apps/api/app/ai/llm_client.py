@@ -51,8 +51,10 @@ class GeminiClient:
                     json=payload,
                 )
                 response.raise_for_status()
-        except (httpx.TimeoutException, httpx.HTTPStatusError) as exc:
+        except (httpx.RequestError, httpx.HTTPStatusError) as exc:
             raise LLMUnavailableError(f"Gemini request failed: {exc}") from exc
+        except Exception as exc:
+            raise LLMUnavailableError(f"Unexpected Gemini client error: {exc}") from exc
 
         try:
             parts = response.json()["candidates"][0]["content"]["parts"]
