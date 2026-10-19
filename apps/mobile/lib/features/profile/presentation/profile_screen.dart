@@ -81,7 +81,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       builder: (dialogCtx) => HelioraConfirmationDialog(
         title: 'Persetujuan Diperlukan',
         content:
-            'Persetujuan pemrosesan data kesehatan diperlukan untuk memperbarui profil dan menganalisis risiko kesehatan Anda. Silakan berikan persetujuan kembali di layar Beranda.',
+            'Persetujuan pemrosesan data kesehatan diperlukan untuk memperbarui profil dan menganalisis risiko kesehatan Anda. Silakan berikan persetujuan kembali melalui portal web HELIORA.',
         cancelLabel: 'Mengerti',
         onCancel: () => Navigator.of(dialogCtx).pop(),
       ),

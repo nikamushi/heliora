@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/generated/export.dart';
 import '../../../core/network/api_exception.dart';
+import '../../consent/data/consent_repository.dart';
 import '../data/assessment_repository.dart';
 import '../data/health_profile_repository.dart';
 
@@ -141,12 +142,15 @@ class AssessmentController extends StateNotifier<AssessmentFlowState> {
   AssessmentController({
     required HealthProfileRepository healthProfileRepository,
     required AssessmentRepository assessmentRepository,
+    ConsentRepository? consentRepository,
   })  : _healthProfileRepository = healthProfileRepository,
         _assessmentRepository = assessmentRepository,
+        _consentRepository = consentRepository,
         super(const AssessmentFlowState());
 
   final HealthProfileRepository _healthProfileRepository;
   final AssessmentRepository _assessmentRepository;
+  final ConsentRepository? _consentRepository;
 
   /// Pre-populates all assessment form fields from an existing health profile (MFR-010).
   void prefillFromProfile(HealthProfileResponse profile) {
@@ -249,6 +253,18 @@ class AssessmentController extends StateNotifier<AssessmentFlowState> {
     );
 
     try {
+      if (_consentRepository != null) {
+        final consentStatus = await _consentRepository.getConsentStatus();
+        if (!consentStatus.hasActiveConsent) {
+          state = state.copyWith(
+            status: AssessmentFlowStatus.failure,
+            errorMessage:
+                'Persetujuan pemrosesan data kesehatan diperlukan sebelum menjalankan analisis. Silakan berikan persetujuan di portal web HELIORA.',
+          );
+          return;
+        }
+      }
+
       final familyDetails = _buildFamilyDetails();
       final profileReq = HealthProfileCreateRequest(
         age: state.age ?? 30,
@@ -305,8 +321,10 @@ final assessmentControllerProvider =
     StateNotifierProvider<AssessmentController, AssessmentFlowState>((ref) {
   final healthRepo = ref.watch(healthProfileRepositoryProvider);
   final assessmentRepo = ref.watch(assessmentRepositoryProvider);
+  final consentRepo = ref.watch(consentRepositoryProvider);
   return AssessmentController(
     healthProfileRepository: healthRepo,
     assessmentRepository: assessmentRepo,
+    consentRepository: consentRepo,
   );
 });

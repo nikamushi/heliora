@@ -4,6 +4,19 @@ import 'package:heliora_mobile/core/network/api_exception.dart';
 import 'package:heliora_mobile/features/assessment/data/assessment_repository.dart';
 import 'package:heliora_mobile/features/assessment/data/health_profile_repository.dart';
 import 'package:heliora_mobile/features/assessment/presentation/assessment_controller.dart';
+import 'package:heliora_mobile/features/consent/data/consent_repository.dart';
+
+class FakeConsentRepository implements ConsentRepository {
+  bool hasConsent = true;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+
+  @override
+  Future<ConsentStatusResponse> getConsentStatus() async {
+    return ConsentStatusResponse(hasActiveConsent: hasConsent);
+  }
+}
 
 class FakeHealthProfileRepository implements HealthProfileRepository {
   bool shouldFail = false;
@@ -225,5 +238,25 @@ void main() {
       expect(state.stressLevel, 3);
       expect(state.isStep1Valid, isTrue);
     });
+
+    test('submitAndRunAssessment halts with failure message when active consent is revoked', () async {
+      final fakeConsent = FakeConsentRepository()..hasConsent = false;
+      final guardedController = AssessmentController(
+        healthProfileRepository: fakeHealthProfileRepo,
+        assessmentRepository: fakeAssessmentRepo,
+        consentRepository: fakeConsent,
+      );
+
+      await guardedController.submitAndRunAssessment();
+
+      expect(guardedController.state.status, AssessmentFlowStatus.failure);
+      expect(
+        guardedController.state.errorMessage,
+        contains('Persetujuan pemrosesan data kesehatan diperlukan'),
+      );
+      expect(fakeHealthProfileRepo.lastSaveRequest, isNull);
+      expect(fakeAssessmentRepo.runCallCount, 0);
+    });
   });
 }
+
