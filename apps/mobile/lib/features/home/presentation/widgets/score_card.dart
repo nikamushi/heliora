@@ -25,29 +25,14 @@ class ScoreCard extends StatelessWidget {
   /// Maximum scale denominator (default 100).
   final int scale;
 
-  /// Derives descriptive, plain-language clinical interpretation (no raw numbers alone).
-  String get interpretation {
-    final value = score.toDouble();
-    if (isHealthScore) {
-      if (value >= 80) return 'Kondisi Optimal';
-      if (value >= 60) return 'Kondisi Baik';
-      if (value >= 40) return 'Perlu Perhatian';
-      return 'Perlu Tindakan';
-    } else {
-      if (value >= 80) return 'Gaya Hidup Baik';
-      if (value >= 60) return 'Cukup Seimbang';
-      if (value >= 40) return 'Perlu Ditingkatkan';
-      return 'Kurang Seimbang';
-    }
-  }
+  /// Retrieves the canonical score tier mapping (PRD §11.5.3).
+  ScoreTier get tier => ScoreTier.fromScore(score);
 
-  Color get scoreColor {
-    final value = score.toDouble();
-    if (value >= 80) return HelioraTokens.primary;
-    if (value >= 60) return HelioraTokens.emerald700;
-    if (value >= 40) return HelioraTokens.amber700;
-    return HelioraTokens.rose700;
-  }
+  /// Derives descriptive, plain-language clinical interpretation (no raw numbers alone).
+  String get interpretation => tier.interpretation(isHealthScore);
+
+  /// Derives the canonical semantic accent color.
+  Color get scoreColor => tier.color;
 
   @override
   Widget build(BuildContext context) {
@@ -117,3 +102,50 @@ class ScoreCard extends StatelessWidget {
     );
   }
 }
+
+/// Canonical score tier model consolidating thresholds, colors, and interpretation (PRD §11.5.3).
+class ScoreTier {
+  const ScoreTier({
+    required this.healthInterpretation,
+    required this.lifestyleInterpretation,
+    required this.color,
+  });
+
+  final String healthInterpretation;
+  final String lifestyleInterpretation;
+  final Color color;
+
+  String interpretation(bool isHealthScore) =>
+      isHealthScore ? healthInterpretation : lifestyleInterpretation;
+
+  static ScoreTier fromScore(num score) {
+    final value = score.toDouble();
+    if (value >= 80) {
+      return const ScoreTier(
+        healthInterpretation: 'Kondisi Optimal',
+        lifestyleInterpretation: 'Gaya Hidup Baik',
+        color: HelioraTokens.primary,
+      );
+    }
+    if (value >= 60) {
+      return const ScoreTier(
+        healthInterpretation: 'Kondisi Baik',
+        lifestyleInterpretation: 'Cukup Seimbang',
+        color: HelioraTokens.teal700,
+      );
+    }
+    if (value >= 40) {
+      return const ScoreTier(
+        healthInterpretation: 'Perlu Perhatian',
+        lifestyleInterpretation: 'Perlu Ditingkatkan',
+        color: HelioraTokens.amber700,
+      );
+    }
+    return const ScoreTier(
+      healthInterpretation: 'Perlu Tindakan',
+      lifestyleInterpretation: 'Kurang Seimbang',
+      color: HelioraTokens.rose700,
+    );
+  }
+}
+

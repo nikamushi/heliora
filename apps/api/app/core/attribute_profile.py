@@ -11,7 +11,7 @@ from decimal import Decimal
 from typing import Any
 
 
-@dataclass
+@dataclass(slots=True)
 class AttributeProfile:
     """Strongly-typed attribute container mirroring health profile attributes."""
 
@@ -36,41 +36,8 @@ class AttributeProfile:
     id: Any = None
     user_id: Any = None
 
-    def __init__(self, **kwargs: Any) -> None:
-        """Allow keyword initialization with defaults while validating known fields."""
-        explicit_fields = (
-            "age",
-            "gender",
-            "height_cm",
-            "weight_kg",
-            "physical_activity_min_per_week",
-            "sleep_duration_hours",
-            "smoking_status",
-            "family_history",
-            "family_history_details",
-            "stress_level",
-            "bmi",
-            "bmi_category",
-            "waist_circumference_cm",
-            "blood_pressure",
-            "blood_sugar_mg_dl",
-            "cholesterol_mg_dl",
-            "created_at",
-            "updated_at",
-            "id",
-            "user_id",
-        )
-        for name in explicit_fields:
-            if name in kwargs:
-                setattr(self, name, kwargs.pop(name))
-            else:
-                setattr(self, name, getattr(self.__class__, name, None))
-
-        # Pass through any remaining arbitrary kwargs for backwards-compatibility
-        for k, v in kwargs.items():
-            setattr(self, k, v)
-
-        # Derive BMI automatically if height and weight are given but BMI is None
+    def __post_init__(self) -> None:
+        """Derive BMI automatically if height and weight are given but BMI is None."""
         if self.bmi is None:
             try:
                 h_cm = float(self.height_cm)

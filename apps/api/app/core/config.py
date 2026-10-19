@@ -71,6 +71,11 @@ class Settings(BaseSettings):
                 self.SUPABASE_JWKS_URL = f"{base}/auth/v1/.well-known/jwks.json"
             if not self.SUPABASE_ISSUER:
                 self.SUPABASE_ISSUER = f"{base}/auth/v1"
+        return self
+
+    @model_validator(mode="after")
+    def validate_cors_security(self) -> "Settings":
+        """Ensure CORS localhost regex is strictly disabled outside development/test environments."""
         if self.APP_ENV not in ("development", "test", "testing", "local"):
             self.CORS_ORIGIN_REGEX = None
         return self

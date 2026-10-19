@@ -6,6 +6,22 @@ import 'package:heliora_mobile/core/network/api_exception.dart';
 import 'package:heliora_mobile/features/assessment/data/assessment_repository.dart';
 import 'package:heliora_mobile/features/assessment/data/health_profile_repository.dart';
 import 'package:heliora_mobile/features/assessment/presentation/assessment_flow_screen.dart';
+import 'package:heliora_mobile/features/consent/data/consent_repository.dart';
+
+class MockConsentRepository implements ConsentRepository {
+  bool hasActiveConsent = true;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+
+  @override
+  Future<ConsentStatusResponse> getConsentStatus() async {
+    return ConsentStatusResponse(
+      hasActiveConsent: hasActiveConsent,
+      termsVersion: '1.0',
+    );
+  }
+}
 
 class MockHealthProfileRepository implements HealthProfileRepository {
   bool failSave = false;
@@ -75,10 +91,12 @@ void main() {
   group('AssessmentFlowScreen', () {
     late MockHealthProfileRepository mockHealthProfileRepo;
     late MockAssessmentRepository mockAssessmentRepo;
+    late MockConsentRepository mockConsentRepo;
 
     setUp(() {
       mockHealthProfileRepo = MockHealthProfileRepository();
       mockAssessmentRepo = MockAssessmentRepository();
+      mockConsentRepo = MockConsentRepository();
     });
 
     Widget createTestWidget({VoidCallback? onCompleted}) {
@@ -86,6 +104,7 @@ void main() {
         overrides: [
           healthProfileRepositoryProvider.overrideWithValue(mockHealthProfileRepo),
           assessmentRepositoryProvider.overrideWithValue(mockAssessmentRepo),
+          consentRepositoryProvider.overrideWithValue(mockConsentRepo),
         ],
         child: MaterialApp(
           home: AssessmentFlowScreen(
