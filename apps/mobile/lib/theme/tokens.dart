@@ -18,10 +18,14 @@ abstract class HelioraTokens {
   // Status Colors
   static const Color emerald700 = Color(0xFF047857);
   static const Color rose700 = Color(0xFFBE123C);
+  static const Color rose300 = Color(0xFFFCA5A5);
+  static const Color rose50 = Color(0xFFFEF2F2);
   static const Color amber700 = Color(0xFFB45309);
+  static const Color slate400 = Color(0xFF94A3B8);
   static const Color inputErrorBorder = Color(0xFFBE123C);
 
   // Corner Radii (Design.md §15.1: 12px corners, strictly no pill chips)
+  static const double radius2xl = 24.0;
   static const double radiusXl = 12.0;
   static const double radiusSm = 6.0;
 
