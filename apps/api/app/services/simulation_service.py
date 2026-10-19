@@ -13,6 +13,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.risk_engine import risk_engine
 from app.repositories.health_profile_repo import health_profile_repo
 from app.schemas.simulation import (
+    MAX_DERIVED_BMI,
+    MIN_DERIVED_BMI,
     FutureSimulationRequest,
     FutureSimulationResponse,
     SimulationHorizon,
@@ -60,6 +62,20 @@ class SimulationService:
 
         overrides = request.model_dump(exclude_unset=True)
         raw_result = risk_engine.simulate_what_if(profile, overrides)
+
+        # The override is valid on its own, but combined with the profile height
+        # it can imply a BMI the scenario model does not support. That is a
+        # client-side scenario problem (422), not a server error.
+        derived_bmi = raw_result["derived_bmi"]
+        if not MIN_DERIVED_BMI <= derived_bmi <= MAX_DERIVED_BMI:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=(
+                    f"Skenario menghasilkan BMI {derived_bmi} yang berada di luar "
+                    f"rentang simulasi ({MIN_DERIVED_BMI:g}–{MAX_DERIVED_BMI:g}). "
+                    "Sesuaikan berat badan pada skenario."
+                ),
+            )
         return WhatIfSimulationResponse(**raw_result)
 
 

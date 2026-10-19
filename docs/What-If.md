@@ -72,7 +72,11 @@ derived_bmi = round(weight_kg / (height_m ** 2), 1)
 ```
 
 `weight_kg` memakai nilai override bila ada, `height_m` dari tinggi profil.
-Skema menjepit `derived_bmi` pada 10.0–80.0.
+Rentang `derived_bmi` yang didukung adalah 10.0–80.0 (inklusif; konstanta
+`MIN_DERIVED_BMI`/`MAX_DERIVED_BMI` di `schemas/simulation.py`). Override berat
+yang valid namun menghasilkan BMI di luar rentang (mis. 300 kg pada tinggi
+profil 140 cm → 153.1) ditolak service dengan **HTTP 422** dan pesan yang
+menyebut nilai BMI hasil turunan — bukan HTTP 500 (QA-002.1).
 
 ### 3.4 Re-run risk engine (BR-WHATIF-004)
 
