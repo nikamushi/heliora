@@ -2052,16 +2052,16 @@ Acceptance Criteria:
 **Owner:** Pino & Tumir + Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S10  
-**Status:** IN PROGRESS
+**Status:** DONE
 
 Tasks:
 
-- [ ] SEC-003: Dedicated CORS security validator in FastAPI settings, removing Divergent Change from Supabase defaults.
-- [ ] ARC-003: Pure typed AttributeProfile dataclass without dynamic kwargs, and typing protocols across all risk engine mixins.
-- [ ] MOB-012.01: Relocate HelioraConfirmationDialog to shared UI layer (lib/theme/widgets/) and harmonize typography tokens.
-- [ ] MOB-012.02: Implement consolidated score tier domain mapping with distinct tier-2 visual accent in ScoreCard.
-- [ ] MOB-012.03: Enforce client-side active consent guard in AssessmentController and correct re-consent guidance.
-- [ ] DOC-004: Synchronize docs/TASK.md completion checklist and verify 100% test suites pass.
+- [x] SEC-003: Dedicated CORS security validator in FastAPI settings, removing Divergent Change from Supabase defaults.
+- [x] ARC-003: Pure typed AttributeProfile dataclass without dynamic kwargs, and typing protocols across all risk engine mixins.
+- [x] MOB-012.01: Relocate HelioraConfirmationDialog to shared UI layer (lib/theme/widgets/) and harmonize typography tokens.
+- [x] MOB-012.02: Implement consolidated score tier domain mapping with distinct tier-2 visual accent in ScoreCard.
+- [x] MOB-012.03: Enforce client-side active consent guard in AssessmentController and correct re-consent guidance.
+- [x] DOC-004: Synchronize docs/TASK.md completion checklist and verify 100% test suites pass.
 
 Acceptance Criteria:
 
