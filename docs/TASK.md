@@ -2047,9 +2047,34 @@ Acceptance Criteria:
 
 ---
 
+## MOB-012 — Post-Review Remediation and Architecture Hardening
+
+**Owner:** Pino & Tumir + Gilang & Aksal  
+**Priority:** P0  
+**Sprint:** S10  
+**Status:** IN PROGRESS
+
+Tasks:
+
+- [ ] SEC-003: Dedicated CORS security validator in FastAPI settings, removing Divergent Change from Supabase defaults.
+- [ ] ARC-003: Pure typed AttributeProfile dataclass without dynamic kwargs, and typing protocols across all risk engine mixins.
+- [ ] MOB-012.01: Relocate HelioraConfirmationDialog to shared UI layer (lib/theme/widgets/) and harmonize typography tokens.
+- [ ] MOB-012.02: Implement consolidated score tier domain mapping with distinct tier-2 visual accent in ScoreCard.
+- [ ] MOB-012.03: Enforce client-side active consent guard in AssessmentController and correct re-consent guidance.
+- [ ] DOC-004: Synchronize docs/TASK.md completion checklist and verify 100% test suites pass.
+
+Acceptance Criteria:
+
+- Backend `validate_cors_security` model validator independently gates `CORS_ORIGIN_REGEX` to development/test only.
+- `AttributeProfile` tidak memiliki bypass `kwargs` dinamis dan seluruh sibling mixin engine risiko mengadopsi `RiskEngineProtocol`.
+- `HelioraConfirmationDialog` berada di `lib/theme/widgets/` dan diekspor melalui `lib/theme/components.dart` dengan token tipografi resmi.
+- `ScoreCard` mengevaluasi threshold tier melalui helper domain tunggal tanpa repeated switches, dengan kontras jelas pada tier 60–79.
+- `AssessmentController.submitAndRunAssessment()` memvalidasi persetujuan aktif sebelum eksekusi dan dialog reaktivasi persetujuan bebas dari instruksi berulang ke Beranda.
+- Seluruh unit tests, widget tests, dan pytest suites lulus 100%.
+
+---
 
 
-# 19. Integration Tasks
 
 
 
