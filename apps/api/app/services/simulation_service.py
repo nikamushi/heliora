@@ -69,7 +69,7 @@ class SimulationService:
         derived_bmi = raw_result["derived_bmi"]
         if not MIN_DERIVED_BMI <= derived_bmi <= MAX_DERIVED_BMI:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=422,
                 detail=(
                     f"Skenario menghasilkan BMI {derived_bmi} yang berada di luar "
                     f"rentang simulasi ({MIN_DERIVED_BMI:g}–{MAX_DERIVED_BMI:g}). "

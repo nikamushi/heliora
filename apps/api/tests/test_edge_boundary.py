@@ -565,3 +565,109 @@ async def test_what_if_service_unsupported_bmi_raises_422_not_validation_error()
                 AsyncMock(), uuid.uuid4(), WhatIfSimulationRequest(weight_kg=300.0)
             )
     assert exc_info.value.status_code == 422
+
+
+# ── BMI storage overflow guard (NUMERIC(4,1) -> max 999.9) ───────────────────
+
+
+@pytest.mark.parametrize(("height", "weight"), [(1.0, 500.0), (70.0, 500.0)])
+def test_create_schema_rejects_bmi_beyond_storage_limit(height, weight):
+    """Extreme height/weight combos would overflow health_profiles.bmi."""
+    with pytest.raises(ValidationError) as exc_info:
+        _create_payload(height_cm=height, weight_kg=weight)
+    assert "BMI" in str(exc_info.value)
+
+
+@pytest.mark.parametrize(
+    ("height", "weight", "expected_bmi"),
+    [(71.0, 500.0, 991.9), (140.0, 300.0, 153.1)],
+)
+def test_create_schema_accepts_extreme_but_storable_bmi(height, weight, expected_bmi):
+    """TC-EXT-01: BMI 153.1 is accepted; limit is the storage ceiling only."""
+    payload = _create_payload(height_cm=height, weight_kg=weight)
+    assert calculate_bmi(payload.height_cm, payload.weight_kg) == expected_bmi
+
+
+async def test_create_route_rejects_unstorable_bmi_with_422():
+    """POST /health-profile must be 422, never a DB overflow 500."""
+    _override_dependencies(uuid.uuid4())
+    try:
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://testserver"
+        ) as client:
+            response = await client.post(
+                "/api/v1/health-profile",
+                json={
+                    "age": 30,
+                    "gender": "male",
+                    "height_cm": 1,
+                    "weight_kg": 500,
+                    "physical_activity_min_per_week": 0,
+                    "sleep_duration_hours": 7,
+                    "smoking_status": "never",
+                },
+            )
+    finally:
+        app.dependency_overrides.clear()
+    assert response.status_code == 422
+    assert "BMI" in response.text
+
+
+def _stored_profile() -> HealthProfile:
+    return _profile(height_cm="180.0", weight_kg="80.0", bmi="24.7")
+
+
+@pytest.mark.parametrize(
+    "update",
+    [
+        {"height_cm": 1.0},  # merged with stored 80 kg
+        {"weight_kg": 500.0, "height_cm": 70.0},  # both sent
+    ],
+)
+async def test_update_service_rejects_unstorable_merged_bmi(update):
+    from app.schemas.health_profile import HealthProfileUpdateRequest
+    from app.services.health_profile_service import health_profile_service
+
+    repo_update = AsyncMock()
+    with (
+        patch(
+            "app.services.health_profile_service.health_profile_repo.get_by_user_id",
+            new_callable=AsyncMock,
+            return_value=_stored_profile(),
+        ),
+        patch(
+            "app.services.health_profile_service.health_profile_repo.update",
+            repo_update,
+        ),
+    ):
+        with pytest.raises(HTTPException) as exc_info:
+            await health_profile_service.update_profile(
+                AsyncMock(), uuid.uuid4(), HealthProfileUpdateRequest(**update)
+            )
+    assert exc_info.value.status_code == 422
+    assert "BMI" in exc_info.value.detail
+    repo_update.assert_not_awaited()
+
+
+async def test_update_service_allows_storable_and_non_bmi_updates():
+    from app.schemas.health_profile import HealthProfileUpdateRequest
+    from app.services.health_profile_service import health_profile_service
+
+    stored = _stored_profile()
+    for update in ({"weight_kg": 95.0}, {"age": 40}, {"sleep_duration_hours": 8.0}):
+        repo_update = AsyncMock(return_value=stored)
+        with (
+            patch(
+                "app.services.health_profile_service.health_profile_repo.get_by_user_id",
+                new_callable=AsyncMock,
+                return_value=stored,
+            ),
+            patch(
+                "app.services.health_profile_service.health_profile_repo.update",
+                repo_update,
+            ),
+        ):
+            await health_profile_service.update_profile(
+                AsyncMock(), uuid.uuid4(), HealthProfileUpdateRequest(**update)
+            )
+        repo_update.assert_awaited_once()
