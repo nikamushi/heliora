@@ -12,6 +12,10 @@ SimulationHorizon = Literal[30, 90, 180]
 RiskLevel = Literal["low", "moderate", "high"]
 StandardizedRiskLabel = Literal["Lower", "Moderate", "Higher"]
 
+# What-if derived BMI range supported by the scenario model (docs/What-If.md §3.3).
+MIN_DERIVED_BMI: float = 10.0
+MAX_DERIVED_BMI: float = 80.0
+
 # PRD FR-005 & §20.21 — Mandated verbatim medical disclaimer
 MANDATORY_MEDICAL_DISCLAIMER: str = (
     "HELIORA adalah alat bantu preventive health berbasis lifestyle dan AI. "
@@ -169,7 +173,10 @@ class WhatIfSimulationResponse(BaseModel):
         ..., description="Dictionary of active lifestyle parameters used in this scenario."
     )
     derived_bmi: float = Field(
-        ..., ge=10.0, le=80.0, description="Recalculated BMI based on simulated weight."
+        ...,
+        ge=MIN_DERIVED_BMI,
+        le=MAX_DERIVED_BMI,
+        description="Recalculated BMI based on simulated weight.",
     )
     baseline_health_score: float = Field(
         ..., ge=0.0, le=100.0, description="Current baseline overall health score."
