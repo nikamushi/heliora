@@ -40,7 +40,7 @@ class ApiException implements Exception {
         error.type == DioExceptionType.receiveTimeout ||
         error.type == DioExceptionType.connectionError) {
       return const ApiException(
-        message: 'Koneksi ke server terputus. Pastikan perangkat terhubung ke internet dan backend aktif di port 8000.',
+        message: 'Koneksi ke server terputus. Pastikan perangkat terhubung ke internet dan coba beberapa saat lagi.',
         statusCode: null,
       );
     }

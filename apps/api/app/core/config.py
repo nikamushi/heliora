@@ -71,6 +71,8 @@ class Settings(BaseSettings):
                 self.SUPABASE_JWKS_URL = f"{base}/auth/v1/.well-known/jwks.json"
             if not self.SUPABASE_ISSUER:
                 self.SUPABASE_ISSUER = f"{base}/auth/v1"
+        if self.APP_ENV not in ("development", "test", "testing", "local"):
+            self.CORS_ORIGIN_REGEX = None
         return self
 
     @property
