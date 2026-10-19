@@ -114,7 +114,9 @@ class HealthProfileCreateRequest(BaseModel):
         default=None, gt=0, le=300, description="Waist circumference in cm"
     )
     blood_pressure: str | None = Field(
-        default=None, description="Blood pressure reading (e.g. '120/80')"
+        default=None,
+        max_length=20,
+        description="Blood pressure reading (e.g. '120/80')",
     )
     blood_sugar_mg_dl: float | None = Field(
         default=None, gt=0, le=1000, description="Fasting blood sugar in mg/dL"
@@ -146,7 +148,11 @@ class HealthProfileUpdateRequest(BaseModel):
     stress_level: int | None = Field(default=None, ge=1, le=10)
     bmi: float | None = Field(default=None, gt=0, le=100)
     waist_circumference_cm: float | None = Field(default=None, gt=0, le=300)
-    blood_pressure: str | None = Field(default=None)
+    blood_pressure: str | None = Field(
+        default=None,
+        max_length=20,
+        description="Blood pressure reading (e.g. '120/80')",
+    )
     blood_sugar_mg_dl: float | None = Field(default=None, gt=0, le=1000)
     cholesterol_mg_dl: float | None = Field(default=None, gt=0, le=1000)
 

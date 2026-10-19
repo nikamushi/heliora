@@ -671,3 +671,13 @@ async def test_update_service_allows_storable_and_non_bmi_updates():
                 AsyncMock(), uuid.uuid4(), HealthProfileUpdateRequest(**update)
             )
         repo_update.assert_awaited_once()
+
+
+def test_blood_pressure_length_exceeding_storage_limit_rejected():
+    """blood_pressure > 20 chars rejected by Pydantic before DB String(20) error."""
+    with pytest.raises(ValidationError):
+        _create_payload(blood_pressure="120/80 mmHg with rest extra long")
+
+    valid_payload = _create_payload(blood_pressure="120/80 (sitting)")
+    assert valid_payload.blood_pressure == "120/80 (sitting)"
+    assert len(valid_payload.blood_pressure) <= 20
