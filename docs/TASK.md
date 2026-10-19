@@ -793,7 +793,7 @@ Acceptance Criteria:
 **Owner:** Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S3  
-**Status:** BACKLOG
+**Status:** DONE
 
 Tasks:
 
@@ -2022,17 +2022,17 @@ Acceptance Criteria:
 **Owner:** Pino & Tumir + Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S9-S10  
-**Status:** IN PROGRESS
+**Status:** DONE
 
 Tasks:
 
-- [ ] SEC-002: Environment-gate CORS localhost regex in FastAPI to development only, and sanitize user-facing mobile network error messages.
-- [ ] MOB-011.01: Implement canonical 80/60/40 score tiers in ScoreCard (Excellent 80-100, Good 60-79, Needs Improvement 40-59, High Risk <40).
-- [ ] MOB-011.02: Prevent health profile edit navigation on ProfileScreen when consent is revoked, displaying consent-reactivation prompt.
-- [ ] MOB-011.03: Harmonize raw hex colors to HelioraTokens across profile and assessment flow screens.
-- [ ] MOB-011.04: Extract duplicated modal confirmation dialog into reusable HelioraConfirmationDialog component.
-- [ ] ARC-002: Refactor AttributeProfile into strongly-typed Pydantic/dataclass schema and add typed Protocols to risk engine mixins.
-- [ ] DOC-003: Reconcile AI-001 status to DONE in docs/TASK.md.
+- [x] SEC-002: Environment-gate CORS localhost regex in FastAPI to development only, and sanitize user-facing mobile network error messages.
+- [x] MOB-011.01: Implement canonical 80/60/40 score tiers in ScoreCard (Excellent 80-100, Good 60-79, Needs Improvement 40-59, High Risk <40).
+- [x] MOB-011.02: Prevent health profile edit navigation on ProfileScreen when consent is revoked, displaying consent-reactivation prompt.
+- [x] MOB-011.03: Harmonize raw hex colors to HelioraTokens across profile and assessment flow screens.
+- [x] MOB-011.04: Extract duplicated modal confirmation dialog into reusable HelioraConfirmationDialog component.
+- [x] ARC-002: Refactor AttributeProfile into strongly-typed Pydantic/dataclass schema and add typed Protocols to risk engine mixins.
+- [x] DOC-003: Reconcile AI-001 status to DONE in docs/TASK.md.
 
 Acceptance Criteria:
 
