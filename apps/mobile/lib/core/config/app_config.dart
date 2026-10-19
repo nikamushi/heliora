@@ -60,7 +60,14 @@ class AppConfig {
       defaultValue: defaultAnonKey,
     );
 
-    const authCallbackScheme = 'id.heliora.app://login-callback';
+    final String authCallbackScheme;
+    if (kIsWeb) {
+      authCallbackScheme = Uri.base.hasScheme && Uri.base.scheme.startsWith('http')
+          ? Uri.base.origin
+          : 'http://localhost:3000';
+    } else {
+      authCallbackScheme = 'id.heliora.app://login-callback';
+    }
 
     return AppConfig(
       apiBaseUrl: apiBaseUrl,

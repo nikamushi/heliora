@@ -150,7 +150,7 @@ class HomeScreen extends ConsumerWidget {
                   valueColor: AlwaysStoppedAnimation(HelioraTokens.primary),
                 ),
               ),
-              error: (err, _) => _buildEmptyAssessmentState(context),
+              error: (err, _) => _buildAssessmentErrorState(context, ref, err),
             );
           },
           loading: () => const Center(
@@ -238,43 +238,22 @@ class HomeScreen extends ConsumerWidget {
                   const SizedBox(height: 12),
                 ],
               ] else ...[
-                // Fallback default conditions if list was empty
-                RiskCard(
-                  item: RiskAssessmentItem(
-                    condition: RiskAssessmentItemCondition.diabetes,
-                    label: 'Diabetes Tipe 2',
-                    probability: 0.12,
-                    estimatedRiskScore: 12,
-                    riskLevel: RiskAssessmentItemRiskLevel.low,
-                    riskLabel: RiskAssessmentItemRiskLabel.lower,
-                    trend: RiskAssessmentItemTrend.stable,
-                    description: 'Risiko diabetes tipe 2 dalam batas wajar.',
+                // Honest empty state when risks list is empty (strictly no fake scores)
+                Container(
+                  padding: const EdgeInsets.all(16.0),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(color: HelioraTokens.border, width: 1.0),
+                    borderRadius: BorderRadius.circular(16.0),
                   ),
-                ),
-                const SizedBox(height: 12),
-                RiskCard(
-                  item: RiskAssessmentItem(
-                    condition: RiskAssessmentItemCondition.hypertension,
-                    label: 'Hipertensi',
-                    probability: 0.24,
-                    estimatedRiskScore: 24,
-                    riskLevel: RiskAssessmentItemRiskLevel.moderate,
-                    riskLabel: RiskAssessmentItemRiskLabel.moderate,
-                    trend: RiskAssessmentItemTrend.stable,
-                    description: 'Risiko hipertensi memerlukan perhatian gaya hidup.',
-                  ),
-                ),
-                const SizedBox(height: 12),
-                RiskCard(
-                  item: RiskAssessmentItem(
-                    condition: RiskAssessmentItemCondition.cardiovascular,
-                    label: 'Penyakit Kardiovaskular',
-                    probability: 0.08,
-                    estimatedRiskScore: 8,
-                    riskLevel: RiskAssessmentItemRiskLevel.low,
-                    riskLabel: RiskAssessmentItemRiskLabel.lower,
-                    trend: RiskAssessmentItemTrend.decreasing,
-                    description: 'Risiko penyakit kardiovaskular rendah.',
+                  child: const Text(
+                    'Belum ada rincian kondisi risiko yang tercatat pada asesmen ini.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'Plus Jakarta Sans',
+                      fontSize: 13,
+                      color: HelioraTokens.mutedForeground,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -499,6 +478,110 @@ class HomeScreen extends ConsumerWidget {
               const SizedBox(height: 24),
 
               // Statutory disclaimer
+              const StatutoryDisclaimerCard(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// State 4: Error state when assessment data cannot be loaded (PRD-Mobile.md MFR-007, MFR-011).
+  Widget _buildAssessmentErrorState(
+    BuildContext context,
+    WidgetRef ref,
+    Object error,
+  ) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 480),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(24.0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(color: HelioraTokens.border, width: 1.0),
+                  borderRadius: BorderRadius.circular(16.0),
+                ),
+                child: Column(
+                  children: [
+                    Container(
+                      width: 64,
+                      height: 64,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFEF2F2),
+                        borderRadius: BorderRadius.circular(16.0),
+                      ),
+                      child: const Center(
+                        child: HelioraIcon(
+                          HelioraIcons.triangleAlert,
+                          size: 30,
+                          color: HelioraTokens.rose700,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Analisis Sedang Tidak Tersedia',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Plus Jakarta Sans',
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.3,
+                        color: HelioraTokens.foreground,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Analisis sedang tidak tersedia, coba lagi. Heliora tidak pernah menampilkan estimasi atau skor rekaan saat sistem sedang mengalami kendala.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Plus Jakarta Sans',
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                        height: 1.5,
+                        color: HelioraTokens.mutedForeground,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          ref.invalidate(latestAssessmentProvider);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: HelioraTokens.primary,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(HelioraTokens.radiusXl),
+                          ),
+                        ),
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            HelioraIcon(
+                              HelioraIcons.activity,
+                              size: 18,
+                              color: Colors.white,
+                            ),
+                            SizedBox(width: 8),
+                            Text('Muat Ulang', style: HelioraTokens.labelButton),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
               const StatutoryDisclaimerCard(),
             ],
           ),

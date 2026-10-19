@@ -253,5 +253,63 @@ void main() {
 
       expect(completedCalled, isTrue);
     });
+
+    testWidgets('pre-populates form controllers and dynamic BMI when initialProfile is provided', (tester) async {
+      tester.view.physicalSize = const Size(800, 1400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      const existingProfile = HealthProfileResponse(
+        id: 'prof-existing',
+        userId: 'usr-123',
+        age: 42,
+        gender: 'female',
+        heightCm: 165.0,
+        weightKg: 68.0,
+        physicalActivityMinPerWeek: 180.0,
+        sleepDurationHours: 7.5,
+        smokingStatus: 'never',
+        familyHistory: true,
+        familyHistoryDetails: 'Diabetes, Hipertensi',
+        stressLevel: 4,
+      );
+
+      var backPressed = false;
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            healthProfileRepositoryProvider.overrideWithValue(mockHealthProfileRepo),
+            assessmentRepositoryProvider.overrideWithValue(mockAssessmentRepo),
+          ],
+          child: MaterialApp(
+            home: AssessmentFlowScreen(
+              initialProfile: existingProfile,
+              onBack: () => backPressed = true,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Verify form fields are pre-populated
+      expect(find.text('42'), findsOneWidget);
+      expect(find.text('165'), findsOneWidget);
+      expect(find.text('68'), findsOneWidget);
+
+      // Verify BMI calculated dynamically (68 / (1.65 * 1.65) = 24.97 -> 25,0)
+      expect(find.text('IMT'), findsOneWidget);
+      expect(find.text('25,0'), findsOneWidget);
+      expect(find.text('NORMAL'), findsOneWidget);
+
+      // Verify onBack button exists and triggers callback
+      expect(find.widgetWithText(OutlinedButton, 'Batal & Kembali ke Profil'), findsOneWidget);
+      await tester.tap(find.widgetWithText(OutlinedButton, 'Batal & Kembali ke Profil'));
+      await tester.pumpAndSettle();
+      expect(backPressed, isTrue);
+    });
   });
 }

@@ -148,6 +148,56 @@ class AssessmentController extends StateNotifier<AssessmentFlowState> {
   final HealthProfileRepository _healthProfileRepository;
   final AssessmentRepository _assessmentRepository;
 
+  /// Pre-populates all assessment form fields from an existing health profile (MFR-010).
+  void prefillFromProfile(HealthProfileResponse profile) {
+    bool hasDiabetes = false;
+    bool hasHypertension = false;
+    bool hasCvd = false;
+    bool hasOther = false;
+    String? notes;
+
+    final details = profile.familyHistoryDetails;
+    if (details != null && details.isNotEmpty) {
+      final parts = details.split(', ');
+      for (final part in parts) {
+        if (part == 'Diabetes') {
+          hasDiabetes = true;
+        } else if (part == 'Hipertensi') {
+          hasHypertension = true;
+        } else if (part == 'Kardiovaskular') {
+          hasCvd = true;
+        } else if (part == 'Penyakit kronis lainnya') {
+          hasOther = true;
+        } else if (part.startsWith('Catatan: ')) {
+          notes = part.substring(9);
+        }
+      }
+    } else if (profile.familyHistory == true) {
+      hasOther = true;
+    }
+
+    final gender = GenderEnum.fromJson(profile.gender);
+    final smoking = SmokingStatusEnum.fromJson(profile.smokingStatus);
+
+    state = state.copyWith(
+      currentStep: 1,
+      status: AssessmentFlowStatus.initial,
+      age: profile.age,
+      gender: gender != GenderEnum.$unknown ? gender : GenderEnum.male,
+      heightCm: profile.heightCm.toDouble(),
+      weightKg: profile.weightKg.toDouble(),
+      physicalActivityMinPerWeek: profile.physicalActivityMinPerWeek.toDouble(),
+      sleepDurationHours: profile.sleepDurationHours.toDouble(),
+      smokingStatus: smoking != SmokingStatusEnum.$unknown ? smoking : SmokingStatusEnum.never,
+      hasDiabetesFamily: hasDiabetes,
+      hasHypertensionFamily: hasHypertension,
+      hasCvdFamily: hasCvd,
+      hasOtherFamily: hasOther,
+      familyHistoryNotes: notes,
+      stressLevel: profile.stressLevel ?? 5,
+    );
+  }
+
   void setAge(int? age) => state = state.copyWith(age: age);
   void setGender(GenderEnum gender) => state = state.copyWith(gender: gender);
   void setHeight(double? h) => state = state.copyWith(heightCm: h);

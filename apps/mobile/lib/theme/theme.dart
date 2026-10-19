@@ -1,7 +1,29 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'tokens.dart';
+
+/// Custom scroll behavior providing fluid, physics-based smooth scrolling across touch,
+/// mouse, stylus, and trackpad on both Mobile and Web platforms.
+class HelioraScrollBehavior extends MaterialScrollBehavior {
+  const HelioraScrollBehavior();
+
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.stylus,
+        PointerDeviceKind.trackpad,
+      };
+
+  @override
+  ScrollPhysics getScrollPhysics(BuildContext context) {
+    return const BouncingScrollPhysics(
+      parent: AlwaysScrollableScrollPhysics(),
+    );
+  }
+}
 
 /// App theme configurations matching Figma Mobile (MVP) Light & Dark specifications.
 class HelioraTheme {

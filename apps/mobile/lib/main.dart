@@ -12,6 +12,7 @@ import 'features/auth/presentation/register_screen.dart';
 import 'features/consent/presentation/consent_controller.dart';
 import 'features/consent/presentation/consent_screen.dart';
 import 'features/assessment/data/assessment_repository.dart';
+import 'features/assessment/data/health_profile_repository.dart';
 import 'features/assessment/presentation/assessment_flow_screen.dart';
 import 'features/home/presentation/home_screen.dart';
 import 'features/profile/presentation/profile_screen.dart';
@@ -84,26 +85,33 @@ class _HelioraAppState extends ConsumerState<HelioraApp> {
     return MaterialApp(
       title: 'HELIORA',
       debugShowCheckedModeBanner: false,
+      scrollBehavior: const HelioraScrollBehavior(),
       theme: HelioraTheme.lightTheme,
       darkTheme: HelioraTheme.darkTheme,
-      home: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 200),
-        child: _splashActive
-            ? SplashScreen(
-                key: const ValueKey('splash_screen'),
-                onSplashComplete: () {
-                  if (mounted) {
-                    setState(() => _splashActive = false);
-                  }
-                },
-              )
-            : (isAuthenticated
-                ? const _AuthenticatedFlowRouter(
-                    key: ValueKey('authenticated_router'),
+      themeMode: ThemeMode.light,
+      home: Builder(
+        builder: (context) {
+          final reduceMotion = MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+          return AnimatedSwitcher(
+            duration: Duration(milliseconds: reduceMotion ? 150 : 200),
+            child: _splashActive
+                ? SplashScreen(
+                    key: const ValueKey('splash_screen'),
+                    onSplashComplete: () {
+                      if (mounted) {
+                        setState(() => _splashActive = false);
+                      }
+                    },
                   )
-                : const _UnauthenticatedNavigationFlow(
-                    key: ValueKey('unauthenticated_router'),
-                  )),
+                : (isAuthenticated
+                    ? const _AuthenticatedFlowRouter(
+                        key: ValueKey('authenticated_router'),
+                      )
+                    : const _UnauthenticatedNavigationFlow(
+                        key: ValueKey('unauthenticated_router'),
+                      )),
+          );
+        },
       ),
     );
   }
@@ -125,6 +133,7 @@ class _AuthenticatedFlowRouterState
   bool _inConsentFlow = false;
   bool _inSimulationFlow = false;
   bool _inProfileFlow = false;
+  bool _editingProfileFromProfile = false;
 
   @override
   void initState() {
@@ -149,10 +158,29 @@ class _AuthenticatedFlowRouterState
   @override
   Widget build(BuildContext context) {
     if (_inAssessmentFlow) {
+      final currentProfile = ref.watch(healthProfileProvider).asData?.value;
       return AssessmentFlowScreen(
+        initialProfile: _editingProfileFromProfile ? currentProfile : null,
+        onBack: _editingProfileFromProfile
+            ? () {
+                setState(() {
+                  _inAssessmentFlow = false;
+                  _editingProfileFromProfile = false;
+                  _inProfileFlow = true;
+                });
+              }
+            : null,
         onAssessmentCompleted: () {
-          setState(() => _inAssessmentFlow = false);
+          final wasEditing = _editingProfileFromProfile;
+          setState(() {
+            _inAssessmentFlow = false;
+            _editingProfileFromProfile = false;
+            if (wasEditing) {
+              _inProfileFlow = true;
+            }
+          });
           ref.invalidate(latestAssessmentProvider);
+          ref.invalidate(healthProfileProvider);
         },
       );
     }
@@ -194,6 +222,7 @@ class _AuthenticatedFlowRouterState
         onEditHealthProfile: () {
           setState(() {
             _inProfileFlow = false;
+            _editingProfileFromProfile = true;
             _inAssessmentFlow = true;
           });
         },
@@ -207,14 +236,17 @@ class _AuthenticatedFlowRouterState
     }
 
     final consentStatusAsync = ref.watch(consentStatusProvider);
+    final healthProfileAsync = ref.watch(healthProfileProvider);
 
     return consentStatusAsync.when(
       data: (status) {
-        // If user never had any consent recorded at all (brand new user onboarding)
-        if (!status.hasActiveConsent && status.activeConsent == null) {
+        // If user never had any consent recorded AND has no health profile yet (brand new onboarding)
+        final hasProfile = healthProfileAsync.asData?.value != null;
+        if (!status.hasActiveConsent && !hasProfile && status.activeConsent == null) {
           return ConsentScreen(
             onConsentGranted: () {
               ref.invalidate(consentStatusProvider);
+              ref.invalidate(healthProfileProvider);
             },
           );
         }

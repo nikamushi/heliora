@@ -190,5 +190,40 @@ void main() {
       expect(controller.state.status, AssessmentFlowStatus.success);
       expect(controller.state.result, isNotNull);
     });
+
+    test('prefillFromProfile pre-populates all state properties correctly', () {
+      const profile = HealthProfileResponse(
+        id: 'prof-test',
+        userId: 'usr-1',
+        age: 38,
+        gender: 'female',
+        heightCm: 162.0,
+        weightKg: 58.0,
+        physicalActivityMinPerWeek: 210.0,
+        sleepDurationHours: 7.5,
+        smokingStatus: 'former',
+        familyHistory: true,
+        familyHistoryDetails: 'Diabetes, Kardiovaskular, Catatan: Ayah jantung',
+        stressLevel: 3,
+      );
+
+      controller.prefillFromProfile(profile);
+
+      final state = controller.state;
+      expect(state.currentStep, 1);
+      expect(state.age, 38);
+      expect(state.gender, GenderEnum.female);
+      expect(state.heightCm, 162.0);
+      expect(state.weightKg, 58.0);
+      expect(state.physicalActivityMinPerWeek, 210.0);
+      expect(state.sleepDurationHours, 7.5);
+      expect(state.smokingStatus, SmokingStatusEnum.former);
+      expect(state.hasDiabetesFamily, isTrue);
+      expect(state.hasCvdFamily, isTrue);
+      expect(state.hasHypertensionFamily, isFalse);
+      expect(state.familyHistoryNotes, 'Ayah jantung');
+      expect(state.stressLevel, 3);
+      expect(state.isStep1Valid, isTrue);
+    });
   });
 }

@@ -13,10 +13,14 @@ import 'widgets/step_bar.dart';
 class AssessmentFlowScreen extends ConsumerStatefulWidget {
   const AssessmentFlowScreen({
     super.key,
+    this.initialProfile,
     this.onAssessmentCompleted,
+    this.onBack,
   });
 
+  final HealthProfileResponse? initialProfile;
   final VoidCallback? onAssessmentCompleted;
+  final VoidCallback? onBack;
 
   @override
   ConsumerState<AssessmentFlowScreen> createState() => _AssessmentFlowScreenState();
@@ -27,6 +31,29 @@ class _AssessmentFlowScreenState extends ConsumerState<AssessmentFlowScreen> {
   final _heightController = TextEditingController();
   final _weightController = TextEditingController();
   final _notesController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialProfile != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ref.read(assessmentControllerProvider.notifier).prefillFromProfile(widget.initialProfile!);
+        _syncControllersFromProfile(widget.initialProfile!);
+      });
+    }
+  }
+
+  void _syncControllersFromProfile(HealthProfileResponse profile) {
+    _ageController.text = profile.age.toString();
+    _heightController.text = profile.heightCm.toStringAsFixed(profile.heightCm % 1 == 0 ? 0 : 1);
+    _weightController.text = profile.weightKg.toStringAsFixed(profile.weightKg % 1 == 0 ? 0 : 1);
+    final details = profile.familyHistoryDetails;
+    if (details != null && details.contains('Catatan: ')) {
+      final idx = details.indexOf('Catatan: ');
+      _notesController.text = details.substring(idx + 9).trim();
+    }
+  }
 
   @override
   void dispose() {
@@ -315,6 +342,23 @@ class _AssessmentFlowScreenState extends ConsumerState<AssessmentFlowScreen> {
             ),
           ),
         ),
+        if (widget.onBack != null) ...[
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 48,
+            child: OutlinedButton(
+              onPressed: widget.onBack,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: HelioraTokens.foreground,
+                side: const BorderSide(color: HelioraTokens.border, width: 1.0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(HelioraTokens.radiusXl),
+                ),
+              ),
+              child: const Text('Batal & Kembali ke Profil', style: HelioraTokens.labelButtonSecondary),
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -524,33 +568,26 @@ class _AssessmentFlowScreenState extends ConsumerState<AssessmentFlowScreen> {
           ),
         ),
         const SizedBox(height: 8),
-        Container(
-          height: 96,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: const Color(0xFFDEE5E1), width: 1.0),
-            borderRadius: BorderRadius.circular(12.0),
+        TextFormField(
+          controller: _notesController,
+          maxLines: 3,
+          minLines: 3,
+          style: const TextStyle(
+            fontFamily: 'Plus Jakarta Sans',
+            fontSize: 14.0,
+            color: Color(0xFF14201A),
           ),
-          child: TextFormField(
-            controller: _notesController,
-            maxLines: 3,
-            style: const TextStyle(
+          decoration: _inputDecoration(
+            hintText: 'Contoh: ayah terdiagnosis diabetes tipe 2 pada usia 50 tahun.',
+          ).copyWith(
+            hintStyle: const TextStyle(
               fontFamily: 'Plus Jakarta Sans',
               fontSize: 14.0,
-              color: Color(0xFF14201A),
+              color: Color(0xFF94A3B8),
             ),
-            decoration: const InputDecoration(
-              hintText: 'Contoh: ayah terdiagnosis diabetes tipe 2 pada usia 50 tahun.',
-              hintStyle: TextStyle(
-                fontFamily: 'Plus Jakarta Sans',
-                fontSize: 14.0,
-                color: Color(0xFF3A423D),
-              ),
-              border: InputBorder.none,
-              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            ),
-            onChanged: (val) => controller.setFamilyNotes(val),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
+          onChanged: (val) => controller.setFamilyNotes(val),
         ),
         const SizedBox(height: 16),
 

@@ -1985,6 +1985,40 @@ Acceptance Criteria:
 
 
 
+## MOB-010 — Mobile UI-UX Refinement and Local Backend Integration
+
+**Owner:** Pino & Tumir  
+**Priority:** P0  
+**Sprint:** S9-S10  
+**Status:** DONE
+
+Tasks:
+
+- [x] Align tokens, typography, and statutory disclaimer with Figma Design System.
+- [x] Remove fake fallback risk scores and implement honest error handling in HomeScreen.
+- [x] Implement health profile form pre-fill when editing from ProfileScreen.
+- [x] Connect mobile client to local FastAPI backend and validate end-to-end flow.
+- [x] Configure backend CORS regex to support Flutter Web dev ports and preflight OPTIONS requests.
+- [x] Standardize ChoiceOption full-width alignment and fix Simulation action button text wrapping.
+- [x] Implement smooth bouncing scroll behavior across touch, mouse, and trackpad devices.
+- [x] Fix assessment flow family history textarea contrast, border, and enforce canonical light themeMode.
+- [x] Implement Figma Mobile/Dialog (node 81:1363) for consent revocation and account sign out.
+
+Acceptance Criteria:
+
+- Tidak ada elemen pill chip atau token `radiusFull`; ambang skor mengikuti standar kanonik 80/60/40.
+- HomeScreen tidak menampilkan skor tiruan saat asesmen kosong dan menampilkan pesan error resmi dengan tombol muat ulang jika API gagal.
+- Form profil kesehatan terisi otomatis saat pengguna menekan "Perbarui profil kesehatan" di layar Profil.
+- Aplikasi mobile dapat terhubung ke backend FastAPI lokal (emulator 10.0.2.2 atau web localhost:8000) dan menyelesaikan alur autentikasi hingga simulasi secara mulus.
+- Preflight request `OPTIONS` dari Flutter Web (port dinamis `127.0.0.1:*` / `localhost:*`) berhasil diizinkan dengan status 200 OK.
+- Seluruh kartu pilihan simulasi membentang seragam (100% lebar kontainer), tombol "Atur ulang" tidak mengalami patah kata, dan scrolling aplikasi responsif serta mulus.
+- Textarea detail riwayat keluarga pada alur asesmen memiliki latar belakang putih bersih, kontras placeholder tajam (`#94A3B8`), dan fokus border hijau tanpa kotak hitam anomali.
+- Modal dialog konfirmasi cabut persetujuan dan keluar akun mengikuti spesifikasi Figma (node 81:1363): radius 24px, judul dan deskripsi ringkas, tombol aksi destruktif penuh di atas, dan tombol batal outlined di bawah.
+
+---
+
+
+
 # 19. Integration Tasks
 
 
