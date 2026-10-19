@@ -9,7 +9,7 @@ import '../../assessment/data/health_profile_repository.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../consent/presentation/consent_controller.dart';
 import '../../home/presentation/widgets/bottom_nav_bar.dart';
-import 'widgets/heliora_confirmation_dialog.dart';
+import '../../../theme/widgets/heliora_confirmation_dialog.dart';
 
 /// Screen managing user profile, health profile summary, and privacy consent revocation (MFR-010, BR-CONSENT-003).
 class ProfileScreen extends ConsumerStatefulWidget {

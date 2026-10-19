@@ -5,6 +5,7 @@ import 'svg_data.dart';
 import 'tokens.dart';
 
 export 'icons.dart';
+export 'widgets/heliora_confirmation_dialog.dart';
 
 /// Available visual variants for the official HELIORA brand mark (Figma "Logo Exploration").
 enum HelioraLogoVariant {

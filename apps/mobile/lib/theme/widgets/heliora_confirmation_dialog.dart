@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../theme/tokens.dart';
+import '../tokens.dart';
 
 /// Reusable confirmation dialog conforming strictly to Figma `Mobile/Dialog` (node 81:1363).
 /// Features a 24px corner border radius, full-width vertical action stack,
@@ -45,19 +45,12 @@ class HelioraConfirmationDialog extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: const TextStyle(
-                  fontFamily: 'Plus Jakarta Sans',
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  color: HelioraTokens.foreground,
-                ),
+                style: HelioraTokens.mobileHeadline,
               ),
               const SizedBox(height: 12),
               Text(
                 content,
-                style: const TextStyle(
-                  fontFamily: 'Plus Jakarta Sans',
-                  fontSize: 14,
+                style: HelioraTokens.bodySmall.copyWith(
                   color: HelioraTokens.secondaryForeground,
                   height: 1.5,
                 ),
@@ -91,9 +84,7 @@ class HelioraConfirmationDialog extends StatelessWidget {
                           )
                         : Text(
                             confirmLabel!,
-                            style: const TextStyle(
-                              fontFamily: 'Plus Jakarta Sans',
-                              fontWeight: FontWeight.w600,
+                            style: HelioraTokens.labelButton.copyWith(
                               fontSize: 14,
                             ),
                           ),
@@ -116,9 +107,7 @@ class HelioraConfirmationDialog extends StatelessWidget {
                   ),
                   child: Text(
                     cancelLabel,
-                    style: const TextStyle(
-                      fontFamily: 'Plus Jakarta Sans',
-                      fontWeight: FontWeight.w600,
+                    style: HelioraTokens.labelButtonSecondary.copyWith(
                       fontSize: 14,
                     ),
                   ),
