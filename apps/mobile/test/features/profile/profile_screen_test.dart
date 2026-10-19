@@ -167,6 +167,50 @@ void main() {
       expect(editCalled, isTrue);
     });
 
+    testWidgets(
+        'tapping "Perbarui profil kesehatan" when consent is revoked shows Persetujuan Diperlukan dialog and does not edit',
+        (tester) async {
+      var editCalled = false;
+      final fakeAuth = FakeAuthRepository();
+      final fakeHealth = FakeHealthProfileRepository();
+      final fakeConsent = FakeConsentRepository();
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            authRepositoryProvider.overrideWithValue(fakeAuth),
+            healthProfileRepositoryProvider.overrideWithValue(fakeHealth),
+            consentRepositoryProvider.overrideWithValue(fakeConsent),
+            currentUserProfileProvider.overrideWith((ref) => fakeAuth.fetchCurrentUserProfile()),
+            healthProfileProvider.overrideWith((ref) => fakeHealth.getHealthProfile()),
+            consentStatusProvider.overrideWith(
+              (ref) => Future.value(
+                const ConsentStatusResponse(hasActiveConsent: false),
+              ),
+            ),
+          ],
+          child: MaterialApp(
+            home: ProfileScreen(
+              onEditHealthProfile: () => editCalled = true,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(find.text('Perbarui profil kesehatan'));
+      await tester.tap(find.text('Perbarui profil kesehatan'));
+      await tester.pumpAndSettle();
+
+      expect(editCalled, isFalse);
+      expect(find.text('Persetujuan Diperlukan'), findsOneWidget);
+      expect(find.text('Mengerti'), findsOneWidget);
+
+      await tester.tap(find.text('Mengerti'));
+      await tester.pumpAndSettle();
+      expect(find.text('Persetujuan Diperlukan'), findsNothing);
+    });
+
     testWidgets('tapping "Cabut persetujuan" opens confirmation dialog and executes revokeConsent',
         (tester) async {
       var revokedCalled = false;

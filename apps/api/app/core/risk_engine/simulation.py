@@ -9,7 +9,7 @@ import math
 from typing import Any
 
 from app.core.attribute_profile import AttributeProfile
-from app.core.risk_engine._shared import _sigmoid
+from app.core.risk_engine._shared import RiskEngineProtocol, _sigmoid
 from app.core.risk_levels import to_risk_label, to_risk_level
 from app.core.vitals import normalize_smoking_status
 from app.schemas.simulation import MANDATORY_MEDICAL_DISCLAIMER
@@ -19,7 +19,7 @@ class SimulationMixin:
     """Projects risk/score trajectories and simulates lifestyle overrides."""
 
     def simulate_future_trajectory(
-        self, profile: Any, horizon_days: int
+        self: RiskEngineProtocol, profile: Any, horizon_days: int
     ) -> dict[str, Any]:
         """Project future risk and score trajectories over defined horizons (30, 90, 180 days).
 
@@ -162,7 +162,7 @@ class SimulationMixin:
         }
 
     def simulate_what_if(
-        self, profile: Any, overrides: dict[str, Any]
+        self: RiskEngineProtocol, profile: Any, overrides: dict[str, Any]
     ) -> dict[str, Any]:
         """Simulate real-time risk recalculation for modifiable lifestyle overrides.
 

@@ -90,7 +90,7 @@ class _AssessmentFlowScreenState extends ConsumerState<AssessmentFlowScreen> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F9F8),
+      backgroundColor: HelioraTokens.muted,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -109,7 +109,7 @@ class _AssessmentFlowScreenState extends ConsumerState<AssessmentFlowScreen> {
                       fontWeight: FontWeight.w700,
                       height: 16.0 / 12.0,
                       letterSpacing: 1.2,
-                      color: const Color(0xFF0D5F3F),
+                      color: HelioraTokens.brand900,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -126,7 +126,7 @@ class _AssessmentFlowScreenState extends ConsumerState<AssessmentFlowScreen> {
                       fontSize: 12.0,
                       fontWeight: FontWeight.w400,
                       height: 16.0 / 12.0,
-                      color: Color(0xFF3A423D),
+                      color: HelioraTokens.mutedForeground,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -140,7 +140,7 @@ class _AssessmentFlowScreenState extends ConsumerState<AssessmentFlowScreen> {
                       fontWeight: FontWeight.w700,
                       height: 32.0 / 24.0,
                       letterSpacing: -0.24,
-                      color: Color(0xFF14201A),
+                      color: HelioraTokens.foreground,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -189,7 +189,7 @@ class _AssessmentFlowScreenState extends ConsumerState<AssessmentFlowScreen> {
             fontSize: 14.0,
             fontWeight: FontWeight.w500,
             height: 20.0 / 14.0,
-            color: Color(0xFF14201A),
+            color: HelioraTokens.foreground,
           ),
         ),
         const SizedBox(height: 8),
@@ -200,7 +200,7 @@ class _AssessmentFlowScreenState extends ConsumerState<AssessmentFlowScreen> {
             fontFamily: 'Plus Jakarta Sans',
             fontSize: 16.0,
             fontWeight: FontWeight.w400,
-            color: Color(0xFF14201A),
+            color: HelioraTokens.foreground,
           ),
           decoration: _inputDecoration(hintText: 'Contoh: 29'),
           onChanged: (val) {
@@ -218,7 +218,7 @@ class _AssessmentFlowScreenState extends ConsumerState<AssessmentFlowScreen> {
             fontSize: 14.0,
             fontWeight: FontWeight.w500,
             height: 20.0 / 14.0,
-            color: Color(0xFF14201A),
+            color: HelioraTokens.foreground,
           ),
         ),
         const SizedBox(height: 8),
@@ -259,7 +259,7 @@ class _AssessmentFlowScreenState extends ConsumerState<AssessmentFlowScreen> {
                       fontSize: 14.0,
                       fontWeight: FontWeight.w500,
                       height: 20.0 / 14.0,
-                      color: Color(0xFF14201A),
+                      color: HelioraTokens.foreground,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -270,7 +270,7 @@ class _AssessmentFlowScreenState extends ConsumerState<AssessmentFlowScreen> {
                       fontFamily: 'Plus Jakarta Sans',
                       fontSize: 16.0,
                       fontWeight: FontWeight.w400,
-                      color: Color(0xFF14201A),
+                      color: HelioraTokens.foreground,
                     ),
                     decoration: _inputDecoration(hintText: '160'),
                     onChanged: (val) {
@@ -293,7 +293,7 @@ class _AssessmentFlowScreenState extends ConsumerState<AssessmentFlowScreen> {
                       fontSize: 14.0,
                       fontWeight: FontWeight.w500,
                       height: 20.0 / 14.0,
-                      color: Color(0xFF14201A),
+                      color: HelioraTokens.foreground,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -304,7 +304,7 @@ class _AssessmentFlowScreenState extends ConsumerState<AssessmentFlowScreen> {
                       fontFamily: 'Plus Jakarta Sans',
                       fontSize: 16.0,
                       fontWeight: FontWeight.w400,
-                      color: Color(0xFF14201A),
+                      color: HelioraTokens.foreground,
                     ),
                     decoration: _inputDecoration(hintText: '74'),
                     onChanged: (val) {
@@ -375,7 +375,7 @@ class _AssessmentFlowScreenState extends ConsumerState<AssessmentFlowScreen> {
           padding: const EdgeInsets.all(16.0),
           decoration: BoxDecoration(
             color: Colors.white,
-            border: Border.all(color: const Color(0xFFDEE5E1), width: 1.0),
+            border: Border.all(color: HelioraTokens.border, width: 1.0),
             borderRadius: BorderRadius.circular(16.0),
           ),
           child: Column(
@@ -423,7 +423,7 @@ class _AssessmentFlowScreenState extends ConsumerState<AssessmentFlowScreen> {
             fontSize: 14.0,
             fontWeight: FontWeight.w500,
             height: 20.0 / 14.0,
-            color: Color(0xFF14201A),
+            color: HelioraTokens.foreground,
           ),
         ),
         const SizedBox(height: 8),
@@ -508,7 +508,7 @@ class _AssessmentFlowScreenState extends ConsumerState<AssessmentFlowScreen> {
             fontSize: 14.0,
             fontWeight: FontWeight.w500,
             height: 20.0 / 14.0,
-            color: Color(0xFF14201A),
+            color: HelioraTokens.foreground,
           ),
         ),
         const SizedBox(height: 8),
@@ -516,7 +516,7 @@ class _AssessmentFlowScreenState extends ConsumerState<AssessmentFlowScreen> {
           padding: const EdgeInsets.all(16.0),
           decoration: BoxDecoration(
             color: Colors.white,
-            border: Border.all(color: const Color(0xFFDEE5E1), width: 1.0),
+            border: Border.all(color: HelioraTokens.border, width: 1.0),
             borderRadius: BorderRadius.circular(16.0),
           ),
           child: Column(
@@ -564,7 +564,7 @@ class _AssessmentFlowScreenState extends ConsumerState<AssessmentFlowScreen> {
             fontSize: 14.0,
             fontWeight: FontWeight.w500,
             height: 20.0 / 14.0,
-            color: Color(0xFF14201A),
+            color: HelioraTokens.foreground,
           ),
         ),
         const SizedBox(height: 8),
@@ -575,7 +575,7 @@ class _AssessmentFlowScreenState extends ConsumerState<AssessmentFlowScreen> {
           style: const TextStyle(
             fontFamily: 'Plus Jakarta Sans',
             fontSize: 14.0,
-            color: Color(0xFF14201A),
+            color: HelioraTokens.foreground,
           ),
           decoration: _inputDecoration(
             hintText: 'Contoh: ayah terdiagnosis diabetes tipe 2 pada usia 50 tahun.',
@@ -583,7 +583,7 @@ class _AssessmentFlowScreenState extends ConsumerState<AssessmentFlowScreen> {
             hintStyle: const TextStyle(
               fontFamily: 'Plus Jakarta Sans',
               fontSize: 14.0,
-              color: Color(0xFF94A3B8),
+              color: HelioraTokens.slate400,
             ),
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
@@ -596,7 +596,7 @@ class _AssessmentFlowScreenState extends ConsumerState<AssessmentFlowScreen> {
           padding: const EdgeInsets.all(16.0),
           decoration: BoxDecoration(
             color: Colors.white,
-            border: Border.all(color: const Color(0xFFDEE5E1), width: 1.0),
+            border: Border.all(color: HelioraTokens.border, width: 1.0),
             borderRadius: BorderRadius.circular(16.0),
           ),
           child: _buildSliderSection(
@@ -679,7 +679,7 @@ class _AssessmentFlowScreenState extends ConsumerState<AssessmentFlowScreen> {
                   fontSize: 14.0,
                   fontWeight: FontWeight.w500,
                   height: 20.0 / 14.0,
-                  color: Color(0xFF14201A),
+                  color: HelioraTokens.foreground,
                 ),
               ),
             ),
@@ -691,7 +691,7 @@ class _AssessmentFlowScreenState extends ConsumerState<AssessmentFlowScreen> {
                 fontSize: 14.0,
                 fontWeight: FontWeight.w500,
                 height: 20.0 / 14.0,
-                color: Color(0xFF0F7A4E),
+                color: HelioraTokens.primary,
               ),
             ),
           ],
@@ -699,10 +699,10 @@ class _AssessmentFlowScreenState extends ConsumerState<AssessmentFlowScreen> {
         const SizedBox(height: 8),
         SliderTheme(
           data: SliderTheme.of(context).copyWith(
-            activeTrackColor: const Color(0xFF0F7A4E),
-            inactiveTrackColor: const Color(0xFFDEE5E1),
-            thumbColor: const Color(0xFF0F7A4E),
-            overlayColor: const Color(0xFF0F7A4E).withValues(alpha: 0.12),
+            activeTrackColor: HelioraTokens.primary,
+            inactiveTrackColor: HelioraTokens.border,
+            thumbColor: HelioraTokens.primary,
+            overlayColor: HelioraTokens.primary.withValues(alpha: 0.12),
             trackHeight: 6.0,
             thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10.0),
           ),
@@ -724,7 +724,7 @@ class _AssessmentFlowScreenState extends ConsumerState<AssessmentFlowScreen> {
                 fontFamily: 'Plus Jakarta Sans',
                 fontSize: 12.0,
                 fontWeight: FontWeight.w400,
-                color: Color(0xFF3A423D),
+                color: HelioraTokens.mutedForeground,
               ),
             ),
             const SizedBox(width: 4),
@@ -736,7 +736,7 @@ class _AssessmentFlowScreenState extends ConsumerState<AssessmentFlowScreen> {
                   fontFamily: 'Plus Jakarta Sans',
                   fontSize: 12.0,
                   fontWeight: FontWeight.w400,
-                  color: Color(0xFF3A423D),
+                  color: HelioraTokens.mutedForeground,
                 ),
               ),
             ),
@@ -747,7 +747,7 @@ class _AssessmentFlowScreenState extends ConsumerState<AssessmentFlowScreen> {
                 fontFamily: 'Plus Jakarta Sans',
                 fontSize: 12.0,
                 fontWeight: FontWeight.w400,
-                color: Color(0xFF3A423D),
+                color: HelioraTokens.mutedForeground,
               ),
             ),
           ],
@@ -771,9 +771,9 @@ class _AssessmentFlowScreenState extends ConsumerState<AssessmentFlowScreen> {
             width: 20,
             height: 20,
             decoration: BoxDecoration(
-              color: isChecked ? const Color(0xFF0F7A4E) : Colors.white,
+              color: isChecked ? HelioraTokens.primary : Colors.white,
               border: Border.all(
-                color: isChecked ? const Color(0xFF0F7A4E) : const Color(0xFFDEE5E1),
+                color: isChecked ? HelioraTokens.primary : HelioraTokens.border,
                 width: 1.5,
               ),
               borderRadius: BorderRadius.circular(6.0),
@@ -797,7 +797,7 @@ class _AssessmentFlowScreenState extends ConsumerState<AssessmentFlowScreen> {
                 fontSize: 14.0,
                 fontWeight: FontWeight.w400,
                 height: 20.0 / 14.0,
-                color: Color(0xFF14201A),
+                color: HelioraTokens.foreground,
               ),
             ),
           ),
@@ -812,35 +812,35 @@ class _AssessmentFlowScreenState extends ConsumerState<AssessmentFlowScreen> {
       hintStyle: const TextStyle(
         fontFamily: 'Plus Jakarta Sans',
         fontSize: 16.0,
-        color: Color(0xFF94A3B8),
+        color: HelioraTokens.slate400,
       ),
       filled: true,
       fillColor: Colors.white,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12.0),
-        borderSide: const BorderSide(color: Color(0xFFDEE5E1), width: 1.0),
+        borderSide: const BorderSide(color: HelioraTokens.border, width: 1.0),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12.0),
-        borderSide: const BorderSide(color: Color(0xFFDEE5E1), width: 1.0),
+        borderSide: const BorderSide(color: HelioraTokens.border, width: 1.0),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12.0),
-        borderSide: const BorderSide(color: Color(0xFF0F7A4E), width: 2.0),
+        borderSide: const BorderSide(color: HelioraTokens.primary, width: 2.0),
       ),
     );
   }
 
   ButtonStyle _primaryButtonStyle() {
     return ElevatedButton.styleFrom(
-      backgroundColor: const Color(0xFF0F7A4E),
+      backgroundColor: HelioraTokens.primary,
       foregroundColor: Colors.white,
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12.0),
       ),
-      disabledBackgroundColor: const Color(0xFF0F7A4E).withValues(alpha: 0.5),
+      disabledBackgroundColor: HelioraTokens.primary.withValues(alpha: 0.5),
       disabledForegroundColor: Colors.white.withValues(alpha: 0.8),
     );
   }
@@ -848,9 +848,9 @@ class _AssessmentFlowScreenState extends ConsumerState<AssessmentFlowScreen> {
   ButtonStyle _secondaryButtonStyle() {
     return OutlinedButton.styleFrom(
       backgroundColor: Colors.white,
-      foregroundColor: const Color(0xFF14201A),
+      foregroundColor: HelioraTokens.foreground,
       elevation: 0,
-      side: const BorderSide(color: Color(0xFFDEE5E1), width: 1.0),
+      side: const BorderSide(color: HelioraTokens.border, width: 1.0),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12.0),
       ),
@@ -869,7 +869,7 @@ class _ProcessingAssessmentView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F9F8),
+      backgroundColor: HelioraTokens.muted,
       body: SafeArea(
         child: Center(
           child: Padding(
@@ -893,7 +893,7 @@ class _ProcessingAssessmentView extends StatelessWidget {
                       fontWeight: FontWeight.w700,
                       height: 32.0 / 24.0,
                       letterSpacing: -0.24,
-                      color: Color(0xFF14201A),
+                      color: HelioraTokens.foreground,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -905,7 +905,7 @@ class _ProcessingAssessmentView extends StatelessWidget {
                       fontSize: 16.0,
                       fontWeight: FontWeight.w400,
                       height: 24.0 / 16.0,
-                      color: Color(0xFF3A423D),
+                      color: HelioraTokens.mutedForeground,
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -915,7 +915,7 @@ class _ProcessingAssessmentView extends StatelessWidget {
                     padding: const EdgeInsets.all(16.0),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      border: Border.all(color: const Color(0xFFDEE5E1), width: 1.0),
+                      border: Border.all(color: HelioraTokens.border, width: 1.0),
                       borderRadius: BorderRadius.circular(16.0),
                     ),
                     child: Column(
@@ -923,30 +923,30 @@ class _ProcessingAssessmentView extends StatelessWidget {
                         // Milestone 1
                         _milestoneRow(
                           iconPath: HelioraIcons.circleCheck,
-                          iconColor: const Color(0xFF0F7A4E),
+                          iconColor: HelioraTokens.primary,
                           label: 'Profil kesehatan tersimpan',
                           isBold: false,
-                          textColor: const Color(0xFF14201A),
+                          textColor: HelioraTokens.foreground,
                         ),
                         const SizedBox(height: 16),
 
                         // Milestone 2
                         _milestoneRow(
                           iconPath: HelioraIcons.activity,
-                          iconColor: const Color(0xFF0F7A4E),
+                          iconColor: HelioraTokens.primary,
                           label: 'Menghitung estimasi risiko',
                           isBold: true,
-                          textColor: const Color(0xFF0F7A4E),
+                          textColor: HelioraTokens.primary,
                         ),
                         const SizedBox(height: 16),
 
                         // Milestone 3
                         _milestoneRow(
                           iconPath: HelioraIcons.clipboardList,
-                          iconColor: const Color(0xFF3A423D),
+                          iconColor: HelioraTokens.mutedForeground,
                           label: 'Menyiapkan hasil',
                           isBold: false,
-                          textColor: const Color(0xFF3A423D),
+                          textColor: HelioraTokens.mutedForeground,
                         ),
                         const SizedBox(height: 16),
 
@@ -955,7 +955,7 @@ class _ProcessingAssessmentView extends StatelessWidget {
                           height: 8.0,
                           width: double.infinity,
                           decoration: BoxDecoration(
-                            color: const Color(0xFFDEE5E1),
+                            color: HelioraTokens.border,
                             borderRadius: BorderRadius.circular(9999.0),
                           ),
                           child: FractionallySizedBox(
@@ -963,7 +963,7 @@ class _ProcessingAssessmentView extends StatelessWidget {
                             widthFactor: 0.6,
                             child: Container(
                               decoration: BoxDecoration(
-                                color: const Color(0xFF0F7A4E),
+                                color: HelioraTokens.primary,
                                 borderRadius: BorderRadius.circular(9999.0),
                               ),
                             ),
@@ -983,7 +983,7 @@ class _ProcessingAssessmentView extends StatelessWidget {
                       fontSize: 12.0,
                       fontWeight: FontWeight.w400,
                       height: 16.0 / 12.0,
-                      color: Color(0xFF3A423D),
+                      color: HelioraTokens.mutedForeground,
                     ),
                   ),
                 ],
@@ -1039,7 +1039,7 @@ class _AssessmentFailureView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F9F8),
+      backgroundColor: HelioraTokens.muted,
       body: SafeArea(
         child: Center(
           child: Padding(
@@ -1054,15 +1054,15 @@ class _AssessmentFailureView extends StatelessWidget {
                     width: 64,
                     height: 64,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF7F9F8),
-                      border: Border.all(color: const Color(0xFFBE123C), width: 1.0),
+                      color: HelioraTokens.rose50,
+                      border: Border.all(color: HelioraTokens.rose700, width: 1.0),
                       borderRadius: BorderRadius.circular(16.0),
                     ),
                     child: const Center(
                       child: HelioraIcon(
                         HelioraIcons.triangleAlert,
                         size: 28,
-                        color: Color(0xFFBE123C),
+                        color: HelioraTokens.rose700,
                       ),
                     ),
                   ),
@@ -1078,7 +1078,7 @@ class _AssessmentFailureView extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                       height: 28.0 / 20.0,
                       letterSpacing: -0.1,
-                      color: Color(0xFF14201A),
+                      color: HelioraTokens.foreground,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -1092,7 +1092,7 @@ class _AssessmentFailureView extends StatelessWidget {
                       fontSize: 16.0,
                       fontWeight: FontWeight.w400,
                       height: 24.0 / 16.0,
-                      color: Color(0xFF3A423D),
+                      color: HelioraTokens.mutedForeground,
                     ),
                   ),
                   if (errorMessage != null &&
@@ -1107,7 +1107,7 @@ class _AssessmentFailureView extends StatelessWidget {
                         fontFamily: 'Plus Jakarta Sans',
                         fontSize: 13.0,
                         fontWeight: FontWeight.w400,
-                        color: Color(0xFF64748B),
+                        color: HelioraTokens.secondaryForeground,
                       ),
                     ),
                   ],
@@ -1120,7 +1120,7 @@ class _AssessmentFailureView extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: onRetry,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0F7A4E),
+                        backgroundColor: HelioraTokens.primary,
                         foregroundColor: Colors.white,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
@@ -1138,8 +1138,8 @@ class _AssessmentFailureView extends StatelessWidget {
                       onPressed: onBackToForm,
                       style: OutlinedButton.styleFrom(
                         backgroundColor: Colors.white,
-                        foregroundColor: const Color(0xFF14201A),
-                        side: const BorderSide(color: Color(0xFFDEE5E1), width: 1.0),
+                        foregroundColor: HelioraTokens.foreground,
+                        side: const BorderSide(color: HelioraTokens.border, width: 1.0),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12.0),
                         ),

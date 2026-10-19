@@ -793,7 +793,7 @@ Acceptance Criteria:
 **Owner:** Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S3  
-**Status:** BACKLOG
+**Status:** DONE
 
 Tasks:
 
@@ -2014,6 +2014,36 @@ Acceptance Criteria:
 - Seluruh kartu pilihan simulasi membentang seragam (100% lebar kontainer), tombol "Atur ulang" tidak mengalami patah kata, dan scrolling aplikasi responsif serta mulus.
 - Textarea detail riwayat keluarga pada alur asesmen memiliki latar belakang putih bersih, kontras placeholder tajam (`#94A3B8`), dan fokus border hijau tanpa kotak hitam anomali.
 - Modal dialog konfirmasi cabut persetujuan dan keluar akun mengikuti spesifikasi Figma (node 81:1363): radius 24px, judul dan deskripsi ringkas, tombol aksi destruktif penuh di atas, dan tombol batal outlined di bawah.
+
+---
+
+## MOB-011 — Mobile and Backend Post-Review Hardening
+
+**Owner:** Pino & Tumir + Gilang & Aksal  
+**Priority:** P0  
+**Sprint:** S9-S10  
+**Status:** DONE
+
+Tasks:
+
+- [x] SEC-002: Environment-gate CORS localhost regex in FastAPI to development only, and sanitize user-facing mobile network error messages.
+- [x] MOB-011.01: Implement canonical 80/60/40 score tiers in ScoreCard (Excellent 80-100, Good 60-79, Needs Improvement 40-59, High Risk <40).
+- [x] MOB-011.02: Prevent health profile edit navigation on ProfileScreen when consent is revoked, displaying consent-reactivation prompt.
+- [x] MOB-011.03: Harmonize raw hex colors to HelioraTokens across profile and assessment flow screens.
+- [x] MOB-011.04: Extract duplicated modal confirmation dialog into reusable HelioraConfirmationDialog component.
+- [x] ARC-002: Refactor AttributeProfile into strongly-typed Pydantic/dataclass schema and add typed Protocols to risk engine mixins.
+- [x] DOC-003: Reconcile AI-001 status to DONE in docs/TASK.md.
+
+Acceptance Criteria:
+
+- Backend CORS regex hanya mengizinkan localhost pada mode development (`ENVIRONMENT == "development"`).
+- Pesan error mobile tidak mengekspos nomor port atau topologi internal backend.
+- ScoreCard menampilkan warna dan tier yang tepat untuk skor 80–100, 60–79, 40–59, dan <40.
+- Pengguna dengan status consent revoked tidak dapat mengedit asesmen dan diarahkan untuk mengaktifkan persetujuan terlebih dahulu.
+- Tidak ada raw hex colors yang mem-bypass HelioraTokens pada layar profil dan alur asesmen.
+- Dialog konfirmasi pencabutan persetujuan dan sign out menggunakan komponen bersama yang teruji.
+- AttributeProfile memiliki tipe data statis terdefinisi penuh tanpa kwargs dinamis tanpa skema.
+- Status AI-001 terupdate sebagai DONE di docs/TASK.md.
 
 ---
 

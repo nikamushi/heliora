@@ -9,6 +9,7 @@ import '../../assessment/data/health_profile_repository.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../consent/presentation/consent_controller.dart';
 import '../../home/presentation/widgets/bottom_nav_bar.dart';
+import 'widgets/heliora_confirmation_dialog.dart';
 
 /// Screen managing user profile, health profile summary, and privacy consent revocation (MFR-010, BR-CONSENT-003).
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -74,100 +75,32 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return 'Obesitas';
   }
 
+  void _showConsentRequiredForEditDialog() {
+    showDialog<void>(
+      context: context,
+      builder: (dialogCtx) => HelioraConfirmationDialog(
+        title: 'Persetujuan Diperlukan',
+        content:
+            'Persetujuan pemrosesan data kesehatan diperlukan untuk memperbarui profil dan menganalisis risiko kesehatan Anda. Silakan berikan persetujuan kembali di layar Beranda.',
+        cancelLabel: 'Mengerti',
+        onCancel: () => Navigator.of(dialogCtx).pop(),
+      ),
+    );
+  }
+
   Future<void> _handleRevokeConsent() async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (dialogCtx) {
-        return Dialog(
-          backgroundColor: Colors.white,
-          surfaceTintColor: Colors.transparent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24.0),
-            side: const BorderSide(color: HelioraTokens.border, width: 1.0),
-          ),
-          insetPadding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 340),
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Cabut persetujuan?',
-                    style: TextStyle(
-                      fontFamily: 'Plus Jakarta Sans',
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: HelioraTokens.foreground,
-                      height: 1.3,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  const Text(
-                    'HELIORA akan berhenti memproses data kesehatan Anda. Hasil asesmen tidak tampil sampai Anda memberi persetujuan lagi. Anda bisa melakukannya kapan saja.',
-                    style: TextStyle(
-                      fontFamily: 'Plus Jakarta Sans',
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                      color: Color(0xFF4A5568),
-                      height: 1.5,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48,
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.of(dialogCtx).pop(true),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: HelioraTokens.rose700,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(HelioraTokens.radiusXl),
-                        ),
-                      ),
-                      child: const Text(
-                        'Cabut persetujuan',
-                        style: TextStyle(
-                          fontFamily: 'Plus Jakarta Sans',
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48,
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.of(dialogCtx).pop(false),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: HelioraTokens.foreground,
-                        side: const BorderSide(color: Color(0xFFDEE5E1), width: 1.0),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(HelioraTokens.radiusXl),
-                        ),
-                      ),
-                      child: const Text(
-                        'Batal',
-                        style: TextStyle(
-                          fontFamily: 'Plus Jakarta Sans',
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
+      builder: (dialogCtx) => HelioraConfirmationDialog(
+        title: 'Cabut persetujuan?',
+        content:
+            'HELIORA akan berhenti memproses data kesehatan Anda. Hasil asesmen tidak tampil sampai Anda memberi persetujuan lagi. Anda bisa melakukannya kapan saja.',
+        confirmLabel: 'Cabut persetujuan',
+        cancelLabel: 'Batal',
+        isDestructive: true,
+        onConfirm: () => Navigator.of(dialogCtx).pop(true),
+        onCancel: () => Navigator.of(dialogCtx).pop(false),
+      ),
     );
 
     if (confirmed == true && mounted) {
@@ -203,97 +136,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Future<void> _handleSignOut() async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (dialogCtx) {
-        return Dialog(
-          backgroundColor: Colors.white,
-          surfaceTintColor: Colors.transparent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24.0),
-            side: const BorderSide(color: HelioraTokens.border, width: 1.0),
-          ),
-          insetPadding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 340),
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Keluar dari Heliora?',
-                    style: TextStyle(
-                      fontFamily: 'Plus Jakarta Sans',
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: HelioraTokens.foreground,
-                      height: 1.3,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  const Text(
-                    'Seluruh sesi dan token pada perangkat ini akan dihapus dengan aman.',
-                    style: TextStyle(
-                      fontFamily: 'Plus Jakarta Sans',
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                      color: Color(0xFF4A5568),
-                      height: 1.5,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48,
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.of(dialogCtx).pop(true),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: HelioraTokens.foreground,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(HelioraTokens.radiusXl),
-                        ),
-                      ),
-                      child: const Text(
-                        'Keluar',
-                        style: TextStyle(
-                          fontFamily: 'Plus Jakarta Sans',
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48,
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.of(dialogCtx).pop(false),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: HelioraTokens.foreground,
-                        side: const BorderSide(color: Color(0xFFDEE5E1), width: 1.0),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(HelioraTokens.radiusXl),
-                        ),
-                      ),
-                      child: const Text(
-                        'Batal',
-                        style: TextStyle(
-                          fontFamily: 'Plus Jakarta Sans',
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
+      builder: (dialogCtx) => HelioraConfirmationDialog(
+        title: 'Keluar dari Heliora?',
+        content:
+            'Seluruh sesi dan token pada perangkat ini akan dihapus dengan aman.',
+        confirmLabel: 'Keluar',
+        cancelLabel: 'Batal',
+        isDestructive: true,
+        onConfirm: () => Navigator.of(dialogCtx).pop(true),
+        onCancel: () => Navigator.of(dialogCtx).pop(false),
+      ),
     );
 
     if (confirmed == true && mounted) {
@@ -308,7 +160,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final consentStatusAsync = ref.watch(consentStatusProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F9F8),
+      backgroundColor: HelioraTokens.muted,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(56),
         child: Container(
@@ -365,9 +217,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
                   // Section 2: Health Profile Summary Card (GET /health-profile)
                   healthProfileAsync.when(
-                    data: (profile) => _buildHealthProfileSummaryCard(profile),
+                    data: (profile) => _buildHealthProfileSummaryCard(
+                      profile,
+                      hasActiveConsent:
+                          consentStatusAsync.value?.hasActiveConsent ?? false,
+                    ),
                     loading: () => _buildCardPlaceholder(height: 180),
-                    error: (_, _) => _buildHealthProfileSummaryCard(null),
+                    error: (_, _) => _buildHealthProfileSummaryCard(
+                      null,
+                      hasActiveConsent:
+                          consentStatusAsync.value?.hasActiveConsent ?? false,
+                    ),
                   ),
                   const SizedBox(height: 16),
 
@@ -486,7 +346,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  Widget _buildHealthProfileSummaryCard(HealthProfileResponse? profile) {
+  Widget _buildHealthProfileSummaryCard(
+    HealthProfileResponse? profile, {
+    required bool hasActiveConsent,
+  }) {
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
@@ -573,10 +436,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             width: double.infinity,
             height: 44,
             child: OutlinedButton(
-              onPressed: widget.onEditHealthProfile,
+              onPressed: () {
+                if (!hasActiveConsent) {
+                  _showConsentRequiredForEditDialog();
+                } else {
+                  widget.onEditHealthProfile?.call();
+                }
+              },
               style: OutlinedButton.styleFrom(
                 foregroundColor: HelioraTokens.primary,
-                side: BorderSide(color: HelioraTokens.border, width: 1.0),
+                side: const BorderSide(color: HelioraTokens.border, width: 1.0),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(HelioraTokens.radiusXl),
                 ),
@@ -734,7 +603,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 onPressed: _isRevoking ? null : _handleRevokeConsent,
                 style: OutlinedButton.styleFrom(
                   foregroundColor: HelioraTokens.rose700,
-                  side: const BorderSide(color: Color(0xFFFCA5A5), width: 1.0),
+                  side: const BorderSide(color: HelioraTokens.rose300, width: 1.0),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(HelioraTokens.radiusXl),
                   ),

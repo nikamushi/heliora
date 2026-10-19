@@ -49,3 +49,15 @@ async def test_cors_preflight_flutter_web_options(client: AsyncClient):
     assert response.headers.get("access-control-allow-origin") == "http://127.0.0.1:55741"
     assert response.headers.get("access-control-allow-credentials") == "true"
 
+
+def test_production_cors_origin_regex_disabled():
+    """In production environments, CORS_ORIGIN_REGEX must be None to prevent unauthorized localhost calls."""
+    from app.core.config import Settings
+
+    prod_settings = Settings(APP_ENV="production")
+    assert prod_settings.CORS_ORIGIN_REGEX is None
+
+    dev_settings = Settings(APP_ENV="development")
+    assert dev_settings.CORS_ORIGIN_REGEX is not None
+
+

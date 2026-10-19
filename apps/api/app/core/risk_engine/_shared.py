@@ -1,6 +1,17 @@
-"""HELIORA API — Internal constants and helpers shared by the engine mixins."""
-
 import math
+from typing import Any, Protocol
+
+
+class RiskEngineProtocol(Protocol):
+    """Structural typing protocol declaring sibling methods required across engine mixins."""
+
+    def estimate_risks(self, profile: Any) -> dict[str, float]: ...
+
+    @staticmethod
+    def calculate_health_score(profile: Any, risks: dict[str, float]) -> float: ...
+
+    @staticmethod
+    def calculate_lifestyle_score(profile: Any) -> float: ...
 
 
 def _sigmoid(x: float) -> float:
