@@ -64,7 +64,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         var isFirstLaunch = false;
         try {
           isFirstLaunch = ref.read(isFirstLaunchProvider);
-        } catch (_) {}
+        } catch (_) {
+          isFirstLaunch = false;
+        }
 
         final targetAuthRoute = viewMode != null
             ? (viewMode == AuthViewMode.register ? AppRoutes.register : AppRoutes.login)
@@ -94,6 +96,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final healthProfileAsync = ref.read(healthProfileProvider);
       final hasProfile = healthProfileAsync.asData?.value != null;
 
+      // Hold navigation while consent evaluation is in-flight on cold start
+      if (consentAsync.isLoading) {
+        return null;
+      }
+
       final status = consentAsync.asData?.value;
       if (status != null) {
         final hasActiveConsent = status.hasActiveConsent;
@@ -106,9 +113,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           return null;
         }
 
-        // If on consent screen but consent is active, redirect to home
+        // If on consent screen but consent is active, redirect to assessment if no assessment exists, else home
         if (hasActiveConsent && location == AppRoutes.consent) {
-          return AppRoutes.home;
+          final hasAssessment = ref.read(latestAssessmentProvider).asData?.value != null;
+          return hasAssessment ? AppRoutes.home : AppRoutes.assessment;
         }
 
         // If consent is revoked, restrict access to simulation and assessment
@@ -147,7 +155,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           var isFirstLaunch = false;
           try {
             isFirstLaunch = ref.watch(isFirstLaunchProvider);
-          } catch (_) {}
+          } catch (_) {
+            isFirstLaunch = false;
+          }
           final viewMode = ref.watch(authViewModeProvider);
 
           return RegisterScreen(
@@ -155,14 +165,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             onNavigateToLogin: () {
               try {
                 ref.read(isFirstLaunchProvider.notifier).markLaunched();
-              } catch (_) {}
+              } catch (_) {
+                // Ignore if unmounted in tests
+              }
               ref.read(authViewModeProvider.notifier).state = AuthViewMode.login;
               context.go(AppRoutes.login);
             },
             onRegistrationSuccess: () {
               try {
                 ref.read(isFirstLaunchProvider.notifier).markLaunched();
-              } catch (_) {}
+              } catch (_) {
+                // Ignore if unmounted in tests
+              }
             },
           );
         },
@@ -174,7 +188,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           onConsentGranted: () {
             ref.invalidate(consentStatusProvider);
             ref.invalidate(healthProfileProvider);
-            if (context.canPop()) {
+            final latestAssessment = ref.read(latestAssessmentProvider).asData?.value;
+            if (latestAssessment == null) {
+              context.go(AppRoutes.assessment);
+            } else if (context.canPop()) {
               context.pop();
             } else {
               context.go(AppRoutes.home);
@@ -220,6 +237,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             final currentProfile = ref.read(healthProfileProvider).asData?.value;
             context.push(AppRoutes.assessment, extra: currentProfile);
           },
+          onReconsent: () => context.push(AppRoutes.consent),
           onConsentRevoked: () {
             context.go(AppRoutes.home);
           },

@@ -19,6 +19,7 @@ class ProfileScreen extends ConsumerStatefulWidget {
     this.onNavigateSimulation,
     this.onEditHealthProfile,
     this.onConsentRevoked,
+    this.onReconsent,
   });
 
   /// Navigation callbacks for 3-tab mobile shell.
@@ -26,6 +27,7 @@ class ProfileScreen extends ConsumerStatefulWidget {
   final VoidCallback? onNavigateSimulation;
   final VoidCallback? onEditHealthProfile;
   final VoidCallback? onConsentRevoked;
+  final VoidCallback? onReconsent;
 
   @override
   ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
@@ -81,8 +83,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       builder: (dialogCtx) => HelioraConfirmationDialog(
         title: 'Persetujuan Diperlukan',
         content:
-            'Persetujuan pemrosesan data kesehatan diperlukan untuk memperbarui profil dan menganalisis risiko kesehatan Anda. Silakan berikan persetujuan kembali melalui portal web HELIORA.',
-        cancelLabel: 'Mengerti',
+            'Persetujuan pemrosesan data kesehatan diperlukan untuk memperbarui profil dan menganalisis risiko kesehatan Anda. Silakan berikan persetujuan kembali untuk melanjutkan.',
+        confirmLabel: widget.onReconsent != null ? 'Beri Persetujuan' : null,
+        cancelLabel: widget.onReconsent != null ? 'Batal' : 'Mengerti',
+        onConfirm: widget.onReconsent != null
+            ? () {
+                Navigator.of(dialogCtx).pop();
+                widget.onReconsent!();
+              }
+            : null,
         onCancel: () => Navigator.of(dialogCtx).pop(),
       ),
     );

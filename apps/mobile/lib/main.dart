@@ -82,25 +82,6 @@ class _HelioraAppState extends ConsumerState<HelioraApp>
 
   @override
   Widget build(BuildContext context) {
-    if (_splashActive) {
-      return MaterialApp(
-        title: 'HELIORA',
-        debugShowCheckedModeBanner: false,
-        scrollBehavior: const HelioraScrollBehavior(),
-        theme: HelioraTheme.lightTheme,
-        darkTheme: HelioraTheme.darkTheme,
-        themeMode: ThemeMode.light,
-        home: SplashScreen(
-          key: const ValueKey('splash_screen'),
-          onSplashComplete: () {
-            if (mounted) {
-              setState(() => _splashActive = false);
-            }
-          },
-        ),
-      );
-    }
-
     final router = ref.watch(appRouterProvider);
 
     return MaterialApp.router(
@@ -111,6 +92,31 @@ class _HelioraAppState extends ConsumerState<HelioraApp>
       darkTheme: HelioraTheme.darkTheme,
       themeMode: ThemeMode.light,
       routerConfig: router,
+      builder: (context, child) {
+        final reduceMotion = MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+        final duration = reduceMotion
+            ? const Duration(milliseconds: 150)
+            : const Duration(milliseconds: 200);
+
+        return AnimatedSwitcher(
+          duration: duration,
+          switchInCurve: Curves.easeIn,
+          switchOutCurve: Curves.easeOut,
+          child: _splashActive
+              ? SplashScreen(
+                  key: const ValueKey('splash_screen'),
+                  onSplashComplete: () {
+                    if (mounted) {
+                      setState(() => _splashActive = false);
+                    }
+                  },
+                )
+              : KeyedSubtree(
+                  key: const ValueKey('app_content'),
+                  child: child ?? const SizedBox.shrink(),
+                ),
+        );
+      },
     );
   }
 }

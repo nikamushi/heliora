@@ -259,7 +259,7 @@ class AssessmentController extends StateNotifier<AssessmentFlowState> {
           state = state.copyWith(
             status: AssessmentFlowStatus.failure,
             errorMessage:
-                'Persetujuan pemrosesan data kesehatan diperlukan sebelum menjalankan analisis. Silakan berikan persetujuan di portal web HELIORA.',
+                'Persetujuan pemrosesan data kesehatan diperlukan sebelum menjalankan analisis. Silakan berikan persetujuan Anda untuk melanjutkan.',
           );
           return;
         }
