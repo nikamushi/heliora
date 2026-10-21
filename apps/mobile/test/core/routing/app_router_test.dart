@@ -68,5 +68,17 @@ void main() {
       container.read(authViewModeProvider.notifier).state = AuthViewMode.register;
       expect(notified, isTrue);
     });
+
+    test('cold-start router configuration builds cleanly with empty defaults', () {
+      final container = ProviderContainer(
+        overrides: [
+          isAuthenticatedProvider.overrideWithValue(true),
+        ],
+      );
+
+      final router = container.read(appRouterProvider);
+      expect(router, isNotNull);
+      expect(router.routeInformationProvider, isNotNull);
+    });
   });
 }

@@ -158,14 +158,14 @@ async def explain_assessment(
     )
     try:
         raw = await active_client.generate_text(ep.SYSTEM_PROMPT, user_message)
-    except LLMUnavailableError as exc:
-        logger.info("LLM unavailable, falling back to deterministic explanation: %s", exc)
-        return build_fallback_explanation(risks, factors, recommendations, evidence)
     except Exception as exc:
-        logger.warning(
-            "Unexpected error during LLM generation, falling back to deterministic explanation: %s",
-            exc,
-        )
+        if isinstance(exc, LLMUnavailableError):
+            logger.info("LLM unavailable, falling back to deterministic explanation: %s", exc)
+        else:
+            logger.warning(
+                "Unexpected error during LLM generation, falling back to deterministic explanation: %s",
+                exc,
+            )
         return build_fallback_explanation(risks, factors, recommendations, evidence)
 
     parsed = ep.validate_llm_output(raw, context["evidence_ids"])

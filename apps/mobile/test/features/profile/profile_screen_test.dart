@@ -211,6 +211,52 @@ void main() {
       expect(find.text('Persetujuan Diperlukan'), findsNothing);
     });
 
+    testWidgets(
+        'tapping "Perbarui profil kesehatan" when onReconsent is provided allows re-consent navigation',
+        (tester) async {
+      var reconsentCalled = false;
+      final fakeAuth = FakeAuthRepository();
+      final fakeHealth = FakeHealthProfileRepository();
+      final fakeConsent = FakeConsentRepository();
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            authRepositoryProvider.overrideWithValue(fakeAuth),
+            healthProfileRepositoryProvider.overrideWithValue(fakeHealth),
+            consentRepositoryProvider.overrideWithValue(fakeConsent),
+            currentUserProfileProvider.overrideWith((ref) => fakeAuth.fetchCurrentUserProfile()),
+            healthProfileProvider.overrideWith((ref) => fakeHealth.getHealthProfile()),
+            consentStatusProvider.overrideWith(
+              (ref) => Future.value(
+                const ConsentStatusResponse(hasActiveConsent: false),
+              ),
+            ),
+          ],
+          child: MaterialApp(
+            home: ProfileScreen(
+              onReconsent: () => reconsentCalled = true,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(find.text('Perbarui profil kesehatan'));
+      await tester.tap(find.text('Perbarui profil kesehatan'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Persetujuan Diperlukan'), findsOneWidget);
+      expect(find.text('Beri Persetujuan'), findsOneWidget);
+      expect(find.text('Batal'), findsOneWidget);
+
+      await tester.tap(find.text('Beri Persetujuan'));
+      await tester.pumpAndSettle();
+
+      expect(reconsentCalled, isTrue);
+      expect(find.text('Persetujuan Diperlukan'), findsNothing);
+    });
+
     testWidgets('tapping "Cabut persetujuan" opens confirmation dialog and executes revokeConsent',
         (tester) async {
       var revokedCalled = false;

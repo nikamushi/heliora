@@ -6,6 +6,7 @@ Rule-based explanation content for assessments: top attribution factors
 """
 
 from typing import Any
+from app.core.risk_engine._shared import RiskEngineProtocol
 
 from app.core.vitals import normalize_smoking_status
 from app.schemas.assessment import ContributingFactor

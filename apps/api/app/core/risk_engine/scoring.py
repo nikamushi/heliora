@@ -7,6 +7,7 @@ Lifestyle Score (docs/Lifestyle-Score.md, AI-005).
 from typing import Any
 
 from app.core.risk_engine._shared import (
+    RiskEngineProtocol,
     HEALTH_IMPROVEMENT_NO_HISTORY,
     HEALTH_IMPROVEMENT_WITH_HISTORY,
     HEALTH_RISK_WEIGHT_CARDIOVASCULAR,

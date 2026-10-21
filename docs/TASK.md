@@ -2056,12 +2056,12 @@ Acceptance Criteria:
 
 Tasks:
 
-- [x] SEC-003: Dedicated CORS security validator in FastAPI settings, removing Divergent Change from Supabase defaults.
-- [x] ARC-003: Pure typed AttributeProfile dataclass without dynamic kwargs, and typing protocols across all risk engine mixins.
-- [x] MOB-012.01: Relocate HelioraConfirmationDialog to shared UI layer (lib/theme/widgets/) and harmonize typography tokens.
-- [x] MOB-012.02: Implement consolidated score tier domain mapping with distinct tier-2 visual accent in ScoreCard.
-- [x] MOB-012.03: Enforce client-side active consent guard in AssessmentController and correct re-consent guidance.
-- [x] DOC-004: Synchronize docs/TASK.md completion checklist and verify 100% test suites pass.
+- [x] MOB-012.01: Dedicated CORS security validator in FastAPI settings, removing Divergent Change from Supabase defaults.
+- [x] MOB-012.02: Pure typed AttributeProfile dataclass without dynamic kwargs, and typing protocols across all risk engine mixins.
+- [x] MOB-012.03: Relocate HelioraConfirmationDialog to shared UI layer (`lib/theme/widgets/`) and harmonize typography tokens.
+- [x] MOB-012.04: Implement consolidated score tier domain mapping with distinct tier-2 visual accent in ScoreCard.
+- [x] MOB-012.05: Enforce client-side active consent guard in AssessmentController and correct re-consent guidance in mobile native dialogs.
+- [x] MOB-012.06: Synchronize docs/TASK.md completion checklist and verify 100% test suites pass.
 
 Acceptance Criteria:
 
@@ -2199,19 +2199,21 @@ Test:
 **Owner:** Gilang & Aksal + Pino & Tumir  
 **Priority:** P0  
 **Sprint:** S9  
-**Status:** BACKLOG
+**Status:** DONE
 
 Test:
 
-- [ ] Missing input.
-- [ ] Invalid input.
-- [ ] Boundary values.
-- [ ] Extreme values.
-- [ ] Empty response.
-- [ ] API timeout.
-- [ ] LLM failure.
-- [ ] RAG failure.
-- [ ] Simulation failure.
+- [x] QA-002.01: Return 422 instead of 500 for unsupported What-If derived BMI.
+- [x] QA-002.02: Boundary and extreme value test suite for profile, vitals, and simulation (tests/test_edge_boundary.py).
+- [x] QA-002.03: Guard against BMI database overflow on create and update (tests/test_edge_boundary.py).
+- [x] QA-002.04: Add max length constraint to blood pressure schema.
+- [x] QA-002.05: Harden Gemini client and RAG retrieval against unhandled exceptions and empty responses.
+- [x] QA-002.06: Add external service resilience and deterministic fallback tests (tests/test_external_resilience.py).
+- [x] QA-002.07: Resolve code-review findings, eliminate duplicate catches, and harden mobile cold-start/re-consent flow.
+
+Acceptance Criteria:
+
+- Seluruh edge-case boundaries, input validation, external service timeout/failure, dan deterministic fallback lulus pengujian otomatis 100%.
 
 ---
 

@@ -59,7 +59,7 @@ void main() {
       const card25 = ScoreCard(title: 'Score', score: 25, isHealthScore: true);
 
       expect(card85.scoreColor, equals(const Color(0xFF0F7A4E))); // primary
-      expect(card65.scoreColor, equals(const Color(0xFF0F766E))); // teal700
+      expect(card65.scoreColor, equals(const Color(0xFF047857))); // emerald700
       expect(card45.scoreColor, equals(const Color(0xFFB45309))); // amber700
       expect(card25.scoreColor, equals(const Color(0xFFBE123C))); // rose700
     });

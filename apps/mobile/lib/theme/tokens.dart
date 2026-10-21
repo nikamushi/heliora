@@ -17,7 +17,6 @@ abstract class HelioraTokens {
 
   // Status Colors
   static const Color emerald700 = Color(0xFF047857);
-  static const Color teal700 = Color(0xFF0F766E);
   static const Color rose700 = Color(0xFFBE123C);
   static const Color rose300 = Color(0xFFFCA5A5);
   static const Color rose50 = Color(0xFFFEF2F2);
