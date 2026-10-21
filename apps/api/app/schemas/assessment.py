@@ -14,7 +14,7 @@ class RiskAssessmentItem(BaseModel):
     probability: float
     estimated_risk_score: float
     risk_level: Literal["low", "moderate", "high"]
-    risk_label: Literal["Lower", "Moderate", "Higher"] = "Lower"
+    risk_label: Literal["Lower", "Moderate", "Higher", "Lebih Rendah", "Sedang", "Lebih Tinggi"] = "Lower"
     trend: Literal["stable", "increasing", "decreasing"] = "stable"
     description: str
 
@@ -25,16 +25,17 @@ class ContributingFactor(BaseModel):
     impact: Literal["increase", "decrease"]
     weight_percentage: float
     description: str
+    value_display: str | None = None
 
 
 class RecommendationItem(BaseModel):
     id: str
     rule_id: str | None = None
     title: str
-    category: Literal["sleep", "activity", "nutrition", "stress"]
+    category: Literal["sleep", "activity", "nutrition", "stress", "consultation"]
     priority: Literal["high", "medium", "low", "protective"] = "medium"
     action: str
-    evidence_level: Literal["A", "B", "C"] = "A"
+    evidence_level: Literal["High", "Moderate", "Limited", "A", "B", "C"] = "High"
     source: str
 
 
@@ -50,3 +51,4 @@ class AssessmentSummaryResponse(BaseModel):
     recommendations: list[RecommendationItem]
     assessed_at: str
     is_mock: bool = False
+    is_baseline: bool = True

@@ -217,6 +217,23 @@ def get_shap_explainer() -> RiskModelWrapper:
     return _explainer_instance
 
 
+def _is_feature_provided(feature_name: str, profile: Any) -> bool:
+    """Check whether the user actually provided this optional biometric/lifestyle feature.
+
+    Per PRD BR-PROFILE-002, optional unentered parameters must not be attributed
+    as contributing factors in user explanations.
+    """
+    if feature_name == "blood_sugar":
+        return getattr(profile, "blood_sugar_mg_dl", None) is not None
+    if feature_name == "cholesterol":
+        return getattr(profile, "cholesterol_mg_dl", None) is not None
+    if feature_name in ("systolic_bp", "diastolic_bp"):
+        return getattr(profile, "blood_pressure", None) is not None
+    if feature_name == "stress_level":
+        return getattr(profile, "stress_level", None) is not None
+    return True
+
+
 def explain_health_profile(profile: Any) -> list[dict[str, Any]]:
     """Generate human-readable SHAP feature contributions for a profile.
 
@@ -237,14 +254,18 @@ def explain_health_profile(profile: Any) -> list[dict[str, Any]]:
         # Compute combined importance (sum of absolute SHAP values across all conditions)
         combined_importance = np.sum(np.abs(shap_values), axis=1)
 
-        # Get top contributing features
-        top_indices = np.argsort(combined_importance)[::-1][:5]
+        # Get top contributing features (sort descending)
+        sorted_indices = np.argsort(combined_importance)[::-1]
 
         factors: list[dict[str, Any]] = []
-        for idx in top_indices:
-            if combined_importance[idx] > 1e-6:
-                feature_name = FEATURE_NAMES[idx]
+        for idx in sorted_indices:
+            feature_name = FEATURE_NAMES[idx]
 
+            # Filter out optional biometric features the user did not actually enter (BR-PROFILE-002)
+            if not _is_feature_provided(feature_name, profile):
+                continue
+
+            if combined_importance[idx] > 1e-6:
                 # Use diabetes column as primary direction indicator
                 # (most clinically actionable for preventive health)
                 raw_shap_dm = float(shap_values[idx, 0]) if shap_values.shape[1] > 0 else 0.0
@@ -274,6 +295,11 @@ def explain_health_profile(profile: Any) -> list[dict[str, Any]]:
                         "shap_cardiovascular": round(raw_shap_cvd, 4),
                     }
                 )
+
+                # Allow all provided profile features (lifestyle, biological, biometrics)
+                # to be returned so the dashboard can group and explain each category completely.
+                if len(factors) >= 11:
+                    break
 
         return factors
 
@@ -307,50 +333,61 @@ def _get_feature_description(
     """Generate a human-readable description for a feature contribution."""
     descriptions = {
         "age": {
-            "positive": "Usia lebih tinggi meningkatkan risiko penyakit metabolisme dan kardiovaskular.",
-            "negative": "Usia dalam rentang optimal memberikan perlindungan relatif terhadap risiko.",
+            "positive": "Faktor pertambahan usia berkontribusi menaikkan estimasi risiko dasar pada model.",
+            "negative": "Faktor usia di bawah 45 tahun berkontribusi menurunkan estimasi risiko dasar pada model.",
         },
         "bmi": {
-            "positive": "BMI lebih tinggi berkontribusi terhadap peningkatan beban metabolik dan risiko.",
-            "negative": "BMI dalam rentang sehat melindungi fungsi metabolik dan kardiovaskular.",
+            "positive": "BMI di atas rentang ideal (≥ 25) berkontribusi menaikkan estimasi risiko model.",
+            "negative": "BMI dalam rentang ideal berkontribusi menurunkan estimasi risiko model.",
         },
         "physical_activity": {
-            "positive": "Aktivitas fisik rendah meningkatkan risiko penyakit kronis.",
-            "negative": "Aktivitas fisik cukup memberikan efek protektif terhadap risiko.",
+            "positive": "Aktivitas fisik di bawah 150 menit/minggu berkontribusi menaikkan estimasi risiko model.",
+            "negative": "Aktivitas fisik memenuhi panduan WHO berkontribusi menurunkan estimasi risiko model.",
         },
         "sleep_duration": {
-            "positive": "Durasi tidur tidak optimal berpotensi meningkatkan risiko kesehatan.",
-            "negative": "Pola tidur optimal mendukung regulasi kardiometabolik.",
+            "positive": "Durasi tidur di bawah 7 jam per hari berkontribusi menaikkan estimasi risiko model.",
+            "negative": "Durasi tidur optimal (7–8 jam/hari) berkontribusi menurunkan estimasi risiko model.",
         },
         "smoking_status": {
-            "positive": "Merokok berkontribusi signifikan terhadap disfungsi endotel dan risiko kardiovaskular.",
-            "negative": "Tidak merokok menjaga integritas vaskular dan fungsi metabolik.",
+            "positive": "Kebiasaan merokok aktif berkontribusi menaikkan estimasi risiko model secara signifikan.",
+            "negative": "Status bebas asap rokok berkontribusi menurunkan estimasi risiko model.",
         },
         "family_history": {
-            "positive": "Riwayat keluarga menunjukkan predisposisi genetik terhadap kondisi metabolik.",
-            "negative": "Tanpa riwayat keluarga memberikan keuntungan protektif.",
+            "positive": "Adanya riwayat penyakit kronis dalam keluarga berkontribusi menaikkan estimasi risiko model.",
+            "negative": "Tidak ada riwayat penyakit kronis keluarga berkontribusi menurunkan estimasi risiko model.",
         },
         "stress_level": {
-            "positive": "Tingkat stres tinggi berpotensi meningkatkan tekanan darah dan risiko.",
-            "negative": "Tingkat stres terkontrol mendukung kesehatan kardiometabolik.",
+            "positive": "Tingkat stres yang dilaporkan tinggi berkontribusi menaikkan estimasi risiko model.",
+            "negative": "Tingkat stres dalam batas terkontrol berkontribusi menurunkan estimasi risiko model.",
         },
         "blood_sugar": {
-            "positive": "Gula darah lebih tinggi meningkatkan risiko diabetes.",
-            "negative": "Gula darah dalam rentang normal melindungi dari risiko diabetes.",
+            "positive": "Kadar gula darah di atas batas optimal berkontribusi menaikkan estimasi risiko model.",
+            "negative": "Kadar gula darah dalam rentang normal berkontribusi menurunkan estimasi risiko model.",
         },
         "cholesterol": {
-            "positive": "Kolesterol lebih tinggi berkontribusi terhadap risiko kardiovaskular.",
-            "negative": "Kolesterol dalam rentang optimal memberikan perlindungan kardiovaskular.",
+            "positive": "Kadar kolesterol di atas batas ideal berkontribusi menaikkan estimasi risiko model.",
+            "negative": "Kadar kolesterol dalam batas normal berkontribusi menurunkan estimasi risiko model.",
         },
         "systolic_bp": {
-            "positive": "Tekanan darah sistolik lebih tinggi meningkatkan risiko hipertensi.",
-            "negative": "Tekanan darah sistolik dalam rentang normal melindungi dari hipertensi.",
+            "positive": "Tekanan darah sistolik di atas batas normal berkontribusi menaikkan estimasi risiko model.",
+            "negative": "Tekanan darah sistolik dalam batas normal berkontribusi menurunkan estimasi risiko model.",
         },
         "diastolic_bp": {
-            "positive": "Tekanan darah diastolik lebih tinggi berkontribusi terhadap risiko hipertensi.",
-            "negative": "Tekanan darah diastolik dalam rentang normal memberikan perlindungan.",
+            "positive": "Tekanan darah diastolik di atas batas normal berkontribusi menaikkan estimasi risiko model.",
+            "negative": "Tekanan darah diastolik dalam batas normal berkontribusi menurunkan estimasi risiko model.",
         },
     }
 
-    default_desc = f"Faktor {feature_name.replace('_', ' ')} berkontribusi terhadap estimasi risiko."
-    return descriptions.get(feature_name, {}).get(direction, default_desc)
+    canonical = "positive" if direction in ("positive", "increase") else "negative"
+    if feature_name == "bmi" and canonical == "negative":
+        bmi_val = getattr(profile, "bmi", None)
+        if bmi_val is not None:
+            try:
+                if float(bmi_val) < 18.5:
+                    return "Pada model, nilai IMT ini menurunkan estimasi risiko kardiometabolik. Namun, nilai ini berada di bawah rentang normal (18,5–22,9 kg/m²)."
+            except (ValueError, TypeError):
+                pass
+        return "BMI dalam rentang normal Asia berkontribusi menurunkan estimasi risiko model."
+
+    default_desc = f"Faktor {feature_name.replace('_', ' ')} memengaruhi estimasi risiko."
+    return descriptions.get(feature_name, {}).get(canonical, default_desc)

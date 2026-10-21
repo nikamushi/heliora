@@ -31,7 +31,7 @@ export default function HelpAboutPage() {
     },
     {
       title: "Explainable AI (Bukan Black-Box)",
-      desc: "Memberikan transparansi penuh mengenai faktor biomarker apa yang memengaruhi probabilitas kesehatan Anda.",
+      desc: "Memberikan transparansi penuh mengenai faktor biomarker apa yang memengaruhi skor estimasi kesehatan Anda.",
       icon: SFSparkles,
       color: "text-violet-600",
       bg: "bg-violet-50/70 border-violet-100",

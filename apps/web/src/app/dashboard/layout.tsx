@@ -15,7 +15,6 @@ import {
   Compass as SFCompass,
   User as SFPersonCropCircle,
   ShieldAlert as SFLockShield,
-  LogOut as SFDoorExit,
   Menu as SFLine3Horizontal,
   X as SFXmark,
   HelpCircle as SFQuestionMarkCircle,
@@ -88,20 +87,41 @@ export default function DashboardLayout({
           setUser(currentUser);
         }
 
-        // 2. Check Mandatory Consent
+        // 2. Check Mandatory Consent (BR-CONSENT-003)
         try {
           const consentStatus = await apiClient.consent.getStatus();
           if (!consentStatus?.has_active_consent) {
+            // Izinkan akses ke halaman pengaturan dan bantuan tanpa redirect paksa
+            if (
+              pathname?.startsWith("/dashboard/settings") ||
+              pathname?.startsWith("/dashboard/help")
+            ) {
+              if (isMounted) {
+                setIsAuthorized(true);
+                setIsCheckingAuth(false);
+              }
+              return;
+            }
+
+            // Izinkan fitur dashboard merender empty state netral dengan CTA (BR-CONSENT-003)
+            // tanpa memblokir seluruh aplikasi dengan halaman error
             if (isMounted) {
-              router.replace("/onboarding/consent");
+              setIsAuthorized(true);
+              setIsCheckingAuth(false);
             }
             return;
           }
         } catch {
-          if (isMounted) {
-            router.replace("/onboarding/consent");
+          if (
+            pathname?.startsWith("/dashboard/settings") ||
+            pathname?.startsWith("/dashboard/help")
+          ) {
+            if (isMounted) {
+              setIsAuthorized(true);
+              setIsCheckingAuth(false);
+            }
+            return;
           }
-          return;
         }
 
         // 3. Check Mandatory Health Profile (Step 1-3)
@@ -144,15 +164,6 @@ export default function DashboardLayout({
     };
   }, [router, pathname]);
 
-
-  const handleLogout = async () => {
-    try {
-      await apiClient.auth.logout();
-    } finally {
-      router.push("/login");
-    }
-  };
-
   const userInitials =
     user?.full_name
       ?.split(" ")
@@ -189,7 +200,7 @@ export default function DashboardLayout({
   return (
     <div className="min-h-screen bg-neutral-50/40 text-neutral-900 selection:bg-brand-100 flex flex-col lg:flex-row">
       {/* ── Mobile & Tablet Top Bar (< 1024px) ── */}
-      <header className="lg:hidden bg-white/90 backdrop-blur-md sticky top-0 z-30 px-4 sm:px-6 h-15 flex items-center justify-between">
+      <header className="lg:hidden bg-white border-b border-neutral-200/80 sticky top-0 z-30 px-4 sm:px-6 h-15 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -223,7 +234,7 @@ export default function DashboardLayout({
               : pathname?.startsWith("/dashboard/simulation/future")
               ? "Proyeksi"
               : pathname?.startsWith("/dashboard/evidence")
-              ? "Bukti"
+              ? "Dasar Ilmiah"
               : pathname?.startsWith("/dashboard/help")
               ? "Bantuan"
               : pathname?.startsWith("/dashboard/profile")
@@ -379,14 +390,14 @@ export default function DashboardLayout({
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: 14 }}
                       transition={{ duration: 0.16 }}
-                      className="space-y-6 pt-0"
+                      className="space-y-3 pt-0"
                     >
-                      {/* Cluster 1: Risiko */}
+                      {/* 1. Risiko */}
                       <div>
                         <Link
                           href="/dashboard/risk/diabetes"
                           onClick={() => setIsMobileMenuOpen(false)}
-                          className={`flex items-center px-4 py-4 rounded-2xl text-xl font-bold transition-colors ${
+                          className={`flex items-center px-4 py-3 rounded-2xl text-lg font-bold transition-colors ${
                             pathname?.startsWith("/dashboard/risk")
                               ? "bg-neutral-900/[0.08] text-neutral-950"
                               : "text-neutral-900 hover:bg-neutral-900/[0.04]"
@@ -396,38 +407,12 @@ export default function DashboardLayout({
                         </Link>
                       </div>
 
-                      {/* Cluster 2: Tindakan */}
+                      {/* 2. Proyeksi */}
                       <div>
-                        <Link
-                          href="/dashboard/recommendations"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                          className={`flex items-center px-4 py-4 rounded-2xl text-xl font-bold transition-colors ${
-                            pathname?.startsWith("/dashboard/recommendations")
-                              ? "bg-neutral-900/[0.08] text-neutral-950"
-                              : "text-neutral-900 hover:bg-neutral-900/[0.04]"
-                          }`}
-                        >
-                          <span>Tindakan</span>
-                        </Link>
-                      </div>
-
-                      {/* Cluster 3: Skenario & Proyeksi */}
-                      <div className="space-y-3">
-                        <Link
-                          href="/dashboard/simulation/what-if"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                          className={`flex items-center px-4 py-4 rounded-2xl text-xl font-bold transition-colors ${
-                            pathname === "/dashboard/simulation/what-if"
-                              ? "bg-neutral-900/[0.08] text-neutral-950"
-                              : "text-neutral-900 hover:bg-neutral-900/[0.04]"
-                          }`}
-                        >
-                          <span>Skenario</span>
-                        </Link>
                         <Link
                           href="/dashboard/simulation/future"
                           onClick={() => setIsMobileMenuOpen(false)}
-                          className={`flex items-center px-4 py-4 rounded-2xl text-xl font-bold transition-colors ${
+                          className={`flex items-center px-4 py-3 rounded-2xl text-lg font-bold transition-colors ${
                             pathname === "/dashboard/simulation/future"
                               ? "bg-neutral-900/[0.08] text-neutral-950"
                               : "text-neutral-900 hover:bg-neutral-900/[0.04]"
@@ -437,18 +422,48 @@ export default function DashboardLayout({
                         </Link>
                       </div>
 
-                      {/* Cluster 4: Bukti */}
+                      {/* 3. Skenario */}
+                      <div>
+                        <Link
+                          href="/dashboard/simulation/what-if"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className={`flex items-center px-4 py-3 rounded-2xl text-lg font-bold transition-colors ${
+                            pathname === "/dashboard/simulation/what-if"
+                              ? "bg-neutral-900/[0.08] text-neutral-950"
+                              : "text-neutral-900 hover:bg-neutral-900/[0.04]"
+                          }`}
+                        >
+                          <span>Skenario</span>
+                        </Link>
+                      </div>
+
+                      {/* 4. Tindakan */}
+                      <div>
+                        <Link
+                          href="/dashboard/recommendations"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className={`flex items-center px-4 py-3 rounded-2xl text-lg font-bold transition-colors ${
+                            pathname?.startsWith("/dashboard/recommendations")
+                              ? "bg-neutral-900/[0.08] text-neutral-950"
+                              : "text-neutral-900 hover:bg-neutral-900/[0.04]"
+                          }`}
+                        >
+                          <span>Tindakan</span>
+                        </Link>
+                      </div>
+
+                      {/* 5. Dasar Ilmiah */}
                       <div>
                         <Link
                           href="/dashboard/evidence"
                           onClick={() => setIsMobileMenuOpen(false)}
-                          className={`flex items-center px-4 py-4 rounded-2xl text-xl font-bold transition-colors ${
+                          className={`flex items-center px-4 py-3 rounded-2xl text-lg font-bold transition-colors ${
                             pathname?.startsWith("/dashboard/evidence")
                               ? "bg-neutral-900/[0.08] text-neutral-950"
                               : "text-neutral-900 hover:bg-neutral-900/[0.04]"
                           }`}
                         >
-                          <span>Bukti</span>
+                          <span>Dasar Ilmiah</span>
                         </Link>
                       </div>
                     </motion.nav>
@@ -577,22 +592,13 @@ export default function DashboardLayout({
                     href="/dashboard/settings"
                     onClick={() => setIsPersonalMenuOpen(false)}
                     className={`w-full flex items-center px-4 py-4 rounded-2xl text-xl font-bold transition-colors ${
-                      pathname === "/dashboard/settings"
+                      pathname?.startsWith("/dashboard/settings")
                         ? "bg-neutral-900/[0.08] text-neutral-950 shadow-xs"
                         : "text-neutral-900 hover:bg-neutral-900/[0.04]"
                     }`}
                   >
                     <span>Akun</span>
                   </Link>
-
-                  {/* 3. Keluar */}
-                  <button
-                    type="button"
-                    onClick={handleLogout}
-                    className="w-full flex items-center px-4 py-4 rounded-2xl text-xl text-rose-600 bg-rose-50 cursor-pointer font-bold"
-                  >
-                    <span>Keluar</span>
-                  </button>
                 </nav>
               </div>
             </motion.aside>
@@ -683,138 +689,124 @@ export default function DashboardLayout({
                   exit={{ opacity: 0, y: -4 }}
                   transition={{ duration: 0.15 }}
                 >
-                  {/* Header of Active Destination (Aligned with Avatar size-9) */}
-                  <div className="h-9 px-2 flex items-center">
-                    <h2 className="text-sm font-bold uppercase tracking-wider text-neutral-800">
-                      {activePrimaryTab === "fitur"
-                        ? "Jelajahi"
-                        : activePrimaryTab === "bantuan"
-                        ? "Bantuan"
-                        : "Personal"}
-                    </h2>
-                  </div>
+                  {/* Secondary Sidebar Header Spacing (Aligned with Avatar size-9) */}
+                  <div className="h-9 px-2 flex items-center" />
 
               {/* Sub-Items for Jelajahi */}
               {activePrimaryTab === "fitur" && (
-                <nav className="mt-6 space-y-6">
-                  {/* Cluster 1: Risiko */}
-                  <div>
-                    <Link
-                      href="/dashboard/risk/diabetes"
-                      className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
-                        pathname?.startsWith("/dashboard/risk")
-                          ? "bg-neutral-900/[0.08] text-neutral-950 font-bold"
-                          : "text-neutral-700 hover:bg-neutral-900/[0.04] hover:text-neutral-900 font-medium"
-                      }`}
-                    >
-                      <SFWaveformPathEcg className="w-5 h-5 shrink-0 text-rose-600" />
-                      <span>Risiko</span>
-                    </Link>
-                  </div>
+                <nav className="mt-2 space-y-1">
+                  {/* 1. Risiko */}
+                  <Link
+                    href="/dashboard/risk/diabetes"
+                    className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
+                      pathname?.startsWith("/dashboard/risk")
+                        ? "bg-white text-neutral-950 font-semibold shadow-2xs"
+                        : "text-neutral-600 hover:bg-neutral-200/50 hover:text-neutral-900 font-medium"
+                    }`}
+                  >
+                    <SFWaveformPathEcg className={`w-5 h-5 shrink-0 ${pathname?.startsWith("/dashboard/risk") ? "text-neutral-900" : "text-neutral-500"}`} />
+                    <span>Risiko</span>
+                  </Link>
 
-                  {/* Cluster 2: Tindakan */}
-                  <div>
-                    <Link
-                      href="/dashboard/recommendations"
-                      className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
-                        pathname?.startsWith("/dashboard/recommendations")
-                          ? "bg-neutral-900/[0.08] text-neutral-950 font-bold"
-                          : "text-neutral-700 hover:bg-neutral-900/[0.04] hover:text-neutral-900 font-medium"
-                      }`}
-                    >
-                      <SFShieldCheckmark className="w-5 h-5 shrink-0 text-emerald-600" />
-                      <span>Tindakan</span>
-                    </Link>
-                  </div>
+                  {/* 2. Proyeksi */}
+                  <Link
+                    href="/dashboard/simulation/future"
+                    className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
+                      pathname === "/dashboard/simulation/future"
+                        ? "bg-white text-neutral-950 font-semibold shadow-2xs"
+                        : "text-neutral-600 hover:bg-neutral-200/50 hover:text-neutral-900 font-medium"
+                    }`}
+                  >
+                    <SFChartUptrend className={`w-5 h-5 shrink-0 ${pathname === "/dashboard/simulation/future" ? "text-neutral-900" : "text-neutral-500"}`} />
+                    <span>Proyeksi</span>
+                  </Link>
 
-                  {/* Cluster 3: Skenario & Proyeksi */}
-                  <div className="space-y-2">
-                    <Link
-                      href="/dashboard/simulation/what-if"
-                      className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
-                        pathname === "/dashboard/simulation/what-if"
-                          ? "bg-neutral-900/[0.08] text-neutral-950 font-bold"
-                          : "text-neutral-700 hover:bg-neutral-900/[0.04] hover:text-neutral-900 font-medium"
-                      }`}
-                    >
-                      <SFSlidersHorizontal className="w-5 h-5 shrink-0 text-violet-600" />
-                      <span>Skenario</span>
-                    </Link>
-                    <Link
-                      href="/dashboard/simulation/future"
-                      className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
-                        pathname === "/dashboard/simulation/future"
-                          ? "bg-neutral-900/[0.08] text-neutral-950 font-bold"
-                          : "text-neutral-700 hover:bg-neutral-900/[0.04] hover:text-neutral-900 font-medium"
-                      }`}
-                    >
-                      <SFChartUptrend className="w-5 h-5 shrink-0 text-teal-600" />
-                      <span>Proyeksi</span>
-                    </Link>
-                  </div>
+                  {/* 3. Skenario */}
+                  <Link
+                    href="/dashboard/simulation/what-if"
+                    className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
+                      pathname === "/dashboard/simulation/what-if"
+                        ? "bg-white text-neutral-950 font-semibold shadow-2xs"
+                        : "text-neutral-600 hover:bg-neutral-200/50 hover:text-neutral-900 font-medium"
+                    }`}
+                  >
+                    <SFSlidersHorizontal className={`w-5 h-5 shrink-0 ${pathname === "/dashboard/simulation/what-if" ? "text-neutral-900" : "text-neutral-500"}`} />
+                    <span>Skenario</span>
+                  </Link>
 
-                  {/* Cluster 4: Bukti */}
-                  <div>
-                    <Link
-                      href="/dashboard/evidence"
-                      className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
-                        pathname?.startsWith("/dashboard/evidence")
-                          ? "bg-neutral-900/[0.08] text-neutral-950 font-bold"
-                          : "text-neutral-700 hover:bg-neutral-900/[0.04] hover:text-neutral-900 font-medium"
-                      }`}
-                    >
-                      <SFBookClosed className="w-5 h-5 shrink-0 text-amber-500" />
-                      <span>Bukti</span>
-                    </Link>
-                  </div>
+                  {/* 4. Tindakan */}
+                  <Link
+                    href="/dashboard/recommendations"
+                    className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
+                      pathname?.startsWith("/dashboard/recommendations")
+                        ? "bg-white text-neutral-950 font-semibold shadow-2xs"
+                        : "text-neutral-600 hover:bg-neutral-200/50 hover:text-neutral-900 font-medium"
+                    }`}
+                  >
+                    <SFShieldCheckmark className={`w-5 h-5 shrink-0 ${pathname?.startsWith("/dashboard/recommendations") ? "text-neutral-900" : "text-neutral-500"}`} />
+                    <span>Tindakan</span>
+                  </Link>
+
+                  {/* 5. Dasar Ilmiah */}
+                  <Link
+                    href="/dashboard/evidence"
+                    className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
+                      pathname?.startsWith("/dashboard/evidence")
+                        ? "bg-white text-neutral-950 font-semibold shadow-2xs"
+                        : "text-neutral-600 hover:bg-neutral-200/50 hover:text-neutral-900 font-medium"
+                    }`}
+                  >
+                    <SFBookClosed className={`w-5 h-5 shrink-0 ${pathname?.startsWith("/dashboard/evidence") ? "text-neutral-900" : "text-neutral-500"}`} />
+                    <span>Dasar Ilmiah</span>
+                  </Link>
                 </nav>
               )}
 
               {/* Sub-Items for Bantuan */}
               {activePrimaryTab === "bantuan" && (
-                <nav className="mt-6 space-y-2">
+                <nav className="mt-2 space-y-1">
                   <Link
                     href="/dashboard/help/about"
                     className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
                       pathname === "/dashboard/help/about" || pathname === "/dashboard/help"
-                        ? "bg-neutral-900/[0.08] text-neutral-950 font-bold"
-                        : "text-neutral-700 hover:bg-neutral-900/[0.04] hover:text-neutral-900 font-medium"
+                        ? "bg-white text-neutral-950 font-semibold shadow-2xs"
+                        : "text-neutral-600 hover:bg-neutral-200/50 hover:text-neutral-900 font-medium"
                     }`}
                   >
-                    <SFInfoCircle className="w-5 h-5 shrink-0 text-amber-600" />
+                    <SFInfoCircle className={`w-5 h-5 shrink-0 ${pathname === "/dashboard/help/about" || pathname === "/dashboard/help" ? "text-neutral-900" : "text-neutral-500"}`} />
                     <span>Tentang</span>
                   </Link>
                   <Link
                     href="/dashboard/help/guide"
                     className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
                       pathname === "/dashboard/help/guide"
-                        ? "bg-neutral-900/[0.08] text-neutral-950 font-bold"
-                        : "text-neutral-700 hover:bg-neutral-900/[0.04] hover:text-neutral-900 font-medium"
+                        ? "bg-white text-neutral-950 font-semibold shadow-2xs"
+                        : "text-neutral-600 hover:bg-neutral-200/50 hover:text-neutral-900 font-medium"
                     }`}
                   >
-                    <SFDocText className="w-5 h-5 shrink-0 text-blue-600" />
+                    <SFDocText className={`w-5 h-5 shrink-0 ${pathname === "/dashboard/help/guide" ? "text-neutral-900" : "text-neutral-500"}`} />
                     <span>Panduan Penggunaan</span>
                   </Link>
                   <Link
                     href="/dashboard/help/faq"
                     className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
                       pathname === "/dashboard/help/faq"
-                        ? "bg-neutral-900/[0.08] text-neutral-950 font-bold"
-                        : "text-neutral-700 hover:bg-neutral-900/[0.04] hover:text-neutral-900 font-medium"
+                        ? "bg-white text-neutral-950 font-semibold shadow-2xs"
+                        : "text-neutral-600 hover:bg-neutral-200/50 hover:text-neutral-900 font-medium"
                     }`}
                   >
-                    <SFBubbleLeftRight className="w-5 h-5 shrink-0 text-violet-600" />
+                    <SFBubbleLeftRight className={`w-5 h-5 shrink-0 ${pathname === "/dashboard/help/faq" ? "text-neutral-900" : "text-neutral-500"}`} />
                     <span>Tanya Jawab (FAQ)</span>
                   </Link>
                   <Link
                     href="/dashboard/help/support"
                     className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
                       pathname === "/dashboard/help/support"
-                        ? "bg-neutral-900/[0.08] text-neutral-950 font-bold"
-                        : "text-neutral-700 hover:bg-neutral-900/[0.04] hover:text-neutral-900 font-medium"
+                        ? "bg-white text-neutral-950 font-semibold shadow-2xs"
+                        : "text-neutral-600 hover:bg-neutral-200/50 hover:text-neutral-900 font-medium"
                     }`}
                   >
-                    <SFHeadphones className="w-5 h-5 shrink-0 text-emerald-600" />
+                    <SFHeadphones className={`w-5 h-5 shrink-0 ${pathname === "/dashboard/help/support" ? "text-neutral-900" : "text-neutral-500"}`} />
                     <span>Hubungi Dukungan</span>
                   </Link>
                 </nav>
@@ -822,41 +814,30 @@ export default function DashboardLayout({
 
               {/* Sub-Items for Personal */}
               {activePrimaryTab === "personal" && (
-                <nav className="mt-6 space-y-6">
-                  <div className="space-y-2">
+                <nav className="mt-2 space-y-4">
+                  <div className="space-y-1">
                     <Link
                       href="/dashboard/profile"
                       className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
                         pathname === "/dashboard/profile"
-                          ? "bg-neutral-900/[0.08] text-neutral-950 font-bold"
-                          : "text-neutral-700 hover:bg-neutral-900/[0.04] hover:text-neutral-900 font-medium"
+                          ? "bg-white text-neutral-950 font-semibold shadow-2xs"
+                          : "text-neutral-600 hover:bg-neutral-200/50 hover:text-neutral-900 font-medium"
                       }`}
                     >
-                      <SFPersonCropCircle className="w-5 h-5 shrink-0 text-blue-600" />
+                      <SFPersonCropCircle className={`w-5 h-5 shrink-0 ${pathname === "/dashboard/profile" ? "text-neutral-900" : "text-neutral-500"}`} />
                       <span>Profil</span>
                     </Link>
                     <Link
                       href="/dashboard/settings"
                       className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
-                        pathname === "/dashboard/settings"
-                          ? "bg-neutral-900/[0.08] text-neutral-950 font-bold"
-                          : "text-neutral-700 hover:bg-neutral-900/[0.04] hover:text-neutral-900 font-medium"
+                        pathname?.startsWith("/dashboard/settings")
+                          ? "bg-white text-neutral-950 font-semibold shadow-2xs"
+                          : "text-neutral-600 hover:bg-neutral-200/50 hover:text-neutral-900 font-medium"
                       }`}
                     >
-                      <SFLockShield className="w-5 h-5 shrink-0 text-emerald-600" />
+                      <SFLockShield className={`w-5 h-5 shrink-0 ${pathname?.startsWith("/dashboard/settings") ? "text-neutral-900" : "text-neutral-500"}`} />
                       <span>Akun</span>
                     </Link>
-                  </div>
-
-                  <div>
-                    <button
-                      type="button"
-                      onClick={handleLogout}
-                      className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-semibold text-rose-600 bg-rose-50 cursor-pointer"
-                    >
-                      <SFDoorExit className="w-5 h-5 shrink-0 text-rose-600" />
-                      <span>Keluar</span>
-                    </button>
                   </div>
                 </nav>
               )}
@@ -870,7 +851,7 @@ export default function DashboardLayout({
       {/* ── Main Content Area (Column 3) ── */}
       <div className="flex-1 min-w-0 flex flex-col">
         {/* Unified Top Header: Global Search and Disease Tabs inside 1 single sticky section */}
-        <header className="bg-white/70 backdrop-blur-md sticky top-0 z-20 px-6 hidden lg:flex flex-col items-center justify-center shrink-0 pt-3.5 pb-4 space-y-5">
+        <header className="bg-white border-b border-neutral-200/80 sticky top-0 z-20 px-6 hidden lg:flex flex-col items-center justify-center shrink-0 pt-3.5 pb-4 space-y-5">
           {/* Top: Global Search Bar */}
           <button
             type="button"
@@ -881,7 +862,7 @@ export default function DashboardLayout({
               <SFMagnifyingglass className="w-4 h-4" />
             </div>
             <div className="w-full pl-9 pr-10 py-1.5 text-sm bg-transparent group-hover:bg-neutral-50/50 text-neutral-400 rounded-xl border border-neutral-200/70 group-hover:border-neutral-300/80 transition-all select-none">
-              Heliora
+              Cari faktor, tindakan, bukti…
             </div>
             <div className="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none">
               <kbd className="inline-flex items-center px-1.5 py-0.5 border border-neutral-200/70 rounded text-[10px] font-mono text-neutral-400 bg-neutral-50/60 shadow-2xs">
@@ -898,33 +879,33 @@ export default function DashboardLayout({
             >
               <Link
                 href="/dashboard/risk/diabetes"
-                className={`w-18 sm:w-20 py-1.5 px-2 text-center rounded-full transition-all select-none flex items-center justify-center shrink-0 ${
+                className={`px-3.5 sm:px-4.5 py-1.5 text-center rounded-full transition-all select-none flex items-center justify-center shrink-0 ${
                   pathname === "/dashboard/risk/diabetes"
                     ? "bg-white text-neutral-900 font-bold shadow-xs"
                     : "text-neutral-500 hover:text-black"
                 }`}
               >
-                <span className="truncate">DM T2</span>
+                <span className="truncate">Diabetes</span>
               </Link>
               <Link
                 href="/dashboard/risk/hypertension"
-                className={`w-18 sm:w-20 py-1.5 px-2 text-center rounded-full transition-all select-none flex items-center justify-center shrink-0 ${
+                className={`px-3.5 sm:px-4.5 py-1.5 text-center rounded-full transition-all select-none flex items-center justify-center shrink-0 ${
                   pathname === "/dashboard/risk/hypertension"
                     ? "bg-white text-neutral-900 font-bold shadow-xs"
                     : "text-neutral-500 hover:text-black"
                 }`}
               >
-                <span className="truncate">HT</span>
+                <span className="truncate">Hipertensi</span>
               </Link>
               <Link
                 href="/dashboard/risk/cardiovascular"
-                className={`w-18 sm:w-20 py-1.5 px-2 text-center rounded-full transition-all select-none flex items-center justify-center shrink-0 ${
+                className={`px-3.5 sm:px-4.5 py-1.5 text-center rounded-full transition-all select-none flex items-center justify-center shrink-0 ${
                   pathname === "/dashboard/risk/cardiovascular"
                     ? "bg-white text-neutral-900 font-bold shadow-xs"
                     : "text-neutral-500 hover:text-black"
                 }`}
               >
-                <span className="truncate">KV</span>
+                <span className="truncate">Kardiovaskular</span>
               </Link>
             </nav>
           )}
@@ -1041,7 +1022,7 @@ export default function DashboardLayout({
                         →
                       </span>
                       <span className="group-hover:translate-x-0.5 inline-block transition-transform duration-200 ease-out">
-                        Pusat Bukti Medis
+                        Dasar Ilmiah
                       </span>
                     </Link>
                     <Link

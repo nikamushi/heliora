@@ -21,6 +21,7 @@ from app.db.models.risk_result import RiskResult
 from app.db.models.user import User
 from app.db.models.xai_result import XAIResult
 from app.main import app
+from app.schemas.assessment import ContributingFactor
 from app.services.assessment_service import assessment_service
 
 # ── 1. Risk Engine Unit Tests ────────────────────────────────────────────────
@@ -464,7 +465,7 @@ async def test_routes_assessment_e2e_flow():
                 assert post_res.status_code == 201
                 post_data = post_res.json()
                 assert post_data["id"] == str(assessment_id)
-                assert post_data["health_score"] == 88.0
+                assert post_data["health_score"] == 88.2
                 assert len(post_data["risks"]) == 3
 
             # 2. GET /api/v1/assessment/latest
@@ -486,5 +487,187 @@ async def test_routes_assessment_e2e_flow():
                 by_id_res = await client.get(f"/api/v1/assessment/{assessment_id}")
                 assert by_id_res.status_code == 200
                 assert by_id_res.json()["id"] == str(assessment_id)
+                # AC-DASH-02: identical scores across endpoints
+                assert by_id_res.json()["health_score"] == post_data["health_score"]
+                assert by_id_res.json()["lifestyle_score"] == post_data["lifestyle_score"]
     finally:
         app.dependency_overrides.clear()
+
+
+def test_profile_fulfilling_all_guidelines_has_no_recs_and_high_lifestyle_score():
+    """Profile meeting all guidelines has 0 recommendations and Lifestyle Score >= 90 (AC-SCORE-02)."""
+    profile = HealthProfile(
+        age=28,
+        gender="female",
+        height_cm=Decimal("165.0"),
+        weight_kg=Decimal("56.0"),
+        bmi=Decimal("20.6"),
+        physical_activity_min_per_week=Decimal("200.0"),
+        sleep_duration_hours=Decimal("8.0"),
+        smoking_status="never",
+        family_history=False,
+    )
+    recs = risk_engine.generate_recommendations(profile)
+    assert len(recs) == 0
+
+    score = risk_engine.calculate_lifestyle_score(profile)
+    assert score >= 90.0
+    assert score == 100.0
+
+
+def test_sleep_deficit_triggers_recommendation_regardless_of_shap():
+    """Sleep < 7.0 hours triggers REC-SLP-01 even if SHAP contribution is small or neutral (FR-026, BR-REC-004)."""
+    profile = HealthProfile(
+        age=32,
+        gender="male",
+        height_cm=Decimal("175.0"),
+        weight_kg=Decimal("68.0"),
+        bmi=Decimal("22.2"),
+        physical_activity_min_per_week=Decimal("180.0"),
+        sleep_duration_hours=Decimal("5.5"),  # Under 7h guideline
+        smoking_status="never",
+        family_history=False,
+    )
+    # Even if SHAP feature is neutral / negative
+    neutral_factor = ContributingFactor(
+        feature="sleep_duration",
+        label="Durasi Tidur",
+        impact="decrease",
+        weight_percentage=4.0,
+        description="Pengaruh netral",
+    )
+    recs = risk_engine.generate_recommendations(profile, top_factors=[neutral_factor])
+    rec_rules = [r["rule_id"] for r in recs]
+    assert "REC-SLP-01" in rec_rules
+
+
+def test_active_smoker_always_triggers_cessation_recommendation():
+    """Active smoker always triggers REC-SMK-01 (BR-REC-005)."""
+    profile = HealthProfile(
+        age=30,
+        gender="male",
+        height_cm=Decimal("170.0"),
+        weight_kg=Decimal("65.0"),
+        bmi=Decimal("22.5"),
+        physical_activity_min_per_week=Decimal("200.0"),
+        sleep_duration_hours=Decimal("7.5"),
+        smoking_status="current",
+        family_history=False,
+    )
+    recs = risk_engine.generate_recommendations(profile)
+    rec_rules = [r["rule_id"] for r in recs]
+    assert "REC-SMK-01" in rec_rules
+
+
+def test_high_risk_triggers_safety_guardrail_consultation():
+    """High risk threshold (probability >= 0.50) triggers REC-SAFETY-01 as #1 priority (FR-037, FR-038)."""
+    profile = HealthProfile(
+        age=58,
+        gender="male",
+        height_cm=Decimal("168.0"),
+        weight_kg=Decimal("88.0"),
+        bmi=Decimal("31.2"),
+        physical_activity_min_per_week=Decimal("30.0"),
+        sleep_duration_hours=Decimal("5.0"),
+        smoking_status="current",
+        family_history=True,
+    )
+    risks = {
+        "diabetes_risk": 0.65,
+        "hypertension_risk": 0.72,
+        "cardiovascular_risk": 0.58,
+    }
+    recs = risk_engine.generate_recommendations(profile, risks=risks)
+    assert len(recs) > 0
+    assert recs[0]["rule_id"] == "REC-SAFETY-01"
+    assert recs[0]["category"] == "consultation"
+    assert "konsultasi" in recs[0]["title"].lower() or "tenaga kesehatan" in recs[0]["title"].lower()
+
+
+def test_every_actionable_recommendation_has_triggering_factor_in_factor_list():
+    """Every actionable recommendation has its underlying factor in the factor list (AC-DASH-02)."""
+    profile = HealthProfile(
+        age=45,
+        gender="female",
+        height_cm=Decimal("160.0"),
+        weight_kg=Decimal("72.0"),
+        bmi=Decimal("28.1"),
+        physical_activity_min_per_week=Decimal("60.0"),
+        sleep_duration_hours=Decimal("5.5"),
+        smoking_status="current",
+        family_history=True,
+    )
+    risks = risk_engine.estimate_risks(profile)
+    factors = risk_engine.extract_top_factors(profile, risks)
+    recs = risk_engine.generate_recommendations(profile, risks=risks, top_factors=factors)
+
+    factor_features = {f.feature for f in factors}
+    rule_feature_map = {
+        "REC-ACT-01": "physical_activity",
+        "REC-SLP-01": "sleep_duration",
+        "REC-NUT-01": "bmi",
+        "REC-NUT-LOWBMI-01": "bmi",
+        "REC-SMK-01": "smoking_status",
+    }
+
+    for rec in recs:
+        rule_id = rec["rule_id"]
+        if rule_id == "REC-SAFETY-01":
+            continue  # Safety rule is independent of single lifestyle factor
+        assert rule_id in rule_feature_map
+        assert rule_feature_map[rule_id] in factor_features
+
+
+def test_lifestyle_score_fully_compliant_profile_at_least_95():
+    """AC-DASH-02 & AC-SCORE-02: Profile meeting sleep (8h), activity (300m/wk), never smoking must score >= 95."""
+    profile = HealthProfile(
+        age=25,
+        gender="male",
+        height_cm=Decimal("172.0"),
+        weight_kg=Decimal("65.0"),
+        bmi=Decimal("22.0"),
+        physical_activity_min_per_week=Decimal("300.0"),
+        sleep_duration_hours=Decimal("8.0"),
+        smoking_status="never",
+        family_history=False,
+    )
+    score = risk_engine.calculate_lifestyle_score(profile)
+    assert score >= 95.0, f"Expected Lifestyle Score >= 95.0, got {score}"
+
+
+def test_safety_threshold_aligned_with_higher_band_60():
+    """BR-SAFETY-001 & §10.4.2: Safety threshold triggers only at score >= 60 (prob >= 0.60), not in moderate band (30-59)."""
+    profile = HealthProfile(
+        age=40,
+        gender="male",
+        height_cm=Decimal("170.0"),
+        weight_kg=Decimal("70.0"),
+        bmi=Decimal("24.2"),
+        physical_activity_min_per_week=Decimal("120.0"),
+        sleep_duration_hours=Decimal("6.5"),
+        smoking_status="former",
+        family_history=False,
+    )
+    # Moderate risk (e.g. 0.52 = score 52), should NOT trigger REC-SAFETY-01
+    moderate_risks = {
+        "diabetes_risk": 0.52,
+        "hypertension_risk": 0.45,
+        "cardiovascular_risk": 0.38,
+    }
+    recs_moderate = risk_engine.generate_recommendations(profile, risks=moderate_risks)
+    assert not any(r["rule_id"] == "REC-SAFETY-01" for r in recs_moderate), (
+        "REC-SAFETY-01 should not trigger for moderate band risks (< 0.60)"
+    )
+
+    # High risk (>= 0.60), MUST trigger REC-SAFETY-01
+    high_risks = {
+        "diabetes_risk": 0.62,
+        "hypertension_risk": 0.45,
+        "cardiovascular_risk": 0.38,
+    }
+    recs_high = risk_engine.generate_recommendations(profile, risks=high_risks)
+    assert any(r["rule_id"] == "REC-SAFETY-01" for r in recs_high), (
+        "REC-SAFETY-01 must trigger when any risk reaches the higher band (>= 0.60)"
+    )
+
+

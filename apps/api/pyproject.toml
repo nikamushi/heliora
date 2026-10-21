@@ -50,3 +50,8 @@ line-length = 88
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "UP"]
 ignore = ["E501"]
+
+[dependency-groups]
+dev = [
+    "playwright>=1.64.0",
+]

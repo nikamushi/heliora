@@ -26,8 +26,8 @@ export default function HelpGuidePage() {
     },
     {
       step: "02",
-      title: "Tinjau Estimasi Risiko 10-Tahun",
-      desc: "Buka menu Jelajahi > Risiko untuk melihat proyeksi probabilitas penyakit kronis: Diabetes Melitus, Hipertensi, dan Kardiovaskular yang dihitung oleh model Machine Learning terkalibrasi.",
+      title: "Tinjau Estimasi Risiko",
+      desc: "Buka menu Jelajahi > Risiko untuk melihat proyeksi skor estimasi risiko penyakit kronis: Diabetes Melitus, Hipertensi, dan Kardiovaskular yang dihitung oleh model Machine Learning terkalibrasi.",
       badge: "Deteksi Dini",
       icon: SFWaveformPathEcg,
     },
@@ -40,8 +40,8 @@ export default function HelpGuidePage() {
     },
     {
       step: "04",
-      title: "Jalankan Rekomendasi & Bukti Klinis",
-      desc: "Akses Jelajahi > Tindakan untuk langkah intervensi harian terpersonalisasi, dan verifikasi rasionalitasnya pada Pusat Bukti berbasis pedoman ADA, JNC-8, dan ACC/AHA.",
+      title: "Jalankan Rekomendasi & Dasar Ilmiah",
+      desc: "Akses Jelajahi > Tindakan untuk langkah intervensi harian terpersonalisasi, dan verifikasi rasionalitasnya pada Dasar Ilmiah berbasis pedoman resmi terverifikasi.",
       badge: "Aksi Terarah",
       icon: SFShieldCheckmark,
     },
@@ -73,7 +73,7 @@ export default function HelpGuidePage() {
       tips: "Gunakan slider interaktif untuk menetapkan target realistis yang dapat dicapai dalam 6 bulan.",
     },
     {
-      title: "Pusat Bukti & Explainable AI (SHAP)",
+      title: "Dasar Ilmiah & Explainable AI (SHAP)",
       desc: "Menjelaskan transparansi penuh alasan di balik setiap angka prediksi AI menggunakan atribusi nilai SHAP (SHapley Additive exPlanations) dan rujukan literatur klinis.",
       icon: SFBookClosed,
       color: "text-amber-600",

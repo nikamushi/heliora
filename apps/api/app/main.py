@@ -125,3 +125,8 @@ async def health_check() -> HealthCheckResponse:
     Acceptance criteria (SETUP-003): Health check endpoint tersedia.
     """
     return HealthCheckResponse(environment=settings.APP_ENV)
+
+
+@app.get("/health", response_model=HealthCheckResponse, tags=["system"], summary="Health check (root)")
+async def health_check_root() -> HealthCheckResponse:
+    return HealthCheckResponse(environment=settings.APP_ENV)
