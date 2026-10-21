@@ -179,10 +179,22 @@ class AssessmentRepository:
     async def commit_assessment_transaction(
         self, session: AsyncSession, assessment: Assessment
     ) -> Assessment:
-        """Commit full transaction and refresh assessment with relations."""
+        """Commit full transaction and reload assessment with eager relations."""
         await session.commit()
-        await session.refresh(assessment)
-        return assessment
+        stmt = (
+            select(Assessment)
+            .where(Assessment.id == assessment.id)
+            .options(
+                selectinload(Assessment.risk_result).selectinload(
+                    RiskResult.xai_results
+                ),
+                selectinload(Assessment.recommendations),
+                selectinload(Assessment.health_profile),
+            )
+        )
+        result = await session.execute(stmt)
+        loaded = result.scalars().first()
+        return loaded if isinstance(loaded, Assessment) else assessment
 
 
 assessment_repo = AssessmentRepository()

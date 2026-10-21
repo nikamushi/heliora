@@ -1128,6 +1128,17 @@ PRD menetapkan bahwa Health Score menggunakan formula weighted scoring sederhana
 
 ---
 
+## 9.3 Keputusan Implementasi (AI-004, rework hybrid)
+
+Metodologi resmi adalah hybrid `PRD.md` §11.5.3: 0.50 komponen Lifestyle
+(`calculate_lifestyle_score`), 0.35 komponen Risiko (invers deduksi 35/35/30),
+0.15 komponen Improvement (konteks riwayat keluarga). Rentang 0.0 – 100.0,
+deterministik, 1 desimal. Metodologi, bobot final, dan band BR-SCORE-006
+diratifikasi di `docs/Health-Score.md`. Dokumen tersebut adalah sumber
+kebenaran turunan untuk Health Score.
+
+---
+
 # 10. Lifestyle Score Architecture
 
 ## 10.1 Purpose
@@ -1214,7 +1225,7 @@ Interpretasi bahasa natural harus dibatasi agar tidak menghasilkan klaim medis y
 
 HELIORA tidak menggunakan model simulation terpisah untuk MVP.
 
-Simulation menggunakan **ML re-inference** dengan input yang dimodifikasi.
+Simulation menggunakan **ML re-inference** — yakni scenario-based re-inference pada Risk Engine yang sama dengan baseline estimation, tanpa model ML terpisah (PRD BR-SIM-003 "Re-run Risk Engine") — dengan input skenario yang dimodifikasi.
 
 PRD menetapkan:
 
@@ -2820,9 +2831,11 @@ ADR-012 — Deployment Strategy
 
 ---
 
-## ADR-006 — ML Re-inference
+## ADR-006 — Simulation Strategy
 
 **Decision:** Simulation menggunakan ML re-inference.
+
+**Revision note:** "ML re-inference" berarti scenario-based re-inference pada Risk Engine yang sama dengan baseline estimation, tanpa model ML terpisah (PRD BR-SIM-003 "Re-run Risk Engine"). Judul section diselaraskan ke daftar ADR ("Simulation Strategy").
 
 **Reason:**
 

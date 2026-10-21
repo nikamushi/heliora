@@ -1,11 +1,25 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalPassThroughEnv": [
+    "LOCALAPPDATA",
+    "APPDATA",
+    "USERPROFILE",
+    "HOME",
+    "TEMP",
+    "TMP",
+    "PUB_*",
+    "FLUTTER_*",
+    "ANDROID_*",
+    "JAVA_HOME",
+    "GRADLE_*"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "outputs": [
         ".next/**",
-        "dist/**"
+        "dist/**",
+        "build/app/outputs/**"
       ]
     },
     "dev": {

@@ -7,7 +7,10 @@ import uuid
 from datetime import datetime
 from enum import StrEnum
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
+
+# health_profiles.bmi is NUMERIC(4,1): the largest storable value is 999.9.
+MAX_STORABLE_BMI: float = 999.9
 
 
 class GenderEnum(StrEnum):
@@ -35,6 +38,22 @@ def calculate_bmi(height_cm: float, weight_kg: float) -> float:
         return 0.0
     h_m = height_cm / 100.0
     return round(weight_kg / (h_m * h_m), 1)
+
+
+def ensure_bmi_storable(height_cm: float, weight_kg: float) -> None:
+    """Raise ValueError if the derived BMI exceeds what the database can store.
+
+    Height/weight are individually valid (height > 0, weight <= 500), but an
+    extreme combination (e.g. 1 cm and 500 kg) yields a BMI that overflows
+    NUMERIC(4,1) and would otherwise surface as an HTTP 500 on save.
+    """
+    bmi = calculate_bmi(height_cm, weight_kg)
+    if bmi > MAX_STORABLE_BMI:
+        raise ValueError(
+            f"Kombinasi tinggi ({height_cm:g} cm) dan berat ({weight_kg:g} kg) "
+            f"menghasilkan BMI {bmi:g}, di luar batas yang dapat disimpan "
+            f"({MAX_STORABLE_BMI:g}). Periksa kembali tinggi dan berat badan."
+        )
 
 
 def get_bmi_category(bmi: float | None) -> str | None:
@@ -95,7 +114,9 @@ class HealthProfileCreateRequest(BaseModel):
         default=None, gt=0, le=300, description="Waist circumference in cm"
     )
     blood_pressure: str | None = Field(
-        default=None, description="Blood pressure reading (e.g. '120/80')"
+        default=None,
+        max_length=20,
+        description="Blood pressure reading (e.g. '120/80')",
     )
     blood_sugar_mg_dl: float | None = Field(
         default=None, gt=0, le=1000, description="Fasting blood sugar in mg/dL"
@@ -103,6 +124,13 @@ class HealthProfileCreateRequest(BaseModel):
     cholesterol_mg_dl: float | None = Field(
         default=None, gt=0, le=1000, description="Total cholesterol in mg/dL"
     )
+
+    @model_validator(mode="after")
+    def _check_bmi_is_storable(self) -> "HealthProfileCreateRequest":
+        """Reject height/weight combos whose auto-calculated BMI overflows storage."""
+        if self.bmi is None:
+            ensure_bmi_storable(self.height_cm, self.weight_kg)
+        return self
 
 
 class HealthProfileUpdateRequest(BaseModel):
@@ -120,7 +148,11 @@ class HealthProfileUpdateRequest(BaseModel):
     stress_level: int | None = Field(default=None, ge=1, le=10)
     bmi: float | None = Field(default=None, gt=0, le=100)
     waist_circumference_cm: float | None = Field(default=None, gt=0, le=300)
-    blood_pressure: str | None = Field(default=None)
+    blood_pressure: str | None = Field(
+        default=None,
+        max_length=20,
+        description="Blood pressure reading (e.g. '120/80')",
+    )
     blood_sugar_mg_dl: float | None = Field(default=None, gt=0, le=1000)
     cholesterol_mg_dl: float | None = Field(default=None, gt=0, le=1000)
 

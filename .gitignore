@@ -109,6 +109,22 @@ apps/api/app/data/
 **/*brfss*.csv
 
 # -----------------------------------------------------------------------------
+# Flutter / Dart / Android (apps/mobile)
+# -----------------------------------------------------------------------------
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+# FVM keeps a local SDK link here; the pinned version lives in .fvmrc
+.fvm/
+.gradle/
+local.properties
+
+# Android release signing (never commit keystores or their passwords)
+key.properties
+*.jks
+*.keystore
+
+# -----------------------------------------------------------------------------
 # Environment and secrets
 # -----------------------------------------------------------------------------
 .env
@@ -172,8 +188,11 @@ COPILOT.md
 .gemini/
 .agent/
 .agents/
+.opencode/
+opencode.json
 skills/
 .skill/
+skills-lock.json
 .agent-skills/
 .ai/
 .ai-context/

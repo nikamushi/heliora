@@ -43,6 +43,12 @@ class Settings(BaseSettings):
         "http://localhost:3001",
         "http://127.0.0.1:3001",
     ]
+    CORS_ORIGIN_REGEX: str | None = r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$"
+
+    # ── LLM Provider (Gemini — ADR-009, Architecture §41) ────────────
+    GEMINI_API_KEY: str | None = None
+    GEMINI_MODEL: str = "gemini-3.5-flash-lite"
+    LLM_TIMEOUT_SECONDS: int = 10
 
     # ── Auth (Legacy & FastAPI Native) ───────────────────────────
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 24 hours
@@ -65,6 +71,13 @@ class Settings(BaseSettings):
                 self.SUPABASE_JWKS_URL = f"{base}/auth/v1/.well-known/jwks.json"
             if not self.SUPABASE_ISSUER:
                 self.SUPABASE_ISSUER = f"{base}/auth/v1"
+        return self
+
+    @model_validator(mode="after")
+    def validate_cors_security(self) -> "Settings":
+        """Ensure CORS localhost regex is strictly disabled outside development/test environments."""
+        if self.APP_ENV not in ("development", "test", "testing", "local"):
+            self.CORS_ORIGIN_REGEX = None
         return self
 
     @property

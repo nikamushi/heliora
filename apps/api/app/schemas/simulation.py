@@ -1,7 +1,7 @@
 """HELIORA API — Simulation schemas.
 
 Request and response schemas for Future Health Simulation and What-if analysis.
-Implements Architecture §8, §14, PRD BR-SIM-001–008, AC-SIM-01/02, SIM-001, SIM-002.
+Implements Architecture §12, §12.3, §18, §19, PRD BR-SIM-001–004, 007, 008, BR-WHATIF-001–006, FR-020–023, AC-SIM-01/02, AC-WHATIF-01/02, SIM-001–SIM-004.
 """
 
 from typing import Literal
@@ -11,6 +11,10 @@ from pydantic import BaseModel, Field
 SimulationHorizon = Literal[30, 90, 180]
 RiskLevel = Literal["low", "moderate", "high"]
 StandardizedRiskLabel = Literal["Lower", "Moderate", "Higher"]
+
+# What-if derived BMI range supported by the scenario model (docs/What-If.md §3.3).
+MIN_DERIVED_BMI: float = 10.0
+MAX_DERIVED_BMI: float = 80.0
 
 # PRD FR-005 & §20.21 — Mandated verbatim medical disclaimer
 MANDATORY_MEDICAL_DISCLAIMER: str = (
@@ -185,7 +189,10 @@ class WhatIfSimulationResponse(BaseModel):
         ..., description="Dictionary of active lifestyle parameters used in this scenario."
     )
     derived_bmi: float = Field(
-        ..., ge=10.0, le=80.0, description="Recalculated BMI based on simulated weight."
+        ...,
+        ge=MIN_DERIVED_BMI,
+        le=MAX_DERIVED_BMI,
+        description="Recalculated BMI based on simulated weight.",
     )
     baseline_health_score: float = Field(
         ..., ge=0.0, le=100.0, description="Current baseline overall health score."

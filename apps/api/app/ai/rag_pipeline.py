@@ -3,7 +3,9 @@
 Document ingestion, cleaning, chunking, embedding, and vector storage.
 Uses sentence-transformers for embeddings + ChromaDB for vector storage.
 
-Architecture §8, PRD RAG-001.
+Architecture §15 (RAG Architecture: §15.2 knowledge base, §15.3 pipeline,
+§15.4 metadata, §15.5 vector storage), ADR-010 (vector storage decision),
+PRD §6.14, TASK.md RAG-001.
 """
 
 from __future__ import annotations
@@ -23,8 +25,8 @@ logger = logging.getLogger(__name__)
 EMBEDDING_MODEL_NAME = "all-MiniLM-L6-v2"
 CHUNK_SIZE = 512  # characters per chunk
 CHUNK_OVERLAP = 64
+COLLECTION_NAME = "heliora_evidence"
 PERSIST_DIR = Path(__file__).parent.parent / "data" / "rag_storage"
-PERSIST_DIR.mkdir(parents=True, exist_ok=True)
 
 # ── In-memory ChromaDB client ──────────────────────────────────────────
 # Use local persistence for durability across restarts.
@@ -34,9 +36,14 @@ _embedding_model: SentenceTransformer | None = None
 
 
 def _get_client() -> chromadb.Client:
-    """Get or create ChromaDB client."""
+    """Get or create ChromaDB client.
+
+    Creates the persist dir lazily so importing this module has no
+    filesystem side effects.
+    """
     global _client
     if _client is None:
+        PERSIST_DIR.mkdir(parents=True, exist_ok=True)
         _client = chromadb.PersistentClient(path=str(PERSIST_DIR))
         logger.info("ChromaDB client initialized with persist dir: %s", PERSIST_DIR)
     return _client
@@ -48,7 +55,7 @@ def _get_collection() -> chromadb.Collection:
     if _collection is None:
         client = _get_client()
         _collection = client.get_or_create_collection(
-            name="heliora_evidence",
+            name=COLLECTION_NAME,
             metadata={"description": "HELIORA clinical evidence knowledge base"},
         )
         logger.info("Evidence collection ready")
@@ -125,6 +132,8 @@ def build_document_chunks(evidence: dict[str, Any]) -> list[dict[str, Any]]:
                 "category": evidence['category'],
                 "category_label": evidence['category_label'],
                 "evidence_level": evidence['evidence_level'],
+                "summary": evidence['summary'],
+                "clinical_section": evidence['clinical_section'],
                 "citation": evidence['citation'],
                 "external_url": evidence['external_url'],
                 "chunk_index": i,
@@ -135,11 +144,36 @@ def build_document_chunks(evidence: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 # ── Ingestion pipeline ───────────────────────────────────────────────────
-def ingest_all_evidence() -> int:
+def reset_knowledge_base() -> int:
+    """Delete the evidence collection and clear cached handles.
+
+    Enables re-ingestion when the registry changes (ingest otherwise skips
+    non-empty collections). Returns number of documents removed (0 when the
+    KB was empty or missing).
+    """
+    global _collection
+    removed = 0
+    try:
+        removed = _get_collection().count()
+    except Exception:
+        logger.warning("Could not read collection before reset.", exc_info=True)
+    try:
+        _get_client().delete_collection(COLLECTION_NAME)
+        logger.info("Deleted collection %s (%d docs removed).", COLLECTION_NAME, removed)
+    except Exception:
+        logger.warning("Collection %s not present; nothing to delete.", COLLECTION_NAME)
+    _collection = None
+    return removed
+
+
+def ingest_all_evidence(reset: bool = False) -> int:
     """Ingest all clinical evidence items into the vector store.
 
     Returns number of documents indexed.
     """
+    if reset:
+        reset_knowledge_base()
+
     collection = _get_collection()
     model = _get_embedding_model()
 
@@ -182,7 +216,7 @@ def get_knowledge_base_status() -> dict[str, Any]:
     count = collection.count()
     return {
         "document_count": count,
-        "collection_name": "heliora_evidence",
+        "collection_name": COLLECTION_NAME,
         "persist_dir": str(PERSIST_DIR),
         "embedding_model": EMBEDDING_MODEL_NAME,
         "ready": count > 0,
@@ -190,18 +224,55 @@ def get_knowledge_base_status() -> dict[str, Any]:
 
 
 # ── CLI entry point ──────────────────────────────────────────────────────
-if __name__ == "__main__":
+def main(argv: list[str] | None = None) -> int:
+    """CLI entry point: ingest/status/reset. Returns process exit code."""
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        prog="rag_pipeline",
+        description="HELIORA RAG knowledge base pipeline (RAG-001).",
+    )
+    sub = parser.add_subparsers(dest="command", required=True)
+    p_ingest = sub.add_parser("ingest", help="Ingest registry evidence into the vector store.")
+    p_ingest.add_argument(
+        "--reset",
+        action="store_true",
+        help="Delete the knowledge base first, then ingest fresh.",
+    )
+    sub.add_parser("status", help="Show knowledge base status.")
+    sub.add_parser("reset", help="Delete the knowledge base collection.")
+    args = parser.parse_args(argv)
+
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 
-    logger.info("Starting RAG knowledge base ingestion...")
-    count = ingest_all_evidence()
-    status = get_knowledge_base_status()
+    try:
+        if args.command == "ingest":
+            logger.info("Starting RAG knowledge base ingestion...")
+            count = ingest_all_evidence(reset=args.reset)
+            status = get_knowledge_base_status()
+            print(f"\n{'='*60}")
+            print("RAG Knowledge Base Ingestion Complete")
+            print(f"{'='*60}")
+            print(f"Documents indexed: {count}")
+            print(f"Collection: {status['collection_name']}")
+            print(f"Storage: {status['persist_dir']}")
+            print(f"Embedding model: {status['embedding_model']}")
+            print(f"{'='*60}\n")
+        elif args.command == "status":
+            status = get_knowledge_base_status()
+            print(f"Collection: {status['collection_name']}")
+            print(f"Documents: {status['document_count']}")
+            print(f"Storage: {status['persist_dir']}")
+            print(f"Embedding model: {status['embedding_model']}")
+            print(f"Ready: {status['ready']}")
+        elif args.command == "reset":
+            removed = reset_knowledge_base()
+            print(f"Removed {removed} documents from {COLLECTION_NAME}.")
+    except Exception:
+        logger.exception("RAG pipeline command failed.")
+        return 1
+    return 0
 
-    print(f"\n{'='*60}")
-    print("RAG Knowledge Base Ingestion Complete")
-    print(f"{'='*60}")
-    print(f"Documents indexed: {count}")
-    print(f"Collection: {status['collection_name']}")
-    print(f"Storage: {status['persist_dir']}")
-    print(f"Embedding model: {status['embedding_model']}")
-    print(f"{'='*60}\n")
+
+if __name__ == "__main__":
+    raise SystemExit(main())

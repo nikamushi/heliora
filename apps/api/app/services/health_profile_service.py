@@ -15,6 +15,7 @@ from app.schemas.health_profile import (
     HealthProfileCreateRequest,
     HealthProfileResponse,
     HealthProfileUpdateRequest,
+    ensure_bmi_storable,
     get_bmi_category,
 )
 
@@ -61,6 +62,27 @@ class HealthProfileService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Profil kesehatan tidak ditemukan. Buat profil terlebih dahulu.",
             )
+
+        # Partial update: validate against the merged height/weight, since the
+        # stored value for the field that was not sent also determines the BMI.
+        if payload.bmi is None and (
+            payload.height_cm is not None or payload.weight_kg is not None
+        ):
+            try:
+                ensure_bmi_storable(
+                    payload.height_cm
+                    if payload.height_cm is not None
+                    else float(existing.height_cm),
+                    payload.weight_kg
+                    if payload.weight_kg is not None
+                    else float(existing.weight_kg),
+                )
+            except ValueError as exc:
+                raise HTTPException(
+                    status_code=422,
+                    detail=str(exc),
+                ) from exc
+
         updated = await health_profile_repo.update(session, existing, payload)
         return self._to_response(updated, payload.family_history_details)
 

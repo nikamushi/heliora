@@ -3,7 +3,8 @@
 Query construction, similarity search, relevance filtering, and source preservation.
 Uses the ChromaDB vector store populated by rag_pipeline.py.
 
-Architecture §8, PRD RAG-002.
+Architecture §15 (RAG Architecture: §15.3 pipeline), ADR-008 (RAG = retrieval,
+LLM = explanation). PRD §6.14, FR-027, AC-EVIDENCE-01, AC-LLM-02, TASK.md RAG-002.
 """
 
 from __future__ import annotations
@@ -11,28 +12,10 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from sentence_transformers import SentenceTransformer
-
 from app.ai.rag_pipeline import (
     _get_collection,
+    _get_embedding_model,
 )
-
-logger = logging.getLogger(__name__)
-
-# ── Query embedding ──────────────────────────────────────────────────────
-# Lazy-load model (shared with pipeline)
-_query_model: SentenceTransformer | None = None
-
-
-def _get_query_model() -> SentenceTransformer:
-    """Get or load the sentence transformer model for queries."""
-    global _query_model
-    if _query_model is None:
-        logger.info("Loading query embedding model...")
-        _query_model = SentenceTransformer("all-MiniLM-L6-v2")
-        logger.info("Query embedding model loaded")
-    return _query_model
-
 
 # ── Similarity search ────────────────────────────────────────────────────
 # Cosine similarity threshold for relevance filtering
@@ -53,7 +36,7 @@ def search_evidence(
     query : Natural language search query.
     top_k : Maximum number of results to return.
     category : Optional category filter (activity, sleep, nutrition, cardiovascular, stress).
-    rule_id : Optional rule ID filter (e.g., REC-ACT-01).
+    rule_id : Optional rule ID filter (e.g., REC-ACT-01, case-insensitive).
     threshold : Minimum similarity score (0-1) for a result to be considered relevant.
 
     Returns
@@ -65,7 +48,7 @@ def search_evidence(
     - similarity_score, chunk_index
     """
     collection = _get_collection()
-    model = _get_query_model()
+    model = _get_embedding_model()
 
     # Embed the query
     query_embedding = model.encode([query], convert_to_numpy=True, normalize_embeddings=True)[0]
@@ -73,12 +56,14 @@ def search_evidence(
     # Query the collection using L2 distance (ChromaDB default).
     # Since embeddings are normalized, L2 distance relates to cosine similarity:
     #   L2_dist² = 2 - 2*cos_sim  →  cos_sim = 1 - L2_dist²/2
-    # Build where filter for metadata
+    # Build where filter for metadata.
+    # Registry stores category lowercase ("activity") and rule_id uppercase
+    # ("REC-ACT-01"), so normalize each side to its stored case.
     where_filter: dict[str, Any] = {}
     if category:
         where_filter["category"] = category.lower()
     if rule_id:
-        where_filter["rule_id"] = rule_id.lower()
+        where_filter["rule_id"] = rule_id.upper()
 
     results = collection.query(
         query_embeddings=[query_embedding],

@@ -238,6 +238,7 @@ REC-xxx     Recommendation
 RAG-xxx     RAG
 LLM-xxx     LLM
 FE-xxx      Frontend
+MOB-xxx     Mobile
 INT-xxx     Integration
 QA-xxx      Quality Assurance
 SEC-xxx     Security
@@ -792,19 +793,19 @@ Acceptance Criteria:
 **Owner:** Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S3  
-**Status:** BACKLOG
+**Status:** DONE
 
 Tasks:
 
-- [ ] Data cleaning.
-- [ ] Missing value handling.
-- [ ] Duplicate handling.
-- [ ] Outlier review.
-- [ ] Encoding.
-- [ ] Feature transformation.
-- [ ] Train/test split.
-- [ ] Prevent data leakage.
-- [ ] Dataset versioning.
+- [x] Data cleaning.
+- [x] Missing value handling.
+- [x] Duplicate handling.
+- [x] Outlier review.
+- [x] Encoding.
+- [x] Feature transformation.
+- [x] Train/test split.
+- [x] Prevent data leakage.
+- [x] Dataset versioning.
 
 Acceptance Criteria:
 
@@ -868,16 +869,19 @@ Acceptance Criteria:
 **Owner:** Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S4  
-**Status:** TESTING
+**Status:** REVIEW
 
 Tasks:
 
 - [x] Define metrics.
 - [x] Evaluate model.
 - [x] Perform error analysis.
-- [ ] Review class imbalance.
+- [x] Review class imbalance.
 - [x] Document performance.
 - [x] Document limitations.
+
+Evidence: `apps/api/evaluation_report.json`, `docs/AI-003-Model-Evaluation.md`,
+`apps/api/tests/test_evaluation.py`, `apps/api/tests/test_model_training.py`.
 
 Acceptance Criteria:
 
@@ -897,21 +901,23 @@ Acceptance Criteria:
 **Owner:** Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S4  
-**Status:** BACKLOG
+**Status:** REVIEW
 
 Tasks:
 
-- [ ] Define methodology.
-- [ ] Define weighting.
-- [ ] Implement calculation.
-- [ ] Test calculation.
-- [ ] Document formula.
+- [x] Define methodology.
+- [x] Define weighting.
+- [x] Implement calculation.
+- [x] Test calculation.
+- [x] Document formula.
 
 Acceptance Criteria:
 
 - Health Score konsisten.
 - Formula terdokumentasi.
 - Tidak diklaim sebagai diagnosis.
+
+Evidence: `docs/Health-Score.md` (hybrid PRD §11.5.3), `apps/api/app/core/risk_engine.py` (`calculate_health_score(profile, risks)`), `apps/api/tests/test_health_score.py` (11 passed), `docs/Architecture.md` §9.3.
 
 ---
 
@@ -922,19 +928,21 @@ Acceptance Criteria:
 **Owner:** Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S4  
-**Status:** BACKLOG
+**Status:** REVIEW
 
 Tasks:
 
-- [ ] Define lifestyle factors.
-- [ ] Define scoring.
-- [ ] Implement calculation.
-- [ ] Test calculation.
+- [x] Define lifestyle factors.
+- [x] Define scoring.
+- [x] Implement calculation.
+- [x] Test calculation.
 
 Acceptance Criteria:
 
 - Lifestyle Score dapat dihitung.
 - Score dapat ditampilkan frontend.
+
+Evidence: `docs/Lifestyle-Score.md`, `apps/api/app/core/risk_engine.py` (`calculate_lifestyle_score`), `apps/api/tests/test_lifestyle_score.py` (10 passed).
 
 ---
 
@@ -1005,13 +1013,13 @@ Supported horizon:
 
 Tasks:
 
-- [ ] Define simulation methodology.
-- [ ] Define assumptions.
-- [ ] Define baseline state.
-- [ ] Define projected state.
-- [ ] Integrate risk engine.
-- [ ] Generate simulation result.
-- [ ] Validate result.
+- [x] Define simulation methodology.
+- [x] Define assumptions.
+- [x] Define baseline state.
+- [x] Define projected state.
+- [x] Integrate risk engine.
+- [x] Generate simulation result.
+- [x] Validate result.
 
 Acceptance Criteria:
 
@@ -1028,16 +1036,16 @@ Acceptance Criteria:
 **Owner:** Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S5  
-**Status:** BACKLOG
+**Status:** TESTING
 
 Tasks:
 
-- [ ] Simulation endpoint.
-- [ ] Input validation.
-- [ ] Horizon validation.
-- [ ] Risk calculation.
-- [ ] Response schema.
-- [ ] Error handling.
+- [x] Simulation endpoint.
+- [x] Input validation.
+- [x] Horizon validation.
+- [x] Risk calculation.
+- [x] Response schema.
+- [x] Error handling.
 
 Acceptance Criteria:
 
@@ -1249,7 +1257,7 @@ Acceptance Criteria:
 **Owner:** Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S7  
-**Status:** TESTING
+**Status:** DONE
 
 Tasks:
 
@@ -1274,7 +1282,7 @@ Acceptance Criteria:
 **Owner:** Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S7-S8  
-**Status:** TESTING
+**Status:** DONE
 
 Tasks:
 
@@ -1282,7 +1290,7 @@ Tasks:
 - [x] Similarity search.
 - [x] Relevance filtering.
 - [x] Source preservation.
-- [ ] Retrieval testing.
+- [x] Retrieval testing.
 
 Acceptance Criteria:
 
@@ -1302,7 +1310,7 @@ Acceptance Criteria:
 **Owner:** Gilang & Aksal  
 **Priority:** P0  
 **Sprint:** S8  
-**Status:** BACKLOG
+**Status:** DONE
 
 LLM responsibility:
 
@@ -1331,13 +1339,13 @@ Invent Evidence
 
 Tasks:
 
-- [ ] Prompt design.
-- [ ] Context construction.
-- [ ] RAG integration.
-- [ ] Explanation generation.
-- [ ] Output validation.
-- [ ] Hallucination guardrail.
-- [ ] Fallback response.
+- [x] Prompt design.
+- [x] Context construction.
+- [x] RAG integration.
+- [x] Explanation generation.
+- [x] Output validation.
+- [x] Hallucination guardrail.
+- [x] Fallback response.
 
 Acceptance Criteria:
 
@@ -1744,7 +1752,329 @@ Acceptance Criteria:
 
 
 
-# 19. Integration Tasks
+# 18.12 Mobile App (Usulan)
+
+Usulan berdasarkan `docs/PRD-Mobile.md`. Seluruh task MOB menunggu persetujuan Product & Project Manager sesuai §31 dan belum termasuk MVP Gate §29.
+
+
+
+## MOB-001 — Mobile PRD and Feature Proposal
+
+**Owner:** Pino & Tumir  
+**Priority:** P0  
+**Sprint:** S9  
+**Status:** IN PROGRESS
+
+Tasks:
+
+- [x] Write mobile PRD (`docs/PRD-Mobile.md`).
+- [ ] Submit feature proposal to Product & Project Manager.
+- [x] Write ADR-012 for the Flutter app in the monorepo.
+- [x] Add the Flutter/pub ecosystem to `docs/Monorepo.md`.
+
+Acceptance Criteria:
+
+- PRD mobile sudah direview Product & Project Manager.
+- Keputusan memasukkan mobile ke MVP tercatat.
+
+---
+
+
+
+## MOB-002 — Mobile Monorepo Foundation
+
+**Owner:** Pino & Tumir  
+**Priority:** P0  
+**Sprint:** S9  
+**Status:** DONE
+
+Tasks:
+
+- [x] Scaffold `apps/mobile` (Flutter, Android, application ID `id.heliora.app`).
+- [x] Pin the Flutter version with FVM (`.fvmrc`).
+- [x] Add a script-only `package.json` for Turborepo (dev, lint, test, build, gen:api).
+- [x] Update `.gitignore` for Dart, Flutter, Gradle, and signing files.
+- [x] Add mobile build outputs to `turbo.json`.
+- [x] Document mobile setup in README.
+
+Acceptance Criteria:
+
+- `pnpm lint` dan `pnpm test` dari root ikut memeriksa mobile.
+- Aplikasi berjalan di emulator Android.
+
+---
+
+
+
+## MOB-003 — Mobile Authentication and API Client
+
+**Owner:** Pino & Tumir + Gilang & Aksal  
+**Priority:** P0  
+**Sprint:** S9  
+**Status:** DONE
+
+Tasks:
+
+- [x] Integrate `supabase_flutter` with the same Supabase project as web.
+- [x] Email and password login (registration in Ticket 04).
+- [x] Google OAuth with deep link `id.heliora.app://login-callback`.
+- [x] Configure intent-filter redirect URL in AndroidManifest.xml.
+- [x] Generate the API client from OpenAPI with `swagger_parser`.
+- [x] Bearer token interceptor and API error mapping.
+- [x] Environment configuration (API URL, Supabase URL, anon key).
+
+Acceptance Criteria:
+
+- Pengguna yang login bisa memanggil `GET /auth/me`.
+- Login Google berhasil di perangkat Android fisik.
+- Client API hasil regenerasi lolos kompilasi.
+
+---
+
+
+
+## MOB-004 — Mobile Theme and Base Components
+
+**Owner:** Pino & Tumir  
+**Priority:** P0  
+**Sprint:** S9  
+**Status:** DONE
+
+Tasks:
+
+- [x] Design tokens in `lib/theme/tokens.dart` using Figma variable names (Light and Dark).
+- [x] Typography with Plus Jakarta Sans and JetBrains Mono.
+- [x] Base widgets (button, input, checkbox, cards, risk status, disclaimer, app bar, bottom navigation, slider).
+- [x] Figma mobile design for all MVP screens in the *Mobile (MVP)* page, including Register, Consent, Assessment, and splash.
+- [x] Launcher icon from the final logo concept A (adaptive icon with background, foreground, and monochrome layers) using `apps/mobile/assets/brand/`.
+- [x] Android native splash: solid brand green with a transparent icon (Android 12+ and Android 8-11).
+- [x] Animated splash in Flutter (about 1 second, 3 second hold then offline state, reduced-motion support) per MFR-012. Should Have and the first item cut if the schedule slips.
+
+Acceptance Criteria:
+
+- Komponen sesuai halaman Figma *Mobile (MVP)*.
+- Tidak ada pill chip atau oval badge.
+- Disclaimer statutori tampil kata per kata sesuai `Design.md` §2.6.
+- Ikon aplikasi memakai logo final konsep A, termasuk lapisan monokrom untuk ikon tema Android.
+- Splash tampil saat cold start, animasi selesai dalam waktu kurang dari 1,2 detik tanpa jeda buatan, dan pengaturan "kurangi animasi" dihormati.
+
+---
+
+
+
+## MOB-005 — Mobile Onboarding Screens
+
+**Owner:** Pino & Tumir  
+**Priority:** P0  
+**Sprint:** S9  
+**Status:** DONE
+
+Tasks:
+
+- [x] Register.
+- [x] Login (email and Google).
+- [x] Consent with statutory disclaimer.
+- [x] Health profile form with validation and BMI.
+- [x] Assessment processing and failure state.
+- [x] Consent-aware routing.
+- [x] First-launch routing: Register on the first launch after install and Login afterwards, using a local non-sensitive flag (MFR-012).
+
+Acceptance Criteria:
+
+- Pengguna baru menyelesaikan Register, Consent, Asesmen, sampai Beranda di perangkat Android fisik.
+- Asesmen tidak bisa dibuka sebelum consent tercatat.
+- Tanpa sesi, peluncuran pertama setelah instal masuk ke Register dan peluncuran berikutnya ke Login. Register peluncuran pertama tidak punya tombol kembali dan punya tombol "Masuk" di bar atas.
+
+---
+
+
+
+## MOB-006 — Mobile Home and What-if Simulation
+
+**Owner:** Pino & Tumir  
+**Priority:** P0  
+**Sprint:** S9  
+**Status:** DONE
+
+Tasks:
+
+- [x] Home: scores with interpretation, three risk estimates, empty state, and revoked-consent state.
+- [x] What-if controls for sleep, activity, weight, and smoking with baseline values.
+- [x] Simulation results per disease with direction text.
+- [x] Reset scenario without changing the original profile.
+- [x] Statutory disclaimer on Home and What-if.
+
+Acceptance Criteria:
+
+- Hasil simulasi tampil di bawah 1 detik sejauh environment memungkinkan.
+- Profil asli tidak berubah setelah simulasi.
+
+---
+
+
+
+## MOB-007 — Mobile Profile and Privacy
+
+**Owner:** Pino & Tumir  
+**Priority:** P0  
+**Sprint:** S9  
+**Status:** DONE
+
+Tasks:
+
+- [x] Identity from `GET /auth/me`.
+- [x] Health profile summary and update.
+- [x] Consent status and revoke with confirmation.
+- [x] Logout.
+
+Acceptance Criteria:
+
+- Setelah consent dicabut, Beranda menampilkan status "Analisis dihentikan sesuai permintaanmu".
+- Logout menghapus sesi di perangkat.
+
+---
+
+
+
+## MOB-008 — Mobile CI and Release
+
+**Owner:** Pino & Tumir  
+**Priority:** P0  
+**Sprint:** S9-S10  
+**Status:** DONE
+
+Tasks:
+
+- [x] Setup Supabase dan backend API ke mobile via environment injection (`API_BASE_URL`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`).
+- [x] GitHub Actions workflow: analyze and test on pull requests.
+- [x] Release APK build as an artifact on `main`.
+- [x] Release signing key stored in GitHub Secrets.
+- [x] Publikasikan GitHub Release perdana aplikasi mobile dengan lampiran binary APK rilis.
+- [x] Test the release APK on a physical device.
+
+Acceptance Criteria:
+
+- CI hijau di `main`.
+- APK rilis yang ditandatangani bisa dipasang di perangkat Android.
+- GitHub Release perdana diterbitkan otomatis beserta file APK yang dapat diunduh.
+
+---
+
+
+
+## MOB-009 — Mobile and Backend Development Runner
+
+**Owner:** Pino & Tumir  
+**Priority:** P1  
+**Sprint:** S9-S10  
+**Status:** DONE
+
+Tasks:
+
+- [x] Define mobile and backend development runner contract.
+- [x] Implement health-gated backend spawner and process tree teardown.
+- [x] Implement interactive flutter runner and root package script.
+
+Acceptance Criteria:
+
+- Menjalankan `pnpm dev:mobile` menyalakan backend FastAPI dan menunggu hingga `/api/v1/health` siap.
+- Flutter mobile berjalan dengan terminal interaktif penuh (hot reload `r` dan `R` berfungsi).
+- Menutup Flutter (`q` atau Ctrl+C) mematikan proses backend secara bersih dan membebaskan port 8000.
+
+---
+
+
+
+## MOB-010 — Mobile UI-UX Refinement and Local Backend Integration
+
+**Owner:** Pino & Tumir  
+**Priority:** P0  
+**Sprint:** S9-S10  
+**Status:** DONE
+
+Tasks:
+
+- [x] Align tokens, typography, and statutory disclaimer with Figma Design System.
+- [x] Remove fake fallback risk scores and implement honest error handling in HomeScreen.
+- [x] Implement health profile form pre-fill when editing from ProfileScreen.
+- [x] Connect mobile client to local FastAPI backend and validate end-to-end flow.
+- [x] Configure backend CORS regex to support Flutter Web dev ports and preflight OPTIONS requests.
+- [x] Standardize ChoiceOption full-width alignment and fix Simulation action button text wrapping.
+- [x] Implement smooth bouncing scroll behavior across touch, mouse, and trackpad devices.
+- [x] Fix assessment flow family history textarea contrast, border, and enforce canonical light themeMode.
+- [x] Implement Figma Mobile/Dialog (node 81:1363) for consent revocation and account sign out.
+
+Acceptance Criteria:
+
+- Tidak ada elemen pill chip atau token `radiusFull`; ambang skor mengikuti standar kanonik 80/60/40.
+- HomeScreen tidak menampilkan skor tiruan saat asesmen kosong dan menampilkan pesan error resmi dengan tombol muat ulang jika API gagal.
+- Form profil kesehatan terisi otomatis saat pengguna menekan "Perbarui profil kesehatan" di layar Profil.
+- Aplikasi mobile dapat terhubung ke backend FastAPI lokal (emulator 10.0.2.2 atau web localhost:8000) dan menyelesaikan alur autentikasi hingga simulasi secara mulus.
+- Preflight request `OPTIONS` dari Flutter Web (port dinamis `127.0.0.1:*` / `localhost:*`) berhasil diizinkan dengan status 200 OK.
+- Seluruh kartu pilihan simulasi membentang seragam (100% lebar kontainer), tombol "Atur ulang" tidak mengalami patah kata, dan scrolling aplikasi responsif serta mulus.
+- Textarea detail riwayat keluarga pada alur asesmen memiliki latar belakang putih bersih, kontras placeholder tajam (`#94A3B8`), dan fokus border hijau tanpa kotak hitam anomali.
+- Modal dialog konfirmasi cabut persetujuan dan keluar akun mengikuti spesifikasi Figma (node 81:1363): radius 24px, judul dan deskripsi ringkas, tombol aksi destruktif penuh di atas, dan tombol batal outlined di bawah.
+
+---
+
+## MOB-011 — Mobile and Backend Post-Review Hardening
+
+**Owner:** Pino & Tumir + Gilang & Aksal  
+**Priority:** P0  
+**Sprint:** S9-S10  
+**Status:** DONE
+
+Tasks:
+
+- [x] SEC-002: Environment-gate CORS localhost regex in FastAPI to development only, and sanitize user-facing mobile network error messages.
+- [x] MOB-011.01: Implement canonical 80/60/40 score tiers in ScoreCard (Excellent 80-100, Good 60-79, Needs Improvement 40-59, High Risk <40).
+- [x] MOB-011.02: Prevent health profile edit navigation on ProfileScreen when consent is revoked, displaying consent-reactivation prompt.
+- [x] MOB-011.03: Harmonize raw hex colors to HelioraTokens across profile and assessment flow screens.
+- [x] MOB-011.04: Extract duplicated modal confirmation dialog into reusable HelioraConfirmationDialog component.
+- [x] ARC-002: Refactor AttributeProfile into strongly-typed Pydantic/dataclass schema and add typed Protocols to risk engine mixins.
+- [x] DOC-003: Reconcile AI-001 status to DONE in docs/TASK.md.
+
+Acceptance Criteria:
+
+- Backend CORS regex hanya mengizinkan localhost pada mode development (`ENVIRONMENT == "development"`).
+- Pesan error mobile tidak mengekspos nomor port atau topologi internal backend.
+- ScoreCard menampilkan warna dan tier yang tepat untuk skor 80–100, 60–79, 40–59, dan <40.
+- Pengguna dengan status consent revoked tidak dapat mengedit asesmen dan diarahkan untuk mengaktifkan persetujuan terlebih dahulu.
+- Tidak ada raw hex colors yang mem-bypass HelioraTokens pada layar profil dan alur asesmen.
+- Dialog konfirmasi pencabutan persetujuan dan sign out menggunakan komponen bersama yang teruji.
+- AttributeProfile memiliki tipe data statis terdefinisi penuh tanpa kwargs dinamis tanpa skema.
+- Status AI-001 terupdate sebagai DONE di docs/TASK.md.
+
+---
+
+## MOB-012 — Post-Review Remediation and Architecture Hardening
+
+**Owner:** Pino & Tumir + Gilang & Aksal  
+**Priority:** P0  
+**Sprint:** S10  
+**Status:** DONE
+
+Tasks:
+
+- [x] MOB-012.01: Dedicated CORS security validator in FastAPI settings, removing Divergent Change from Supabase defaults.
+- [x] MOB-012.02: Pure typed AttributeProfile dataclass without dynamic kwargs, and typing protocols across all risk engine mixins.
+- [x] MOB-012.03: Relocate HelioraConfirmationDialog to shared UI layer (`lib/theme/widgets/`) and harmonize typography tokens.
+- [x] MOB-012.04: Implement consolidated score tier domain mapping with distinct tier-2 visual accent in ScoreCard.
+- [x] MOB-012.05: Enforce client-side active consent guard in AssessmentController and correct re-consent guidance in mobile native dialogs.
+- [x] MOB-012.06: Synchronize docs/TASK.md completion checklist and verify 100% test suites pass.
+
+Acceptance Criteria:
+
+- Backend `validate_cors_security` model validator independently gates `CORS_ORIGIN_REGEX` to development/test only.
+- `AttributeProfile` tidak memiliki bypass `kwargs` dinamis dan seluruh sibling mixin engine risiko mengadopsi `RiskEngineProtocol`.
+- `HelioraConfirmationDialog` berada di `lib/theme/widgets/` dan diekspor melalui `lib/theme/components.dart` dengan token tipografi resmi.
+- `ScoreCard` mengevaluasi threshold tier melalui helper domain tunggal tanpa repeated switches, dengan kontras jelas pada tier 60–79.
+- `AssessmentController.submitAndRunAssessment()` memvalidasi persetujuan aktif sebelum eksekusi dan dialog reaktivasi persetujuan bebas dari instruksi berulang ke Beranda.
+- Seluruh unit tests, widget tests, dan pytest suites lulus 100%.
+
+---
+
+
 
 
 
@@ -1869,19 +2199,21 @@ Test:
 **Owner:** Gilang & Aksal + Pino & Tumir  
 **Priority:** P0  
 **Sprint:** S9  
-**Status:** BACKLOG
+**Status:** DONE
 
 Test:
 
-- [ ] Missing input.
-- [ ] Invalid input.
-- [ ] Boundary values.
-- [ ] Extreme values.
-- [ ] Empty response.
-- [ ] API timeout.
-- [ ] LLM failure.
-- [ ] RAG failure.
-- [ ] Simulation failure.
+- [x] QA-002.01: Return 422 instead of 500 for unsupported What-If derived BMI.
+- [x] QA-002.02: Boundary and extreme value test suite for profile, vitals, and simulation (tests/test_edge_boundary.py).
+- [x] QA-002.03: Guard against BMI database overflow on create and update (tests/test_edge_boundary.py).
+- [x] QA-002.04: Add max length constraint to blood pressure schema.
+- [x] QA-002.05: Harden Gemini client and RAG retrieval against unhandled exceptions and empty responses.
+- [x] QA-002.06: Add external service resilience and deterministic fallback tests (tests/test_external_resilience.py).
+- [x] QA-002.07: Resolve code-review findings, eliminate duplicate catches, and harden mobile cold-start/re-consent flow.
+
+Acceptance Criteria:
+
+- Seluruh edge-case boundaries, input validation, external service timeout/failure, dan deterministic fallback lulus pengujian otomatis 100%.
 
 ---
 
@@ -2544,8 +2876,8 @@ HELIORA MVP hanya dianggap siap apabila seluruh P0 berikut selesai.
 ## AI
 
 - [ ] Preventive Lifestyle Risk Engine
-- [ ] Health Score
-- [ ] Lifestyle Score
+- [x] Health Score
+- [x] Lifestyle Score
 - [ ] Explainable AI
 - [ ] Future Health Simulation
 - [x] What-if Simulation

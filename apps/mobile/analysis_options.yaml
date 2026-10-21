@@ -1,0 +1,11 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude:
+    # Output of `gen:api` (swagger_parser) and build_runner. Regenerated, not edited by hand.
+    - lib/core/api/generated/**
+    - "**/*.g.dart"
+
+linter:
+  rules:
+    prefer_single_quotes: true
