@@ -875,34 +875,34 @@ export default function DashboardLayout({
           {pathname?.startsWith("/dashboard/risk") && (
             <nav
               aria-label="Navigasi Kondisi Risiko"
-              className="inline-grid grid-cols-3 p-1.5 bg-neutral-100/90 rounded-full text-xs font-medium gap-1"
+              className="inline-grid grid-cols-3 p-1 bg-neutral-100 rounded-xl text-xs font-medium gap-1"
             >
               <Link
                 href="/dashboard/risk/diabetes"
-                className={`px-3.5 sm:px-4.5 py-1.5 text-center rounded-full transition-all select-none flex items-center justify-center shrink-0 ${
+                className={`px-3 sm:px-4 py-1.5 text-center rounded-lg transition-all select-none flex items-center justify-center shrink-0 ${
                   pathname === "/dashboard/risk/diabetes"
-                    ? "bg-white text-neutral-900 font-bold shadow-xs"
-                    : "text-neutral-500 hover:text-black"
+                    ? "bg-white text-neutral-900 font-semibold shadow-xs"
+                    : "text-neutral-500 hover:text-neutral-900"
                 }`}
               >
                 <span className="truncate">Diabetes</span>
               </Link>
               <Link
                 href="/dashboard/risk/hypertension"
-                className={`px-3.5 sm:px-4.5 py-1.5 text-center rounded-full transition-all select-none flex items-center justify-center shrink-0 ${
+                className={`px-3 sm:px-4 py-1.5 text-center rounded-lg transition-all select-none flex items-center justify-center shrink-0 ${
                   pathname === "/dashboard/risk/hypertension"
-                    ? "bg-white text-neutral-900 font-bold shadow-xs"
-                    : "text-neutral-500 hover:text-black"
+                    ? "bg-white text-neutral-900 font-semibold shadow-xs"
+                    : "text-neutral-500 hover:text-neutral-900"
                 }`}
               >
                 <span className="truncate">Hipertensi</span>
               </Link>
               <Link
                 href="/dashboard/risk/cardiovascular"
-                className={`px-3.5 sm:px-4.5 py-1.5 text-center rounded-full transition-all select-none flex items-center justify-center shrink-0 ${
+                className={`px-3 sm:px-4 py-1.5 text-center rounded-lg transition-all select-none flex items-center justify-center shrink-0 ${
                   pathname === "/dashboard/risk/cardiovascular"
-                    ? "bg-white text-neutral-900 font-bold shadow-xs"
-                    : "text-neutral-500 hover:text-black"
+                    ? "bg-white text-neutral-900 font-semibold shadow-xs"
+                    : "text-neutral-500 hover:text-neutral-900"
                 }`}
               >
                 <span className="truncate">Kardiovaskular</span>

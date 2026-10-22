@@ -187,7 +187,7 @@ function EvidenceDetailModal({
               type="button"
               onClick={onClose}
               aria-label="Tutup dialog"
-              className="size-8 rounded-full hover:bg-neutral-100 text-neutral-400 hover:text-neutral-800 flex items-center justify-center transition-colors cursor-pointer shrink-0 -mt-1 -mr-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-900"
+              className="size-8 rounded-lg hover:bg-neutral-100 text-neutral-400 hover:text-neutral-800 flex items-center justify-center transition-colors cursor-pointer shrink-0 -mt-1 -mr-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-900"
             >
               <X className="size-4" />
             </button>
@@ -267,7 +267,7 @@ function EvidenceDetailModal({
                     onClick={() => setShowGradeInfo((prev) => !prev)}
                     aria-label="Apa itu WHO GRADE?"
                     aria-expanded={showGradeInfo}
-                    className="inline-flex items-center justify-center size-6 rounded-full text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-900 transition-colors cursor-pointer shrink-0"
+                    className="inline-flex items-center justify-center size-6 rounded-md text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-900 transition-colors cursor-pointer shrink-0"
                   >
                     <Info className="size-4" />
                   </button>
