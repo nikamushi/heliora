@@ -10,7 +10,7 @@ from collections.abc import AsyncGenerator
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError
+from jose import JWTError, jwt
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
@@ -50,6 +50,12 @@ async def get_current_user(
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
+        try:
+            raw_h = jwt.get_unverified_header(token)
+            logger.warning(f"[AUTH DIAGNOSTIC] Incoming token header: {raw_h}")
+        except Exception as h_err:
+            logger.warning(f"[AUTH DIAGNOSTIC] Failed to read header: {h_err}")
+
         payload = verify_token(token)
         user_id_str: str | None = payload.get("sub")
         if user_id_str is None:

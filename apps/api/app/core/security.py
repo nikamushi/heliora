@@ -154,10 +154,13 @@ class SupabaseJWKSVerifier:
             "verify_iss": False,  # Evaluated below to support flexible issuer variants
         }
 
+        # Ensure alg from token is accepted in algorithms list
+        allowed_algs = list(set(settings.SUPABASE_ALLOWED_ALGS) | ({alg} if alg else set()))
+
         claims = jwt.decode(
             token,
             key,
-            algorithms=settings.SUPABASE_ALLOWED_ALGS,
+            algorithms=allowed_algs,
             audience=settings.SUPABASE_AUDIENCE,
             options=options,
         )
@@ -195,14 +198,16 @@ def verify_token(token: str) -> dict[str, Any]:
     try:
         header = jwt.get_unverified_header(token)
     except Exception as exc:
-        logger.debug(f"[AUTH] Failed to get unverified header: {exc}")
+        logger.warning(f"[AUTH] Failed to get unverified header: {exc}")
         return decode_access_token(token)
 
     alg = (header.get("alg") or "").upper()
     kid = header.get("kid")
 
-    # If algorithm is asymmetric (ES256, RS256) or token has kid with Supabase JWKS configured
-    if settings.SUPABASE_JWKS_URL and (alg in settings.SUPABASE_ALLOWED_ALGS or (kid and alg != "HS256")):
+    logger.warning(f"[AUTH DIAGNOSTIC] verify_token alg='{alg}', kid='{kid}'")
+
+    # If algorithm is asymmetric (ES256, RS256) or token has kid that is not HS256, verify via Supabase JWKS
+    if alg in ("ES256", "RS256") or (kid and alg != "HS256"):
         return supabase_jwks_verifier.verify_supabase_token(token)
 
     return decode_access_token(token)
@@ -213,4 +218,11 @@ def decode_access_token(token: str) -> dict[str, Any]:
 
     Raises ``jose.JWTError`` on invalid/expired tokens.
     """
-    return jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.TOKEN_ALGORITHM])
+    try:
+        header = jwt.get_unverified_header(token)
+        token_alg = (header.get("alg") or settings.TOKEN_ALGORITHM).upper()
+    except Exception:
+        token_alg = settings.TOKEN_ALGORITHM
+
+    allowed = list(set([settings.TOKEN_ALGORITHM, token_alg]) - {"none", "NONE"})
+    return jwt.decode(token, settings.SECRET_KEY, algorithms=allowed)
