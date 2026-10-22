@@ -2,7 +2,8 @@
 
 import React from "react";
 import Link from "next/link";
-import { ArrowLeft, Activity } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { LogoEmblem } from "@/components/logo";
 import { DisclaimerBanner } from "@/components/disclaimer-banner";
 
 interface AuthLayoutProps {
@@ -156,9 +157,7 @@ export function AuthLayout({
               href="/"
               className="group mb-6 flex items-center gap-2 transition-transform group-hover:scale-105"
             >
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-900 text-white shadow-sm">
-                <Activity size={26} strokeWidth={2} />
-              </div>
+              <LogoEmblem size={48} className="shadow-sm" />
             </Link>
             <h1 className="text-center text-[36px] leading-[42px] font-semibold tracking-tight text-foreground">
               {title}

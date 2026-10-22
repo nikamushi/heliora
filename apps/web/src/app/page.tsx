@@ -8,6 +8,7 @@ import { BilateralPatternFlow } from "@/components/BilateralPatternFlow";
 import { LayeredHealthPicture } from "@/components/LayeredHealthPicture";
 import { UnderstandActivityIcons } from "@/components/UnderstandActivityIcons";
 import { ExplainableFactorsVisual } from "@/components/ExplainableFactorsVisual";
+import { LogoEmblem } from "@/components/logo";
 import { SimulationDirectionVisual } from "@/components/SimulationDirectionVisual";
 import { RecommendationsEvidenceVisual } from "@/components/RecommendationsEvidenceVisual";
 import { motion, useScroll, useTransform } from "motion/react";
@@ -573,9 +574,7 @@ export default function LandingPage() {
       <footer className="border-t border-brand-900/10 bg-white/70 backdrop-blur-md">
         <div className="container mx-auto px-6 lg:px-12 py-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-brand-900/60 font-medium">
           <div className="flex items-center gap-2 text-brand-900">
-            <div className="w-6 h-6 rounded-lg bg-brand-900 text-white flex items-center justify-center">
-              <IconHeartbeat size={14} strokeWidth={2.5} />
-            </div>
+            <LogoEmblem size={24} className="rounded-lg shadow-2xs" />
             <span className="font-bold tracking-tight text-xs">HELIORA</span>
           </div>
           <div className="flex items-center gap-6">
