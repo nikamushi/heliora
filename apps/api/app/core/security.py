@@ -17,6 +17,22 @@ from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
+# Pre-seeded canonical Supabase EC public key for project vhrwtzenemkswivwhwmt
+# Ensures instant verification without network latency or DNS timeouts
+DEFAULT_SUPABASE_JWKS: dict[str, dict[str, Any]] = {
+    "5815989f-20b8-4831-9813-bb51361546aa": {
+        "alg": "ES256",
+        "crv": "P-256",
+        "ext": True,
+        "key_ops": ["verify"],
+        "kid": "5815989f-20b8-4831-9813-bb51361546aa",
+        "kty": "EC",
+        "use": "sig",
+        "x": "nwv5kuP16Ehe6EYgB3P8nCP9u2xtBv-SwaR-uCZxXUk",
+        "y": "G2OWi2Y9KZ143EU8n2XC0rAdiq0WH3DOeSbIsba1AU4",
+    }
+}
+
 
 # ── Password Hashing ────────────────────────────────────────────
 def hash_password(plain_password: str) -> str:
@@ -65,6 +81,12 @@ class SupabaseJWKSVerifier:
     def __init__(self) -> None:
         self._keys: dict[str, Any] = {}
         self._last_fetched: float = 0.0
+        # Initialize with project default keys for zero-cold-start verification
+        try:
+            for kid, k in DEFAULT_SUPABASE_JWKS.items():
+                self._keys[kid] = jwk.construct(k)
+        except Exception as exc:
+            logger.debug(f"[AUTH] Failed to initialize default JWKS key: {exc}")
 
     def fetch_keys(self, force: bool = False) -> dict[str, Any]:
         """Fetch and cache public keys from Supabase JWKS endpoint."""
@@ -169,21 +191,19 @@ supabase_jwks_verifier = SupabaseJWKSVerifier()
 
 
 def verify_token(token: str) -> dict[str, Any]:
-    """Unified token verifier supporting Supabase JWKS and legacy HS256 tokens."""
+    """Unified token verifier supporting Supabase JWKS (ES256/RS256) and legacy HS256 tokens."""
     try:
         header = jwt.get_unverified_header(token)
     except Exception as exc:
         logger.debug(f"[AUTH] Failed to get unverified header: {exc}")
         return decode_access_token(token)
 
-    if header.get("kid") and settings.SUPABASE_JWKS_URL:
-        try:
-            return supabase_jwks_verifier.verify_supabase_token(token)
-        except Exception as exc:
-            logger.warning(
-                f"[AUTH] Supabase JWKS verification failed ({exc}); falling back to HS256 decode"
-            )
-            return decode_access_token(token)
+    alg = (header.get("alg") or "").upper()
+    kid = header.get("kid")
+
+    # If algorithm is asymmetric (ES256, RS256) or token has kid with Supabase JWKS configured
+    if settings.SUPABASE_JWKS_URL and (alg in settings.SUPABASE_ALLOWED_ALGS or (kid and alg != "HS256")):
+        return supabase_jwks_verifier.verify_supabase_token(token)
 
     return decode_access_token(token)
 
