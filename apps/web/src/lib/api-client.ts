@@ -117,6 +117,8 @@ class ApiClient {
     }
   }
 
+  private inFlightGetRequests = new Map<string, Promise<unknown>>();
+
   public setStoredUser(user: UserResponse): void {
     if (typeof window === "undefined") return;
     localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
@@ -142,41 +144,64 @@ class ApiClient {
       headers.set("Authorization", `Bearer ${token}`);
     }
 
-    try {
-      const response = await fetch(url, {
-        ...options,
-        headers,
-      });
+    const method = (options.method || "GET").toUpperCase();
+    const requestKey = `${method}:${url}`;
 
-      if (!response.ok) {
-        let errorMessage = `Terjadi kesalahan pada server (${response.status})`;
-        let errorData: unknown = null;
+    // Deduplicate in-flight GET requests to prevent redundant network spam
+    if (method === "GET") {
+      const existing = this.inFlightGetRequests.get(requestKey);
+      if (existing) {
+        return existing as Promise<T>;
+      }
+    }
 
-        try {
-          const json = (await response.json()) as ApiErrorResponse;
-          errorData = json;
-          if (typeof json.detail === "string") {
-            errorMessage = json.detail;
-          } else if (Array.isArray(json.detail) && json.detail.length > 0) {
-            errorMessage = json.detail.map((e) => e.msg).join(", ");
+    const execute = async (): Promise<T> => {
+      try {
+        const response = await fetch(url, {
+          ...options,
+          headers,
+        });
+
+        if (!response.ok) {
+          let errorMessage = `Terjadi kesalahan pada server (${response.status})`;
+          let errorData: unknown = null;
+
+          try {
+            const json = (await response.json()) as ApiErrorResponse;
+            errorData = json;
+            if (typeof json.detail === "string") {
+              errorMessage = json.detail;
+            } else if (Array.isArray(json.detail) && json.detail.length > 0) {
+              errorMessage = json.detail.map((e) => e.msg).join(", ");
+            }
+          } catch {
+            // If response body is not JSON, retain default error message
           }
-        } catch {
-          // If response body is not JSON, retain default error message
+
+          throw new ApiClientError(response.status, errorMessage, errorData);
         }
 
-        throw new ApiClientError(response.status, errorMessage, errorData);
+        return (await response.json()) as T;
+      } catch (err) {
+        if (err instanceof ApiClientError) {
+          throw err;
+        }
+        throw new ApiClientError(
+          0,
+          "Tidak dapat terhubung ke server backend. Pastikan server API sudah berjalan."
+        );
+      } finally {
+        if (method === "GET") {
+          this.inFlightGetRequests.delete(requestKey);
+        }
       }
+    };
 
-      return (await response.json()) as T;
-    } catch (err) {
-      if (err instanceof ApiClientError) {
-        throw err;
-      }
-      throw new ApiClientError(
-        0,
-        "Tidak dapat terhubung ke server backend. Pastikan server API sudah berjalan."
-      );
+    const promise = execute();
+    if (method === "GET") {
+      this.inFlightGetRequests.set(requestKey, promise);
     }
+    return promise;
   }
 
   // ── Authentication (FE-012, ADR-011; Architecture §20, BE-001) ───

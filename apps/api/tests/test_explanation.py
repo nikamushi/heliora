@@ -158,7 +158,7 @@ def test_llm_config_defaults(monkeypatch):
         monkeypatch.delenv(var, raising=False)
     settings = Settings(_env_file=None)
     assert settings.GEMINI_API_KEY is None
-    assert settings.GEMINI_MODEL == "gemini-3.5-flash-lite"
+    assert settings.GEMINI_MODEL == "gemini-1.5-flash"
     assert settings.LLM_TIMEOUT_SECONDS == 10
 
 

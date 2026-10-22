@@ -21,7 +21,7 @@ class GeminiClient:
     def __init__(
         self,
         api_key: str | None = None,
-        model: str = "gemini-3.5-flash-lite",
+        model: str = "gemini-1.5-flash",
         timeout_seconds: float = 10.0,
         transport: httpx.AsyncBaseTransport | None = None,
     ) -> None:

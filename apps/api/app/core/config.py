@@ -74,7 +74,7 @@ class Settings(BaseSettings):
 
     # ── LLM Provider (Gemini — ADR-009, Architecture §41) ────────────
     GEMINI_API_KEY: str | None = None
-    GEMINI_MODEL: str = "gemini-3.5-flash-lite"
+    GEMINI_MODEL: str = "gemini-1.5-flash"
     LLM_TIMEOUT_SECONDS: int = 10
 
     # ── Auth (Legacy & FastAPI Native) ───────────────────────────

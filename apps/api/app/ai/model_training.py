@@ -99,6 +99,85 @@ def generate_training_data(n_samples: int = 10000, seed: int = 42) -> tuple[np.n
     return feature_matrix, y_diabetes, y_hypertension, y_cvd
 
 
+def load_empirical_training_data(
+    source: str = "auto",
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, dict[str, Any]] | None:
+    """Load empirical training data from NHANES processed parquet or BRFSS dataset.
+
+    Maps empirical variables to HELIORA's 11 serving feature contract:
+    ['age', 'bmi', 'physical_activity', 'sleep_duration', 'smoking_status',
+     'family_history', 'stress_level', 'blood_sugar', 'cholesterol',
+     'systolic_bp', 'diastolic_bp']
+    """
+    import pandas as pd
+
+    repo_root = Path(__file__).resolve().parents[4]
+    nhanes_parquet = repo_root / "ai" / "datasets" / "processed" / "NHANES-2021-2023-v1" / "train.parquet"
+    brfss_csv = repo_root / "apps" / "ml" / "data" / "brfss_2023.csv"
+
+    if source in ("auto", "nhanes") and nhanes_parquet.exists():
+        logger.info("Loading empirical NHANES training data from %s", nhanes_parquet)
+        df = pd.read_parquet(nhanes_parquet)
+        n = len(df)
+        X = np.column_stack([
+            df["age"].astype(float).values,
+            df["bmi"].astype(float).values,
+            df["physical_activity_min_per_week"].astype(float).values,
+            df["sleep_duration_hours"].astype(float).values,
+            df["smoking_status"].astype(float).values,
+            np.zeros(n, dtype=float),       # family_history neutral baseline
+            np.full(n, 5.0, dtype=float),   # stress_level neutral baseline
+            df["blood_sugar_mg_dl"].astype(float).values,
+            df["cholesterol_mg_dl"].astype(float).values,
+            df["systolic_bp_mean"].astype(float).values,
+            df["diastolic_bp_mean"].astype(float).values,
+        ])
+        y_dm = df["diabetes"].astype(int).values
+        y_ht = df["hypertension"].astype(int).values
+        y_cvd = df["cardiovascular"].astype(int).values
+        meta = {
+            "source": "NHANES-2021-2023-v1",
+            "path": str(nhanes_parquet),
+            "n_samples": n,
+        }
+        return X, y_dm, y_ht, y_cvd, meta
+
+    if source in ("auto", "brfss") and brfss_csv.exists():
+        logger.info("Loading empirical BRFSS training data from %s", brfss_csv)
+        df = pd.read_csv(brfss_csv)
+        df = df.dropna(subset=["age", "bmi", "diabetes", "hypertension", "cardiovascular"])
+        n = len(df)
+        activity = df["physical_activity_min_per_week"].fillna(0.0).astype(float).values
+        sleep = df["sleep_duration_hours"].fillna(7.0).astype(float).values
+        chol = np.where(df.get("high_cholesterol", 0) == 1, 220.0, 180.0)
+        systolic = np.where(df["hypertension"] == 1, 140.0, 120.0)
+        diastolic = np.where(df["hypertension"] == 1, 90.0, 80.0)
+        X = np.column_stack([
+            df["age"].astype(float).values,
+            df["bmi"].astype(float).values,
+            activity,
+            sleep,
+            df["smoking_status"].fillna(0).astype(float).values,
+            np.zeros(n, dtype=float),
+            np.full(n, 5.0, dtype=float),
+            np.full(n, 90.0, dtype=float),
+            chol,
+            systolic,
+            diastolic,
+        ])
+        y_dm = df["diabetes"].astype(int).values
+        y_ht = df["hypertension"].astype(int).values
+        y_cvd = df["cardiovascular"].astype(int).values
+        meta = {
+            "source": "BRFSS-2023",
+            "path": str(brfss_csv),
+            "n_samples": n,
+        }
+        return X, y_dm, y_ht, y_cvd, meta
+
+    return None
+
+
 # ── Model training ───────────────────────────────────────────────
 
 @dataclass
@@ -131,30 +210,50 @@ def train_risk_models(
     use_xgboost: bool = True,
     save_path: Path | None = None,
     balance_classes: bool = False,
+    data_source: str = "synthetic",
 ) -> TrainedModels:
     """Train gradient boosting models for the three risk conditions.
 
     Args:
-        n_samples: Number of synthetic training samples.
+        n_samples: Number of synthetic training samples (when data_source='synthetic').
         seed: RNG seed for reproducibility.
         use_xgboost: If True, use XGBoost; otherwise LightGBM.
         save_path: Optional path to persist trained models.
         balance_classes: If True, weight the positive class of each
             condition by its negative/positive sample ratio (AI-003.04).
             Defaults to False so the historical baseline stays reproducible.
+        data_source: 'synthetic', 'empirical', or 'auto'. When 'empirical' or 'auto',
+            loads real cohort data from NHANES processed parquet or BRFSS dataset.
 
     Returns:
         TrainedModels with trained model objects and metadata.
     """
-    logger.info(
-        "Generating %d training samples (seed=%d, xgboost=%s, balance=%s)",
-        n_samples,
-        seed,
-        use_xgboost,
-        balance_classes,
-    )
+    empirical_data = None
+    if data_source in ("auto", "empirical", "nhanes", "brfss"):
+        empirical_data = load_empirical_training_data(data_source)
 
-    feature_matrix, y_dm, y_ht, y_cvd = generate_training_data(n_samples, seed)
+    if empirical_data is not None:
+        feature_matrix, y_dm, y_ht, y_cvd, meta = empirical_data
+        actual_samples = len(feature_matrix)
+        dataset_name = meta.get("source", "empirical")
+        logger.info(
+            "Training on empirical dataset %s with %d samples (xgboost=%s, balance=%s)",
+            dataset_name,
+            actual_samples,
+            use_xgboost,
+            balance_classes,
+        )
+    else:
+        logger.info(
+            "Generating %d synthetic training samples (seed=%d, xgboost=%s, balance=%s)",
+            n_samples,
+            seed,
+            use_xgboost,
+            balance_classes,
+        )
+        feature_matrix, y_dm, y_ht, y_cvd = generate_training_data(n_samples, seed)
+        actual_samples = n_samples
+        dataset_name = "synthetic" 
 
     train_method = _train_xgboost if use_xgboost else _train_lightgbm
 
@@ -186,7 +285,8 @@ def train_risk_models(
         hypertension_model=hypertension_model,
         cvd_model=cvd_model,
         training_info={
-            "n_samples": n_samples,
+            "n_samples": actual_samples,
+            "dataset": dataset_name,
             "seed": seed,
             "algorithm": "xgboost" if use_xgboost else "lightgbm",
             "n_features": len(FEATURE_NAMES),
@@ -328,8 +428,15 @@ class ModelRiskEngine:
                 cached = load_models(default_path)
                 expected = _expected_default_signature()
                 info = cached.training_info
-                if all(info.get(key) == value for key, value in expected.items()):
-                    logger.info("Loading cached models from %s", default_path)
+                is_synthetic_match = all(info.get(key) == value for key, value in expected.items())
+                is_empirical_match = (
+                    info.get("algorithm") == "xgboost"
+                    and info.get("n_features") == len(FEATURE_NAMES)
+                    and info.get("balance_classes") is False
+                    and info.get("dataset") in ("NHANES-2021-2023-v1", "BRFSS-2023")
+                )
+                if is_synthetic_match or is_empirical_match:
+                    logger.info("Loading cached models from %s (%s)", default_path, info.get("dataset", "synthetic"))
                     return cached
                 logger.warning(
                     "Cached models signature mismatch (config changed), retraining..."
@@ -470,8 +577,8 @@ def evaluate_trained_models(models: TrainedModels, n_test: int = 2000, seed: int
 if __name__ == "__main__":  # pragma: no cover - manual CLI entry point
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 
-    logger.info("Training risk prediction models...")
-    models = train_risk_models(n_samples=10000, save_path=MODEL_DIR / "default")
+    logger.info("Training risk prediction models on real empirical dataset...")
+    models = train_risk_models(data_source="auto", save_path=MODEL_DIR / "default")
 
     logger.info("Evaluating trained models...")
     eval_results = evaluate_trained_models(models)

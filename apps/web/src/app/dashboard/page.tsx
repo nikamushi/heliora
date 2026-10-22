@@ -503,8 +503,13 @@ export default function DashboardPage() {
                         )}
                       </span>
                     </div>
-                    <div className="h-1 w-full bg-neutral-200 rounded-full overflow-hidden">
-                      <div style={{ width: `${relativeWidthPct}%` }} className="h-full rounded-full bg-neutral-400" />
+                    <div className="h-1.5 w-full bg-neutral-100 rounded-full overflow-hidden">
+                      <div
+                        style={{ width: `${relativeWidthPct}%` }}
+                        className={`h-full rounded-full transition-all duration-300 ${
+                          factor.impact === "decrease" ? "bg-emerald-600" : "bg-amber-600"
+                        }`}
+                      />
                     </div>
                   </div>
                 );
@@ -544,8 +549,13 @@ export default function DashboardPage() {
                         )}
                       </span>
                     </div>
-                    <div className="h-1 w-full bg-neutral-200 rounded-full overflow-hidden">
-                      <div style={{ width: `${relativeWidthPct}%` }} className="h-full rounded-full bg-neutral-400" />
+                    <div className="h-1.5 w-full bg-neutral-100 rounded-full overflow-hidden">
+                      <div
+                        style={{ width: `${relativeWidthPct}%` }}
+                        className={`h-full rounded-full transition-all duration-300 ${
+                          factor.impact === "decrease" ? "bg-emerald-600" : "bg-amber-600"
+                        }`}
+                      />
                     </div>
                   </div>
                 );
@@ -574,8 +584,13 @@ export default function DashboardPage() {
                         )}
                       </span>
                     </div>
-                    <div className="h-1 w-full bg-neutral-200 rounded-full overflow-hidden">
-                      <div style={{ width: `${relativeWidthPct}%` }} className="h-full rounded-full bg-neutral-400" />
+                    <div className="h-1.5 w-full bg-neutral-100 rounded-full overflow-hidden">
+                      <div
+                        style={{ width: `${relativeWidthPct}%` }}
+                        className={`h-full rounded-full transition-all duration-300 ${
+                          factor.impact === "decrease" ? "bg-emerald-600" : "bg-amber-600"
+                        }`}
+                      />
                     </div>
                   </div>
                 );
