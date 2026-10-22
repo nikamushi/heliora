@@ -8,10 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FormAlertTooltip } from "@/components/ui/alert-tooltip";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { TriangleAlert } from "lucide-react";
+import { TriangleAlert, Eye as IconEye, EyeOff as IconEyeOff } from "lucide-react";
 import { AuthLayout } from "@/components/auth-layout";
 import { apiClient, ApiClientError } from "@/lib/api-client";
-import { IconEye, IconEyeOff } from "@tabler/icons-react";
 
 const PRIVACY_NOTE =
   "Privasi adalah bagian dari pengalaman HELIORA. Kami hanya menggunakan data yang diperlukan untuk memberikan pengalaman yang lebih personal.";

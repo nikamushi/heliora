@@ -8,9 +8,9 @@ import uuid
 from decimal import Decimal
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import joinedload, selectinload
 
 from app.db.models.assessment import Assessment
 from app.db.models.recommendation import Recommendation
@@ -21,6 +21,23 @@ from app.db.models.xai_result import XAIResult
 class AssessmentRepository:
     """Data-access repository for health assessments and associated analytics."""
 
+    async def count_completed_by_user_id(
+        self, session: AsyncSession, user_id: uuid.UUID
+    ) -> int:
+        """Count total completed assessments for a user to determine baseline status."""
+        try:
+            stmt = (
+                select(Assessment.id)
+                .where(Assessment.user_id == user_id)
+                .where(Assessment.status == "completed")
+                .order_by(Assessment.created_at.desc())
+                .limit(2)
+            )
+            result = await session.execute(stmt)
+            return len(result.scalars().all())
+        except Exception:
+            return 1
+
     async def get_latest_by_user_id(
         self, session: AsyncSession, user_id: uuid.UUID
     ) -> Assessment | None:
@@ -29,13 +46,14 @@ class AssessmentRepository:
             select(Assessment)
             .where(Assessment.user_id == user_id)
             .options(
-                selectinload(Assessment.risk_result).selectinload(
+                joinedload(Assessment.risk_result).selectinload(
                     RiskResult.xai_results
                 ),
                 selectinload(Assessment.recommendations),
-                selectinload(Assessment.health_profile),
+                joinedload(Assessment.health_profile),
             )
             .order_by(Assessment.created_at.desc())
+            .limit(1)
         )
         result = await session.execute(stmt)
         return result.scalars().first()
@@ -48,11 +66,11 @@ class AssessmentRepository:
             select(Assessment)
             .where(Assessment.id == assessment_id, Assessment.user_id == user_id)
             .options(
-                selectinload(Assessment.risk_result).selectinload(
+                joinedload(Assessment.risk_result).selectinload(
                     RiskResult.xai_results
                 ),
                 selectinload(Assessment.recommendations),
-                selectinload(Assessment.health_profile),
+                joinedload(Assessment.health_profile),
             )
         )
         result = await session.execute(stmt)

@@ -13,10 +13,10 @@
 | Document Title   | HELIORA Product Requirements Document (PRD)        |
 | Product Name     | HELIORA                                            |
 | Product Category | AI-Powered Preventive Health Intelligence Platform |
-| Document Version | 1.1                                                |
+| Document Version | 1.2                                                |
 | Document Status  | Draft — Revised                                    |
 | Created Date     | August 2026                                        |
-| Last Updated     | 19 August 2026                                     |
+| Last Updated     | 21 October 2026                                    |
 | Language         | English & Indonesian                               |
 | Confidentiality  | Internal Team Document                             |
 
@@ -122,6 +122,7 @@ Dokumen berikut menjadi referensi utama dalam penyusunan PRD ini.
 | ------- | ---- | ------ | ----------- |
 | 1.0 | August 2026 | HELIORA Development Team | Initial draft |
 | 1.1 | 19 August 2026 | HELIORA Development Team | Product, AI, MVP scope, safety, acceptance, and consistency revision |
+| 1.2 | 21 October 2026 | HELIORA Development Team | Safety threshold alignment (score ≥ 60 / prob ≥ 0.60), BMI underweight presentation & guideline decoupling, Lifestyle Score weight formula validation (35/35/30), optional biometric imputation transparency disclosure |
 
 ---
 
@@ -150,6 +151,16 @@ Revisi utama:
 - LLM diberi deterministic fallback dan tidak menjadi dependency untuk risk estimation atau recommendation.
 - Privacy diperluas dengan data retention, consent withdrawal, account deletion, dan third-party AI data handling.
 - Requirement Traceability Matrix ditambahkan untuk menghubungkan problem, objective, feature, requirement, acceptance criteria, dan test.
+
+Version 1.2 menyelesaikan kontradiksi penyajian faktor risiko, penyelarasan safety threshold, validasi matematis Lifestyle Score, dan transparansi data opsional:
+
+Revisi utama:
+
+- **Penyelarasan Ambang Safety (REC-SAFETY-01):** Ambang safety diselaraskan ke skala skor UI (skor estimasi ≥ 60 / probabilitas ≥ 0,60) agar konsisten dengan batas bawah band "Lebih Tinggi" (§10.4.2), mencegah pesan konsultasi medis muncul pada kategori risiko "Sedang".
+- **Pemisahan Pengaruh Model vs Status Pedoman (BMI Underweight):** Nilai IMT < 18,5 kg/m² disajikan secara objektif dengan pengaruh model ("Menurunkan estimasi") dan status pedoman ("Di bawah rentang normal (18,5–22,9 kg/m²)"). Tidak lagi dilabeli "rentang ideal" ataupun "Protektif".
+- **Validasi Matematis Lifestyle Score (AC-DASH-02, AC-SCORE-02):** Bobot 35% aktivitas fisik (≥ 150 mnt/mgg), 35% tidur (7–9 jam), 30% bebas rokok. Ditambahkan unit test untuk menjamin profil yang memenuhi ketiga pedoman mencapai Lifestyle Score ≥ 95.
+- **Empty State Rekomendasi:** Empty state berbasis penguatan positif hanya muncul apabila *seluruh* parameter gaya hidup berada dalam rentang pedoman normal.
+- **Transparansi Imputasi Data Opsional (§7.14, BR-PROFILE-002):** Memberikan disclosure transparan pada dashboard apabila data gula darah, tekanan darah, dan kolesterol tidak diisi pengguna.
 
 ---
 
@@ -9657,7 +9668,16 @@ Bobot dapat disesuaikan selama proses pengembangan berdasarkan hasil eksperimen 
 
 ## BR-SCORE-004 — Lifestyle Score
 
-Lifestyle Score digunakan untuk memberikan gambaran kualitas kebiasaan hidup pengguna.
+Lifestyle Score digunakan untuk memberikan gambaran kualitas kebiasaan hidup pengguna yang dapat dimodifikasi secara mandiri.
+
+Struktur bobot kanonis (AC-SCORE-02):
+
+| Faktor | Bobot | Target Optimal |
+| :--- | :---: | :--- |
+| Physical Activity | 35% | WHO standard ≥ 150 menit/minggu |
+| Sleep Duration | 35% | 7.0–9.0 jam/hari (Kemenkes/CDC) |
+| Smoking Status | 30% | Bebas asap rokok (never: 30%, former: 28%, current: 0%) |
+| **Total** | **100%** | |
 
 Lifestyle Score berbeda dari risk estimation.
 
@@ -10110,6 +10130,30 @@ THEN recommend healthy weight management
 
 Recommendation tidak boleh memberikan diagnosis obesitas tanpa konteks yang sesuai.
 
+### Kebijakan Penanganan IMT Rendah (< 18,5 kg/m²)
+Berdasarkan standar Kemenkes RI dan WHO WPRO untuk populasi Asia-Pasifik, rentang IMT normal adalah 18,5–22,9 kg/m².
+
+1. **Perilaku Model Estimasi (SHAP & ML):**
+   Pada model estimasi diabetes tipe 2, nilai IMT yang rendah (< 18,5 kg/m²) secara matematis menghasilkan kontribusi yang menurunkan skor estimasi risiko diabetes karena resistensi insulin berkorelasi kuat dengan adipositas tinggi.
+2. **Prinsip Evidence First:**
+   Pedoman pencegahan primer diabetes melitus (PERKENI 2021 dan ADA 2026) tidak menetapkan aturan defisit diabetes untuk kondisi berat badan kurang. Oleh karena itu, Rule Engine tidak membuat aturan defisit buatan tanpa rujukan pedoman diabetes.
+3. **Penyajian UI:**
+   Kondisi IMT < 18,5 kg/m² disajikan secara deskriptif netral sebagai teks sekunder: "Di bawah rentang normal (18,5–22,9)" dengan catatan klinis informatif pada modal detail faktor, mengarahkan pengguna menjaga asupan gizi seimbang demi kesehatan umum tanpa mengacaukan target preventif diabetes.
+
+### BR-REC-006a — Low BMI Recommendation Rule
+
+Jika IMT < 18,5 kg/m²:
+
+```text
+IF BMI < 18.5
+THEN recommend "Perhatikan berat badan"
+```
+
+- Recommendation yang dipicu: title **"Perhatikan berat badan"** (rule_id: `REC-NUT-LOWBMI-01`), kategori `nutrition`, prioritas medium.
+- Copy bersifat non-alarmist (edukatif, bukan diagnosis): menyarankan peningkatan asupan nutrisi seimbang untuk mencapai berat badan ideal; tidak menyatakan kondisi medis.
+- Evidence bersumber dari Knowledge Base (Pedoman Gizi Seimbang Kemenkes RI) dan ditampilkan melalui Evidence Center (BR-EVIDENCE-001/002).
+- Tidak menyertakan tombol simulasi (What-if) pada rekomendasi ini; rekomendasi bersifat informatif.
+
 ---
 
 ## BR-REC-007 — Recommendation Source
@@ -10125,6 +10169,20 @@ Guideline Reference
   ↓
 Recommendation
 ```
+
+---
+
+## BR-REC-008 — Maintenance / Protective Fallback Rule
+
+Jika seluruh parameter gaya hidup modifiable pengguna telah memenuhi target preventif guideline (tidak ada defisit yang memicu BR-REC-003 s/d BR-REC-006):
+
+```text
+IF all modifiable factors >= targets
+THEN recommend maintaining healthy lifestyle routine
+```
+
+Recommendation berfokus pada penguatan positif (positive reinforcement) untuk mempertahankan kebiasaan sehat saat ini.
+Sumber acuan: Kemenkes RI: GERMAS (Gerakan Masyarakat Hidup Sehat) dan WHO Guidelines on Physical Activity and Sedentary Behaviour (2020).
 
 ---
 
@@ -11119,20 +11177,17 @@ Acceptance criteria:
 
 ## AC-SCORE-02 — Lifestyle Score
 
-Sistem harus menghasilkan Lifestyle Score berdasarkan faktor lifestyle.
+Sistem harus menghasilkan Lifestyle Score berdasarkan faktor lifestyle yang dapat dimodifikasi secara mandiri.
 
-Faktor yang dapat digunakan meliputi:
-
-- BMI;
-- physical activity;
-- sleep duration;
-- smoking status;
-- faktor lifestyle lainnya yang telah ditentukan dalam model.
+Faktor dan bobot yang digunakan:
+- physical activity (bobot 35%, WHO standard ≥ 150 min/minggu);
+- sleep duration (bobot 35%, target 7.0–9.0 jam/hari);
+- smoking status (bobot 30%, bebas asap rokok).
+Total: 100%.
 
 Acceptance criteria:
-
 - score dihitung berdasarkan formula yang terdokumentasi;
-- bobot setiap faktor terdokumentasi;
+- bobot setiap faktor terdokumentasi (Aktivitas Fisik 35%, Durasi Tidur 35%, Status Merokok 30%);
 - score dapat direproduksi menggunakan input yang sama;
 - score tidak diposisikan sebagai diagnosis medis.
 

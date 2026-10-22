@@ -32,6 +32,20 @@ function CallbackInner() {
     };
 
     const route = async () => {
+      // ── 0. Alihkan aliran pemulihan kata sandi (Password Recovery) ke /reset-password ──
+      const type = searchParams.get("type");
+      const nextParam = searchParams.get("next");
+      const hash = typeof window !== "undefined" ? window.location.hash : "";
+      if (
+        type === "recovery" ||
+        nextParam === "/reset-password" ||
+        nextParam === "/dashboard/settings" ||
+        hash.includes("type=recovery")
+      ) {
+        router.replace(`/reset-password${window.location.search}${hash}`);
+        return;
+      }
+
       // ── 1. Tunggu session Supabase selesai dibangun dari callback Google ──
       if (!isSupabaseConfigured()) {
         fail(

@@ -69,6 +69,18 @@ class RiskTrajectoryItem(BaseModel):
     )
 
 
+class DailyTrajectoryPoint(BaseModel):
+    """Discrete trajectory point evaluated directly by the physiological risk model."""
+
+    day: int = Field(..., ge=0, description="Day offset in simulation horizon.")
+    health_score: float = Field(
+        ..., ge=0.0, le=100.0, description="Model-evaluated health score."
+    )
+    lifestyle_score: float = Field(
+        ..., ge=0.0, le=100.0, description="Model-evaluated lifestyle score."
+    )
+
+
 class FutureSimulationResponse(BaseModel):
     """Response containing future health projection scenario results."""
 
@@ -92,6 +104,10 @@ class FutureSimulationResponse(BaseModel):
     )
     risk_trajectories: list[RiskTrajectoryItem] = Field(
         ..., description="Per-condition trajectory comparison items."
+    )
+    daily_trajectories: list[DailyTrajectoryPoint] = Field(
+        default_factory=list,
+        description="Discrete trajectory points evaluated directly by the risk engine model.",
     )
     is_model_estimated: bool = Field(
         default=True,

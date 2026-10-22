@@ -19,8 +19,8 @@ export function DisclaimerBanner({
 }: DisclaimerBannerProps) {
   if (variant === "note") {
     return (
-      <p className={cn("flex gap-2 text-[11px] leading-relaxed text-brand-900/70", className)}>
-        <Info aria-hidden="true" className="mt-0.5 size-3.5 text-brand-900/60 shrink-0" />
+      <p className={cn("flex gap-2 text-[13px] leading-relaxed text-neutral-600", className)}>
+        <Info aria-hidden="true" className="mt-0.5 size-4 text-neutral-500 shrink-0" />
         <span>{text}</span>
       </p>
     );

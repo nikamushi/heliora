@@ -3,12 +3,12 @@
 import React from "react";
 import Link from "next/link";
 import {
-  SFInfoCircle,
-  SFSparkles,
-  SFShieldCheckmark,
-  SFBookClosed,
-  SFChevronRight,
-} from "@/components/icons/sf-icons";
+  Info as SFInfoCircle,
+  Sparkles as SFSparkles,
+  ShieldCheck as SFShieldCheckmark,
+  BookOpen as SFBookClosed,
+  ChevronRight as SFChevronRight,
+} from "lucide-react";
 import { DisclaimerBanner } from "@/components/disclaimer-banner";
 import { LogoEmblem } from "@/components/logo";
 
@@ -32,7 +32,7 @@ export default function HelpAboutPage() {
     },
     {
       title: "Explainable AI (Bukan Black-Box)",
-      desc: "Memberikan transparansi penuh mengenai faktor biomarker apa yang memengaruhi probabilitas kesehatan Anda.",
+      desc: "Memberikan transparansi penuh mengenai faktor biomarker apa yang memengaruhi skor estimasi kesehatan Anda.",
       icon: SFSparkles,
       color: "text-violet-600",
       bg: "bg-violet-50/70 border-violet-100",

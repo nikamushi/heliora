@@ -22,10 +22,12 @@ export function useRequireAuth() {
         const client = getSupabaseClient();
         if (client) {
           const { data } = await client.auth.getSession();
-          if (!cancelled) {
-            setStatus(data.session ? "signed-in" : "signed-out");
+          if (data.session) {
+            if (!cancelled) {
+              setStatus("signed-in");
+            }
+            return;
           }
-          return;
         }
       }
       if (!cancelled) {

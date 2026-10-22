@@ -35,7 +35,13 @@ import {
 const TOKEN_STORAGE_KEY = "heliora_access_token";
 const USER_STORAGE_KEY = "heliora_user_data";
 
-export type ApiErrorKind = "unauthorized" | "not_found" | "network" | "validation" | "server";
+export type ApiErrorKind =
+  | "unauthorized"
+  | "forbidden"
+  | "not_found"
+  | "network"
+  | "validation"
+  | "server";
 
 export class ApiClientError extends Error {
   public readonly kind: ApiErrorKind;
@@ -47,8 +53,10 @@ export class ApiClientError extends Error {
   ) {
     super(message);
     this.name = "ApiClientError";
-    if (status === 401 || status === 403) {
+    if (status === 401) {
       this.kind = "unauthorized";
+    } else if (status === 403) {
+      this.kind = "forbidden";
     } else if (status === 404) {
       this.kind = "not_found";
     } else if (status === 400 || status === 422) {

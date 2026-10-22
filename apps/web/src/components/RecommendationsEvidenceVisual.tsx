@@ -1,40 +1,40 @@
 import React from "react";
 import {
-  IconCheck,
-  IconArrowRight,
-  IconShoe,
-  IconHandClick,
-  IconCompass,
-  IconTarget,
-  IconFlag,
-  IconRocket,
-  IconCalendarCheck,
-  IconChecklist,
-  IconCirclePlus,
-  IconRoute,
-  IconBulb,
-  IconShieldCheck,
-  IconSparkles,
-  IconCircleArrowRight,
-} from "@tabler/icons-react";
+  Check,
+  ArrowRight,
+  Footprints,
+  MousePointerClick,
+  Compass,
+  Target,
+  Flag,
+  Rocket,
+  CalendarCheck,
+  ListChecks,
+  PlusCircle,
+  Route,
+  Lightbulb,
+  ShieldCheck,
+  Sparkles,
+  CircleArrowRight,
+} from "lucide-react";
 
 const recommendationIcons = [
-  { id: "checkmark", icon: IconCheck },
-  { id: "arrow-forward", icon: IconArrowRight },
-  { id: "footstep", icon: IconShoe },
-  { id: "hand-tap", icon: IconHandClick },
-  { id: "compass", icon: IconCompass },
-  { id: "target", icon: IconTarget },
-  { id: "flag", icon: IconFlag },
-  { id: "rocket", icon: IconRocket },
-  { id: "calendar-check", icon: IconCalendarCheck },
-  { id: "checklist", icon: IconChecklist },
-  { id: "plus-circle", icon: IconCirclePlus },
-  { id: "path-route", icon: IconRoute },
-  { id: "lightbulb", icon: IconBulb },
-  { id: "shield-check", icon: IconShieldCheck },
-  { id: "spark-check", icon: IconSparkles },
-  { id: "arrow-circle", icon: IconCircleArrowRight },
+  { id: "checkmark", icon: Check },
+  { id: "arrow-forward", icon: ArrowRight },
+  { id: "footstep", icon: Footprints },
+  { id: "hand-tap", icon: MousePointerClick },
+  { id: "compass", icon: Compass },
+  { id: "target", icon: Target },
+  { id: "flag", icon: Flag },
+  { id: "rocket", icon: Rocket },
+  { id: "calendar-check", icon: CalendarCheck },
+  { id: "checklist", icon: ListChecks },
+  { id: "plus-circle", icon: PlusCircle },
+  { id: "path-route", icon: Route },
+  { id: "lightbulb", icon: Lightbulb },
+  { id: "shield-check", icon: ShieldCheck },
+  { id: "spark-check", icon: Sparkles },
+  { id: "arrow-circle", icon: CircleArrowRight },
 ];
 
 export function RecommendationsEvidenceVisual() {
@@ -51,7 +51,7 @@ export function RecommendationsEvidenceVisual() {
             >
               <IconComp 
                 className="w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11" 
-                stroke={1.5} 
+                strokeWidth={1.5} 
               />
             </div>
           );

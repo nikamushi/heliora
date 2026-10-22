@@ -1,7 +1,6 @@
 "use client";
 
-import React from "react";
-import { IconActivity, IconWaveSine, IconSparkles, IconCheck } from "@tabler/icons-react";
+import { Activity as IconActivity, Activity as IconWaveSine, Sparkles as IconSparkles, Check as IconCheck } from "lucide-react";
 
 export function UnderstandPatternVisual() {
   return (
@@ -134,7 +133,7 @@ export function UnderstandPatternVisual() {
           <div className="bg-[#12291d]/90 backdrop-blur-md border border-emerald-500/25 px-3 py-1.5 rounded-lg shadow-md text-right">
             <div className="text-[10px] uppercase font-mono text-emerald-300/70 tracking-wider">Korelasi Status</div>
             <div className="text-xs font-semibold text-emerald-300 flex items-center justify-end gap-1">
-              <IconCheck size={13} stroke={2.5} />
+              <IconCheck size={13} strokeWidth={2.5} />
               <span>3 Pola Terpetakan</span>
             </div>
           </div>

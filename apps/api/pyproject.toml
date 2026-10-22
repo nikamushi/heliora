@@ -31,10 +31,6 @@ dev = [
     "httpx>=0.27.0",
     "ruff>=0.6.0",
 ]
-ml = [
-    "lightgbm>=4.0.0",
-    "xgboost>=2.0.0",
-]
 
 [build-system]
 requires = ["hatchling"]
@@ -57,5 +53,5 @@ ignore = ["E501"]
 
 [dependency-groups]
 dev = [
-    "pytest-cov>=5.0.0",
+    "playwright>=1.64.0",
 ]

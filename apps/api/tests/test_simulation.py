@@ -148,6 +148,11 @@ async def test_service_successful_simulation():
         assert res.horizon_days == 90
         assert len(res.risk_trajectories) == 3
         assert res.is_model_estimated is True
+        assert len(res.daily_trajectories) == 91
+        assert res.daily_trajectories[0].day == 0
+        assert res.daily_trajectories[0].health_score == res.baseline_health_score
+        assert res.daily_trajectories[-1].day == 90
+        assert res.daily_trajectories[-1].health_score == res.projected_health_score
 
 
 # ── 3. Route Layer Tests (FastAPI Endpoints) ─────────────────────────────────

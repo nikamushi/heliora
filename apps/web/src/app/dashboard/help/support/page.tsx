@@ -3,13 +3,13 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import {
-  SFHeadphones,
-  SFEnvelope,
-  SFShieldCheckmark,
-  SFSparkles,
-  SFDocText,
-  SFBubbleLeftRight,
-} from "@/components/icons/sf-icons";
+  Headphones as SFHeadphones,
+  Mail as SFEnvelope,
+  ShieldCheck as SFShieldCheckmark,
+  Sparkles as SFSparkles,
+  FileText as SFDocText,
+  MessageSquare as SFBubbleLeftRight,
+} from "lucide-react";
 import { DisclaimerBanner } from "@/components/disclaimer-banner";
 
 export default function HelpSupportPage() {

@@ -4,30 +4,29 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  SFHeartTextSquare,
-  SFWaveformPathEcg,
-  SFChevronRight,
-  SFChevronLeft,
-  SFShieldCheckmark,
-  SFBookClosed,
-  SFSlidersHorizontal,
-  SFChartUptrend,
-  SFCompass,
-  SFPersonCropCircle,
-  SFLockShield,
-  SFDoorExit,
-  SFLine3Horizontal,
-  SFXmark,
-  SFQuestionMarkCircle,
-  SFDocText,
-  SFBubbleLeftRight,
-  SFHeadphones,
-  SFInfoCircle,
-} from "@/components/icons/sf-icons";
+  Heart as SFHeartTextSquare,
+  Activity as SFWaveformPathEcg,
+  ChevronRight as SFChevronRight,
+  ChevronLeft as SFChevronLeft,
+  ShieldCheck as SFShieldCheckmark,
+  BookOpen as SFBookClosed,
+  SlidersHorizontal as SFSlidersHorizontal,
+  TrendingUp as SFChartUptrend,
+  Compass as SFCompass,
+  User as SFPersonCropCircle,
+  ShieldAlert as SFLockShield,
+  Menu as SFLine3Horizontal,
+  X as SFXmark,
+  HelpCircle as SFQuestionMarkCircle,
+  FileText as SFDocText,
+  MessageSquare as SFBubbleLeftRight,
+  Headphones as SFHeadphones,
+  Info as SFInfoCircle,
+  Search as SFMagnifyingglass,
+} from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { apiClient } from "@/lib/api-client";
 import { UserResponse } from "@/types/api";
-import { LogoEmblem } from "@/components/logo";
 
 export default function DashboardLayout({
   children,
@@ -42,9 +41,21 @@ export default function DashboardLayout({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isPersonalMenuOpen, setIsPersonalMenuOpen] = useState(false);
   const [mobileNavLevel, setMobileNavLevel] = useState<"root" | "fitur" | "bantuan">("root");
-  const [isRiskMenuExpanded, setIsRiskMenuExpanded] = useState(
-    pathname?.startsWith("/dashboard/risk") ?? false
-  );
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setIsSearchOpen((prev) => !prev);
+      } else if (e.key === "Escape" && isSearchOpen) {
+        setIsSearchOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isSearchOpen]);
 
   useEffect(() => {
     let isMounted = true;
@@ -76,20 +87,41 @@ export default function DashboardLayout({
           setUser(currentUser);
         }
 
-        // 2. Check Mandatory Consent
+        // 2. Check Mandatory Consent (BR-CONSENT-003)
         try {
           const consentStatus = await apiClient.consent.getStatus();
           if (!consentStatus?.has_active_consent) {
+            // Izinkan akses ke halaman pengaturan dan bantuan tanpa redirect paksa
+            if (
+              pathname?.startsWith("/dashboard/settings") ||
+              pathname?.startsWith("/dashboard/help")
+            ) {
+              if (isMounted) {
+                setIsAuthorized(true);
+                setIsCheckingAuth(false);
+              }
+              return;
+            }
+
+            // Izinkan fitur dashboard merender empty state netral dengan CTA (BR-CONSENT-003)
+            // tanpa memblokir seluruh aplikasi dengan halaman error
             if (isMounted) {
-              router.replace("/onboarding/consent");
+              setIsAuthorized(true);
+              setIsCheckingAuth(false);
             }
             return;
           }
         } catch {
-          if (isMounted) {
-            router.replace("/onboarding/consent");
+          if (
+            pathname?.startsWith("/dashboard/settings") ||
+            pathname?.startsWith("/dashboard/help")
+          ) {
+            if (isMounted) {
+              setIsAuthorized(true);
+              setIsCheckingAuth(false);
+            }
+            return;
           }
-          return;
         }
 
         // 3. Check Mandatory Health Profile (Step 1-3)
@@ -132,15 +164,6 @@ export default function DashboardLayout({
     };
   }, [router, pathname]);
 
-
-  const handleLogout = async () => {
-    try {
-      await apiClient.auth.logout();
-    } finally {
-      router.push("/login");
-    }
-  };
-
   const userInitials =
     user?.full_name
       ?.split(" ")
@@ -162,7 +185,9 @@ export default function DashboardLayout({
     return (
       <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center">
         <div className="flex flex-col items-center gap-4">
-          <LogoEmblem size={48} className="rounded-2xl shadow-xs animate-pulse" />
+          <div className="w-12 h-12 rounded-2xl bg-[#0D5F3F] text-white flex items-center justify-center font-bold text-xl shadow-xs animate-pulse">
+            H
+          </div>
           <div className="space-y-1.5">
             <h2 className="text-base font-semibold text-[#111827]">Memeriksa Sesi HELIORA</h2>
             <p className="text-xs text-[#6B7280]">Menyiapkan data kesehatan Anda...</p>
@@ -175,8 +200,8 @@ export default function DashboardLayout({
   return (
     <div className="min-h-screen bg-neutral-50/40 text-neutral-900 selection:bg-brand-100 flex flex-col lg:flex-row">
       {/* ── Mobile & Tablet Top Bar (< 1024px) ── */}
-      <header className="lg:hidden border-b border-neutral-200/80 bg-white/90 backdrop-blur-md sticky top-0 z-30 px-4 sm:px-6 h-15 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <header className="lg:hidden bg-white border-b border-neutral-200/80 sticky top-0 z-30 px-4 sm:px-6 h-15 flex items-center justify-between">
+        <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => {
@@ -190,9 +215,8 @@ export default function DashboardLayout({
           >
             <SFLine3Horizontal className="w-6 h-6" />
           </button>
-          <Link href="/dashboard" className="flex items-center gap-2.5 font-bold text-base tracking-tight text-neutral-900">
-            <LogoEmblem size={28} className="rounded-lg shadow-xs" />
-            <span>HELIORA</span>
+          <Link href="/dashboard" className="font-bold text-base tracking-tight text-neutral-900">
+            HELIORA
           </Link>
         </div>
 
@@ -210,7 +234,7 @@ export default function DashboardLayout({
               : pathname?.startsWith("/dashboard/simulation/future")
               ? "Proyeksi"
               : pathname?.startsWith("/dashboard/evidence")
-              ? "Bukti"
+              ? "Dasar Ilmiah"
               : pathname?.startsWith("/dashboard/help")
               ? "Bantuan"
               : pathname?.startsWith("/dashboard/profile")
@@ -220,6 +244,14 @@ export default function DashboardLayout({
         </div>
 
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setIsSearchOpen(true)}
+            className="size-9 text-neutral-800 hover:text-neutral-950 flex items-center justify-center transition-colors cursor-pointer"
+            aria-label="Buka pencarian"
+          >
+            <SFMagnifyingglass className="w-5.5 h-5.5" />
+          </button>
           <button
             type="button"
             onClick={() => {
@@ -358,97 +390,29 @@ export default function DashboardLayout({
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: 14 }}
                       transition={{ duration: 0.16 }}
-                      className="space-y-6 pt-0"
+                      className="space-y-3 pt-0"
                     >
-                      {/* Cluster 1: Risiko */}
+                      {/* 1. Risiko */}
                       <div>
-                        <button
-                          type="button"
-                          onClick={() => setIsRiskMenuExpanded(!isRiskMenuExpanded)}
-                          className={`w-full flex items-center justify-between px-4 py-4 rounded-2xl text-xl font-bold transition-colors cursor-pointer ${
+                        <Link
+                          href="/dashboard/risk/diabetes"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className={`flex items-center px-4 py-3 rounded-2xl text-lg font-bold transition-colors ${
                             pathname?.startsWith("/dashboard/risk")
                               ? "bg-neutral-900/[0.08] text-neutral-950"
                               : "text-neutral-900 hover:bg-neutral-900/[0.04]"
                           }`}
                         >
                           <span>Risiko</span>
-                          <SFChevronRight
-                            className={`w-6 h-6 text-neutral-400 transition-transform duration-200 ${
-                              isRiskMenuExpanded ? "rotate-90" : ""
-                            }`}
-                          />
-                        </button>
-                        {isRiskMenuExpanded && (
-                          <div className="pl-4 pr-2 py-1 space-y-2 border-l-2 border-neutral-100 ml-4 my-2">
-                            <Link
-                              href="/dashboard/risk/diabetes"
-                              onClick={() => setIsMobileMenuOpen(false)}
-                              className={`block py-1.5 text-lg transition-colors ${
-                                pathname === "/dashboard/risk/diabetes"
-                                  ? "font-bold text-brand-900"
-                                  : "text-neutral-700 hover:text-neutral-950 font-semibold"
-                              }`}
-                            >
-                              Diabetes Melitus
-                            </Link>
-                            <Link
-                              href="/dashboard/risk/hypertension"
-                              onClick={() => setIsMobileMenuOpen(false)}
-                              className={`block py-1.5 text-lg transition-colors ${
-                                pathname === "/dashboard/risk/hypertension"
-                                  ? "font-bold text-brand-900"
-                                  : "text-neutral-700 hover:text-neutral-950 font-semibold"
-                              }`}
-                            >
-                              Hipertensi
-                            </Link>
-                            <Link
-                              href="/dashboard/risk/cardiovascular"
-                              onClick={() => setIsMobileMenuOpen(false)}
-                              className={`block py-1.5 text-lg transition-colors ${
-                                pathname === "/dashboard/risk/cardiovascular"
-                                  ? "font-bold text-brand-900"
-                                  : "text-neutral-700 hover:text-neutral-950 font-semibold"
-                              }`}
-                            >
-                              Kardiovaskular
-                            </Link>
-                          </div>
-                        )}
+                        </Link>
                       </div>
 
-                      {/* Cluster 2: Tindakan */}
+                      {/* 2. Proyeksi */}
                       <div>
-                        <Link
-                          href="/dashboard/recommendations"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                          className={`flex items-center px-4 py-4 rounded-2xl text-xl font-bold transition-colors ${
-                            pathname?.startsWith("/dashboard/recommendations")
-                              ? "bg-neutral-900/[0.08] text-neutral-950"
-                              : "text-neutral-900 hover:bg-neutral-900/[0.04]"
-                          }`}
-                        >
-                          <span>Tindakan</span>
-                        </Link>
-                      </div>
-
-                      {/* Cluster 3: Skenario & Proyeksi */}
-                      <div className="space-y-3">
-                        <Link
-                          href="/dashboard/simulation/what-if"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                          className={`flex items-center px-4 py-4 rounded-2xl text-xl font-bold transition-colors ${
-                            pathname === "/dashboard/simulation/what-if"
-                              ? "bg-neutral-900/[0.08] text-neutral-950"
-                              : "text-neutral-900 hover:bg-neutral-900/[0.04]"
-                          }`}
-                        >
-                          <span>Skenario</span>
-                        </Link>
                         <Link
                           href="/dashboard/simulation/future"
                           onClick={() => setIsMobileMenuOpen(false)}
-                          className={`flex items-center px-4 py-4 rounded-2xl text-xl font-bold transition-colors ${
+                          className={`flex items-center px-4 py-3 rounded-2xl text-lg font-bold transition-colors ${
                             pathname === "/dashboard/simulation/future"
                               ? "bg-neutral-900/[0.08] text-neutral-950"
                               : "text-neutral-900 hover:bg-neutral-900/[0.04]"
@@ -458,18 +422,48 @@ export default function DashboardLayout({
                         </Link>
                       </div>
 
-                      {/* Cluster 4: Bukti */}
+                      {/* 3. Skenario */}
+                      <div>
+                        <Link
+                          href="/dashboard/simulation/what-if"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className={`flex items-center px-4 py-3 rounded-2xl text-lg font-bold transition-colors ${
+                            pathname === "/dashboard/simulation/what-if"
+                              ? "bg-neutral-900/[0.08] text-neutral-950"
+                              : "text-neutral-900 hover:bg-neutral-900/[0.04]"
+                          }`}
+                        >
+                          <span>Skenario</span>
+                        </Link>
+                      </div>
+
+                      {/* 4. Tindakan */}
+                      <div>
+                        <Link
+                          href="/dashboard/recommendations"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className={`flex items-center px-4 py-3 rounded-2xl text-lg font-bold transition-colors ${
+                            pathname?.startsWith("/dashboard/recommendations")
+                              ? "bg-neutral-900/[0.08] text-neutral-950"
+                              : "text-neutral-900 hover:bg-neutral-900/[0.04]"
+                          }`}
+                        >
+                          <span>Tindakan</span>
+                        </Link>
+                      </div>
+
+                      {/* 5. Dasar Ilmiah */}
                       <div>
                         <Link
                           href="/dashboard/evidence"
                           onClick={() => setIsMobileMenuOpen(false)}
-                          className={`flex items-center px-4 py-4 rounded-2xl text-xl font-bold transition-colors ${
+                          className={`flex items-center px-4 py-3 rounded-2xl text-lg font-bold transition-colors ${
                             pathname?.startsWith("/dashboard/evidence")
                               ? "bg-neutral-900/[0.08] text-neutral-950"
                               : "text-neutral-900 hover:bg-neutral-900/[0.04]"
                           }`}
                         >
-                          <span>Bukti</span>
+                          <span>Dasar Ilmiah</span>
                         </Link>
                       </div>
                     </motion.nav>
@@ -598,22 +592,13 @@ export default function DashboardLayout({
                     href="/dashboard/settings"
                     onClick={() => setIsPersonalMenuOpen(false)}
                     className={`w-full flex items-center px-4 py-4 rounded-2xl text-xl font-bold transition-colors ${
-                      pathname === "/dashboard/settings"
+                      pathname?.startsWith("/dashboard/settings")
                         ? "bg-neutral-900/[0.08] text-neutral-950 shadow-xs"
                         : "text-neutral-900 hover:bg-neutral-900/[0.04]"
                     }`}
                   >
                     <span>Akun</span>
                   </Link>
-
-                  {/* 3. Keluar */}
-                  <button
-                    type="button"
-                    onClick={handleLogout}
-                    className="w-full flex items-center px-4 py-4 rounded-2xl text-xl text-rose-600 bg-rose-50 cursor-pointer font-bold"
-                  >
-                    <span>Keluar</span>
-                  </button>
                 </nav>
               </div>
             </motion.aside>
@@ -622,7 +607,7 @@ export default function DashboardLayout({
       </AnimatePresence>
 
       {/* ── Desktop Primary Sidebar (Sidebar 1: Icon-Only Rail) ── */}
-      <aside className="hidden lg:flex w-16 shrink-0 flex-col items-center border-r border-neutral-200/80 bg-neutral-50/80 h-screen sticky top-0 py-4 px-2.5 z-20 select-none">
+      <aside className="hidden lg:flex w-16 shrink-0 flex-col items-center bg-brand-900 h-screen sticky top-0 py-4 px-2.5 z-20 select-none">
         <div className="flex flex-col items-center gap-6 w-full">
           {/* User Avatar Entry Point (Top) */}
           <Link
@@ -630,23 +615,23 @@ export default function DashboardLayout({
             title={user?.full_name || "Profil Saya"}
             className={`size-9 rounded-full font-semibold flex items-center justify-center text-xs transition-all ${
               activePrimaryTab === "personal"
-                ? "bg-neutral-900 text-white ring-2 ring-neutral-900/20 shadow-xs"
-                : "bg-neutral-200 text-neutral-800 hover:ring-2 hover:ring-brand-900/20"
+                ? "bg-white text-brand-900 ring-2 ring-white/40 shadow-xs"
+                : "bg-white/15 text-white hover:bg-white/25 hover:ring-2 hover:ring-white/30"
             }`}
           >
             {userInitials}
           </Link>
 
           {/* Top-Level Icon Navigation */}
-          <nav className="flex flex-col items-center gap-4 w-full">
+          <nav className="flex flex-col items-center gap-6 w-full">
             {/* Destination 1: Ringkasan */}
             <Link
               href="/dashboard"
               title="Ringkasan"
               className={`size-10 rounded-xl flex items-center justify-center transition-colors ${
                 activePrimaryTab === "ringkasan"
-                  ? "bg-neutral-900/[0.08] text-neutral-950 shadow-xs"
-                  : "text-neutral-500 hover:bg-neutral-900/[0.04] hover:text-neutral-900"
+                  ? "bg-white text-brand-900 shadow-xs"
+                  : "text-white/70 hover:text-white hover:bg-white/10"
               }`}
             >
               <SFHeartTextSquare className="w-5.5 h-5.5" />
@@ -658,8 +643,8 @@ export default function DashboardLayout({
               title="Jelajahi"
               className={`size-10 rounded-xl flex items-center justify-center transition-colors ${
                 activePrimaryTab === "fitur"
-                  ? "bg-neutral-900/[0.08] text-neutral-950 shadow-xs"
-                  : "text-neutral-500 hover:bg-neutral-900/[0.04] hover:text-neutral-900"
+                  ? "bg-white text-brand-900 shadow-xs"
+                  : "text-white/70 hover:text-white hover:bg-white/10"
               }`}
             >
               <SFCompass className="w-5.5 h-5.5" />
@@ -671,8 +656,8 @@ export default function DashboardLayout({
               title="Bantuan"
               className={`size-10 rounded-xl flex items-center justify-center transition-colors ${
                 activePrimaryTab === "bantuan"
-                  ? "bg-neutral-900/[0.08] text-neutral-950 shadow-xs"
-                  : "text-neutral-500 hover:bg-neutral-900/[0.04] hover:text-neutral-900"
+                  ? "bg-white text-brand-900 shadow-xs"
+                  : "text-white/70 hover:text-white hover:bg-white/10"
               }`}
             >
               <SFQuestionMarkCircle className="w-5.5 h-5.5" />
@@ -693,9 +678,9 @@ export default function DashboardLayout({
               duration: 0.28,
               ease: [0.32, 0.72, 0, 1],
             }}
-            className="hidden lg:flex shrink-0 flex-col h-screen sticky top-0 z-10 overflow-hidden bg-white border-r border-neutral-200/80"
+            className="hidden lg:flex shrink-0 flex-col h-screen sticky top-0 z-10 overflow-hidden bg-neutral-100"
           >
-            <div className="w-60 min-w-[240px] h-full p-4.5 overflow-y-auto flex flex-col justify-between">
+            <div className="w-60 min-w-[240px] h-full pt-4 px-4.5 pb-4.5 overflow-y-auto flex flex-col justify-between">
               <AnimatePresence mode="wait" initial={false}>
                 <motion.div
                   key={activePrimaryTab}
@@ -703,183 +688,125 @@ export default function DashboardLayout({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -4 }}
                   transition={{ duration: 0.15 }}
-                  className="space-y-5"
                 >
-                  {/* Header of Active Destination */}
-                  <div className="px-2 pt-1 pb-1.5 border-b border-neutral-100">
-                    <h2 className="text-sm font-bold uppercase tracking-wider text-neutral-800">
-                      {activePrimaryTab === "fitur"
-                        ? "Jelajahi"
-                        : activePrimaryTab === "bantuan"
-                        ? "Bantuan"
-                        : "Personal"}
-                    </h2>
-                  </div>
+                  {/* Secondary Sidebar Header Spacing (Aligned with Avatar size-9) */}
+                  <div className="h-9 px-2 flex items-center" />
 
               {/* Sub-Items for Jelajahi */}
               {activePrimaryTab === "fitur" && (
-                <nav className="space-y-6">
-                  {/* Cluster 1: Risiko */}
-                  <div>
-                    <button
-                      type="button"
-                      onClick={() => setIsRiskMenuExpanded(!isRiskMenuExpanded)}
-                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm transition-colors cursor-pointer ${
-                        pathname?.startsWith("/dashboard/risk")
-                          ? "bg-neutral-900/[0.08] text-neutral-950 font-bold"
-                          : "text-neutral-700 hover:bg-neutral-900/[0.04] hover:text-neutral-900 font-medium"
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <SFWaveformPathEcg className="w-5 h-5 shrink-0 text-rose-600" />
-                        <span>Risiko</span>
-                      </div>
-                      <SFChevronRight
-                        className={`w-4 h-4 transition-transform duration-200 ${
-                          isRiskMenuExpanded ? "rotate-90" : ""
-                        }`}
-                      />
-                    </button>
+                <nav className="mt-2 space-y-1">
+                  {/* 1. Risiko */}
+                  <Link
+                    href="/dashboard/risk/diabetes"
+                    className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
+                      pathname?.startsWith("/dashboard/risk")
+                        ? "bg-white text-neutral-950 font-semibold shadow-2xs"
+                        : "text-neutral-600 hover:bg-neutral-200/50 hover:text-neutral-900 font-medium"
+                    }`}
+                  >
+                    <SFWaveformPathEcg className={`w-5 h-5 shrink-0 ${pathname?.startsWith("/dashboard/risk") ? "text-neutral-900" : "text-neutral-500"}`} />
+                    <span>Risiko</span>
+                  </Link>
 
-                    {isRiskMenuExpanded && (
-                      <div className="pl-9.5 pr-2 py-1 space-y-1">
-                        <Link
-                          href="/dashboard/risk/diabetes"
-                          className={`block py-1 text-[13px] transition-colors ${
-                            pathname === "/dashboard/risk/diabetes"
-                              ? "font-bold text-brand-900"
-                              : "text-neutral-500 hover:text-neutral-900"
-                          }`}
-                        >
-                          Diabetes Melitus
-                        </Link>
-                        <Link
-                          href="/dashboard/risk/hypertension"
-                          className={`block py-1 text-[13px] transition-colors ${
-                            pathname === "/dashboard/risk/hypertension"
-                              ? "font-bold text-brand-900"
-                              : "text-neutral-500 hover:text-neutral-900"
-                          }`}
-                        >
-                          Hipertensi
-                        </Link>
-                        <Link
-                          href="/dashboard/risk/cardiovascular"
-                          className={`block py-1 text-[13px] transition-colors ${
-                            pathname === "/dashboard/risk/cardiovascular"
-                              ? "font-bold text-brand-900"
-                              : "text-neutral-500 hover:text-neutral-900"
-                          }`}
-                        >
-                          Kardiovaskular
-                        </Link>
-                      </div>
-                    )}
-                  </div>
+                  {/* 2. Proyeksi */}
+                  <Link
+                    href="/dashboard/simulation/future"
+                    className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
+                      pathname === "/dashboard/simulation/future"
+                        ? "bg-white text-neutral-950 font-semibold shadow-2xs"
+                        : "text-neutral-600 hover:bg-neutral-200/50 hover:text-neutral-900 font-medium"
+                    }`}
+                  >
+                    <SFChartUptrend className={`w-5 h-5 shrink-0 ${pathname === "/dashboard/simulation/future" ? "text-neutral-900" : "text-neutral-500"}`} />
+                    <span>Proyeksi</span>
+                  </Link>
 
-                  {/* Cluster 2: Tindakan */}
-                  <div>
-                    <Link
-                      href="/dashboard/recommendations"
-                      className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
-                        pathname?.startsWith("/dashboard/recommendations")
-                          ? "bg-neutral-900/[0.08] text-neutral-950 font-bold"
-                          : "text-neutral-700 hover:bg-neutral-900/[0.04] hover:text-neutral-900 font-medium"
-                      }`}
-                    >
-                      <SFShieldCheckmark className="w-5 h-5 shrink-0 text-emerald-600" />
-                      <span>Tindakan</span>
-                    </Link>
-                  </div>
+                  {/* 3. Skenario */}
+                  <Link
+                    href="/dashboard/simulation/what-if"
+                    className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
+                      pathname === "/dashboard/simulation/what-if"
+                        ? "bg-white text-neutral-950 font-semibold shadow-2xs"
+                        : "text-neutral-600 hover:bg-neutral-200/50 hover:text-neutral-900 font-medium"
+                    }`}
+                  >
+                    <SFSlidersHorizontal className={`w-5 h-5 shrink-0 ${pathname === "/dashboard/simulation/what-if" ? "text-neutral-900" : "text-neutral-500"}`} />
+                    <span>Skenario</span>
+                  </Link>
 
-                  {/* Cluster 3: Skenario & Proyeksi */}
-                  <div className="space-y-2">
-                    <Link
-                      href="/dashboard/simulation/what-if"
-                      className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
-                        pathname === "/dashboard/simulation/what-if"
-                          ? "bg-neutral-900/[0.08] text-neutral-950 font-bold"
-                          : "text-neutral-700 hover:bg-neutral-900/[0.04] hover:text-neutral-900 font-medium"
-                      }`}
-                    >
-                      <SFSlidersHorizontal className="w-5 h-5 shrink-0 text-violet-600" />
-                      <span>Skenario</span>
-                    </Link>
-                    <Link
-                      href="/dashboard/simulation/future"
-                      className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
-                        pathname === "/dashboard/simulation/future"
-                          ? "bg-neutral-900/[0.08] text-neutral-950 font-bold"
-                          : "text-neutral-700 hover:bg-neutral-900/[0.04] hover:text-neutral-900 font-medium"
-                      }`}
-                    >
-                      <SFChartUptrend className="w-5 h-5 shrink-0 text-teal-600" />
-                      <span>Proyeksi</span>
-                    </Link>
-                  </div>
+                  {/* 4. Tindakan */}
+                  <Link
+                    href="/dashboard/recommendations"
+                    className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
+                      pathname?.startsWith("/dashboard/recommendations")
+                        ? "bg-white text-neutral-950 font-semibold shadow-2xs"
+                        : "text-neutral-600 hover:bg-neutral-200/50 hover:text-neutral-900 font-medium"
+                    }`}
+                  >
+                    <SFShieldCheckmark className={`w-5 h-5 shrink-0 ${pathname?.startsWith("/dashboard/recommendations") ? "text-neutral-900" : "text-neutral-500"}`} />
+                    <span>Tindakan</span>
+                  </Link>
 
-                  {/* Cluster 4: Bukti */}
-                  <div>
-                    <Link
-                      href="/dashboard/evidence"
-                      className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
-                        pathname?.startsWith("/dashboard/evidence")
-                          ? "bg-neutral-900/[0.08] text-neutral-950 font-bold"
-                          : "text-neutral-700 hover:bg-neutral-900/[0.04] hover:text-neutral-900 font-medium"
-                      }`}
-                    >
-                      <SFBookClosed className="w-5 h-5 shrink-0 text-amber-500" />
-                      <span>Bukti</span>
-                    </Link>
-                  </div>
+                  {/* 5. Dasar Ilmiah */}
+                  <Link
+                    href="/dashboard/evidence"
+                    className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
+                      pathname?.startsWith("/dashboard/evidence")
+                        ? "bg-white text-neutral-950 font-semibold shadow-2xs"
+                        : "text-neutral-600 hover:bg-neutral-200/50 hover:text-neutral-900 font-medium"
+                    }`}
+                  >
+                    <SFBookClosed className={`w-5 h-5 shrink-0 ${pathname?.startsWith("/dashboard/evidence") ? "text-neutral-900" : "text-neutral-500"}`} />
+                    <span>Dasar Ilmiah</span>
+                  </Link>
                 </nav>
               )}
 
               {/* Sub-Items for Bantuan */}
               {activePrimaryTab === "bantuan" && (
-                <nav className="space-y-2">
+                <nav className="mt-2 space-y-1">
                   <Link
                     href="/dashboard/help/about"
                     className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
                       pathname === "/dashboard/help/about" || pathname === "/dashboard/help"
-                        ? "bg-neutral-900/[0.08] text-neutral-950 font-bold"
-                        : "text-neutral-700 hover:bg-neutral-900/[0.04] hover:text-neutral-900 font-medium"
+                        ? "bg-white text-neutral-950 font-semibold shadow-2xs"
+                        : "text-neutral-600 hover:bg-neutral-200/50 hover:text-neutral-900 font-medium"
                     }`}
                   >
-                    <SFInfoCircle className="w-5 h-5 shrink-0 text-amber-600" />
+                    <SFInfoCircle className={`w-5 h-5 shrink-0 ${pathname === "/dashboard/help/about" || pathname === "/dashboard/help" ? "text-neutral-900" : "text-neutral-500"}`} />
                     <span>Tentang</span>
                   </Link>
                   <Link
                     href="/dashboard/help/guide"
                     className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
                       pathname === "/dashboard/help/guide"
-                        ? "bg-neutral-900/[0.08] text-neutral-950 font-bold"
-                        : "text-neutral-700 hover:bg-neutral-900/[0.04] hover:text-neutral-900 font-medium"
+                        ? "bg-white text-neutral-950 font-semibold shadow-2xs"
+                        : "text-neutral-600 hover:bg-neutral-200/50 hover:text-neutral-900 font-medium"
                     }`}
                   >
-                    <SFDocText className="w-5 h-5 shrink-0 text-blue-600" />
+                    <SFDocText className={`w-5 h-5 shrink-0 ${pathname === "/dashboard/help/guide" ? "text-neutral-900" : "text-neutral-500"}`} />
                     <span>Panduan Penggunaan</span>
                   </Link>
                   <Link
                     href="/dashboard/help/faq"
                     className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
                       pathname === "/dashboard/help/faq"
-                        ? "bg-neutral-900/[0.08] text-neutral-950 font-bold"
-                        : "text-neutral-700 hover:bg-neutral-900/[0.04] hover:text-neutral-900 font-medium"
+                        ? "bg-white text-neutral-950 font-semibold shadow-2xs"
+                        : "text-neutral-600 hover:bg-neutral-200/50 hover:text-neutral-900 font-medium"
                     }`}
                   >
-                    <SFBubbleLeftRight className="w-5 h-5 shrink-0 text-violet-600" />
+                    <SFBubbleLeftRight className={`w-5 h-5 shrink-0 ${pathname === "/dashboard/help/faq" ? "text-neutral-900" : "text-neutral-500"}`} />
                     <span>Tanya Jawab (FAQ)</span>
                   </Link>
                   <Link
                     href="/dashboard/help/support"
                     className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
                       pathname === "/dashboard/help/support"
-                        ? "bg-neutral-900/[0.08] text-neutral-950 font-bold"
-                        : "text-neutral-700 hover:bg-neutral-900/[0.04] hover:text-neutral-900 font-medium"
+                        ? "bg-white text-neutral-950 font-semibold shadow-2xs"
+                        : "text-neutral-600 hover:bg-neutral-200/50 hover:text-neutral-900 font-medium"
                     }`}
                   >
-                    <SFHeadphones className="w-5 h-5 shrink-0 text-emerald-600" />
+                    <SFHeadphones className={`w-5 h-5 shrink-0 ${pathname === "/dashboard/help/support" ? "text-neutral-900" : "text-neutral-500"}`} />
                     <span>Hubungi Dukungan</span>
                   </Link>
                 </nav>
@@ -887,41 +814,30 @@ export default function DashboardLayout({
 
               {/* Sub-Items for Personal */}
               {activePrimaryTab === "personal" && (
-                <nav className="space-y-6">
-                  <div className="space-y-2">
+                <nav className="mt-2 space-y-4">
+                  <div className="space-y-1">
                     <Link
                       href="/dashboard/profile"
                       className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
                         pathname === "/dashboard/profile"
-                          ? "bg-neutral-900/[0.08] text-neutral-950 font-bold"
-                          : "text-neutral-700 hover:bg-neutral-900/[0.04] hover:text-neutral-900 font-medium"
+                          ? "bg-white text-neutral-950 font-semibold shadow-2xs"
+                          : "text-neutral-600 hover:bg-neutral-200/50 hover:text-neutral-900 font-medium"
                       }`}
                     >
-                      <SFPersonCropCircle className="w-5 h-5 shrink-0 text-blue-600" />
+                      <SFPersonCropCircle className={`w-5 h-5 shrink-0 ${pathname === "/dashboard/profile" ? "text-neutral-900" : "text-neutral-500"}`} />
                       <span>Profil</span>
                     </Link>
                     <Link
                       href="/dashboard/settings"
                       className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
-                        pathname === "/dashboard/settings"
-                          ? "bg-neutral-900/[0.08] text-neutral-950 font-bold"
-                          : "text-neutral-700 hover:bg-neutral-900/[0.04] hover:text-neutral-900 font-medium"
+                        pathname?.startsWith("/dashboard/settings")
+                          ? "bg-white text-neutral-950 font-semibold shadow-2xs"
+                          : "text-neutral-600 hover:bg-neutral-200/50 hover:text-neutral-900 font-medium"
                       }`}
                     >
-                      <SFLockShield className="w-5 h-5 shrink-0 text-emerald-600" />
+                      <SFLockShield className={`w-5 h-5 shrink-0 ${pathname?.startsWith("/dashboard/settings") ? "text-neutral-900" : "text-neutral-500"}`} />
                       <span>Akun</span>
                     </Link>
-                  </div>
-
-                  <div>
-                    <button
-                      type="button"
-                      onClick={handleLogout}
-                      className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-semibold text-rose-600 bg-rose-50 cursor-pointer"
-                    >
-                      <SFDoorExit className="w-5 h-5 shrink-0 text-rose-600" />
-                      <span>Keluar</span>
-                    </button>
                   </div>
                 </nav>
               )}
@@ -933,7 +849,201 @@ export default function DashboardLayout({
       </AnimatePresence>
 
       {/* ── Main Content Area (Column 3) ── */}
-      <div className="flex-1 min-w-0 flex flex-col">{children}</div>
+      <div className="flex-1 min-w-0 flex flex-col">
+        {/* Unified Top Header: Global Search and Disease Tabs inside 1 single sticky section */}
+        <header className="bg-white border-b border-neutral-200/80 sticky top-0 z-20 px-6 hidden lg:flex flex-col items-center justify-center shrink-0 pt-3.5 pb-4 space-y-5">
+          {/* Top: Global Search Bar */}
+          <button
+            type="button"
+            onClick={() => setIsSearchOpen(true)}
+            className="relative w-full max-w-md flex items-center text-left cursor-pointer group"
+          >
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-neutral-400 group-hover:text-neutral-600 transition-colors">
+              <SFMagnifyingglass className="w-4 h-4" />
+            </div>
+            <div className="w-full pl-9 pr-10 py-1.5 text-sm bg-transparent group-hover:bg-neutral-50/50 text-neutral-400 rounded-xl border border-neutral-200/70 group-hover:border-neutral-300/80 transition-all select-none">
+              Cari faktor, tindakan, bukti…
+            </div>
+            <div className="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none">
+              <kbd className="inline-flex items-center px-1.5 py-0.5 border border-neutral-200/70 rounded text-[10px] font-mono text-neutral-400 bg-neutral-50/60 shadow-2xs">
+                ⌘K
+              </kbd>
+            </div>
+          </button>
+
+          {/* Bottom (in same header): Tab Switcher when navigating risk routes */}
+          {pathname?.startsWith("/dashboard/risk") && (
+            <nav
+              aria-label="Navigasi Kondisi Risiko"
+              className="inline-grid grid-cols-3 p-1.5 bg-neutral-100/90 rounded-full text-xs font-medium gap-1"
+            >
+              <Link
+                href="/dashboard/risk/diabetes"
+                className={`px-3.5 sm:px-4.5 py-1.5 text-center rounded-full transition-all select-none flex items-center justify-center shrink-0 ${
+                  pathname === "/dashboard/risk/diabetes"
+                    ? "bg-white text-neutral-900 font-bold shadow-xs"
+                    : "text-neutral-500 hover:text-black"
+                }`}
+              >
+                <span className="truncate">Diabetes</span>
+              </Link>
+              <Link
+                href="/dashboard/risk/hypertension"
+                className={`px-3.5 sm:px-4.5 py-1.5 text-center rounded-full transition-all select-none flex items-center justify-center shrink-0 ${
+                  pathname === "/dashboard/risk/hypertension"
+                    ? "bg-white text-neutral-900 font-bold shadow-xs"
+                    : "text-neutral-500 hover:text-black"
+                }`}
+              >
+                <span className="truncate">Hipertensi</span>
+              </Link>
+              <Link
+                href="/dashboard/risk/cardiovascular"
+                className={`px-3.5 sm:px-4.5 py-1.5 text-center rounded-full transition-all select-none flex items-center justify-center shrink-0 ${
+                  pathname === "/dashboard/risk/cardiovascular"
+                    ? "bg-white text-neutral-900 font-bold shadow-xs"
+                    : "text-neutral-500 hover:text-black"
+                }`}
+              >
+                <span className="truncate">Kardiovaskular</span>
+              </Link>
+            </nav>
+          )}
+        </header>
+        {children}
+      </div>
+
+      {/* ── Search Sheet Overlay (Apple Style Top Dropdown Sheet) ── */}
+      <AnimatePresence>
+        {isSearchOpen && (
+          <div className="fixed inset-0 z-50 overflow-hidden">
+            {/* Backdrop Blur */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="fixed inset-0 bg-neutral-950/25 backdrop-blur-md"
+              onClick={() => setIsSearchOpen(false)}
+              aria-hidden="true"
+            />
+
+            {/* Top Sheet Panel (Apple Fluid Spring - Ultra Smooth In & Out) */}
+            <motion.div
+              initial={{ y: "-100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "calc(-100% - 100px)" }}
+              transition={{
+                type: "spring",
+                damping: 38,
+                stiffness: 280,
+                mass: 0.9,
+              }}
+              className="relative w-full h-screen min-h-screen lg:h-auto lg:min-h-0 bg-white shadow-none lg:shadow-2xl lg:shadow-neutral-900/15 z-10 pt-5 pb-8 px-5 sm:px-8 lg:pt-7 lg:pb-10 lg:px-12 overflow-y-auto"
+            >
+              <div className="max-w-2xl mx-auto space-y-6">
+                {/* Search Input Row: Large, Borderless Typography with Staggered Entrance */}
+                <motion.div
+                  initial={{ opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.05, duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+                  className="flex items-center gap-3"
+                >
+                  <SFMagnifyingglass className="w-6 h-6 text-neutral-400 shrink-0" />
+                  <input
+                    type="text"
+                    autoFocus
+                    placeholder="Cari"
+                    className="flex-1 bg-transparent text-xl sm:text-2xl font-medium text-neutral-900 placeholder:text-neutral-400 focus:outline-none tracking-tight"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setIsSearchOpen(false)}
+                    className="lg:hidden size-8 text-neutral-400 hover:text-neutral-800 active:text-neutral-950 flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                    aria-label="Tutup pencarian"
+                  >
+                    <SFXmark className="w-5 h-5" />
+                  </button>
+                </motion.div>
+
+                {/* Quick Links Section with Staggered Reveal & Micro-Interactions */}
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1, duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+                  className="space-y-3 pt-1"
+                >
+                  <span className="text-xs font-semibold text-neutral-400 tracking-wide block">
+                    Quick Links
+                  </span>
+                  <div className="flex flex-col space-y-2.5">
+                    <Link
+                      href="/dashboard"
+                      onClick={() => setIsSearchOpen(false)}
+                      className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-neutral-800 hover:text-brand-900 transition-colors w-fit group"
+                    >
+                      <span className="text-neutral-400 group-hover:text-brand-900 group-hover:translate-x-1 inline-block transition-transform duration-200 ease-out">
+                        →
+                      </span>
+                      <span className="group-hover:translate-x-0.5 inline-block transition-transform duration-200 ease-out">
+                        Ringkasan Klinis
+                      </span>
+                    </Link>
+                    <Link
+                      href="/dashboard/risk/diabetes"
+                      onClick={() => setIsSearchOpen(false)}
+                      className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-neutral-800 hover:text-brand-900 transition-colors w-fit group"
+                    >
+                      <span className="text-neutral-400 group-hover:text-brand-900 group-hover:translate-x-1 inline-block transition-transform duration-200 ease-out">
+                        →
+                      </span>
+                      <span className="group-hover:translate-x-0.5 inline-block transition-transform duration-200 ease-out">
+                        Analisis Risiko Penyakit
+                      </span>
+                    </Link>
+                    <Link
+                      href="/dashboard/simulation/what-if"
+                      onClick={() => setIsSearchOpen(false)}
+                      className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-neutral-800 hover:text-brand-900 transition-colors w-fit group"
+                    >
+                      <span className="text-neutral-400 group-hover:text-brand-900 group-hover:translate-x-1 inline-block transition-transform duration-200 ease-out">
+                        →
+                      </span>
+                      <span className="group-hover:translate-x-0.5 inline-block transition-transform duration-200 ease-out">
+                        Simulasi Gaya Hidup (What-If)
+                      </span>
+                    </Link>
+                    <Link
+                      href="/dashboard/evidence"
+                      onClick={() => setIsSearchOpen(false)}
+                      className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-neutral-800 hover:text-brand-900 transition-colors w-fit group"
+                    >
+                      <span className="text-neutral-400 group-hover:text-brand-900 group-hover:translate-x-1 inline-block transition-transform duration-200 ease-out">
+                        →
+                      </span>
+                      <span className="group-hover:translate-x-0.5 inline-block transition-transform duration-200 ease-out">
+                        Dasar Ilmiah
+                      </span>
+                    </Link>
+                    <Link
+                      href="/dashboard/help"
+                      onClick={() => setIsSearchOpen(false)}
+                      className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-neutral-800 hover:text-brand-900 transition-colors w-fit group"
+                    >
+                      <span className="text-neutral-400 group-hover:text-brand-900 group-hover:translate-x-1 inline-block transition-transform duration-200 ease-out">
+                        →
+                      </span>
+                      <span className="group-hover:translate-x-0.5 inline-block transition-transform duration-200 ease-out">
+                        Pusat Bantuan &amp; Panduan
+                      </span>
+                    </Link>
+                  </div>
+                </motion.div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

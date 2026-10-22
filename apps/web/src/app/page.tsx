@@ -11,17 +11,17 @@ import { ExplainableFactorsVisual } from "@/components/ExplainableFactorsVisual"
 import { SimulationDirectionVisual } from "@/components/SimulationDirectionVisual";
 import { RecommendationsEvidenceVisual } from "@/components/RecommendationsEvidenceVisual";
 import { motion, useScroll, useTransform } from "motion/react";
-import { LogoEmblem } from "@/components/logo";
 import { 
-  IconShieldLock,
-  IconEye,
-  IconCompass,
-  IconAdjustmentsHorizontal,
-  IconSparkles,
-  IconBolt,
-  IconStack2,
-  IconUserHeart
-} from "@tabler/icons-react";
+  Activity as IconHeartbeat,
+  ShieldCheck as IconShieldLock,
+  Eye as IconEye,
+  Compass as IconCompass,
+  SlidersHorizontal as IconAdjustmentsHorizontal,
+  Sparkles as IconSparkles,
+  Zap as IconBolt,
+  Layers as IconStack2,
+  HeartHandshake as IconUserHeart,
+} from "lucide-react";
 
 // Fluid Apple HIG motion curves
 const fadeUpVariants = {
@@ -209,7 +209,7 @@ function SectionUnderstandingPurpose() {
                     <div className="absolute inset-0 bg-gradient-to-b from-white/80 via-transparent to-black/[0.02] pointer-events-none rounded-[inherit]" />
                     <Icon 
                       className={`w-9 h-9 sm:w-11 sm:h-11 md:w-13 md:h-13 ${item.text} relative z-10`} 
-                      stroke={1.6} 
+                      strokeWidth={1.6} 
                     />
                   </div>
                   {/* Clean Label Underneath */}
@@ -344,7 +344,7 @@ export default function LandingPage() {
               <div className="flex items-center justify-between sm:justify-center whitespace-nowrap flex-nowrap gap-x-3 sm:gap-x-8 md:gap-x-12 lg:gap-x-16 w-full">
                 {/* 1. Understand / Pahami */}
                 <div className="flex flex-col items-center gap-2 sm:gap-3 group cursor-default">
-                  <IconEye className="w-7 h-7 sm:w-9 sm:h-9 md:w-11 md:h-11 lg:w-12 lg:h-12 text-white/60 group-hover:text-white transition-all duration-200 group-hover:scale-110" stroke={1.6} />
+                  <IconEye className="w-7 h-7 sm:w-9 sm:h-9 md:w-11 md:h-11 lg:w-12 lg:h-12 text-white/60 group-hover:text-white transition-all duration-200 group-hover:scale-110" strokeWidth={1.6} />
                   <span className="text-xs sm:text-sm md:text-base font-medium tracking-tight text-white/60 group-hover:text-white transition-colors">
                     Pahami
                   </span>
@@ -352,7 +352,7 @@ export default function LandingPage() {
 
                 {/* 2. Explore / Jelajahi */}
                 <div className="flex flex-col items-center gap-2 sm:gap-3 group cursor-default">
-                  <IconCompass className="w-7 h-7 sm:w-9 sm:h-9 md:w-11 md:h-11 lg:w-12 lg:h-12 text-white/60 group-hover:text-white transition-all duration-200 group-hover:scale-110" stroke={1.6} />
+                  <IconCompass className="w-7 h-7 sm:w-9 sm:h-9 md:w-11 md:h-11 lg:w-12 lg:h-12 text-white/60 group-hover:text-white transition-all duration-200 group-hover:scale-110" strokeWidth={1.6} />
                   <span className="text-xs sm:text-sm md:text-base font-medium tracking-tight text-white/60 group-hover:text-white transition-colors">
                     Jelajahi
                   </span>
@@ -360,7 +360,7 @@ export default function LandingPage() {
 
                 {/* 3. Simulate / Simulasikan */}
                 <div className="flex flex-col items-center gap-2 sm:gap-3 group cursor-default">
-                  <IconAdjustmentsHorizontal className="w-7 h-7 sm:w-9 sm:h-9 md:w-11 md:h-11 lg:w-12 lg:h-12 text-white/60 group-hover:text-white transition-all duration-200 group-hover:scale-110" stroke={1.6} />
+                  <IconAdjustmentsHorizontal className="w-7 h-7 sm:w-9 sm:h-9 md:w-11 md:h-11 lg:w-12 lg:h-12 text-white/60 group-hover:text-white transition-all duration-200 group-hover:scale-110" strokeWidth={1.6} />
                   <span className="text-xs sm:text-sm md:text-base font-medium tracking-tight text-white/60 group-hover:text-white transition-colors">
                     Simulasikan
                   </span>
@@ -368,7 +368,7 @@ export default function LandingPage() {
 
                 {/* 4. Recommend / Rekomendasi */}
                 <div className="flex flex-col items-center gap-2 sm:gap-3 group cursor-default">
-                  <IconSparkles className="w-7 h-7 sm:w-9 sm:h-9 md:w-11 md:h-11 lg:w-12 lg:h-12 text-white/60 group-hover:text-white transition-all duration-200 group-hover:scale-110" stroke={1.6} />
+                  <IconSparkles className="w-7 h-7 sm:w-9 sm:h-9 md:w-11 md:h-11 lg:w-12 lg:h-12 text-white/60 group-hover:text-white transition-all duration-200 group-hover:scale-110" strokeWidth={1.6} />
                   <span className="text-xs sm:text-sm md:text-base font-medium tracking-tight text-white/60 group-hover:text-white transition-colors">
                     Rekomendasi
                   </span>
@@ -376,7 +376,7 @@ export default function LandingPage() {
 
                 {/* 5. Act / Bertindak */}
                 <div className="flex flex-col items-center gap-2 sm:gap-3 group cursor-default">
-                  <IconBolt className="w-7 h-7 sm:w-9 sm:h-9 md:w-11 md:h-11 lg:w-12 lg:h-12 text-white/60 group-hover:text-white transition-all duration-200 group-hover:scale-110" stroke={1.6} />
+                  <IconBolt className="w-7 h-7 sm:w-9 sm:h-9 md:w-11 md:h-11 lg:w-12 lg:h-12 text-white/60 group-hover:text-white transition-all duration-200 group-hover:scale-110" strokeWidth={1.6} />
                   <span className="text-xs sm:text-sm md:text-base font-medium tracking-tight text-white/60 group-hover:text-white transition-colors">
                     Bertindak
                   </span>
@@ -573,7 +573,9 @@ export default function LandingPage() {
       <footer className="border-t border-brand-900/10 bg-white/70 backdrop-blur-md">
         <div className="container mx-auto px-6 lg:px-12 py-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-brand-900/60 font-medium">
           <div className="flex items-center gap-2 text-brand-900">
-            <LogoEmblem size={24} className="rounded-lg" />
+            <div className="w-6 h-6 rounded-lg bg-brand-900 text-white flex items-center justify-center">
+              <IconHeartbeat size={14} strokeWidth={2.5} />
+            </div>
             <span className="font-bold tracking-tight text-xs">HELIORA</span>
           </div>
           <div className="flex items-center gap-6">

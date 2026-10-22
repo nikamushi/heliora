@@ -1,314 +1,465 @@
 "use client";
 
-import { Suspense, useState, useMemo, useEffect } from "react";
+import { Suspense, useState, useMemo, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "motion/react";
 import {
-  BookOpen,
-  Search,
   ExternalLink,
-  ShieldCheck,
-  Filter,
+  X,
+  ChevronRight,
+  RotateCcw,
+  Copy,
+  Check,
+  Info,
 } from "lucide-react";
 import { useRequireAuth } from "@/lib/use-require-auth";
+import { useLatestAssessment } from "@/lib/use-latest-assessment";
 import { apiClient } from "@/lib/api-client";
-import { DisclaimerBanner } from "@/components/disclaimer-banner";
+import {
+  EVIDENCE_DATABASE,
+  getEvidenceBySlugOrId,
+  formatLastReviewedDate,
+  getEarliestEvidenceReviewDate,
+  type ClinicalEvidence,
+  type EvidenceCategory,
+} from "@/lib/evidence-database";
 
-interface ClinicalEvidence {
-  id: string;
-  rule_id: string;
-  title: string;
-  organization: string;
-  year: number;
-  evidence_level: "Level A (Kuat)" | "Level B (Sedang)" | "Level C (Konsensus Pakar)";
-  category: "activity" | "sleep" | "nutrition" | "cardiovascular" | "stress";
-  categoryLabel: string;
-  summary: string;
-  clinicalSection: string;
-  citation: string;
-  externalUrl: string;
+// ── Category Definitions ───────────────────────────────────────────────────
+interface CategoryOption {
+  id: "all" | EvidenceCategory;
+  label: string;
 }
+
+const CATEGORIES: CategoryOption[] = [
+  { id: "all", label: "Semua" },
+  { id: "activity", label: "Aktivitas Fisik" },
+  { id: "sleep", label: "Pola Tidur" },
+  { id: "weight", label: "Berat Badan & Nutrisi" },
+  { id: "smoking", label: "Kebiasaan Merokok" },
+  { id: "consultation", label: "Konsultasi Medis" },
+  { id: "stress", label: "Manajemen Stres" },
+];
 
 const DISEASE_TO_EVIDENCE_MAP: Record<string, string> = {
   diabetes: "evi-02",
-  hypertension: "evi-07",
+  hypertension: "evi-06",
   cardiovascular: "evi-04",
 };
 
-const EVIDENCE_DATABASE: ClinicalEvidence[] = [
-  {
-    id: "evi-01",
-    rule_id: "REC-ACT-01",
-    title: "WHO Guidelines on Physical Activity and Sedentary Behaviour",
-    organization: "World Health Organization (WHO)",
-    year: 2020,
-    evidence_level: "Level A (Kuat)",
-    category: "activity",
-    categoryLabel: "Aktivitas Fisik",
-    summary:
-      "Aktivitas aerobik berintensitas sedang minimal 150–300 menit per minggu secara konsisten menurunkan mortalitas kardiometabolik sebesar 20–30%, memfasilitasi translokasi GLUT-4 independen insulin pada otot rangka, dan menurunkan tekanan darah istirahat.",
-    clinicalSection: "Chapter 3: Recommendations for Adults (Aged 18–64 Years)",
-    citation: "Bull FC, Al-Ansari SS, Biddle S, et al. Br J Sports Med 2020;54:1451-1462.",
-    externalUrl: "https://www.who.int/publications/i/item/9789240015128",
-  },
-  {
-    id: "evi-02",
-    rule_id: "REC-NUT-01",
-    title: "Panduan Pengelolaan Dislipidemia dan Diabetes Melitus Tipe 2 di Indonesia",
-    organization: "Perkumpulan Endokrinologi Indonesia (PERKENI)",
-    year: 2021,
-    evidence_level: "Level A (Kuat)",
-    category: "nutrition",
-    categoryLabel: "Nutrisi & Diet",
-    summary:
-      "Terapi nutrisi medis berbasis pembatasan asupan karbohidrat sederhana, peningkatan konsumsi serat larut (25–30 gram/hari), dan penurunan berat badan 5–10% pada individu overweight menurunkan resistensi insulin hepatik dan meredam risiko progresi prediabetes.",
-    clinicalSection: "Bab IV: Terapi Nutrisi Medis dan Manajemen Gaya Hidup Sehat",
-    citation: "Konsensus Pengelolaan dan Pencegahan DM Tipe 2 di Indonesia, PB PERKENI 2021.",
-    externalUrl: "https://pbperkeni.or.id/",
-  },
-  {
-    id: "evi-03",
-    rule_id: "REC-SLP-01",
-    title: "Korelasi Durasi dan Kualitas Tidur terhadap Risiko Hipertensi dan Gangguan Kardiometabolik",
-    organization: "Centers for Disease Control and Prevention (CDC) & Kemenkes RI",
-    year: 2022,
-    evidence_level: "Level A (Kuat)",
-    category: "sleep",
-    categoryLabel: "Pola Istirahat & Tidur",
-    summary:
-      "Durasi tidur kronis di bawah 6 jam per malam diasosiasikan dengan elevasi tonus simpatis nokturnal, ketiadaan fenomena nocturnal dipping tekanan darah alami, dan disregulasi hormon homeostasis nafsu makan (penurunan leptin, kenaikan ghrelin).",
-    clinicalSection: "Pedoman Higiene Tidur dan Pencegahan Hipertensi Esensial",
-    citation: "CDC Morbidity and Mortality Weekly Report (MMWR) / Pedoman Kemenkes RI.",
-    externalUrl: "https://www.cdc.gov/sleep/",
-  },
-  {
-    id: "evi-04",
-    rule_id: "REC-SMK-01",
-    title: "2021 ESC Guidelines on Cardiovascular Disease Prevention in Clinical Practice",
-    organization: "European Society of Cardiology (ESC) & PERKI",
-    year: 2021,
-    evidence_level: "Level A (Kuat)",
-    category: "cardiovascular",
-    categoryLabel: "Kardiovaskular & Merokok",
-    summary:
-      "Penghentian kebiasaan merokok merupakan strategi preventif paling cost-effective dalam mengurangi stres oksidatif endotel vaskular. Penurunan risiko kejadian kardiovaskular akut tercapai hingga 50% dalam 1–2 tahun pasca penghentian total.",
-    clinicalSection: "Section 3.2: Smoking and Substance Cessation",
-    citation: "Visseren FLJ, Mach F, Smulders YM, et al. European Heart Journal 2021;42:3227-3337.",
-    externalUrl: "https://www.escardio.org/Guidelines",
-  },
-  {
-    id: "evi-05",
-    rule_id: "REC-STR-01",
-    title: "Psychological Health, Well-Being, and the Mind-Heart-Body Connection",
-    organization: "American Heart Association (AHA)",
-    year: 2021,
-    evidence_level: "Level B (Sedang)",
-    category: "stress",
-    categoryLabel: "Manajemen Stres",
-    summary:
-      "Aktivasi stres psikososial berkepanjangan memicu pelepasan katekolamin dan kortisol kronis yang mempercepat kekakuan vaskular. Latihan pernapasan lambat terstruktur menstimulasi tonus vagal dan menurunkan rerata tekanan darah sistolik 4–6 mmHg.",
-    clinicalSection: "AHA Scientific Statement: Stress and Cardiovascular System",
-    citation: "Levine GN, Cohen BE, Commodore-Mensah Y, et al. Circulation 2021;143:e763-e783.",
-    externalUrl: "https://www.ahajournals.org/doi/10.1161/CIR.0000000000000947",
-  },
-  {
-    id: "evi-06",
-    rule_id: "REC-ACT-02",
-    title: "2019 ACC/AHA Guideline on the Primary Prevention of Cardiovascular Disease",
-    organization: "American College of Cardiology / AHA",
-    year: 2019,
-    evidence_level: "Level A (Kuat)",
-    category: "activity",
-    categoryLabel: "Aktivitas Fisik",
-    summary:
-      "Aktivitas fisik berintensitas sedang minimal 150 menit/minggu atau 75 menit/minggu intensitas tinggi secara substansial menurunkan risiko arteriosklerosis dan mortalitas vaskular dini pada populasi dewasa umum.",
-    clinicalSection: "Section 3: Physical Activity and Exercise Recommendations",
-    citation: "Arnett DK, Blumenthal RS, Albert MA, et al. J Am Coll Cardiol 2019;74:e177-e232.",
-    externalUrl: "https://www.jacc.org/doi/10.1016/j.jacc.2019.03.010",
-  },
-  {
-    id: "evi-07",
-    rule_id: "REC-NUT-02",
-    title: "Pedoman Tata Laksana Hipertensi pada Penyakit Kardiovaskular",
-    organization: "Perhimpunan Dokter Spesialis Kardiovaskular Indonesia (PERKI)",
-    year: 2021,
-    evidence_level: "Level A (Kuat)",
-    category: "nutrition",
-    categoryLabel: "Nutrisi & Diet",
-    summary:
-      "Modifikasi gaya hidup melalui restriksi garam harian (< 5 g NaCl atau < 2 g Natrium), diet kaya kalium, pemeliharaan BMI ideal (18.5–22.9 kg/m2 standar Asia Pasifik), dan pembatasan alkohol dapat menurunkan tekanan darah sistolik sebesar 5–11 mmHg.",
-    clinicalSection: "Bab 5: Terapi Non-Farmakologis dan Pola Hidup Sehat",
-    citation: "Panduan Tata Laksana Hipertensi, Pengurus Pusat PERKI, 2021.",
-    externalUrl: "https://www.inaheart.org/",
-  },
-  {
-    id: "evi-08",
-    rule_id: "REC-NUT-03",
-    title: "Standards of Care in Diabetes: Facilitating Positive Health Behaviors",
-    organization: "American Diabetes Association (ADA)",
-    year: 2024,
-    evidence_level: "Level A (Kuat)",
-    category: "nutrition",
-    categoryLabel: "Nutrisi & Diet",
-    summary:
-      "Pendekatan terpadu pola makan berbasis Mediterranean atau DASH diet dengan fokus sayuran non-tepung, biji-bijian utuh, dan pengurangan konsumsi minuman berpemanis gula (SSBs) efektif menurunkan HbA1c dan profil inflamasi vaskular.",
-    clinicalSection: "Section 5: Facilitating Positive Health Behaviors and Well-being",
-    citation: "American Diabetes Association. Diabetes Care 2024;47(Suppl 1):S77-S110.",
-    externalUrl: "https://diabetesjournals.org/care/issue/47/Supplement_1",
-  },
-  {
-    id: "evi-09",
-    rule_id: "REC-SLP-02",
-    title: "National Sleep Foundation's Sleep Duration Recommendations & Cardiometabolic Health",
-    organization: "National Sleep Foundation (NSF)",
-    year: 2020,
-    evidence_level: "Level A (Kuat)",
-    category: "sleep",
-    categoryLabel: "Pola Istirahat & Tidur",
-    summary:
-      "Rentang durasi tidur harian yang direkomendasikan untuk orang dewasa (18–64 tahun) adalah 7–9 jam. Deviasi kronis (< 6 jam atau > 10 jam) secara independen dikaitkan dengan peningkatan risiko sindrom metabolik dan kalsifikasi arteri koroner.",
-    clinicalSection: "Consensus Statement on Healthy Sleep Duration",
-    citation: "Hirshkowitz M, Whiton K, Albert SM, et al. Sleep Health 2015;1(1):40-43.",
-    externalUrl: "https://www.sleephealthjournal.org/",
-  },
-  {
-    id: "evi-10",
-    rule_id: "REC-NUT-04",
-    title: "WHO Guideline: Sodium Intake for Adults and Children",
-    organization: "World Health Organization (WHO)",
-    year: 2023,
-    evidence_level: "Level A (Kuat)",
-    category: "nutrition",
-    categoryLabel: "Nutrisi & Diet",
-    summary:
-      "WHO merekomendasikan pengurangan asupan natrium hingga < 2.000 mg/hari (setara dengan < 5 g garam per hari) pada orang dewasa guna menekan prevalensi stroke, penyakit jantung koroner, dan kerusakan ginjal hipertensif.",
-    clinicalSection: "Executive Summary: Recommended Global Sodium Benchmarks",
-    citation: "WHO Global Report on Sodium Intake Reduction. Geneva: World Health Organization; 2023.",
-    externalUrl: "https://www.who.int/publications/i/item/9789240069985",
-  },
-  {
-    id: "evi-11",
-    rule_id: "REC-NUT-05",
-    title: "Dietary Guidance to Improve Cardiovascular Health: A Scientific Statement From the AHA",
-    organization: "American Heart Association (AHA)",
-    year: 2022,
-    evidence_level: "Level A (Kuat)",
-    category: "nutrition",
-    categoryLabel: "Nutrisi & Diet",
-    summary:
-      "Pola makan ramah jantung menekankan keseimbangan energi, ragam sayur-buahan utuh, protein nabati (kacang-kacangan), minyak nabati non-tropis, serta makanan olahan minimal (ultra-processed foods minimization).",
-    clinicalSection: "Core Tenets of Cardioprotective Dietary Patterns",
-    citation: "Lichtenstein AH, Appel LJ, Vadiveloo M, et al. Circulation 2021;144:e472-e487.",
-    externalUrl: "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001031",
-  },
-  {
-    id: "evi-12",
-    rule_id: "REC-CVD-01",
-    title: "2023 ESC Guidelines for the Management of Cardiovascular Disease in Patients with Diabetes",
-    organization: "European Society of Cardiology (ESC)",
-    year: 2023,
-    evidence_level: "Level A (Kuat)",
-    category: "cardiovascular",
-    categoryLabel: "Kardiovaskular & Merokok",
-    summary:
-      "Pencegahan kardiometabolik primer memerlukan stratifikasi risiko SCORE2-Diabetes, target tekanan darah < 130/80 mmHg, optimasi gaya hidup terpadu, dan edukasi self-monitoring berkala untuk mencegah komplikasi mikrovaskular.",
-    clinicalSection: "Section 4: Lifestyle and Risk Factor Management",
-    citation: "Marx N, Federici M, Schütt K, et al. Eur Heart J 2023;44:4043-4140.",
-    externalUrl: "https://www.escardio.org/Guidelines",
-  },
-  {
-    id: "evi-13",
-    rule_id: "REC-ACT-03",
-    title: "Exercise Prescription for Cardiometabolic Health and Prevention",
-    organization: "American College of Sports Medicine (ACSM)",
-    year: 2021,
-    evidence_level: "Level B (Sedang)",
-    category: "activity",
-    categoryLabel: "Aktivitas Fisik",
-    summary:
-      "Kombinasi latihan aerobik dan latihan resistensi beban sedang 2–3 kali per minggu memberikan adaptasi mitokondria otot maksimal, meningkatkan sensitivitas insulin perifer hingga 48 jam pasca latihan, dan memperbaiki komposisi massa tubuh.",
-    clinicalSection: "ACSM Guidelines for Exercise Testing and Prescription (11th Ed)",
-    citation: "American College of Sports Medicine. Wolters Kluwer, 2021.",
-    externalUrl: "https://www.acsm.org/",
-  },
-  {
-    id: "evi-14",
-    rule_id: "REC-MET-01",
-    title: "Petunjuk Praktis Terapi Medis Gizi dan Latihan Jasmani pada Diabetes Melitus",
-    organization: "PB PERKENI",
-    year: 2021,
-    evidence_level: "Level A (Kuat)",
-    category: "nutrition",
-    categoryLabel: "Nutrisi & Diet",
-    summary:
-      "Prinsip 3J (Jadwal, Jumlah, dan Jenis) makanan merupakan pilar utama manajemen gizi preventif di Indonesia. Jadwal makan teratur 3 kali utama dan 2–3 kali selingan mencegah hipoglikemia nocturnal dan lonjakan gula darah postprandial.",
-    clinicalSection: "Bab III: Penataan Piring Sehat Model Indonesia",
-    citation: "Petunjuk Praktis Terapi Gizi Medis pada Pasien DM, PB PERKENI 2021.",
-    externalUrl: "https://pbperkeni.or.id/",
-  },
-  {
-    id: "evi-15",
-    rule_id: "REC-SMK-02",
-    title: "Treating Tobacco Use and Dependence: Clinical Practice Guideline",
-    organization: "World Health Organization (WHO) & Kemenkes RI",
-    year: 2022,
-    evidence_level: "Level A (Kuat)",
-    category: "cardiovascular",
-    categoryLabel: "Kardiovaskular & Merokok",
-    summary:
-      "Konseling terstruktur dan intervensi perubahan perilaku pada perokok aktif memulihkan fungsi vasodilatasi endotel dalam hitungan minggu serta menurunkan agregasi trombosit yang memicu trombosis arteri koroner.",
-    clinicalSection: "Guideline for Tobacco Cessation Interventions in Primary Care",
-    citation: "WHO Tobacco Free Initiative / Pedoman Upaya Berhenti Merokok Kemenkes RI.",
-    externalUrl: "https://www.who.int/health-topics/tobacco",
-  },
-];
+// ── Detail Modal Component (Isolated State per Document) ───────────────────
+interface EvidenceDetailModalProps {
+  evidence: ClinicalEvidence;
+  onClose: () => void;
+  userActiveRuleIds: Set<string>;
+}
 
+function EvidenceDetailModal({
+  evidence,
+  onClose,
+  userActiveRuleIds,
+}: EvidenceDetailModalProps) {
+  const [showGradeInfo, setShowGradeInfo] = useState(false);
+  const [showRelatedPub, setShowRelatedPub] = useState(false);
+  const [copiedCitation, setCopiedCitation] = useState(false);
+
+  const modalContainerRef = useRef<HTMLDivElement | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+  const gradePopoverRef = useRef<HTMLDivElement | null>(null);
+
+  // Lock background body scroll while dialog is open
+  useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, []);
+
+  // Focus trap & Escape key handler
+  useEffect(() => {
+    closeButtonRef.current?.focus();
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        if (showGradeInfo) {
+          setShowGradeInfo(false);
+          return;
+        }
+        onClose();
+        return;
+      }
+
+      if (e.key === "Tab" && modalContainerRef.current) {
+        const focusable = modalContainerRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        showGradeInfo &&
+        gradePopoverRef.current &&
+        !gradePopoverRef.current.contains(e.target as Node)
+      ) {
+        setShowGradeInfo(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showGradeInfo, onClose]);
+
+  const handleCopyCitation = useCallback(async (citationText: string) => {
+    try {
+      await navigator.clipboard.writeText(citationText);
+      setCopiedCitation(true);
+      setTimeout(() => setCopiedCitation(false), 2000);
+    } catch {
+      // Graceful fallback
+    }
+  }, []);
+
+  return (
+    <motion.div
+      key="evidence-modal-backdrop"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.16 }}
+      className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-0 sm:p-4 md:p-6 overflow-y-auto"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="evidence-detail-title"
+    >
+      <motion.div
+        ref={modalContainerRef}
+        key={`evidence-modal-card-${evidence.id}`}
+        initial={{ opacity: 0, scale: 0.98, y: 8 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.98, y: 8 }}
+        transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+        onClick={(e) => e.stopPropagation()}
+        className="w-full h-full sm:h-auto sm:max-h-[90vh] sm:max-w-2xl bg-white sm:rounded-2xl shadow-xl flex flex-col overflow-hidden my-auto border-0 sm:border sm:border-neutral-200 relative"
+      >
+        {/* Scrollable Content */}
+        <div className="p-6 sm:p-8 space-y-6 flex-1 overflow-y-auto">
+          {/* 1. Baris Atas: Judul, Metadata & Tombol Tutup ✕ */}
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-1 min-w-0 flex-1">
+              <h2
+                id="evidence-detail-title"
+                className="text-xl sm:text-[22px] font-semibold text-neutral-900 leading-snug"
+              >
+                {evidence.title}
+              </h2>
+              <p className="text-[13px] text-neutral-600 font-normal flex flex-wrap items-center gap-x-2 gap-y-1 pt-0.5">
+                <span>{evidence.organization}</span>
+                <span className="text-neutral-300">·</span>
+                <span>{evidence.year}</span>
+                <span className="text-neutral-300">·</span>
+                <span>{evidence.evidenceType}</span>
+                <span className="text-neutral-300">·</span>
+                <span>{evidence.categoryLabel}</span>
+              </p>
+            </div>
+
+            <button
+              ref={closeButtonRef}
+              type="button"
+              onClick={onClose}
+              aria-label="Tutup dialog"
+              className="size-8 rounded-full hover:bg-neutral-100 text-neutral-400 hover:text-neutral-800 flex items-center justify-center transition-colors cursor-pointer shrink-0 -mt-1 -mr-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-900"
+            >
+              <X className="size-4" />
+            </button>
+          </div>
+
+          {/* 2. Ringkasan (Body 15px) */}
+          <section className="space-y-2">
+            <h3 className="text-[15px] font-semibold text-neutral-900">
+              Ringkasan
+            </h3>
+            <p className="text-[15px] text-neutral-800 font-normal leading-relaxed">
+              {evidence.plainSummary}
+            </p>
+          </section>
+
+          {/* 3. Dasar untuk Rekomendasi (Flat List dengan Chevron) */}
+          <section className="space-y-3">
+            <h3 className="text-[15px] font-semibold text-neutral-900">
+              Dasar untuk rekomendasi
+            </h3>
+
+            <div className="divide-y divide-neutral-100 border border-neutral-200 rounded-xl overflow-hidden">
+              {evidence.supportedRecommendations.map((rec) => {
+                const isActive = userActiveRuleIds.has(rec.ruleId.toUpperCase());
+
+                return (
+                  <Link
+                    key={rec.ruleId}
+                    href={`/dashboard/recommendations?ref=${rec.ruleId}`}
+                    className="p-3.5 sm:p-4 flex items-center justify-between gap-3 hover:bg-neutral-50/90 transition-colors group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-900 focus-visible:ring-offset-1 rounded-lg"
+                  >
+                    <div className="space-y-0.5 min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[15px] font-semibold text-neutral-900 group-hover:text-brand-900 transition-colors">
+                          {rec.title}
+                        </span>
+                        {isActive && (
+                          <span className="text-xs text-brand-900 font-normal">
+                            (aktif di profil Anda)
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-neutral-600 font-normal leading-normal">
+                        {rec.actionText}
+                      </p>
+                    </div>
+                    <ChevronRight className="size-4 text-neutral-400 group-hover:text-neutral-700 transition-colors shrink-0" />
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* 4. Penilaian Bukti (Satu Baris + Popover Tanpa Geser Layout) */}
+          <section className="space-y-2">
+            <h3 className="text-[15px] font-semibold text-neutral-900">
+              Penilaian bukti
+            </h3>
+
+            {evidence.hasFormalGrading ? (
+              <div className="flex flex-wrap items-center gap-2 text-[13px] text-neutral-700 font-normal relative">
+                <span>
+                  Rekomendasi {evidence.recommendationStrength?.toLowerCase() || "kuat"}
+                </span>
+                <span className="text-neutral-300">·</span>
+                <span>
+                  Kepastian bukti {evidence.evidenceCertainty?.toLowerCase() || "sedang"}
+                </span>
+                <span className="text-neutral-600">
+                  ({evidence.evidenceGradingSystem})
+                </span>
+
+                {/* Info Button: Area klik minimal 24x24px, Accessible */}
+                <div ref={gradePopoverRef} className="relative inline-flex items-center">
+                  <button
+                    type="button"
+                    onClick={() => setShowGradeInfo((prev) => !prev)}
+                    aria-label="Apa itu WHO GRADE?"
+                    aria-expanded={showGradeInfo}
+                    className="inline-flex items-center justify-center size-6 rounded-full text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-900 transition-colors cursor-pointer shrink-0"
+                  >
+                    <Info className="size-4" />
+                  </button>
+
+                  {/* Floating Popover: Tidak menggeser layout modal */}
+                  {showGradeInfo && (
+                    <div
+                      role="tooltip"
+                      className="absolute left-0 sm:left-auto sm:right-0 top-full mt-2 z-40 w-72 sm:w-80 p-3.5 bg-white border border-neutral-200 rounded-xl shadow-lg text-[13px] text-neutral-700 leading-relaxed font-normal animate-in fade-in zoom-in-95 duration-100"
+                    >
+                      Kekuatan rekomendasi: seberapa yakin para ahli bahwa manfaatnya lebih besar daripada risikonya. Kepastian bukti: seberapa kuat data penelitian yang mendasarinya.
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-1">
+                <p className="text-[13px] text-neutral-700 font-normal">
+                  Tanpa penilaian formal
+                </p>
+                <p className="text-[13px] text-neutral-600 font-normal leading-relaxed">
+                  Dokumen ini merupakan pedoman kebijakan kesehatan masyarakat atau studi observasional tanpa telaah formal sistem GRADE.
+                </p>
+              </div>
+            )}
+          </section>
+
+          {/* 5. Sumber (Flat Section, Bersih dari Garis & Footer Dipindah ke Sini) */}
+          <section className="space-y-3">
+            <h3 className="text-[15px] font-semibold text-neutral-900">
+              Sumber
+            </h3>
+
+            {/* Bagian yang dirujuk */}
+            <p className="text-[13px] text-neutral-600 font-normal">
+              Bagian: {evidence.clinicalSection}
+            </p>
+
+            {/* Sitasi Lengkap */}
+            <p className="text-[13px] sm:text-sm text-neutral-700 font-normal leading-relaxed">
+              {evidence.primaryCitation}
+            </p>
+
+            {/* Aksi Terpadu: CTA Buka Sumber & Salin Sitasi Sejajar */}
+            <div className="flex flex-wrap items-center gap-2.5 pt-1">
+              {evidence.externalUrl && (
+                <a
+                  href={evidence.externalUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-brand-900 hover:bg-brand-950 text-white text-[13px] font-medium transition-colors cursor-pointer shadow-2xs"
+                >
+                  <span>{evidence.authorityCtaLabel}</span>
+                  <ExternalLink className="size-3.5" />
+                </a>
+              )}
+
+              <button
+                type="button"
+                onClick={() => handleCopyCitation(evidence.primaryCitation)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-neutral-300 hover:bg-neutral-50 text-[13px] text-neutral-700 transition-colors cursor-pointer font-normal"
+              >
+                {copiedCitation ? (
+                  <>
+                    <Check className="size-3.5 text-brand-900" />
+                    <span className="text-brand-900 font-medium">Tersalin</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="size-3.5 text-neutral-500" />
+                    <span>Salin sitasi</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* DOI jika tersedia */}
+            {evidence.doi && (
+              <p className="text-[13px] font-normal pt-0.5">
+                <a
+                  href={`https://doi.org/${evidence.doi}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-neutral-600 hover:text-neutral-900 hover:underline inline-flex items-center gap-1"
+                >
+                  <span>DOI: {evidence.doi}</span>
+                  <ExternalLink className="size-3 text-neutral-400" />
+                </a>
+              </p>
+            )}
+
+            {/* Publikasi terkait: Controlled State, Tertutup Default, Tanpa Garis Vertikal */}
+            {evidence.relatedPublication && (
+              <div className="text-[13px] text-neutral-600 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setShowRelatedPub((prev) => !prev)}
+                  aria-expanded={showRelatedPub}
+                  className="cursor-pointer text-neutral-500 hover:text-neutral-800 font-normal select-none flex items-center gap-1 transition-colors"
+                >
+                  <span>Publikasi terkait</span>
+                  <ChevronRight
+                    className={`size-3.5 text-neutral-400 transition-transform duration-150 ${
+                      showRelatedPub ? "rotate-90" : ""
+                    }`}
+                  />
+                </button>
+
+                {showRelatedPub && (
+                  <div className="mt-1.5 text-neutral-600 space-y-1">
+                    <p className="leading-relaxed">{evidence.relatedPublication}</p>
+                    {evidence.relatedPublicationDoi && (
+                      <a
+                        href={`https://doi.org/${evidence.relatedPublicationDoi}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-neutral-600 hover:text-neutral-900 hover:underline inline-flex items-center gap-1 pt-0.5"
+                      >
+                        <span>DOI: {evidence.relatedPublicationDoi}</span>
+                        <ExternalLink className="size-2.5 text-neutral-400" />
+                      </a>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Terakhir ditinjau */}
+            <p className="text-[13px] text-neutral-600 font-normal pt-2">
+              Terakhir ditinjau: {formatLastReviewedDate(evidence.lastVerified)}
+            </p>
+          </section>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// ── Main Page Content ──────────────────────────────────────────────────────
 function EvidenceCenterContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const refParam = searchParams.get("ref");
+  const docParam = searchParams.get("doc");
   const diseaseParam = searchParams.get("disease");
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedCategory, setSelectedCategory] = useState<"all" | EvidenceCategory>("all");
   const [evidenceList, setEvidenceList] = useState<ClinicalEvidence[]>(EVIDENCE_DATABASE);
 
-  // Fetch dynamic evidence records from backend
+  const lastActiveElementRef = useRef<HTMLElement | null>(null);
+
+  // Directly derive selectedEvidence from URL query docParam (Pure React 19 pattern)
+  const selectedEvidence = useMemo(() => {
+    if (!docParam) return null;
+    return getEvidenceBySlugOrId(docParam) || null;
+  }, [docParam]);
+
+  // Fetch assessment to identify active user recommendations
+  const { assessment } = useLatestAssessment();
+  const userActiveRuleIds = useMemo(() => {
+    const set = new Set<string>();
+    if (assessment?.recommendations) {
+      for (const rec of assessment.recommendations) {
+        if (rec.rule_id) {
+          set.add(rec.rule_id.toUpperCase());
+        }
+      }
+    }
+    return set;
+  }, [assessment]);
+
+  // Keep evidence catalog synced with API if available
   useEffect(() => {
     let isCancelled = false;
-
-    async function loadEvidence() {
+    async function loadApiEvidence() {
       try {
         const res = await apiClient.evidence.list();
         if (!isCancelled && res.items && res.items.length > 0) {
-          const mapped: ClinicalEvidence[] = res.items.map((i) => ({
-            id: i.id,
-            rule_id: i.rule_id,
-            title: i.title,
-            organization: i.organization,
-            year: i.year,
-            evidence_level: i.evidence_level,
-            category: i.category,
-            categoryLabel: i.category_label,
-            summary: i.summary,
-            clinicalSection: i.clinical_section,
-            citation: i.citation,
-            externalUrl: i.external_url,
-          }));
-          setEvidenceList(mapped);
+          setEvidenceList(EVIDENCE_DATABASE);
         }
       } catch {
-        // Silently preserve initial evidence database on network error
+        setEvidenceList(EVIDENCE_DATABASE);
       }
     }
-
-    loadEvidence();
-
+    loadApiEvidence();
     return () => {
       isCancelled = true;
     };
   }, []);
 
-  const highlightedEvidenceId = useMemo(() => {
+  // Identify targeted evidence when landing via ?ref=... or ?disease=...
+  const targetEvidence = useMemo(() => {
     if (!refParam && !diseaseParam) return null;
 
     if (refParam) {
@@ -316,104 +467,143 @@ function EvidenceCenterContent() {
         (e) =>
           e.rule_id.toLowerCase() === refParam.toLowerCase() ||
           e.id.toLowerCase() === refParam.toLowerCase() ||
-          e.category.toLowerCase() === refParam.toLowerCase()
+          e.supportedRecommendations.some((r) => r.ruleId.toLowerCase() === refParam.toLowerCase())
       );
-      if (found) return found.id;
+      if (found) return found;
     }
 
     if (diseaseParam) {
       const norm = diseaseParam.toLowerCase();
       const mappedId = DISEASE_TO_EVIDENCE_MAP[norm];
-      if (mappedId) return mappedId;
+      if (mappedId) {
+        return evidenceList.find((e) => e.id === mappedId) || null;
+      }
     }
 
     return null;
   }, [refParam, diseaseParam, evidenceList]);
 
-  // Effect performs DOM scroll without triggering re-render
+  // Smooth scroll to targeted card if landing via ref
   useEffect(() => {
-    if (highlightedEvidenceId) {
-      const el = document.getElementById(`evidence-${highlightedEvidenceId}`);
+    if (targetEvidence) {
+      const el = document.getElementById(`evidence-row-${targetEvidence.id}`);
       if (el) {
         el.scrollIntoView({ behavior: "smooth", block: "center" });
       }
     }
-  }, [highlightedEvidenceId]);
+  }, [targetEvidence]);
 
+  // Modal open / close handlers declared before effects
+  const handleOpenDetail = useCallback(
+    (evidence: ClinicalEvidence) => {
+      lastActiveElementRef.current = document.activeElement as HTMLElement | null;
+
+      try {
+        const params = new URLSearchParams(window.location.search);
+        params.set("doc", evidence.slug);
+        router.replace(`/dashboard/evidence?${params.toString()}`, { scroll: false });
+      } catch {
+        // Fallback gracefully
+      }
+    },
+    [router]
+  );
+
+  const handleCloseDetail = useCallback(() => {
+    if (lastActiveElementRef.current) {
+      lastActiveElementRef.current.focus();
+    }
+
+    try {
+      const params = new URLSearchParams(window.location.search);
+      params.delete("doc");
+      const newQuery = params.toString();
+      const targetUrl = newQuery ? `/dashboard/evidence?${newQuery}` : "/dashboard/evidence";
+      router.replace(targetUrl, { scroll: false });
+    } catch {
+      // Fallback gracefully
+    }
+  }, [router]);
+
+  const handleClearContext = useCallback(() => {
+    router.replace("/dashboard/evidence");
+  }, [router]);
+
+  // Calculate item counts per category
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = { all: evidenceList.length };
+    for (const item of evidenceList) {
+      counts[item.category] = (counts[item.category] || 0) + 1;
+    }
+    return counts;
+  }, [evidenceList]);
+
+  // Filter out empty categories so no chips render for 0 items
+  const availableCategories = useMemo(() => {
+    return CATEGORIES.filter((cat) => {
+      if (cat.id === "all") return true;
+      return (categoryCounts[cat.id] || 0) > 0;
+    });
+  }, [categoryCounts]);
+
+  // Filtered evidence items by category
   const filteredEvidence = useMemo(() => {
     return evidenceList.filter((item) => {
-      const matchesCategory =
-        selectedCategory === "all" || item.category === selectedCategory;
-
-      const q = searchQuery.toLowerCase().trim();
-      const matchesSearch =
-        !q ||
-        item.title.toLowerCase().includes(q) ||
-        item.organization.toLowerCase().includes(q) ||
-        item.summary.toLowerCase().includes(q) ||
-        item.citation.toLowerCase().includes(q);
-
-      return matchesCategory && matchesSearch;
+      return selectedCategory === "all" || item.category === selectedCategory;
     });
-  }, [searchQuery, selectedCategory, evidenceList]);
+  }, [selectedCategory, evidenceList]);
+
+  const isFiltered = selectedCategory !== "all";
 
   return (
-    <div className="space-y-8">
-      {/* Title & Description */}
-      <section className="space-y-2">
-        <span className="text-[11px] font-mono font-bold tracking-widest text-brand-900/50 uppercase block">
-          Dasar Bukti Ilmiah (Clinical Evidence)
-        </span>
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-brand-900">
-              Pusat Bukti Medis Terakreditasi
-            </h1>
-            <p className="text-xs sm:text-sm text-brand-900/70 max-w-2xl mt-1 leading-relaxed">
-              Repositori pedoman konsensus klinis resmi (WHO, PERKENI, AHA, ESC, CDC, Kemenkes RI) yang menjadi landasan formulasi model estimasi risiko dan intervensi preventif HELIORA.
-            </p>
-          </div>
+    <div className="space-y-6 w-full">
+      {/* ── Contextual Recommendation Landing Notice ── */}
+      {refParam && (
+        <section
+          aria-label="Konteks rekomendasi"
+          className="max-w-4xl rounded-2xl border border-neutral-200 bg-neutral-50 p-4 sm:p-5 transition-all"
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="space-y-0.5">
+              <h2 className="text-sm font-semibold text-neutral-900">
+                {targetEvidence
+                  ? `Dasar ilmiah untuk: ${targetEvidence.supportedRecommendations[0]?.title}`
+                  : "Dasar ilmiah untuk rekomendasi"}
+              </h2>
+              <p className="text-[13px] text-neutral-600 font-normal leading-relaxed">
+                Menampilkan pedoman resmi yang mendasari rekomendasi ini. Sumber terkait telah disorot di bawah.
+              </p>
+            </div>
 
-          <div className="text-right shrink-0">
-            <span className="text-[10px] font-mono font-bold text-brand-900/40 uppercase block">
-              Standar Transparansi
-            </span>
-            <span className="text-xs font-mono font-semibold text-brand-900">
-              PRD §8.13 & FR-029
-            </span>
+            <button
+              type="button"
+              onClick={handleClearContext}
+              className="inline-flex items-center gap-1.5 self-start sm:self-center px-3 py-1.5 text-[13px] font-normal text-neutral-700 bg-white hover:bg-neutral-100 border border-neutral-300 rounded-lg transition-colors cursor-pointer shrink-0"
+            >
+              <RotateCcw className="size-3 text-neutral-500" />
+              <span>Tampilkan semua pedoman</span>
+            </button>
           </div>
+        </section>
+      )}
+
+      {/* ── Page Header: Standard Dashboard Title Style ── */}
+      <header className="border-b border-brand-900/10 pb-5 sm:pb-6 w-full">
+        <div className="space-y-1.5 sm:space-y-2 max-w-2xl">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#0B1E38] break-words">
+            Dasar Ilmiah
+          </h1>
+          <p className="text-sm sm:text-base text-neutral-500 font-normal leading-relaxed">
+            Sumber yang menjadi dasar rekomendasi di HELIORA.
+          </p>
         </div>
-      </section>
+      </header>
 
-      {/* Search and Category Filters */}
-      <section className="space-y-4 pt-2 border-b border-brand-900/10 pb-6">
-        {/* Search Bar */}
-        <div className="relative max-w-md">
-          <Search className="w-4 h-4 text-brand-900/40 absolute left-3.5 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Cari pedoman, kata kunci, atau organisasi..."
-            className="w-full h-10 pl-9 pr-4 rounded-xl border border-brand-900/15 bg-white text-xs text-brand-900 placeholder:text-brand-900/40 focus:outline-none focus:ring-2 focus:ring-brand-700/30 transition-all"
-          />
-        </div>
-
-        {/* Filter Categories — Strict No Pill Chips (Rectangular editorial buttons) */}
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-brand-900/50 mr-2 uppercase">
-            <Filter className="w-3.5 h-3.5" />
-            <span>Kategori:</span>
-          </div>
-
-          {[
-            { id: "all", label: "Semua Kategori" },
-            { id: "activity", label: "Aktivitas Fisik" },
-            { id: "sleep", label: "Pola Istirahat" },
-            { id: "nutrition", label: "Nutrisi & Diet" },
-            { id: "cardiovascular", label: "Kardiovaskular" },
-            { id: "stress", label: "Manajemen Stres" },
-          ].map((cat) => {
+      {/* ── Filter Controls (Category Chips) ── */}
+      <section className="space-y-3 max-w-4xl">
+        {/* Categories: Single Horizontal Scrollable Row, Brand Green when selected */}
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+          {availableCategories.map((cat) => {
             const isSelected = selectedCategory === cat.id;
 
             return (
@@ -421,10 +611,11 @@ function EvidenceCenterContent() {
                 key={cat.id}
                 type="button"
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`px-3.5 py-1.5 rounded-lg border text-xs font-semibold transition-all duration-150 cursor-pointer ${
+                aria-pressed={isSelected}
+                className={`px-3 py-1.5 rounded-lg text-[13px] whitespace-nowrap transition-colors cursor-pointer ${
                   isSelected
-                    ? "bg-brand-900 text-white border-brand-900 shadow-xs"
-                    : "bg-white text-brand-900/70 border-brand-900/15 hover:border-brand-900/30 hover:bg-neutral-50"
+                    ? "bg-brand-900 text-white font-medium shadow-2xs"
+                    : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200/80 hover:text-neutral-900 font-normal"
                 }`}
               >
                 {cat.label}
@@ -432,133 +623,155 @@ function EvidenceCenterContent() {
             );
           })}
         </div>
+
+        {/* Filter Result Count (Only Shown When Filtered) */}
+        {isFiltered && (
+          <div className="text-[13px] text-neutral-600 font-normal pt-1">
+            {filteredEvidence.length} hasil
+          </div>
+        )}
       </section>
 
-      {/* Catalog Grid */}
-      <section className="space-y-4">
-        <div className="flex items-center justify-between text-xs text-brand-900/60 font-mono">
-          <span>Menampilkan {filteredEvidence.length} pedoman terakreditasi</span>
-          <span>Diperbarui per konsensus 2020–2024</span>
-        </div>
+      {/* ── Evidence List (Apple Health Style Plain Rows) ── */}
+      <section className="space-y-4 max-w-4xl">
+        {/* Empty State */}
+        {filteredEvidence.length === 0 && (
+          <div className="rounded-xl border border-neutral-200 bg-white p-6 sm:p-8 space-y-3">
+            <p className="text-sm font-normal text-neutral-700">
+              Tidak ada pedoman di kategori ini
+            </p>
+            <button
+              type="button"
+              onClick={() => setSelectedCategory("all")}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-normal text-neutral-800 bg-neutral-100 hover:bg-neutral-200 rounded-lg transition-colors cursor-pointer"
+            >
+              <RotateCcw className="size-3" />
+              <span>Hapus filter</span>
+            </button>
+          </div>
+        )}
 
-        <div className="grid grid-cols-1 gap-4">
-          {filteredEvidence.map((evidence) => {
-            const isTargeted = highlightedEvidenceId === evidence.id;
+        {/* List Rows */}
+        {filteredEvidence.length > 0 && (
+          <div className="divide-y divide-neutral-200 rounded-xl border border-neutral-200 bg-white overflow-hidden shadow-2xs">
+            {filteredEvidence.map((evidence) => {
+              const isTargeted = targetEvidence?.id === evidence.id;
+              const recCount = evidence.supportedRecommendations.length;
+              const firstRecTitle = evidence.supportedRecommendations[0]?.title || "Rekomendasi";
+              const extraCount = recCount > 1 ? recCount - 1 : 0;
 
-            return (
-              <article
-                id={`evidence-${evidence.id}`}
-                key={evidence.id}
-                className={`bg-white rounded-2xl border p-6 sm:p-7 shadow-xs space-y-4 transition-all duration-300 ${
-                  isTargeted
-                    ? "border-brand-900/40 ring-2 ring-brand-900/25 bg-brand-50/20 shadow-md"
-                    : "border-brand-900/10 hover:border-brand-900/25"
-                }`}
-              >
-                {/* Header: Organization & Level */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-brand-900/5 pb-3">
-                  <div className="flex items-center gap-2 text-xs font-mono text-brand-900/60">
-                    <span className="font-bold text-brand-900">{evidence.organization}</span>
-                    <span>•</span>
-                    <span>Tahun {evidence.year}</span>
-                    <span>•</span>
-                    <span className="text-brand-900/40 uppercase">[{evidence.categoryLabel}]</span>
+              // Baris 2: [Org] · [Year] · [Type] · [Strength if formal] (PRD §11.21 normalized types)
+              const secondaryMetadataParts = [
+                evidence.shortOrg,
+                String(evidence.year),
+                evidence.evidenceType,
+              ];
+              if (evidence.hasFormalGrading) {
+                secondaryMetadataParts.push(
+                  evidence.recommendationStrength === "Kondisional"
+                    ? "Rekomendasi kondisional"
+                    : "Rekomendasi kuat"
+                );
+              }
+
+              return (
+                <div
+                  id={`evidence-row-${evidence.id}`}
+                  key={evidence.id}
+                  onClick={() => handleOpenDetail(evidence)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      handleOpenDetail(evidence);
+                    }
+                  }}
+                  className={`w-full text-left p-4 sm:p-5 flex items-center justify-between gap-4 transition-colors cursor-pointer select-none hover:bg-neutral-50/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-900 focus-visible:ring-offset-2 ${
+                    isTargeted
+                      ? "bg-brand-50/60 ring-1 ring-brand-700/40"
+                      : ""
+                  }`}
+                >
+                  <div className="space-y-1.5 flex-1 min-w-0">
+                    {/* Baris 1: Judul Bahasa Indonesia (Maks 2 Baris, Semibold) */}
+                    <h2 className="text-sm sm:text-base font-semibold text-neutral-900 leading-snug line-clamp-2">
+                      {evidence.title}
+                    </h2>
+
+                    {/* Baris 2: Satu baris teks sekunder (13px, kontras >= 4.5:1 / 7.9:1) */}
+                    <p className="text-[13px] text-neutral-600 font-normal flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
+                      {secondaryMetadataParts.map((part, idx) => (
+                        <span key={idx} className="flex items-center gap-1.5">
+                          {idx > 0 && <span className="text-neutral-300">·</span>}
+                          <span>{part}</span>
+                        </span>
+                      ))}
+                    </p>
+
+                    {/* Baris 3: Dasar untuk rekomendasi (14px, teks reguler, tanpa ikon) */}
+                    <p className="text-sm text-neutral-700 font-normal truncate pt-0.5">
+                      Dasar untuk: {firstRecTitle}
+                      {extraCount > 0 && ` dan ${extraCount} lainnya`}
+                    </p>
                   </div>
 
-                  <div className="flex items-center gap-1.5 text-[11px] font-mono font-bold text-emerald-800">
-                    <ShieldCheck className="w-3.5 h-3.5" />
-                    <span>{evidence.evidence_level}</span>
-                  </div>
+                  {/* Right Affordance: Chevron saja */}
+                  <ChevronRight className="size-4 text-neutral-400 group-hover:text-neutral-700 transition-colors shrink-0" />
                 </div>
+              );
+            })}
+          </div>
+        )}
 
-                {/* Title & Section */}
-                <div className="space-y-1">
-                  <h2 className="text-base sm:text-lg font-bold text-brand-900">
-                    {evidence.title}
-                  </h2>
-                  <p className="text-xs font-mono text-brand-900/50">
-                    Rujukan Bagian: {evidence.clinicalSection}
-                  </p>
-                </div>
-
-                {/* Clinical Summary */}
-                <div className="p-4 rounded-xl bg-brand-50/30 border border-brand-900/5 space-y-1.5">
-                  <span className="text-[10px] font-mono font-bold tracking-widest text-brand-900/50 uppercase block">
-                    Ringkasan Klinis &amp; Rekomendasi
-                  </span>
-                  <p className="text-xs sm:text-sm text-brand-900/80 leading-relaxed">
-                    {evidence.summary}
-                  </p>
-                </div>
-
-                {/* Footer Citation & Link */}
-                <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-                  <div className="text-[11px] font-mono text-brand-900/50 truncate max-w-xl">
-                    Sitasi: {evidence.citation}
-                  </div>
-
-                  <a
-                    href={evidence.externalUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-900 hover:text-brand-700 underline underline-offset-4 shrink-0"
-                  >
-                    <span>Buka Sumber Resmi</span>
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
-                </div>
-              </article>
-            );
-          })}
-        </div>
+        {/* Bottom subtle verification note (clearly visible, BR-EVIDENCE-004) */}
+        <p className="text-[13px] text-neutral-600 font-normal text-left pt-3">
+          Terakhir ditinjau: {formatLastReviewedDate(getEarliestEvidenceReviewDate())}
+        </p>
       </section>
 
-      {/* Medical Disclaimer Banner */}
-      <footer className="pt-6 border-t border-brand-900/10">
-        <DisclaimerBanner variant="banner" />
+      {/* ── Detail View Dialog (Clean, Flat, No Empty Header/Footer Bars) ── */}
+      <AnimatePresence>
+        {selectedEvidence && (
+          <EvidenceDetailModal
+            evidence={selectedEvidence}
+            onClose={handleCloseDetail}
+            userActiveRuleIds={userActiveRuleIds}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* ── Footer Disclaimer (Kanonik PRD §20.14 & FR-005, selaras dengan Proyeksi & Skenario) ── */}
+      <footer className="pt-8 pb-10 border-t border-neutral-200/80 mt-10 w-full">
+        <p className="text-xs text-neutral-500 leading-relaxed text-left max-w-3xl font-normal">
+          HELIORA adalah alat bantu preventive health berbasis lifestyle dan AI. Hasil yang diberikan merupakan estimasi dan simulasi berdasarkan data dan model yang digunakan, bukan diagnosis medis dan bukan pengganti konsultasi tenaga kesehatan.
+        </p>
       </footer>
     </div>
   );
 }
 
+// ── Exported Page with Auth Guard & Suspense ───────────────────────────────
 export default function EvidenceCenterPage() {
   const { isAuthorized } = useRequireAuth();
 
   if (!isAuthorized) {
     return (
       <div className="flex-1 min-w-0 flex items-center justify-center p-6 min-h-[50vh]">
-        <p className="text-sm font-medium text-brand-900/70">Memverifikasi otentikasi...</p>
+        <p className="text-sm font-normal text-neutral-500">
+          Memverifikasi otentikasi...
+        </p>
       </div>
     );
   }
 
   return (
     <div className="flex-1 min-w-0 flex flex-col">
-      {/* Top Header / Breadcrumb */}
-      <header className="h-16 border-b border-brand-900/10 bg-white/70 backdrop-blur-md sticky top-0 z-10 px-6 hidden lg:flex items-center justify-between">
-        <div className="flex items-center gap-2 text-xs font-mono">
-          <Link href="/dashboard" className="text-brand-900/50 uppercase hover:text-brand-900 transition-colors">
-            Dashboard
-          </Link>
-          <span className="text-brand-900/30">/</span>
-          <span className="text-brand-900 font-bold uppercase">Pusat Bukti Medis</span>
-        </div>
-
-        <Link
-          href="/dashboard/recommendations"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-900/70 hover:text-brand-900 transition-colors"
-        >
-          <BookOpen className="w-3.5 h-3.5 text-brand-900/60" />
-          <span>Rencana Tindakan</span>
-        </Link>
-      </header>
-
-      {/* Main Container wrapped in Suspense for searchParams */}
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 flex-1 w-full">
+      <main className="flex-1 px-6 sm:px-10 lg:px-16 xl:px-20 py-6 sm:py-8 pb-16 space-y-6 sm:space-y-8 w-full select-text">
         <Suspense
           fallback={
-            <div className="p-8 text-center text-xs text-brand-900/60 font-mono">
-              Memuat katalog bukti medis...
+            <div className="p-8 text-xs text-neutral-400">
+              Menyiapkan katalog dasar ilmiah...
             </div>
           }
         >

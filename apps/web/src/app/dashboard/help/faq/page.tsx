@@ -3,11 +3,11 @@
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import {
-  SFBubbleLeftRight,
-  SFChevronDown,
-  SFMagnifyingglass,
-  SFHeadphones,
-} from "@/components/icons/sf-icons";
+  MessageSquare as SFBubbleLeftRight,
+  ChevronDown as SFChevronDown,
+  Search as SFMagnifyingglass,
+  Headphones as SFHeadphones,
+} from "lucide-react";
 import { DisclaimerBanner } from "@/components/disclaimer-banner";
 
 interface FAQItem {
@@ -24,13 +24,13 @@ const FAQS: FAQItem[] = [
     category: "medical",
     question: "Apakah hasil estimasi risiko HELIORA merupakan diagnosis medis resmi?",
     answer:
-      "Bukan. HELIORA adalah platform kecerdasan buatan untuk skrining stratifikasi risiko preventif dan pendukung keputusan klinis (Clinical Decision Support). Seluruh angka probabilitas 10-tahun ditujukan untuk edukasi dan deteksi dini, bukan pengganti konsultasi, pemeriksaan fisik, atau diagnosis definitif dari dokter Anda.",
+      "Bukan. HELIORA adalah platform kecerdasan buatan untuk skrining stratifikasi risiko preventif dan pendukung keputusan klinis (Clinical Decision Support). Seluruh angka skor estimasi risiko ditujukan untuk edukasi dan deteksi dini, bukan pengganti konsultasi, pemeriksaan fisik, atau diagnosis definitif dari dokter Anda.",
     badge: "Klinis & Medis",
   },
   {
     id: "faq-2",
     category: "ai",
-    question: "Bagaimana algoritma AI HELIORA menghitung probabilitas 10-tahun penyakit kronis?",
+    question: "Bagaimana algoritma AI HELIORA menghitung skor estimasi risiko penyakit kronis?",
     answer:
       "AI HELIORA memanfaatkan model machine learning terkalibrasi (ensemble gradient boosting) yang dilatih dan divalidasi terhadap dataset kohort longitudinal epidemiologis. Model mengintegrasikan parameter demografi, antropometri, profil lipid, glukosa puasa, tekanan darah, dan riwayat gaya hidup sesuai kaidah biostatistika internasional.",
     badge: "Metodologi AI",
@@ -40,7 +40,7 @@ const FAQS: FAQItem[] = [
     category: "ai",
     question: "Apa itu analisis Explainable AI (SHAP) dan mengapa itu penting bagi saya?",
     answer:
-      "SHAP (SHapley Additive exPlanations) adalah metode teori permainan kooperatif untuk menjelaskan kontribusi matematis tiap biomarker terhadap skor risiko Anda. Dengan SHAP, HELIORA tidak berperilaku sebagai 'black box'—Anda dapat melihat persis biomarker mana yang paling menaikkan atau menurunkan skor risiko Anda.",
+      "SHAP (SHapley Additive exPlanations) adalah metode teori permainan kooperatif untuk menjelaskan kontribusi matematis tiap biomarker terhadap skor risiko Anda. Dengan SHAP, HELIORA tidak berperilaku sebagai 'black box': Anda dapat melihat persis biomarker mana yang paling menaikkan atau menurunkan skor risiko Anda.",
     badge: "Explainable AI",
   },
   {

@@ -3,15 +3,15 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import {
-  SFDocText,
-  SFBubbleLeftRight,
-  SFHeadphones,
-  SFChevronRight,
-  SFMagnifyingglass,
-  SFSparkles,
-  SFBookClosed,
-  SFInfoCircle,
-} from "@/components/icons/sf-icons";
+  FileText as SFDocText,
+  MessageSquare as SFBubbleLeftRight,
+  Headphones as SFHeadphones,
+  ChevronRight as SFChevronRight,
+  Search as SFMagnifyingglass,
+  Sparkles as SFSparkles,
+  BookOpen as SFBookClosed,
+  Info as SFInfoCircle,
+} from "lucide-react";
 import { DisclaimerBanner } from "@/components/disclaimer-banner";
 
 export default function HelpCenterHubPage() {

@@ -104,18 +104,29 @@ export interface HealthProfileResponse {
   height_cm: number;
   weight_kg: number;
   bmi: number;
+  bmi_category?: string | null;
   physical_activity_min_per_week: number;
   sleep_duration_hours: number;
   smoking_status: string;
   family_history: boolean;
   family_history_details?: string | null;
   stress_level?: number | null;
+  waist_circumference_cm?: number | null;
+  blood_pressure?: string | null;
+  blood_sugar_mg_dl?: number | null;
+  cholesterol_mg_dl?: number | null;
   created_at: string;
   updated_at?: string | null;
 }
 
 export type RiskLevel = "low" | "moderate" | "high";
-export type StandardizedRiskLabel = "Lower" | "Moderate" | "Higher";
+export type StandardizedRiskLabel =
+  | "Lower"
+  | "Moderate"
+  | "Higher"
+  | "Lebih Rendah"
+  | "Sedang"
+  | "Lebih Tinggi";
 
 export interface RiskAssessmentItem {
   condition: "diabetes" | "hypertension" | "cardiovascular";
@@ -134,16 +145,17 @@ export interface ContributingFactor {
   impact: "increase" | "decrease";
   weight_percentage: number;
   description: string;
+  value_display?: string;
 }
 
 export interface RecommendationItem {
   id: string;
   rule_id?: string;
   title: string;
-  category: "sleep" | "activity" | "nutrition" | "stress";
+  category: "sleep" | "activity" | "nutrition" | "stress" | "consultation";
   priority?: "high" | "medium" | "low" | "protective";
   action: string;
-  evidence_level: "A" | "B" | "C";
+  evidence_level: "High" | "Moderate" | "Limited" | "A" | "B" | "C";
   source: string;
 }
 
@@ -158,6 +170,8 @@ export interface AssessmentSummaryResponse {
   assessed_at: string;
   /** Set by the frontend when it shows example data because no real assessment could be loaded. */
   is_mock?: boolean;
+  /** Set to true when this is the user's initial baseline assessment (no trend history). */
+  is_baseline?: boolean;
 }
 
 // ── Simulation Endpoints (Architecture §14, PRD BR-SIM-001–008, AC-SIM-01) ──
@@ -181,6 +195,12 @@ export interface RiskTrajectoryItem {
   description: string;
 }
 
+export interface DailyTrajectoryPoint {
+  day: number;
+  health_score: number;
+  lifestyle_score: number;
+}
+
 export interface FutureSimulationResponse {
   horizon_days: SimulationHorizon;
   assumptions: string[];
@@ -189,6 +209,7 @@ export interface FutureSimulationResponse {
   baseline_lifestyle_score: number;
   projected_lifestyle_score: number;
   risk_trajectories: RiskTrajectoryItem[];
+  daily_trajectories?: DailyTrajectoryPoint[];
   is_model_estimated: boolean;
   disclaimer: string;
 }
@@ -231,17 +252,35 @@ export interface WhatIfSimulationResponse {
 // ── Evidence Center Endpoints (Architecture §14, PRD FR-027, BR-EVIDENCE-001) ──
 export interface ClinicalEvidenceItem {
   id: string;
+  slug?: string;
   rule_id: string;
   title: string;
+  title_translation?: string;
   organization: string;
+  short_org?: string;
+  publication?: string;
+  evidence_type?: string;
+  evidence_type_category?: string;
   year: number;
-  evidence_level: "Level A (Kuat)" | "Level B (Sedang)" | "Level C (Konsensus Pakar)";
-  category: "activity" | "sleep" | "nutrition" | "cardiovascular" | "stress";
+  version?: string;
+  evidence_level?: "Level A (Kuat)" | "Level B (Sedang)" | "Level C (Konsensus Pakar)";
+  recommendation_strength?: "Kuat" | "Kondisional";
+  evidence_certainty?: "Tinggi" | "Sedang" | "Terbatas" | "Konsensus Klinis";
+  evidence_grading_system?: string;
+  evidence_grading_detail?: string;
+  category: "activity" | "sleep" | "nutrition" | "cardiovascular" | "weight" | "smoking" | "stress" | "consultation";
   category_label: string;
+  supported_recommendations?: Array<{ ruleId: string; title: string; actionText: string } | string>;
+  plain_summary?: string;
+  biological_mechanism?: string;
   summary: string;
   clinical_section: string;
-  citation: string;
+  citation?: string;
+  primary_citation?: string;
+  related_publication?: string;
   external_url: string;
+  last_verified?: string;
+  doi?: string;
 }
 
 export interface EvidenceListResponse {

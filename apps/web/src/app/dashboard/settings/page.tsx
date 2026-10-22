@@ -1,50 +1,72 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import {
-  SFShieldCheckmark,
-  SFKey,
-  SFDocText,
-  SFDoorExit,
-  SFCheckmarkCircle,
-  SFArrowUpRight,
-  SFLock,
-  SFEnvelope,
-} from "@/components/icons/sf-icons";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ChevronRight, Loader2 } from "lucide-react";
 import { apiClient } from "@/lib/api-client";
 import { useRequireAuth } from "@/lib/use-require-auth";
 import { ConsentStatusResponse, UserResponse } from "@/types/api";
-import { DisclaimerBanner } from "@/components/disclaimer-banner";
+import { AUTH_PASSWORD_RESET_COOLDOWN_SECONDS } from "@/lib/auth-config";
 
-export default function SettingsPage() {
+function SettingsInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { isAuthorized } = useRequireAuth();
-  const [user, setUser] = useState<UserResponse | null>(null);
+
+  const [user, setUser] = useState<UserResponse | null>(() => apiClient.getStoredUser());
   const [consentStatus, setConsentStatus] = useState<ConsentStatusResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [passwordResetSent, setPasswordResetSent] = useState(false);
-  const [isResetting, setIsResetting] = useState(false);
+  const [consentError, setConsentError] = useState(false);
+
+  // Trigger ref for focus restoration
+  const passwordTriggerRef = useRef<HTMLButtonElement>(null);
+  const passwordCancelRef = useRef<HTMLButtonElement>(null);
+
+  // State Alert Ubah Kata Sandi
+  const demoParam = searchParams.get("demo");
+  const isDemoSent = demoParam === "reset-sent" || demoParam === "alert-sent";
+  const isDemoLoading = demoParam === "alert-loading";
+  const isDemoError = demoParam === "alert-error";
+  const isDemoDefault = demoParam === "alert-default";
+
+  const [showPasswordAlert, setShowPasswordAlert] = useState(
+    isDemoSent || isDemoLoading || isDemoError || isDemoDefault
+  );
+  const [isResetting, setIsResetting] = useState(isDemoLoading);
+  const [resetSent, setResetSent] = useState(isDemoSent);
+  const [resetCountdown, setResetCountdown] = useState(isDemoSent ? 58 : 0);
+  const [resetError, setResetError] = useState<string | null>(
+    isDemoError ? "Tidak dapat mengirim tautan. Silakan coba beberapa saat lagi." : null
+  );
+
+  // State Logout
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
     if (!isAuthorized) return;
     let isCancelled = false;
 
     async function loadSettings() {
-      setIsLoading(true);
       try {
-        const storedUser = apiClient.getStoredUser();
-        if (storedUser) {
-          setUser(storedUser);
-        }
+        const stored = apiClient.getStoredUser();
+        if (stored && !isCancelled) setUser(stored);
 
-        const consent = await apiClient.consent.getStatus();
-        if (!isCancelled) {
-          setConsentStatus(consent);
+        const [meRes, consentRes] = await Promise.allSettled([
+          apiClient.auth.me(),
+          apiClient.consent.getStatus(),
+        ]);
+
+        if (isCancelled) return;
+
+        if (meRes.status === "fulfilled") {
+          setUser(meRes.value);
         }
-      } catch {
-        // Silently catch error
+        if (consentRes.status === "fulfilled") {
+          setConsentStatus(consentRes.value);
+        } else {
+          setConsentError(true);
+        }
       } finally {
         if (!isCancelled) {
           setIsLoading(false);
@@ -59,7 +81,70 @@ export default function SettingsPage() {
     };
   }, [isAuthorized]);
 
+  useEffect(() => {
+    if (resetCountdown <= 0) return;
+    const timer = setInterval(() => {
+      setResetCountdown((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [resetCountdown]);
+
+  useEffect(() => {
+    if (showPasswordAlert && !resetSent) {
+      passwordCancelRef.current?.focus();
+    }
+  }, [showPasswordAlert, resetSent]);
+
+  const handlePasswordAlertKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "Escape") {
+      e.stopPropagation();
+      e.preventDefault();
+      closePasswordAlert();
+    }
+  };
+
+  const closePasswordAlert = () => {
+    setShowPasswordAlert(false);
+    setResetSent(false);
+    setResetError(null);
+    passwordTriggerRef.current?.focus();
+  };
+
+  const handleRequestPasswordReset = async () => {
+    if (!user?.email || resetCountdown > 0) return;
+    setIsResetting(true);
+    setResetError(null);
+    try {
+      const { getSupabaseClient } = await import("@/lib/supabase-client");
+      const supabase = getSupabaseClient();
+      if (supabase) {
+        const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        if (error) {
+          if (
+            error.message?.toLowerCase().includes("rate limit") ||
+            error.status === 429
+          ) {
+            setResetError(
+              "Terlalu banyak permintaan. Silakan tunggu beberapa saat sebelum mencoba lagi."
+            );
+            return;
+          }
+          throw error;
+        }
+      }
+      setResetSent(true);
+      setResetCountdown(AUTH_PASSWORD_RESET_COOLDOWN_SECONDS);
+    } catch {
+      setResetError("Tidak dapat mengirim tautan. Silakan coba beberapa saat lagi.");
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
   const handleLogout = async () => {
+    setIsLoggingOut(true);
     try {
       await apiClient.auth.logout();
     } finally {
@@ -67,224 +152,199 @@ export default function SettingsPage() {
     }
   };
 
-  const handleRequestPasswordReset = async () => {
-    if (!user?.email) return;
-    setIsResetting(true);
-    try {
-      // Send password reset via Supabase Client
-      const { getSupabaseClient } = await import("@/lib/supabase-client");
-      const supabase = getSupabaseClient();
-      if (supabase) {
-        await supabase.auth.resetPasswordForEmail(user.email, {
-          redirectTo: `${window.location.origin}/auth/callback?next=/dashboard/settings`,
-        });
-      }
-      setPasswordResetSent(true);
-    } catch {
-      setPasswordResetSent(true); // Graceful state
-    } finally {
-      setIsResetting(false);
-    }
-  };
-
   if (!isAuthorized || isLoading) {
     return (
-      <div className="flex-1 min-w-0 flex items-center justify-center p-6 min-h-[50vh]">
-        <div className="text-center space-y-2">
-          <p className="text-xs font-mono font-bold tracking-widest text-brand-900/50 uppercase">
-            HELIORA
-          </p>
-          <p className="text-sm font-medium text-brand-900/70">Memuat pengaturan akun...</p>
+      <div className="flex-1 min-w-0 px-4 sm:px-8 lg:px-12 py-8 max-w-2xl space-y-6 animate-pulse">
+        <div className="h-8 w-32 bg-neutral-200 rounded-md" />
+        <div className="space-y-4">
+          <div className="h-32 bg-neutral-100 rounded-2xl" />
+          <div className="h-24 bg-neutral-100 rounded-2xl" />
+          <div className="h-12 bg-neutral-100 rounded-2xl" />
         </div>
       </div>
     );
   }
 
+  const isDemoRevoked = demoParam === "consent-revoked";
+  const hasActiveConsent = isDemoRevoked ? false : consentStatus?.has_active_consent === true;
+  const isRevoked = isDemoRevoked || (consentStatus !== null && !hasActiveConsent);
+
   return (
     <div className="flex-1 min-w-0 flex flex-col">
-      {/* Top Header / Breadcrumb */}
-      <header className="h-16 border-b border-brand-900/10 bg-white/70 backdrop-blur-md sticky top-0 z-10 px-6 hidden lg:flex items-center">
-        <div className="flex items-center gap-2 text-xs font-mono">
-          <Link href="/dashboard" className="text-brand-900/50 uppercase hover:text-brand-900 transition-colors">
-            Dashboard
-          </Link>
-          <span className="text-brand-900/30">/</span>
-          <span className="text-brand-900 font-bold uppercase">Pengaturan Akun</span>
-        </div>
-      </header>
-
-      {/* Main Content Area */}
-      <main className="flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:p-8 space-y-6 sm:space-y-8 max-w-4xl w-full mx-auto">
-        {/* Title Section */}
-        <section className="space-y-2 border-b border-brand-900/10 pb-6">
-          <span className="text-xs font-mono font-bold tracking-widest text-brand-900/50 uppercase block">
-            Preferensi &amp; Keamanan
-          </span>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-brand-900">
-            Pengaturan Akun &amp; Privasi
+      <main className="flex-1 px-4 sm:px-8 lg:px-12 py-6 sm:py-8 pb-16 w-full max-w-2xl space-y-8 select-text">
+        {/* Header */}
+        <header>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900">
+            Akun
           </h1>
-          <p className="text-sm text-brand-900/70 mt-1 max-w-2xl leading-relaxed">
-            Kelola kredensial akses, hak persetujuan privasi etika data medis, dan sesi aktif pada ekosistem HELIORA.
-          </p>
-        </section>
+        </header>
 
-        {/* Section 1: Security & Credentials */}
-        <section className="bg-white border border-brand-900/10 rounded-2xl p-6 shadow-xs space-y-5">
-          <div className="flex items-center justify-between pb-3 border-b border-brand-900/10">
-            <div>
-              <span className="text-[10px] font-mono font-bold tracking-widest text-brand-900/40 uppercase block">
-                Keamanan &amp; Autentikasi
-              </span>
-              <h2 className="text-base font-bold text-brand-900 mt-0.5">
-                Kredensial Akun
-              </h2>
-            </div>
-            <SFLock className="w-4 h-4 text-brand-900/40" />
-          </div>
-
-          <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl bg-neutral-50/70 border border-brand-900/10">
-              <div className="space-y-1">
-                <span className="text-[10px] font-mono font-bold text-brand-900/50 uppercase block">
-                  Email Terdaftar
-                </span>
-                <p className="text-sm font-bold text-brand-900 flex items-center gap-2">
-                  <SFEnvelope className="w-4 h-4 text-brand-900/60" />
-                  <span>{user?.email || "Tidak ada email"}</span>
-                </p>
-              </div>
-
-              <span className="text-[11px] font-mono font-bold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 self-start sm:self-auto">
-                Terenkripsi Supabase Auth
-              </span>
+        {/* Grup 1: Informasi Akun */}
+        <section aria-label="Informasi Akun">
+          <div className="bg-white rounded-2xl border border-neutral-200/80 shadow-xs divide-y divide-neutral-100 overflow-hidden">
+            {/* Baris Nama: Label primer (neutral-900), Value sekunder (neutral-500) */}
+            <div className="flex items-center justify-between px-4 py-3.5 text-sm">
+              <span className="font-medium text-neutral-900">Nama</span>
+              <span className="text-neutral-500 font-normal">{user?.full_name || "—"}</span>
             </div>
 
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl bg-neutral-50/70 border border-brand-900/10">
-              <div className="space-y-1">
-                <span className="text-[10px] font-mono font-bold text-brand-900/50 uppercase block">
-                  Kata Sandi
-                </span>
-                <p className="text-xs text-brand-900/70 leading-relaxed max-w-md">
-                  Ganti kata sandi secara aman dengan menerima tautan pembaruan kata sandi ke email Anda.
-                </p>
-              </div>
-
-              <div>
-                {passwordResetSent ? (
-                  <span className="text-xs font-mono font-bold text-emerald-800 flex items-center gap-1.5">
-                    <SFCheckmarkCircle className="w-4 h-4" />
-                    <span>Tautan Terkirim ke Email</span>
-                  </span>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={handleRequestPasswordReset}
-                    disabled={isResetting}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-brand-900 bg-white border border-brand-900/15 hover:bg-neutral-100 shadow-xs transition-all cursor-pointer disabled:opacity-50"
-                  >
-                    <SFKey className="w-3.5 h-3.5 text-brand-900/70" />
-                    <span>{isResetting ? "Mengirim..." : "Kirim Tautan Reset"}</span>
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Section 2: Privacy & Medical Consent Management (FR-004, BR-CONSENT-003) */}
-        <section className="bg-white border border-brand-900/10 rounded-2xl p-6 shadow-xs space-y-5">
-          <div className="flex items-center justify-between pb-3 border-b border-brand-900/10">
-            <div>
-              <span className="text-[10px] font-mono font-bold tracking-widest text-brand-900/40 uppercase block">
-                Privasi &amp; Etika Medis
-              </span>
-              <h2 className="text-base font-bold text-brand-900 mt-0.5">
-                Persetujuan Pengolahan Data (Consent)
-              </h2>
-            </div>
-            <SFShieldCheckmark className="w-4 h-4 text-emerald-700" />
-          </div>
-
-          <div className="space-y-4">
-            <div className="p-4 rounded-xl bg-neutral-50/70 border border-brand-900/10 space-y-3">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-brand-900/5 pb-2.5">
-                <div className="space-y-0.5">
-                  <span className="text-xs font-bold text-brand-900">
-                    Status Persetujuan Pemrosesan Data Medis
-                  </span>
-                  <p className="text-[11px] font-mono text-brand-900/60">
-                    Versi Kebijakan: {consentStatus?.terms_version || "v1.0"}
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-emerald-800">
-                  <SFCheckmarkCircle className="w-4 h-4" />
-                  <span>Aktif &amp; Terverifikasi</span>
-                </div>
-              </div>
-
-              <p className="text-xs text-brand-900/70 leading-relaxed">
-                Anda telah menyetujui pengolahan parameter gaya hidup murni untuk estimasi risiko preventif kardiometabolik non-diagnostik. Data Anda tidak diperjualbelikan atau dibagikan ke pihak ketiga tanpa persetujuan eksplisit.
-              </p>
-
-              {consentStatus?.active_consent?.accepted_at && (
-                <div className="text-[11px] font-mono text-brand-900/50">
-                  Waktu persetujuan:{" "}
-                  {new Date(consentStatus.active_consent.accepted_at).toLocaleString("id-ID", {
-                    dateStyle: "long",
-                    timeStyle: "short",
-                  })}
-                </div>
-              )}
+            {/* Baris Email: Label primer (neutral-900), Value sekunder (neutral-500) */}
+            <div className="flex items-center justify-between px-4 py-3.5 text-sm">
+              <span className="font-medium text-neutral-900">Email</span>
+              <span className="text-neutral-500 font-normal">{user?.email || "—"}</span>
             </div>
 
-            <div className="flex items-center justify-between pt-1">
-              <Link
-                href="/onboarding/consent"
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-900 hover:underline underline-offset-4"
-              >
-                <SFDocText className="w-3.5 h-3.5 text-brand-900/60" />
-                <span>Tinjau Naskah Persetujuan Lengkap</span>
-                <SFArrowUpRight className="w-3 h-3 text-brand-900/40" />
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* Section 3: Active Session & Sign Out */}
-        <section className="bg-white border border-brand-900/10 rounded-2xl p-6 shadow-xs space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-brand-900/10">
-            <div>
-              <span className="text-[10px] font-mono font-bold tracking-widest text-brand-900/40 uppercase block">
-                Sesi Perangkat
-              </span>
-              <h2 className="text-base font-bold text-brand-900 mt-0.5">
-                Keluar dari Perangkat
-              </h2>
-            </div>
-          </div>
-
-          <p className="text-xs text-brand-900/70 leading-relaxed max-w-lg">
-            Mengakhiri sesi akan menghapus token otentikasi lokal pada browser Anda. Anda dapat masuk kembali kapan saja dengan email dan kata sandi Anda.
-          </p>
-
-          <div className="pt-2">
+            {/* Baris Ubah Kata Sandi: Tanpa chevron (karena membuka alert dialog, bukan navigasi halaman) */}
             <button
+              ref={passwordTriggerRef}
               type="button"
-              onClick={handleLogout}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold text-rose-700 bg-rose-50/80 border border-rose-200/80 hover:bg-rose-100/70 transition-all cursor-pointer"
+              onClick={() => {
+                setShowPasswordAlert(true);
+                setResetSent(false);
+                setResetError(null);
+              }}
+              className="w-full flex items-center px-4 py-3.5 text-sm font-medium text-neutral-900 hover:bg-neutral-50/70 transition-colors text-left cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-900"
             >
-              <SFDoorExit className="w-4 h-4" />
-              <span>Keluar dari Akun</span>
+              <span>Ubah Kata Sandi</span>
             </button>
           </div>
         </section>
 
-        {/* Footer Medical Disclaimer */}
-        <footer className="pt-6 border-t border-brand-900/10">
-          <DisclaimerBanner variant="banner" />
-        </footer>
+        {/* Grup 2: Privasi */}
+        <section aria-labelledby="section-privacy" className="space-y-2">
+          <h2 id="section-privacy" className="text-xs font-semibold uppercase tracking-wider text-neutral-500 px-4">
+            Privasi
+          </h2>
+
+          <div className="bg-white rounded-2xl border border-neutral-200/80 shadow-xs divide-y divide-neutral-100 overflow-hidden">
+            {/* Baris Persetujuan Data: Label primer, Value sekunder + chevron navigasi */}
+            <Link
+              href="/dashboard/settings/consent"
+              className="flex items-center justify-between px-4 py-3.5 text-sm hover:bg-neutral-50/70 transition-colors text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-900"
+            >
+              <span className="font-medium text-neutral-900">Persetujuan Data</span>
+              <div className="flex items-center gap-1.5">
+                {consentError ? (
+                  <span className="text-xs text-rose-700 font-medium">Gagal memuat status</span>
+                ) : hasActiveConsent ? (
+                  <span className="text-sm text-neutral-500 font-normal">Diberikan</span>
+                ) : isRevoked ? (
+                  <span className="text-sm text-amber-800 font-medium">Ditarik</span>
+                ) : (
+                  <span className="text-sm text-neutral-500 font-normal">Belum Diberikan</span>
+                )}
+                <ChevronRight className="w-4 h-4 text-neutral-400" />
+              </div>
+            </Link>
+
+            {/* Baris Hapus Akun: Label primer + chevron navigasi */}
+            <Link
+              href="/dashboard/settings/delete-account"
+              className="flex items-center justify-between px-4 py-3.5 text-sm hover:bg-neutral-50/70 transition-colors text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-900"
+            >
+              <span className="font-medium text-neutral-900">Hapus Akun</span>
+              <ChevronRight className="w-4 h-4 text-neutral-400" />
+            </Link>
+          </div>
+        </section>
+
+        {/* Grup 3: Keluar (Grup Terakhir) */}
+        <section aria-label="Keluar">
+          <div className="bg-white rounded-2xl border border-neutral-200/80 shadow-xs overflow-hidden">
+            <button
+              type="button"
+              onClick={handleLogout}
+              disabled={isLoggingOut}
+              className="w-full flex items-center justify-center px-4 py-3.5 text-sm font-semibold text-rose-700 hover:bg-rose-50/50 transition-colors cursor-pointer disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600"
+            >
+              <span>{isLoggingOut ? "Keluar..." : "Keluar"}</span>
+            </button>
+          </div>
+        </section>
       </main>
+
+      {/* Alert Ubah Kata Sandi */}
+      {showPasswordAlert && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="password-alert-title"
+          onKeyDown={handlePasswordAlertKeyDown}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4"
+        >
+          <div className="bg-white w-full max-w-sm rounded-2xl shadow-xl border border-neutral-200 p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <h2 id="password-alert-title" className="text-base font-bold text-neutral-900">
+              Ubah Kata Sandi
+            </h2>
+
+            {resetSent ? (
+              <p className="text-sm text-neutral-700 leading-relaxed">
+                Tautan terkirim ke <strong className="text-neutral-900 font-semibold">{user?.email || "email Anda"}</strong>.
+              </p>
+            ) : (
+              <p className="text-sm text-neutral-600 leading-relaxed">
+                Kami akan mengirim tautan ke{" "}
+                <strong className="text-neutral-900 font-semibold">{user?.email || "email Anda"}</strong> untuk membuat kata sandi baru. Tautan berlaku 1{"\u00A0"}jam.
+              </p>
+            )}
+
+            {resetError && (
+              <p className="text-xs text-rose-700 font-medium">
+                {resetError}
+              </p>
+            )}
+
+            <div className="pt-2 flex items-center justify-end gap-2.5">
+              {resetSent ? (
+                <button
+                  type="button"
+                  onClick={closePasswordAlert}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-neutral-900 hover:bg-neutral-800 transition-colors cursor-pointer"
+                >
+                  Selesai
+                </button>
+              ) : (
+                <>
+                  <button
+                    ref={passwordCancelRef}
+                    type="button"
+                    onClick={closePasswordAlert}
+                    disabled={isResetting}
+                    className="px-4 py-2 rounded-xl text-xs font-medium text-neutral-700 hover:bg-neutral-100 transition-colors cursor-pointer"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleRequestPasswordReset}
+                    disabled={isResetting || resetCountdown > 0}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-white bg-emerald-800 hover:bg-emerald-900 transition-colors cursor-pointer disabled:opacity-50"
+                  >
+                    {isResetting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                    <span>
+                      {isResetting
+                        ? "Mengirim..."
+                        : resetCountdown > 0
+                        ? `Kirim ulang (${resetCountdown}s)`
+                        : resetError
+                        ? "Coba Lagi"
+                        : "Kirim Tautan"}
+                    </span>
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
+  );
+}
+
+export default function SettingsPage() {
+  return (
+    <Suspense fallback={<div className="flex-1 min-w-0 p-8 animate-pulse" />}>
+      <SettingsInner />
+    </Suspense>
   );
 }

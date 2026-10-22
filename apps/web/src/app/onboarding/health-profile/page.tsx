@@ -69,7 +69,7 @@ export default function HealthProfilePage() {
   // Step 3: Riwayat Medis (Opsional)
   const [familyHistory, setFamilyHistory] = useState<string[]>(["none"]);
   const [familyHistoryDetails, setFamilyHistoryDetails] = useState("");
-  const [stress, setStress] = useState("5");
+  const [stress, setStress] = useState("3");
 
   useEffect(() => {
     let isMounted = true;
@@ -147,8 +147,10 @@ export default function HealthProfilePage() {
             setFamilyHistoryDetails("");
           }
 
-          if (profile.stress_level) {
-            setStress(String(profile.stress_level));
+          if (profile.stress_level != null) {
+            const raw = Number(profile.stress_level);
+            const norm = raw > 5 ? Math.min(5, Math.max(1, Math.round(raw / 2))) : Math.min(5, Math.max(1, Math.round(raw)));
+            setStress(String(norm));
           }
         } catch {
           // No profile yet, start fresh
@@ -254,23 +256,29 @@ export default function HealthProfilePage() {
         smoking_status: smoking || "never",
         family_history: hasFamilyHistory,
         family_history_details: resolvedDetails,
-        stress_level: stress ? parseInt(stress, 10) : 5,
+        stress_level: stress ? parseInt(stress, 10) : 3,
         bmi: bmiValue,
       };
 
       await apiClient.healthProfile.save(payload);
 
+      let assessmentSuccess = true;
       try {
         await apiClient.assessment.run();
       } catch (assessmentErr) {
-        console.warn("Auto-assessment on onboarding warning:", assessmentErr);
+        assessmentSuccess = false;
+        console.warn("Auto-assessment warning (FR-042 fallback):", assessmentErr);
       }
 
       if (typeof window !== "undefined") {
         localStorage.setItem("heliora_health_profile", JSON.stringify(payload));
       }
 
-      router.push("/dashboard");
+      if (typeof window !== "undefined" && (window.location.search.includes("edit") || (typeof document !== "undefined" && document.referrer.includes("/dashboard/profile")))) {
+        router.push(assessmentSuccess ? "/dashboard/profile?updated=true" : "/dashboard/profile?partial=true");
+      } else {
+        router.push(assessmentSuccess ? "/dashboard" : "/dashboard?notice=partial_assessment");
+      }
     } catch (err: unknown) {
       setIsLoading(false);
       if (err instanceof ApiClientError) {
@@ -610,21 +618,24 @@ export default function HealthProfilePage() {
                 {/* Tingkat Stres */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <label className="text-[15px] font-medium text-[#111827]">
-                      Tingkat Stres Harian
-                    </label>
+                    <div>
+                      <label className="text-[15px] font-medium text-[#111827]">
+                        Tingkat Stres Harian
+                      </label>
+                      <span className="text-xs text-[#6B7280] block">Opsional · Skala 1–5</span>
+                    </div>
                     <div className="flex items-baseline gap-1 tabular-nums">
                       <span className="text-[15px] font-semibold text-[#111827]">
-                        {stress || "5"}
+                        {stress || "3"}
                       </span>
-                      <span className="text-[15px] text-[#6B7280]">/ 10</span>
+                      <span className="text-[15px] text-[#6B7280]">/ 5</span>
                     </div>
                   </div>
                   <div className="pt-2 pb-1">
                     <Slider
-                      value={[Number(stress) || 5]}
+                      value={[Number(stress) || 3]}
                       min={1}
-                      max={10}
+                      max={5}
                       step={1}
                       onValueChange={(val) => {
                         const v = typeof val === "number" ? val : val[0];
@@ -635,11 +646,15 @@ export default function HealthProfilePage() {
                   </div>
                   <div className="text-xs sm:text-[13px] text-[#6B7280]">
                     <span>
-                      {Number(stress) <= 3
-                        ? "Rendah (Rileks dan terkendali)"
-                        : Number(stress) <= 6
-                        ? "Sedang (Beban kerja normal)"
-                        : "Tinggi (Sering tertekan / rentan burnout)"}
+                      {Number(stress) <= 1
+                        ? "1: Sangat Rendah (Rileks dan terkendali)"
+                        : Number(stress) === 2
+                        ? "2: Rendah (Beban kerja ringan)"
+                        : Number(stress) === 3
+                        ? "3: Sedang (Beban kerja harian normal)"
+                        : Number(stress) === 4
+                        ? "4: Tinggi (Sering merasa tertekan)"
+                        : "5: Sangat Tinggi (Rentan burnout / beban berat)"}
                     </span>
                   </div>
                 </div>
@@ -672,6 +687,12 @@ export default function HealthProfilePage() {
                 <ArrowLeft className="w-4 h-4" />
                 <span>Consent</span>
               </Link>
+            )}
+
+            {step === 3 && (
+              <p className="text-xs text-[#6B7280] text-center sm:text-left max-w-xs leading-relaxed">
+                Menyimpan data akan secara otomatis memperbarui estimasi risiko dan rekomendasi Anda.
+              </p>
             )}
 
             <div className="flex items-center gap-3">
