@@ -204,3 +204,53 @@ body {
   animation: specular-shimmer 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
+.legal-content a:focus-visible {
+  outline: 2px solid #0F7A4E;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ── Print Stylesheet for Legal Documents & PDF Export ── */
+@media print {
+  html,
+  body {
+    background: #FFFFFF !important;
+    color: #111111 !important;
+    font-size: 11pt !important;
+    line-height: 1.5 !important;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Prevent awkward page breaks in tables and clauses */
+  table,
+  tr,
+  td,
+  th {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  section {
+    break-inside: avoid-page;
+    page-break-inside: avoid;
+    margin-bottom: 2rem !important;
+  }
+
+  /* Surface destination URL on external links when printed (excludes mailto and anchor links) */
+  .legal-content a[href^="http"]:after {
+    content: " (" attr(href) ")";
+    font-size: 85%;
+    color: #444444;
+  }
+
+  .legal-content a[href^="#"]:after,
+  .legal-content a[href^="mailto:"]:after {
+    content: "";
+  }
+}
+
+

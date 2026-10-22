@@ -252,13 +252,12 @@ export default function RegisterPage() {
                 >
                   Ketentuan Layanan
                 </Link>{" "}
-                &amp;{" "}
-                kebijakan{" "}
+                dan{" "}
                 <Link
                   href="/privacy"
                   className={TEXT_LINK}
                 >
-                  Privasi Data
+                  Kebijakan Privasi
                 </Link>
                 .
               </label>
@@ -272,7 +271,7 @@ export default function RegisterPage() {
             <div className="flex items-center gap-1.5">
               <TriangleAlert className="size-3.5 shrink-0 text-amber-600" />
               <span className="text-xs">
-                Wajib menyetujui ketentuan layanan &amp; privasi data sebelum
+                Wajib menyetujui ketentuan layanan &amp; kebijakan privasi sebelum
                 mendaftar.
               </span>
             </div>

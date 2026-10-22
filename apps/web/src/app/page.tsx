@@ -3,6 +3,7 @@
 import React, { useRef } from "react";
 import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
+import { PublicFooter } from "@/components/public-footer";
 import { Button } from "@/components/ui/button";
 import { BilateralPatternFlow } from "@/components/BilateralPatternFlow";
 import { LayeredHealthPicture } from "@/components/LayeredHealthPicture";
@@ -13,7 +14,6 @@ import { SimulationDirectionVisual } from "@/components/SimulationDirectionVisua
 import { RecommendationsEvidenceVisual } from "@/components/RecommendationsEvidenceVisual";
 import { motion, useScroll, useTransform } from "motion/react";
 import { 
-  Activity as IconHeartbeat,
   ShieldCheck as IconShieldLock,
   Eye as IconEye,
   Compass as IconCompass,
@@ -571,20 +571,7 @@ export default function LandingPage() {
       </main>
 
       {/* FOOTER */}
-      <footer className="border-t border-brand-900/10 bg-white/70 backdrop-blur-md">
-        <div className="container mx-auto px-6 lg:px-12 py-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-brand-900/60 font-medium">
-          <div className="flex items-center gap-2 text-brand-900">
-            <LogoEmblem size={24} className="rounded-lg shadow-2xs" />
-            <span className="font-bold tracking-tight text-xs">HELIORA</span>
-          </div>
-          <div className="flex items-center gap-6">
-            <Link href="/terms" className="hover:text-brand-900 transition-colors">Ketentuan Layanan</Link>
-            <Link href="/privacy" className="hover:text-brand-900 transition-colors">Privasi Data</Link>
-            <Link href="/disclaimer" className="hover:text-brand-900 transition-colors">Disclaimer Medis</Link>
-          </div>
-          <p>© {new Date().getFullYear()} Heliora Inc. All rights reserved.</p>
-        </div>
-      </footer>
+<PublicFooter />
     </div>
   );
 }

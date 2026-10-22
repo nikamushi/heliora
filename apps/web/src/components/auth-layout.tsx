@@ -152,12 +152,14 @@ export function AuthLayout({
     <div className="flex min-h-screen flex-col justify-between bg-muted text-foreground selection:bg-brand-200">
       <main className="mx-auto flex w-full max-w-[440px] flex-1 flex-col items-center justify-center px-4 py-6 md:px-8">
         <div className="w-full">
-          <div className="mb-8 flex flex-col items-center">
+          <div className="mb-8 flex flex-col items-center text-center">
+            {/* Wordmark HELIORA */}
             <Link
               href="/"
-              className="group mb-6 flex items-center gap-2 transition-transform group-hover:scale-105"
+              className="mb-6 inline-flex items-center text-sm font-bold tracking-tight text-brand-900 transition-opacity hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-900 rounded-xs select-none"
+              aria-label="HELIORA Beranda"
             >
-              <LogoEmblem size={48} className="shadow-sm" />
+<LogoEmblem size={44} className="shadow-sm" />
             </Link>
             <h1 className="text-center text-[36px] leading-[42px] font-semibold tracking-tight text-foreground">
               {title}
@@ -183,32 +185,24 @@ export function AuthLayout({
         </div>
       </main>
 
-      <footer className="w-full border-t border-border bg-white/50 px-4 py-6 backdrop-blur-md md:px-8">
-        <div className="mx-auto flex max-w-2xl flex-wrap items-center justify-start gap-x-8 gap-y-1 text-xs text-muted-foreground sm:flex-nowrap sm:justify-between">
-          <p className="whitespace-nowrap text-muted-foreground/60">
-            © {new Date().getFullYear()} Heliora Inc. All rights reserved.
-          </p>
-          <nav className="flex items-center gap-x-4 whitespace-nowrap">
-            <Link
-              href="/terms"
-              className="transition-colors hover:text-foreground"
-            >
-              Ketentuan Layanan
-            </Link>
-            <span
-              aria-hidden="true"
-              className="select-none text-muted-foreground/40"
-            >
-              |
-            </span>
-            <Link
-              href="/privacy"
-              className="transition-colors hover:text-foreground"
-            >
-              Privasi Data
-            </Link>
-          </nav>
-        </div>
+      <footer className="w-full px-4 py-6 text-xs text-muted-foreground">
+        <nav
+          className="mx-auto flex items-center justify-center gap-6"
+          aria-label="Dokumen hukum"
+        >
+          <Link
+            href="/terms"
+            className="transition-colors hover:text-foreground hover:underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-900 rounded-xs"
+          >
+            Ketentuan Layanan
+          </Link>
+          <Link
+            href="/privacy"
+            className="transition-colors hover:text-foreground hover:underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-900 rounded-xs"
+          >
+            Kebijakan Privasi
+          </Link>
+        </nav>
       </footer>
     </div>
   );

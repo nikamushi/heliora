@@ -26,7 +26,7 @@ export function Navbar() {
             <div className="flex items-center gap-1 rounded-full bg-brand-50/80 px-1.5 py-1.5 backdrop-blur-md border border-brand-200/50 shadow-sm">
               {[
                 { name: "Fitur", href: "#why-heliora" },
-                { name: "How it works", href: "#how-it-works" },
+                { name: "Cara Kerja", href: "#how-it-works" },
               ].map((item) => (
                 <Link
                   key={item.name}
@@ -45,11 +45,11 @@ export function Navbar() {
               href="/login"
               className="text-sm font-medium text-brand-900/70 hover:text-brand-900 transition-colors"
             >
-              Log in
+              Masuk
             </Link>
             <Link href="/register">
               <Button className="rounded-full bg-brand-900 px-5 text-sm hover:bg-brand-900/90 shadow-sm text-white">
-                Sign up
+                Daftar
               </Button>
             </Link>
           </div>
@@ -58,6 +58,7 @@ export function Navbar() {
           <button
             className="md:hidden relative z-50 p-2 text-brand-900"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label={mobileMenuOpen ? "Tutup menu" : "Buka menu"}
           >
             {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -69,17 +70,17 @@ export function Navbar() {
         <div className="fixed inset-0 z-40 bg-brand-50 pt-24 px-6 md:hidden flex flex-col h-screen">
           <nav className="flex flex-col gap-6 text-2xl font-medium tracking-tight text-brand-900">
             <Link href="#why-heliora" onClick={() => setMobileMenuOpen(false)}>Fitur</Link>
-            <Link href="#how-it-works" onClick={() => setMobileMenuOpen(false)}>How it works</Link>
+            <Link href="#how-it-works" onClick={() => setMobileMenuOpen(false)}>Cara Kerja</Link>
           </nav>
           <div className="mt-auto pb-12 flex flex-col gap-4">
             <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
               <Button variant="outline" className="w-full h-14 rounded-2xl text-lg border-brand-200 text-brand-900 hover:bg-brand-100">
-                Log in
+                Masuk
               </Button>
             </Link>
             <Link href="/register" onClick={() => setMobileMenuOpen(false)}>
               <Button className="w-full h-14 rounded-2xl text-lg bg-brand-900 text-white hover:bg-brand-900/90">
-                Sign up
+                Daftar
               </Button>
             </Link>
           </div>
