@@ -646,7 +646,7 @@ export default function DashboardLayout({
               <TooltipContent
                 side="right"
                 sideOffset={12}
-                className="bg-brand-950/95 text-white border border-brand-800/80 shadow-xl rounded-lg py-1.5 px-3 text-xs font-medium tracking-wide backdrop-blur-md"
+                className="border border-neutral-700/60 bg-neutral-900 text-neutral-100 shadow-xl rounded-lg py-1.5 px-3 text-xs font-medium tracking-wide backdrop-blur-md"
               >
                 {user?.full_name || "Profil Saya"}
               </TooltipContent>
@@ -673,7 +673,7 @@ export default function DashboardLayout({
                 <TooltipContent
                   side="right"
                   sideOffset={12}
-                  className="bg-brand-950/95 text-white border border-brand-800/80 shadow-xl rounded-lg py-1.5 px-3 text-xs font-medium tracking-wide backdrop-blur-md"
+                  className="border border-neutral-700/60 bg-neutral-900 text-neutral-100 shadow-xl rounded-lg py-1.5 px-3 text-xs font-medium tracking-wide backdrop-blur-md"
                 >
                   Ringkasan
                 </TooltipContent>
@@ -698,7 +698,7 @@ export default function DashboardLayout({
                 <TooltipContent
                   side="right"
                   sideOffset={12}
-                  className="bg-brand-950/95 text-white border border-brand-800/80 shadow-xl rounded-lg py-1.5 px-3 text-xs font-medium tracking-wide backdrop-blur-md"
+                  className="border border-neutral-700/60 bg-neutral-900 text-neutral-100 shadow-xl rounded-lg py-1.5 px-3 text-xs font-medium tracking-wide backdrop-blur-md"
                 >
                   Jelajahi
                 </TooltipContent>
@@ -723,7 +723,7 @@ export default function DashboardLayout({
                 <TooltipContent
                   side="right"
                   sideOffset={12}
-                  className="bg-brand-950/95 text-white border border-brand-800/80 shadow-xl rounded-lg py-1.5 px-3 text-xs font-medium tracking-wide backdrop-blur-md"
+                  className="border border-neutral-700/60 bg-neutral-900 text-neutral-100 shadow-xl rounded-lg py-1.5 px-3 text-xs font-medium tracking-wide backdrop-blur-md"
                 >
                   Bantuan
                 </TooltipContent>

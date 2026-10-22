@@ -172,6 +172,9 @@ export interface AssessmentSummaryResponse {
   is_mock?: boolean;
   /** Set to true when this is the user's initial baseline assessment (no trend history). */
   is_baseline?: boolean;
+  ai_explanation?: string | null;
+  ai_evidence_refs?: string[] | null;
+  ai_source?: 'llm' | 'fallback' | null;
 }
 
 // ── Simulation Endpoints (Architecture §14, PRD BR-SIM-001–008, AC-SIM-01) ──

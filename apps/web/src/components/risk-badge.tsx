@@ -86,11 +86,11 @@ export function RiskBadge({
   return (
     <Tooltip>
       <TooltipTrigger asChild>{content}</TooltipTrigger>
-      <TooltipContent sideOffset={4} className="text-left max-w-xs space-y-1">
-        <p className="font-semibold text-[11px] uppercase tracking-wider text-brand-900/60 font-mono">
+      <TooltipContent sideOffset={6} className="text-left max-w-xs space-y-1.5 p-3">
+        <p className="font-semibold text-[11px] uppercase tracking-wider text-neutral-400 font-mono">
           Kategori Risiko: {label}
         </p>
-        <p className="text-xs text-brand-900/80 leading-relaxed font-normal">
+        <p className="text-xs text-neutral-200 leading-relaxed font-normal">
           {guidanceText}
         </p>
       </TooltipContent>

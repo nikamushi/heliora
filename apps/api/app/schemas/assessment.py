@@ -52,3 +52,6 @@ class AssessmentSummaryResponse(BaseModel):
     assessed_at: str
     is_mock: bool = False
     is_baseline: bool = True
+    ai_explanation: str | None = None
+    ai_evidence_refs: list[str] | None = None
+    ai_source: Literal["llm", "fallback"] | None = None

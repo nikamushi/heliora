@@ -2157,7 +2157,7 @@ Acceptance Criteria:
 
 - [x] Connect recommendation API.
 - [x] Connect evidence API.
-- [ ] Connect explanation API (pending LLM-001).
+- [x] Connect explanation API (pending LLM-001).
 - [x] Handle fallback.
 
 ---

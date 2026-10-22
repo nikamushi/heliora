@@ -600,6 +600,31 @@ export default function DashboardPage() {
           )}
         </section>
 
+        {/* AI Clinical Analysis */}
+        {assessment.ai_explanation && (
+          <section aria-labelledby="ai-analysis-heading" className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-mono font-bold tracking-widest text-brand-900/60 uppercase mb-1">
+                  Analisis Klinis AI
+                </p>
+                <h2 id="ai-analysis-heading" className="text-lg font-semibold text-neutral-900">
+                  Ringkasan personalisasi & bukti ilmiah
+                </h2>
+              </div>
+              <span className="text-xs font-mono text-neutral-500">
+                {assessment.ai_source === "llm" ? "Gemini 2.5 AI · Grounded" : "Deterministik · Standar Klinis"}
+              </span>
+            </div>
+
+            <div className="rounded-2xl border border-neutral-200/90 bg-white p-6 shadow-xs space-y-4">
+              <div className="text-neutral-700 leading-relaxed whitespace-pre-line text-sm">
+                {assessment.ai_explanation}
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* Simulator & Projection */}
         <section aria-labelledby="sim-heading" className="space-y-3">
           <h2 id="sim-heading" className="text-lg font-semibold text-neutral-900">Simulator dan proyeksi</h2>

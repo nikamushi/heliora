@@ -353,9 +353,10 @@ class AssessmentService:
         assessment.health_profile = profile
 
         total_completed = await assessment_repo.count_completed_by_user_id(session, user_id)
-        return self._format_assessment_response(
+        resp = self._format_assessment_response(
             assessment, top_factors_data, is_baseline=(total_completed <= 1)
         )
+        return await self._attach_explanation(resp)
 
     async def get_latest_assessment(
         self, session: AsyncSession, user_id: uuid.UUID
@@ -371,9 +372,10 @@ class AssessmentService:
                 ),
             )
         total_completed = await assessment_repo.count_completed_by_user_id(session, user_id)
-        return self._format_assessment_response(
+        resp = self._format_assessment_response(
             assessment, is_baseline=(total_completed <= 1)
         )
+        return await self._attach_explanation(resp)
 
     async def get_assessment_by_id(
         self, session: AsyncSession, assessment_id: uuid.UUID, user_id: uuid.UUID
@@ -388,9 +390,28 @@ class AssessmentService:
                 detail="Data asesmen risiko tidak ditemukan.",
             )
         total_completed = await assessment_repo.count_completed_by_user_id(session, user_id)
-        return self._format_assessment_response(
+        resp = self._format_assessment_response(
             assessment, is_baseline=(total_completed <= 1)
         )
+        return await self._attach_explanation(resp)
+
+
+    async def _attach_explanation(
+        self, resp: AssessmentSummaryResponse
+    ) -> AssessmentSummaryResponse:
+        """Enrich assessment response with AI clinical explanation (or fallback)."""
+        try:
+            from app.services.explanation_service import explain_assessment
+            risks_dict = [r.model_dump() for r in resp.risks]
+            factors_dict = [f.model_dump() for f in resp.top_factors]
+            recs_dict = [rec.model_dump() for rec in resp.recommendations]
+            explanation = await explain_assessment(risks_dict, factors_dict, recs_dict)
+            resp.ai_explanation = explanation.text
+            resp.ai_evidence_refs = explanation.evidence_refs
+            resp.ai_source = explanation.source
+        except Exception as exc:
+            logger.warning("Failed to generate AI explanation for assessment: %s", exc)
+        return resp
 
 
 assessment_service = AssessmentService()

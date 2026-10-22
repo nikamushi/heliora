@@ -39,7 +39,7 @@ class GeminiClient:
         payload = {
             "system_instruction": {"parts": [{"text": system_prompt}]},
             "contents": [{"parts": [{"text": user_message}]}],
-            "generationConfig": {"temperature": 0.3, "maxOutputTokens": 1024},
+            "generationConfig": {"temperature": 0.3, "maxOutputTokens": 2048},
         }
         try:
             async with httpx.AsyncClient(
