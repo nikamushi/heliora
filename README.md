@@ -4,17 +4,22 @@ AI-Powered Preventive Health Intelligence Platform.
 
 ## Overview
 
-HELIORA adalah platform MVP kompetisi INSEVENT 2026 (SDG 3) yang membantu masyarakat memahami kesehatan dari pola gaya hidup, mengestimasi risiko penyakit tidak menular (Diabetes Melitus Tipe 2, Hipertensi, Penyakit Kardiovaskular), melakukan simulasi perubahan gaya hidup, serta memperoleh rekomendasi preventif berbasis bukti klinis.
+HELIORA adalah platform MVP kompetisi INSEVENT 2026 (SDG 3: *Good Health and Well-Being*) yang membantu masyarakat memahami kesehatan dari pola gaya hidup, mengestimasi risiko penyakit tidak menular (Diabetes Melitus Tipe 2, Hipertensi, Penyakit Kardiovaskular), melakukan simulasi perubahan gaya hidup (*What-If Engine*), serta memperoleh rekomendasi preventif berbasis bukti klinis dan eksplanasi AI transparan.
 
 > [!IMPORTANT]
-> HELIORA bukan alat diagnosis medis, layanan telemedicine, ataupun pengganti konsultasi dengan dokter atau tenaga medis profesional.
+> **Batasan Medis (Medical Disclaimer):**
+> HELIORA adalah platform estimasi risiko preventif berbasis gaya hidup, bukan alat diagnosis medis klinis, layanan telemedicine, ataupun pengganti konsultasi dengan dokter atau tenaga medis profesional.
+
+---
 
 ## Tech Stack
 
-- **Frontend:** Next.js 16 (Turbopack, App Router), React 19, TypeScript, Tailwind CSS
+- **Frontend:** Next.js 16 (Turbopack, App Router), React 19, TypeScript, Tailwind CSS v4, Motion
 - **Backend:** FastAPI, Python 3.12, SQLAlchemy (asyncpg), Alembic, Pydantic v2
-- **Mobile (usulan, MOB-001 sampai MOB-008):** Flutter (Android), versi dikunci dengan FVM
-- **Auth & Database:** Supabase (PostgreSQL, JWKS Bearer auth, RLS)
+- **AI & Explainability:** Google Gemini (Generative AI), RAG Pipeline berbasis Evidence Klinis (CDC, WHO, PERKENI)
+- **Machine Learning & Data:** Scikit-Learn, XGBoost, empirical datasets (CDC BRFSS 2022, BPJS NCD, Harvard Dataverse Indonesia)
+- **Mobile (Android):** Flutter, dikunci dengan FVM (Flutter Version Management)
+- **Auth & Database:** Supabase (PostgreSQL, JWKS Bearer auth ES256/RS256, JIT User Provisioning, RLS)
 - **Monorepo & Tooling:** Turborepo, pnpm, uv
 
 ---
@@ -23,7 +28,7 @@ HELIORA adalah platform MVP kompetisi INSEVENT 2026 (SDG 3) yang membantu masyar
 
 - **Node.js** >= 20.x & **pnpm** >= 9.x
 - **Python** >= 3.11 (disarankan 3.12) & **uv** package manager
-- **Mobile saja:** Flutter versi di `apps/mobile/.fvmrc` (lewat FVM), Android Studio dengan Android SDK, dan JDK 17 bawaan Android Studio
+- **Mobile (Opsional):** Flutter versi sesuai `apps/mobile/.fvmrc` (lewat FVM), Android Studio dengan Android SDK, dan JDK 17
 
 Untuk pengembang lokal, aktifkan hook commit monorepo sekali setelah klon:
 ```bash
@@ -32,78 +37,55 @@ git config core.hooksPath .githooks
 
 ---
 
+## Konfigurasi Environment (.env)
+
+### 1. Backend (`apps/api/.env`)
+Salin dari template:
+```bash
+cp apps/api/.env.example apps/api/.env
+```
+Variabel penting:
+- `DATABASE_URL`: URI koneksi PostgreSQL / Supabase pooler (misal: `postgresql+asyncpg://postgres.[ref]:[password]@aws-0-[region].pooler.supabase.com:6543/postgres`).
+- `SUPABASE_URL` & `SUPABASE_ANON_KEY`: Kredensial project Supabase.
+- `GEMINI_API_KEY`: API key Google AI Studio untuk pipeline penjelasan klinis AI. (Jika tidak diisi, backend otomatis menggunakan *rule-based clinical fallback* non-blocking).
+- `GEMINI_MODEL`: Model Gemini yang aktif (default: `gemini-2.5-flash`).
+
+### 2. Frontend (`apps/web/.env.local`)
+Salin dari template:
+```bash
+cp apps/web/.env.example apps/web/.env.local
+```
+Variabel penting:
+- `NEXT_PUBLIC_API_URL`: URL API backend (default lokal: `http://localhost:8000`).
+- `NEXT_PUBLIC_SUPABASE_URL`: URL project Supabase.
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Anon/public key Supabase.
+
+---
+
 ## Cara Menjalankan Project
 
-### 1. Backend (FastAPI)
-
-Masuk ke direktori `apps/api`:
+### 1. Menjalankan Backend (FastAPI)
 
 ```bash
 cd apps/api
+uv sync --extra dev
+uv run alembic upgrade head
+uv run uvicorn app.main:app --reload --port 8000
 ```
+- API Endpoint: `http://localhost:8000`
+- Dokumentasi OpenAPI (Swagger UI): `http://localhost:8000/docs`
+- Health Check: `http://localhost:8000/api/v1/health`
 
-1. **Salin konfigurasi environment:**
-   ```bash
-   cp .env.example .env
-   # Di Windows PowerShell:
-   # Copy-Item .env.example .env
-   ```
-   Sesuaikan `DATABASE_URL` dengan database PostgreSQL lokal atau instance Supabase Anda.
-
-2. **Sinkronkan dependensi dengan `uv`:**
-   ```bash
-   uv sync --extra dev
-   ```
-
-3. **Jalankan migrasi database:**
-   ```bash
-   uv run alembic upgrade head
-   ```
-
-4. **Jalankan server FastAPI:**
-   ```bash
-   uv run uvicorn app.main:app --reload --port 8000
-   ```
-
-API berjalan di `http://localhost:8000`. Dokumentasi interaktif Swagger UI tersedia di `http://localhost:8000/docs`.
-
----
-
-### 2. Frontend (Next.js)
-
-Masuk ke direktori `apps/web`:
+### 2. Menjalankan Frontend (Next.js)
 
 ```bash
 cd apps/web
+pnpm install
+pnpm dev
 ```
+- Aplikasi web berjalan di `http://localhost:3000`.
 
-1. **Salin konfigurasi environment:**
-   ```bash
-   cp .env.example .env.local
-   # Di Windows PowerShell:
-   # Copy-Item .env.example .env.local
-   ```
-   Sesuaikan `NEXT_PUBLIC_API_URL` (default: `http://localhost:8000`) dan kredensial Supabase (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`).
-
-2. **Install dependensi paket:**
-   ```bash
-   pnpm install
-   ```
-
-3. **Jalankan server Next.js:**
-   ```bash
-   pnpm --filter frontend dev
-   # Atau jika berada di dalam direktori apps/web:
-   # pnpm dev
-   ```
-
-Aplikasi frontend berjalan di `http://localhost:3000`.
-
----
-
-### 3. Mobile (Flutter)
-
-Panduan lengkap ada di [`apps/mobile/README.md`](apps/mobile/README.md). Ringkasnya:
+### 3. Menjalankan Mobile (Flutter Android)
 
 ```bash
 cd apps/mobile
@@ -111,79 +93,85 @@ fvm install && fvm flutter pub get
 cd ../..
 pnpm --filter mobile dev
 ```
+*(Emulator Android menjangkau backend lokal melalui `http://10.0.2.2:8000`).*
 
-Emulator Android menjangkau backend lokal di `http://10.0.2.2:8000`, bukan `localhost`.
-
----
-
-### 4. Menjalankan Sekaligus dari Root (Opsional)
-
-Dari root direktori repositori:
-```bash
-pnpm dev
-```
-*(Menjalankan frontend dev server via Turborepo. Backend dapat dijalankan bersamaan di terminal terpisah menggunakan perintah `uv run uvicorn app.main:app --reload --port 8000` dari `apps/api`. Mobile tidak ikut karena `flutter run` butuh perangkat; jalankan dengan `pnpm --filter mobile dev`).*
+### 4. Menjalankan Sekaligus (Dev Runners)
+- **Web & Root:** Dari root direktori jalankan `pnpm dev`.
+- **Backend + Mobile (One-Click):** Dari root jalankan `pnpm dev:mobile` (otomatis menunggu backend siap sebelum membuka Flutter session).
 
 ---
 
-### 5. Menjalankan Mobile & Backend Sekaligus (One-Click Dev Runner)
+## Validasi & Pengujian Kualitas (QA Tested)
 
-Dari root direktori repositori:
-```bash
-pnpm dev:mobile
-```
-*(Menjalankan FastAPI backend secara otomatis, menunggu hingga endpoint `/api/v1/health` siap (HTTP 200), kemudian membuka Flutter mobile dengan TTY interaktif penuh untuk hot reload `r` dan `R`. Saat keluar dengan `q` atau Ctrl+C, proses backend dibersihkan secara otomatis tanpa meninggalkan zombie process).*
+Repositori ini telah melewati rangkaian pengetesan menyeluruh:
 
----
-
-## Menjalankan Linting & Pengujian
-
-### Backend
+### 1. Backend Test Suite
 ```bash
 cd apps/api
-uv run --extra dev ruff check app tests alembic
-uv run --extra dev pytest
+uv run pytest
 ```
+- **Hasil:** 380 passed, 2 skipped, 0 failures.
+- Cakupan pengujian: Kalkulasi skor risiko, deterministik What-If simulation, JIT Supabase OAuth token verification, integritas data consent (UU PDP), dan fallback non-blocking LLM explanation pipeline.
 
-### Frontend
+### 2. Frontend Build & Typecheck
 ```bash
-# Dari root monorepo
+cd apps/web
+npx tsc --noEmit
+pnpm build
+```
+- **Hasil:** 35 rute terkompilasi bersih menggunakan Turbopack tanpa type error.
+
+### 3. Linting
+```bash
+# Backend
+cd apps/api && uv run ruff check app tests alembic
+
+# Frontend
 pnpm --filter frontend lint
-pnpm --filter frontend build
 ```
-
-### Mobile
-```bash
-# Dari root monorepo
-pnpm --filter mobile lint
-pnpm --filter mobile test
-pnpm --filter mobile build
-```
-
-`pnpm lint`, `pnpm test`, dan `pnpm build` di root ikut menjalankan mobile, sehingga butuh Flutter dan Android SDK terpasang. Pengembang yang tidak mengerjakan mobile disarankan memakai `--filter` per aplikasi (misal `pnpm --filter frontend lint` atau `pnpm --filter frontend build`).
 
 ---
 
-## Dokumentasi & Struktur Proyek
+## Empirical Datasets & AI Intelligence
 
-- [PRD](docs/PRD.md)
-- [Architecture](docs/Architecture.md)
-- [Design](docs/Design.md)
-- [Monorepo](docs/Monorepo.md)
-- [TASK](docs/TASK.md)
-- [CONTRIBUTING](CONTRIBUTING.md)
+Model penilaian risiko HELIORA dikalibrasi menggunakan dataset empiris kesehatan (`apps/ml/data/`):
+1. **CDC BRFSS 2022 (`cdc_brfss_2022_preprocessed.parquet`):** Baseline data epidemiologi risiko metabolik dan kardiovaskular berskala besar.
+2. **BPJS NCD Feature Sample (`bpjs_sample_ncd_features.parquet`):** Karakteristik pola komorbiditas dan beban penyakit tidak menular di Indonesia.
+3. **Harvard Dataverse Indonesia Lifestyle (`dataverse_indonesia_lifestyle.parquet`):** Distribusi faktor gaya hidup spesifik populasi Indonesia (aktivitas fisik, konsumsi garam/gula, merokok, dan indeks massa tubuh).
+
+### AI Clinical Explanation Pipeline
+Ketika pengguna menyelesaikan *health assessment*, engine AI:
+1. Mengekstrak kontributor risiko utama (*explainable factors*).
+2. Melakukan retrieval referensi klinis terverifikasi (kategori bukti CDC/WHO/PERKENI).
+3. Memanggil model `gemini-2.5-flash` untuk merumuskan narasi penjelasan yang ramah pasien, transparan, dan terbebas dari halusinasi diagnosa.
+
+---
+
+## Standar Keamanan & Legalitas
+
+- **Kepatuhan UU PDP (UU No. 27/2022):** Persetujuan pemrosesan data kesehatan dilakukan secara eksplisit pada rute `/onboarding/consent` sebelum data kesehatan sensitif dikumpulkan.
+- **Autentikasi Supabase & OAuth:** Mendukung email/password dan Google OAuth dengan verifikasi JWKS (ES256/RS256) serta *Just-In-Time* (JIT) provisioning ke database internal.
+- **Rute Legal Terbuka:**
+  - `/terms`: Ketentuan Layanan lengkap dengan klausul batasan tanggung jawab hukum.
+  - `/privacy`: Kebijakan Privasi data pengguna sesuai prinsip minimisasi data.
+  - `/disclaimer`: Alias rute yang mengarahkan langsung ke disclaimer medis resmi.
+
+---
+
+## Struktur Direktori
 
 ```text
 heliora/
 ├── apps/
-│   ├── api/            # FastAPI backend (uv, SQLAlchemy, Alembic, tests)
-│   ├── mobile/         # Flutter Android app (pub, FVM; package.json berisi script saja)
-│   └── web/            # Next.js frontend (pnpm, App Router, Tailwind CSS)
+│   ├── api/            # Backend FastAPI (FastAPI, SQLAlchemy, Alembic, tests)
+│   ├── ml/             # ML data empirical & training scripts (apps/ml/data/)
+│   ├── mobile/         # Flutter Android app (FVM, Riverpod, clean architecture)
+│   └── web/            # Next.js frontend (App Router, Tailwind CSS, Turbopack)
 ├── docs/               # PRD, Architecture, Design, Monorepo, TASK
-├── supabase/           # Schema database & migrasi SQL Supabase
-├── .githooks/          # Commit message hooks
-├── package.json        # Turborepo root configuration
+├── supabase/           # Migrasi SQL & skema basis data
+├── .githooks/          # Commit message hooks monorepo
+├── package.json        # Konfigurasi Turborepo root
 ├── pnpm-workspace.yaml
-├── pyproject.toml      # uv workspace root
+├── pyproject.toml      # Konfigurasi uv workspace root
 └── turbo.json
 ```
