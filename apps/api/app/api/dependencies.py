@@ -68,8 +68,36 @@ async def get_current_user(
 
     user = await user_repo.get_by_id(db, user_id)
     if user is None:
-        logger.warning(f"[AUTH 401] User ID {user_id} not found in public.users")
-        raise credentials_exception
+        email = payload.get("email")
+        if email:
+            user = await user_repo.get_by_email(db, email)
+            if user is None:
+                user_meta = payload.get("user_metadata") or {}
+                full_name = (
+                    user_meta.get("full_name")
+                    or user_meta.get("name")
+                    or email.split("@")[0]
+                )
+                try:
+                    user = await user_repo.create(
+                        db,
+                        id=user_id,
+                        email=email,
+                        full_name=full_name,
+                    )
+                    logger.info(
+                        f"[AUTH JIT] Auto-provisioned user {email} (ID: {user_id}) from Supabase token"
+                    )
+                except Exception as prov_err:
+                    logger.error(
+                        f"[AUTH JIT] Failed to auto-provision user {user_id}: {prov_err}"
+                    )
+                    raise credentials_exception
+            else:
+                logger.info(f"[AUTH] Resolved user by email {email} (ID: {user.id})")
+        else:
+            logger.warning(f"[AUTH 401] User ID {user_id} not found in public.users")
+            raise credentials_exception
 
     return user
 
