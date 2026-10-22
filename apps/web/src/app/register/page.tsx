@@ -86,7 +86,12 @@ export default function RegisterPage() {
   };
 
   return (
-    <AuthLayout title="Buat akun Heliora" showDisclaimer disclaimerText={PRIVACY_NOTE}>
+    <AuthLayout
+      title="Buat akun Heliora"
+      showDisclaimer
+      disclaimerText={PRIVACY_NOTE}
+      showFooter={false}
+    >
       <form onSubmit={handleRegister} className="space-y-4">
         <FormAlertTooltip message={error} onDismiss={() => setError("")} />
 

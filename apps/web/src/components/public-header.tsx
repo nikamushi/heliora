@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { LogoEmblem } from "@/components/logo";
 import { cn } from "@/lib/utils";
 
 export function PublicHeader() {
@@ -25,25 +26,7 @@ export function PublicHeader() {
           className="flex items-center gap-2.5 rounded-lg text-neutral-900 transition-opacity hover:opacity-85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-900"
           aria-label="HELIORA Beranda"
         >
-          {/* Standalone Vector SVG: Guaranteed to print and render sharply with fill */}
-          <svg
-            width="32"
-            height="32"
-            viewBox="0 0 32 32"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            className="size-8 shrink-0"
-            aria-hidden="true"
-          >
-            <rect width="32" height="32" rx="8" fill="#0F7A4E" />
-            <path
-              d="M7 16H11L13.5 10L18.5 22L21 16H25"
-              stroke="#FFFFFF"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <LogoEmblem size={32} className="shadow-2xs" />
           <span className="text-base font-bold tracking-tight text-brand-900">
             HELIORA
           </span>

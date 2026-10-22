@@ -13,6 +13,7 @@ interface AuthLayoutProps {
   showDisclaimer?: boolean;
   /** Overrides the note shown when `showDisclaimer` is set (see DisclaimerBanner). */
   disclaimerText?: string;
+  showFooter?: boolean;
   /**
    * `centered` — single-column card (hi-fi auth language).
    * `split` — two-column with brand panel (design.md §5.3).
@@ -26,6 +27,7 @@ export function AuthLayout({
   subtitle,
   showDisclaimer = false,
   disclaimerText,
+  showFooter = true,
   variant = "centered",
 }: AuthLayoutProps) {
   if (variant === "split") {
@@ -185,25 +187,27 @@ export function AuthLayout({
         </div>
       </main>
 
-      <footer className="w-full px-4 py-6 text-xs text-muted-foreground">
-        <nav
-          className="mx-auto flex items-center justify-center gap-6"
-          aria-label="Dokumen hukum"
-        >
-          <Link
-            href="/terms"
-            className="transition-colors hover:text-foreground hover:underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-900 rounded-xs"
+      {showFooter && (
+        <footer className="w-full px-4 py-6 text-xs text-muted-foreground">
+          <nav
+            className="mx-auto flex items-center justify-center gap-6"
+            aria-label="Dokumen hukum"
           >
-            Ketentuan Layanan
-          </Link>
-          <Link
-            href="/privacy"
-            className="transition-colors hover:text-foreground hover:underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-900 rounded-xs"
-          >
-            Kebijakan Privasi
-          </Link>
-        </nav>
-      </footer>
+            <Link
+              href="/terms"
+              className="transition-colors hover:text-foreground hover:underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-900 rounded-xs"
+            >
+              Ketentuan Layanan
+            </Link>
+            <Link
+              href="/privacy"
+              className="transition-colors hover:text-foreground hover:underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-900 rounded-xs"
+            >
+              Kebijakan Privasi
+            </Link>
+          </nav>
+        </footer>
+      )}
     </div>
   );
 }
