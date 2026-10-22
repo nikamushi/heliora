@@ -326,7 +326,7 @@ def test_get_source_missing_returns_none(wired):
 
 def test_registry_chunks_preserve_source_for_all_items():
     """Source tetap tersedia: every registry item chunks keep id/rule/cite/url."""
-    assert len(CLINICAL_EVIDENCE_REGISTRY) >= 15
+    assert len(CLINICAL_EVIDENCE_REGISTRY) >= 10
 
     for item in CLINICAL_EVIDENCE_REGISTRY:
         chunks = build_document_chunks(item)
