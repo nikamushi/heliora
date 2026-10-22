@@ -237,17 +237,17 @@ function ResetPasswordInner() {
 
           <div className="pt-2 flex flex-col gap-2">
             <Link
-              href="/login"
+              href="/forgot-password"
               className="inline-flex items-center justify-center gap-2 h-11 w-full rounded-xl bg-brand-900 hover:bg-brand-800 text-white text-xs font-semibold shadow-xs transition-all"
             >
-              <span>Kembali ke Halaman Masuk</span>
+              <span>Minta Tautan Pemulihan Baru</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
             <Link
-              href="/dashboard/settings"
+              href="/login"
               className="inline-flex items-center justify-center h-10 w-full rounded-xl border border-neutral-200 text-xs font-medium text-neutral-700 hover:text-neutral-900 hover:bg-neutral-50 transition-all"
             >
-              Buka Pengaturan Akun
+              Kembali ke Halaman Masuk
             </Link>
           </div>
         </div>

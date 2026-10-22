@@ -277,6 +277,40 @@ class ApiClient {
       }
       this.clearToken();
     },
+
+    resetPasswordForEmail: async (
+      email: string,
+      redirectTo?: string
+    ): Promise<void> => {
+      const supabase = getSupabaseClient();
+      if (supabase) {
+        const targetUrl =
+          redirectTo ||
+          (typeof window !== "undefined"
+            ? `${window.location.origin}/reset-password`
+            : "/reset-password");
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: targetUrl,
+        });
+        if (error) {
+          if (
+            error.status === 429 ||
+            (error as { code?: string }).code === "over_email_send_rate_limit"
+          ) {
+            throw new ApiClientError(
+              429,
+              "Terlalu banyak permintaan pemulihan kata sandi. Silakan tunggu beberapa menit sebelum mencoba lagi."
+            );
+          }
+          // Do not leak user existence (anti-enumeration)
+          console.warn("[Auth] resetPasswordForEmail notification:", error.message);
+        }
+        return;
+      }
+
+      // Simulated latency for dev without Supabase configured
+      await new Promise((resolve) => setTimeout(resolve, 600));
+    },
   };
 
   private mapSupabaseUser(supabaseUser: SupabaseAuthUser): UserResponse {

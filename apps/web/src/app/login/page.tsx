@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { Suspense, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,8 +11,9 @@ import { AuthLayout } from "@/components/auth-layout";
 import { apiClient, ApiClientError } from "@/lib/api-client";
 import { Eye as IconEye, EyeOff as IconEyeOff } from "lucide-react";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -64,7 +65,14 @@ export default function LoginPage() {
             profile.height_cm &&
             profile.weight_kg
           ) {
-            router.push("/dashboard");
+            const redirectParam = searchParams.get("redirect");
+            const destination =
+              redirectParam &&
+              redirectParam.startsWith("/") &&
+              !redirectParam.startsWith("//")
+                ? redirectParam
+                : "/dashboard";
+            router.push(destination);
           } else {
             router.push("/onboarding/health-profile");
           }
@@ -86,8 +94,7 @@ export default function LoginPage() {
   };
 
   return (
-    <AuthLayout title="Masuk ke HELIORA">
-      <form onSubmit={handleLogin} className="space-y-4">
+    <form onSubmit={handleLogin} className="space-y-4">
         <FormAlertTooltip message={error} onDismiss={() => setError("")} />
 
         {/* Email Field */}
@@ -215,7 +222,7 @@ export default function LoginPage() {
               href="/forgot-password"
               className="block transition-colors hover:text-primary-800 hover:underline underline-offset-4"
             >
-              Lupa email atau kata sandi?
+              Lupa kata sandi?
             </Link>
             <Link
               href="/register"
@@ -226,6 +233,15 @@ export default function LoginPage() {
           </div>
         </div>
       </form>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <AuthLayout title="Masuk ke HELIORA">
+      <Suspense fallback={<div className="h-64 animate-pulse rounded-xl bg-neutral-100" />}>
+        <LoginForm />
+      </Suspense>
     </AuthLayout>
   );
 }
