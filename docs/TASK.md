@@ -1752,6 +1752,31 @@ Acceptance Criteria:
 
 
 
+## FE-016 — Forgot Password, Terms, Privacy
+
+**Owner:** Pino & Tumir  
+**Priority:** P1  
+**Sprint:** S9  
+**Status:** REVIEW  
+
+Tasks:
+
+- [x] Implement forgot-password page with Supabase Auth recovery and RFC 5322 validation.
+- [x] Implement terms of service page with verbatim medical disclaimer and legal liability boundaries.
+- [x] Implement privacy policy page with UU PDP compliance, data minimisation, and consent retention.
+- [x] Standardize public headers, footers, and auth layout navigation.
+
+Acceptance Criteria:
+
+- Rute /forgot-password dapat diakses langsung, terintegrasi resetPasswordForEmail, validasi format email RFC 5322, dan pesan sukses anti-enumeration.
+- Rute /terms dapat diakses publik, memuat klausul verbatim Medical Disclaimer HELIORA PRD §9.4 FR-005, batasan tanggung jawab, hak penggunaan layanan, dan syarat usia.
+- Rute /privacy dapat diakses publik, merinci kategori data, dasar hukum UU PDP (UU No. 27/2022), retensi data, transfer data Pasal 56, dan kontak DPO.
+- Tautan di header, footer, /login, dan /register terhubung ke rute legal tanpa 404.
+
+---
+
+
+
 # 18.12 Mobile App (Usulan)
 
 Usulan berdasarkan `docs/PRD-Mobile.md`. Seluruh task MOB menunggu persetujuan Product & Project Manager sesuai §31 dan belum termasuk MVP Gate §29.
