@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """HELIORA API — Assessment service.
 
 Orchestrates the health assessment pipeline: profile validation,
@@ -7,7 +9,7 @@ recommendations, and persistence (Architecture §6.6, §8, BE-004, XAI-001).
 
 import logging
 import uuid
-from typing import Literal
+from typing import Any, Literal
 
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
