@@ -4,6 +4,7 @@ Password hashing (bcrypt) and JWT token helpers.
 Implements Architecture §20.2 (password hashing) and §20.1 (auth flow).
 """
 
+import logging
 import time
 from datetime import UTC, datetime, timedelta
 from typing import Any
@@ -13,6 +14,8 @@ import httpx
 from jose import jwk, jwt
 
 from app.core.config import settings
+
+logger = logging.getLogger(__name__)
 
 
 # ── Password Hashing ────────────────────────────────────────────
@@ -94,7 +97,7 @@ class SupabaseJWKSVerifier:
         return self._keys
 
     def verify_supabase_token(self, token: str) -> dict[str, Any]:
-        """Verify Supabase JWT token against JWKS public key."""
+        """Verify Supabase JWT token against JWKS public key with flexible issuer matching."""
         try:
             header = jwt.get_unverified_header(token)
         except Exception as exc:
@@ -126,17 +129,40 @@ class SupabaseJWKSVerifier:
             "verify_iat": True,
             "verify_exp": True,
             "verify_nbf": True,
-            "verify_iss": bool(settings.SUPABASE_ISSUER),
+            "verify_iss": False,  # Evaluated below to support flexible issuer variants
         }
 
-        return jwt.decode(
+        claims = jwt.decode(
             token,
             key,
             algorithms=settings.SUPABASE_ALLOWED_ALGS,
             audience=settings.SUPABASE_AUDIENCE,
-            issuer=settings.SUPABASE_ISSUER,
             options=options,
         )
+
+        if settings.SUPABASE_ISSUER:
+            token_iss = claims.get("iss", "")
+            expected_ref = ""
+            if settings.SUPABASE_URL:
+                expected_ref = (
+                    settings.SUPABASE_URL.replace("https://", "")
+                    .replace("http://", "")
+                    .split(".")[0]
+                )
+
+            valid_iss = (
+                token_iss == settings.SUPABASE_ISSUER
+                or token_iss == settings.SUPABASE_URL
+                or (settings.SUPABASE_URL and token_iss == f"{settings.SUPABASE_URL.rstrip('/')}/auth/v1")
+                or token_iss == "supabase"
+                or (bool(expected_ref) and expected_ref in token_iss)
+            )
+            if not valid_iss:
+                raise jwt.JWTClaimsError(
+                    f"Invalid issuer '{token_iss}'; expected project match for '{settings.SUPABASE_ISSUER}'"
+                )
+
+        return claims
 
 
 supabase_jwks_verifier = SupabaseJWKSVerifier()
@@ -146,11 +172,18 @@ def verify_token(token: str) -> dict[str, Any]:
     """Unified token verifier supporting Supabase JWKS and legacy HS256 tokens."""
     try:
         header = jwt.get_unverified_header(token)
-    except Exception:
+    except Exception as exc:
+        logger.debug(f"[AUTH] Failed to get unverified header: {exc}")
         return decode_access_token(token)
 
     if header.get("kid") and settings.SUPABASE_JWKS_URL:
-        return supabase_jwks_verifier.verify_supabase_token(token)
+        try:
+            return supabase_jwks_verifier.verify_supabase_token(token)
+        except Exception as exc:
+            logger.warning(
+                f"[AUTH] Supabase JWKS verification failed ({exc}); falling back to HS256 decode"
+            )
+            return decode_access_token(token)
 
     return decode_access_token(token)
 

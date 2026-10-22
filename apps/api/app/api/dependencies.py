@@ -4,6 +4,7 @@ Provides FastAPI dependency functions for database sessions,
 authentication context, and privacy consent gating (Architecture §5.3, §20.3, §21.1).
 """
 
+import logging
 import uuid
 from collections.abc import AsyncGenerator
 
@@ -19,6 +20,8 @@ from app.db.models.user import User
 from app.db.session import async_session_factory
 from app.repositories.consent_repo import consent_repo
 from app.repositories.user_repo import user_repo
+
+logger = logging.getLogger(__name__)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_PREFIX}/auth/token")
 
@@ -50,13 +53,16 @@ async def get_current_user(
         payload = verify_token(token)
         user_id_str: str | None = payload.get("sub")
         if user_id_str is None:
+            logger.warning("[AUTH 401] Token missing 'sub' claim")
             raise credentials_exception
         user_id = uuid.UUID(user_id_str)
-    except (JWTError, ValueError):
+    except (JWTError, ValueError) as exc:
+        logger.warning(f"[AUTH 401] Token verification failed: {exc}")
         raise credentials_exception
 
     user = await user_repo.get_by_id(db, user_id)
     if user is None:
+        logger.warning(f"[AUTH 401] User ID {user_id} not found in public.users")
         raise credentials_exception
 
     return user
