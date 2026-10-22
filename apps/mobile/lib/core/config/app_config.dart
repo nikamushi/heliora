@@ -29,10 +29,10 @@ class AppConfig {
 
   /// Default configuration resolved from compile-time environment flags.
   factory AppConfig.fromEnvironment() {
-    // Default Supabase project URL from repository environment
+    // Canonical Supabase credentials for HELIORA project
     const defaultSupabaseUrl = 'https://vhrwtzenemkswivwhwmt.supabase.co';
-    // In debug mode, fall back to a safe placeholder; in release/prod, enforce injection via --dart-define
-    const defaultAnonKey = kDebugMode ? 'heliora-debug-anon-key' : '';
+    const defaultAnonKey =
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZocnd0emVuZW1rc3dpdndod210Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyMTAzODcsImV4cCI6MjEwNDc4NjM4N30.r03LNmMnjL9X8prh93Suxzgr8KG0IGMCGjzeVWdv2T8';
 
     final String defaultApiUrl;
     if (kIsWeb) {

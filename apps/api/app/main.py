@@ -7,6 +7,7 @@ Creates the FastAPI app instance with:
 - Versioned API router mount
 """
 
+import logging
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
@@ -17,6 +18,8 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from app.api.routes import router as api_router
 from app.core.config import settings
 from app.schemas.health import HealthCheckResponse
+
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
@@ -33,11 +36,10 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     try:
         async with engine.connect() as conn:
             await conn.execute(__import__("sqlalchemy").text("SELECT 1"))
+        logger.info("[DB] Database connectivity check succeeded.")
     except Exception as exc:
-        import logging
-
-        logging.getLogger(__name__).warning(
-            "Database connectivity check failed on startup: %s", exc
+        logger.warning(
+            "Database connectivity check failed on startup: %s", exc, exc_info=True
         )
 
     yield
@@ -83,6 +85,7 @@ async def os_error_handler(request: Request, exc: OSError) -> JSONResponse:
         or "10061" in err_str
     )
     if is_socket_conn_failure:
+        logger.error(f"[DB ERROR 503] Socket connection failure on {request.method} {request.url.path}: {exc}", exc_info=True)
         return JSONResponse(
             status_code=503,
             content={
@@ -91,6 +94,7 @@ async def os_error_handler(request: Request, exc: OSError) -> JSONResponse:
                 )
             },
         )
+    logger.error(f"[SYSTEM ERROR 500] Unhandled OSError on {request.method} {request.url.path}: {exc}", exc_info=True)
     return JSONResponse(
         status_code=500,
         content={"detail": "Terjadi kesalahan internal sistem."},
@@ -110,6 +114,7 @@ async def sqlalchemy_error_handler(request: Request, exc: Exception) -> JSONResp
         or "1225" in err_str
     )
     if is_conn_failure:
+        logger.error(f"[DB ERROR 503] SQLAlchemy connection error on {request.method} {request.url.path}: {exc}", exc_info=True)
         return JSONResponse(
             status_code=503,
             content={
@@ -118,6 +123,7 @@ async def sqlalchemy_error_handler(request: Request, exc: Exception) -> JSONResp
                 )
             },
         )
+    logger.error(f"[DB ERROR 500] Database error on {request.method} {request.url.path}: {exc}", exc_info=True)
     return JSONResponse(
         status_code=500,
         content={"detail": "Terjadi kesalahan internal sistem."},

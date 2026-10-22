@@ -52,9 +52,9 @@ async def get_current_user(
     try:
         try:
             raw_h = jwt.get_unverified_header(token)
-            logger.warning(f"[AUTH DIAGNOSTIC] Incoming token header: {raw_h}")
+            logger.debug(f"[AUTH DIAGNOSTIC] Incoming token header: {raw_h}")
         except Exception as h_err:
-            logger.warning(f"[AUTH DIAGNOSTIC] Failed to read header: {h_err}")
+            logger.debug(f"[AUTH DIAGNOSTIC] Failed to read header: {h_err}")
 
         payload = verify_token(token)
         user_id_str: str | None = payload.get("sub")

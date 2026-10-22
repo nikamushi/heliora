@@ -31,8 +31,18 @@ class Settings(BaseSettings):
     @field_validator("DATABASE_URL", mode="before")
     @classmethod
     def normalize_database_url(cls, v: str) -> str:
-        """Ensure standard postgresql:// scheme uses asyncpg driver."""
-        if isinstance(v, str) and v.startswith("postgresql://"):
+        """Ensure standard postgresql:// scheme uses asyncpg driver and session pooler."""
+        if not isinstance(v, str):
+            return v
+        # Redirect direct Supabase DB host to AWS session pooler on port 5432 to prevent Windows IPv6 WinError 1225
+        if "db.vhrwtzenemkswivwhwmt.supabase.co" in v:
+            v = v.replace(
+                "db.vhrwtzenemkswivwhwmt.supabase.co",
+                "aws-0-ap-northeast-2.pooler.supabase.com",
+            )
+            if "postgres:" in v and "postgres.vhrwtzenemkswivwhwmt" not in v:
+                v = v.replace("postgres:", "postgres.vhrwtzenemkswivwhwmt:", 1)
+        if v.startswith("postgresql://"):
             return v.replace("postgresql://", "postgresql+asyncpg://", 1)
         return v
 
