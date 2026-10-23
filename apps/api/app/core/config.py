@@ -6,6 +6,7 @@ never from source code (Architecture §22.3).
 """
 
 from pathlib import Path
+
 from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -41,9 +42,7 @@ class Settings(BaseSettings):
 
     # ── Database ─────────────────────────────────────────────────
     # Canonical default uses Supabase AWS Session Pooler (port 5432) to prevent local socket 10061 failures
-    DATABASE_URL: str = (
-        "postgresql+asyncpg://postgres.vhrwtzenemkswivwhwmt:heliora2026@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres"
-    )
+    DATABASE_URL: str = "postgresql+asyncpg://postgres.vhrwtzenemkswivwhwmt:heliora2026@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres"
 
     @field_validator("DATABASE_URL", mode="before")
     @classmethod

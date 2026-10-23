@@ -549,9 +549,7 @@ async def test_what_if_route_require_auth_401():
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url="http://testserver"
     ) as client:
-        res = await client.post(
-            "/api/v1/simulation/what-if", json={"weight_kg": 70.0}
-        )
+        res = await client.post("/api/v1/simulation/what-if", json={"weight_kg": 70.0})
         assert res.status_code in (401, 403)
 
 

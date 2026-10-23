@@ -178,9 +178,15 @@ class SimulationMixin:
                     return round(max(0.0100, min(0.9500, _sigmoid(b_lo - d_lo))), 4)
 
                 r_at_d = {
-                    "diabetes_risk": prob_at_day(base_risks["diabetes_risk"], dm_momentum),
-                    "hypertension_risk": prob_at_day(base_risks["hypertension_risk"], ht_momentum),
-                    "cardiovascular_risk": prob_at_day(base_risks["cardiovascular_risk"], cvd_momentum),
+                    "diabetes_risk": prob_at_day(
+                        base_risks["diabetes_risk"], dm_momentum
+                    ),
+                    "hypertension_risk": prob_at_day(
+                        base_risks["hypertension_risk"], ht_momentum
+                    ),
+                    "cardiovascular_risk": prob_at_day(
+                        base_risks["cardiovascular_risk"], cvd_momentum
+                    ),
                 }
                 daily_points.append(
                     {

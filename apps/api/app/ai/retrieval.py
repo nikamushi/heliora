@@ -51,7 +51,9 @@ def search_evidence(
     model = _get_embedding_model()
 
     # Embed the query
-    query_embedding = model.encode([query], convert_to_numpy=True, normalize_embeddings=True)[0]
+    query_embedding = model.encode(
+        [query], convert_to_numpy=True, normalize_embeddings=True
+    )[0]
 
     # Query the collection using L2 distance (ChromaDB default).
     # Since embeddings are normalized, L2 distance relates to cosine similarity:
@@ -86,28 +88,34 @@ def search_evidence(
             #   L2_dist² = ||a-b||² = 2 - 2*cos_sim
             #   cos_sim = 1 - L2_dist²/2
             distance = float(distances[i])
-            cosine_sim = 1.0 - (distance ** 2) / 2.0
+            cosine_sim = 1.0 - (distance**2) / 2.0
 
             if cosine_sim >= threshold:
                 meta = metadatas[i] if i < len(metadatas) else {}
                 doc_text = documents[i] if i < len(documents) else ""
 
-                hits.append({
-                    "evidence_id": meta.get("evidence_id", doc_id.split("-chunk-")[0]),
-                    "title": meta.get("title", "Unknown"),
-                    "organization": meta.get("organization", "Unknown"),
-                    "year": int(meta.get("year", 0)) if meta.get("year") else 0,
-                    "category": meta.get("category", "unknown"),
-                    "category_label": meta.get("category_label", ""),
-                    "evidence_level": meta.get("evidence_level", "Level C (Konsensus Pakar)"),
-                    "summary": _extract_summary_from_chunk(doc_text),
-                    "clinical_section": meta.get("clinical_section", ""),
-                    "citation": meta.get("citation", ""),
-                    "external_url": meta.get("external_url", ""),
-                    "rule_id": meta.get("rule_id", ""),
-                    "similarity_score": round(cosine_sim, 4),
-                    "chunk_index": meta.get("chunk_index", i),
-                })
+                hits.append(
+                    {
+                        "evidence_id": meta.get(
+                            "evidence_id", doc_id.split("-chunk-")[0]
+                        ),
+                        "title": meta.get("title", "Unknown"),
+                        "organization": meta.get("organization", "Unknown"),
+                        "year": int(meta.get("year", 0)) if meta.get("year") else 0,
+                        "category": meta.get("category", "unknown"),
+                        "category_label": meta.get("category_label", ""),
+                        "evidence_level": meta.get(
+                            "evidence_level", "Level C (Konsensus Pakar)"
+                        ),
+                        "summary": _extract_summary_from_chunk(doc_text),
+                        "clinical_section": meta.get("clinical_section", ""),
+                        "citation": meta.get("citation", ""),
+                        "external_url": meta.get("external_url", ""),
+                        "rule_id": meta.get("rule_id", ""),
+                        "similarity_score": round(cosine_sim, 4),
+                        "chunk_index": meta.get("chunk_index", i),
+                    }
+                )
 
     # Sort by similarity and apply top_k
     hits.sort(key=lambda x: x["similarity_score"], reverse=True)
@@ -174,16 +182,19 @@ def test_retrieval() -> dict[str, Any]:
     results = []
     for query, expected_category in test_queries:
         hits = search_evidence(query, top_k=3, category=expected_category)
-        results.append({
-            "query": query,
-            "expected_category": expected_category,
-            "retrieved_count": len(hits),
-            "top_result": hits[0] if hits else None,
-            "avg_similarity": (
-                round(sum(h["similarity_score"] for h in hits) / len(hits), 4)
-                if hits else 0.0
-            ),
-        })
+        results.append(
+            {
+                "query": query,
+                "expected_category": expected_category,
+                "retrieved_count": len(hits),
+                "top_result": hits[0] if hits else None,
+                "avg_similarity": (
+                    round(sum(h["similarity_score"] for h in hits) / len(hits), 4)
+                    if hits
+                    else 0.0
+                ),
+            }
+        )
 
     return {
         "test_count": len(test_queries),
@@ -198,9 +209,9 @@ def test_retrieval() -> dict[str, Any]:
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print("RAG Retrieval Pipeline — Test")
-    print(f"{'='*60}\n")
+    print(f"{'=' * 60}\n")
 
     # Run retrieval tests
     test_results = test_retrieval()
@@ -217,4 +228,4 @@ if __name__ == "__main__":
             print(f"  Category: {r['top_result']['category_label']}")
         print()
 
-    print(f"{'='*60}\n")
+    print(f"{'=' * 60}\n")

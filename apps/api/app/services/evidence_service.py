@@ -104,7 +104,6 @@ CLINICAL_EVIDENCE_REGISTRY: list[dict[str, Any]] = [
         "external_url": "https://ayosehat.kemkes.go.id/germas",
         "last_verified": "15 Jan 2026",
     },
-
     # ── 2. POLA TIDUR ───────────────────────────────────────────────────────
     {
         "id": "evi-03",
@@ -205,7 +204,6 @@ CLINICAL_EVIDENCE_REGISTRY: list[dict[str, Any]] = [
         "last_verified": "20 Jan 2026",
         "doi": "10.15585/mmwr.mm6506a1",
     },
-
     # ── 3. BERAT BADAN & NUTRISI ─────────────────────────────────────────────
     {
         "id": "evi-02",
@@ -334,7 +332,6 @@ CLINICAL_EVIDENCE_REGISTRY: list[dict[str, Any]] = [
         "external_url": "https://www.inaheart.org/",
         "last_verified": "18 Mar 2026",
     },
-
     # ── 4. KEBIASAAN MEROKOK ────────────────────────────────────────────────
     {
         "id": "evi-04",
@@ -379,7 +376,6 @@ CLINICAL_EVIDENCE_REGISTRY: list[dict[str, Any]] = [
         "external_url": "https://p2ptm.kemkes.go.id/",
         "last_verified": "05 Mar 2026",
     },
-
     # ── 5. KONSULTASI MEDIS ─────────────────────────────────────────────────
     {
         "id": "evi-07",
@@ -423,7 +419,6 @@ CLINICAL_EVIDENCE_REGISTRY: list[dict[str, Any]] = [
         "external_url": "https://kemkes.go.id/",
         "last_verified": "25 Mar 2026",
     },
-
     # ── 6. MANAJEMEN STRES ──────────────────────────────────────────────────
     {
         "id": "evi-05",

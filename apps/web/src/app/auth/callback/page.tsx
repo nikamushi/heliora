@@ -3,7 +3,7 @@
 import React, { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { apiClient, ApiClientError } from "@/lib/api-client";
+import { apiClient } from "@/lib/api-client";
 import { getSupabaseClient, isSupabaseConfigured } from "@/lib/supabase-client";
 
 type CallbackState = "working" | "error";

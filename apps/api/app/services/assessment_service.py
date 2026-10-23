@@ -1,11 +1,11 @@
-from __future__ import annotations
-
 """HELIORA API — Assessment service.
 
 Orchestrates the health assessment pipeline: profile validation,
 risk calculation, SHAP-based explainable AI, scoring, factor attribution,
 recommendations, and persistence (Architecture §6.6, §8, BE-004, XAI-001).
 """
+
+from __future__ import annotations
 
 import logging
 import uuid
@@ -122,7 +122,9 @@ class AssessmentService:
                 return "nutrition"
             return "activity"
 
-        rule_evidence_map: dict[str, Literal["High", "Moderate", "Limited", "A", "B", "C"]] = {
+        rule_evidence_map: dict[
+            str, Literal["High", "Moderate", "Limited", "A", "B", "C"]
+        ] = {
             "REC-SAFETY-01": "High",
             "REC-ACT-01": "High",
             "REC-SLP-01": "High",
@@ -131,7 +133,14 @@ class AssessmentService:
             "REC-NUT-LOWBMI-01": "High",
         }
 
-        allowed_rule_ids = ("REC-SAFETY-01", "REC-ACT-01", "REC-SLP-01", "REC-NUT-01", "REC-SMK-01", "REC-NUT-LOWBMI-01")
+        allowed_rule_ids = (
+            "REC-SAFETY-01",
+            "REC-ACT-01",
+            "REC-SLP-01",
+            "REC-NUT-01",
+            "REC-SMK-01",
+            "REC-NUT-LOWBMI-01",
+        )
         recommendations: list[RecommendationItem] = []
         if assessment.recommendations:
             for rec in assessment.recommendations:
@@ -168,7 +177,9 @@ class AssessmentService:
                     factors.append(
                         ContributingFactor(
                             feature=f["feature"],
-                            label=f.get("label", f["feature"].replace("_", " ").title()),
+                            label=f.get(
+                                "label", f["feature"].replace("_", " ").title()
+                            ),
                             impact=f.get("impact", "increase"),
                             weight_percentage=f.get("weight_percentage", 0.0),
                             description=f.get(
@@ -205,11 +216,13 @@ class AssessmentService:
 
         # 4. Populate value_display on factors if health_profile is present
         profile = assessment.health_profile
-        health_score = risk_engine.calculate_health_score({
-            "diabetes_risk": float(rr.diabetes_risk),
-            "hypertension_risk": float(rr.hypertension_risk),
-            "cardiovascular_risk": float(rr.cardiovascular_risk),
-        })
+        health_score = risk_engine.calculate_health_score(
+            {
+                "diabetes_risk": float(rr.diabetes_risk),
+                "hypertension_risk": float(rr.hypertension_risk),
+                "cardiovascular_risk": float(rr.cardiovascular_risk),
+            }
+        )
         if profile is not None:
             lifestyle_score = risk_engine.calculate_lifestyle_score(profile)
         else:
@@ -220,31 +233,49 @@ class AssessmentService:
                     if f.feature == "sleep_duration":
                         slp = float(profile.sleep_duration_hours)
                         if 7.0 <= slp <= 9.0:
-                            f.value_display = f"{slp:g} jam/hari · sesuai pedoman 7–9 jam"
+                            f.value_display = (
+                                f"{slp:g} jam/hari · sesuai pedoman 7–9 jam"
+                            )
                         elif slp < 7.0:
-                            f.value_display = f"{slp:g} jam/hari · di bawah pedoman 7–9 jam"
+                            f.value_display = (
+                                f"{slp:g} jam/hari · di bawah pedoman 7–9 jam"
+                            )
                         else:
-                            f.value_display = f"{slp:g} jam/hari · di atas pedoman 7–9 jam"
+                            f.value_display = (
+                                f"{slp:g} jam/hari · di atas pedoman 7–9 jam"
+                            )
                     elif f.feature == "physical_activity":
                         act = int(profile.physical_activity_min_per_week)
                         if act >= 150:
-                            f.value_display = f"{act} menit/minggu · target ≥ 150 menit terpenuhi"
+                            f.value_display = (
+                                f"{act} menit/minggu · target ≥ 150 menit terpenuhi"
+                            )
                         else:
-                            f.value_display = f"{act} menit/minggu · di bawah target 150 menit"
+                            f.value_display = (
+                                f"{act} menit/minggu · di bawah target 150 menit"
+                            )
                     elif f.feature == "bmi" and profile.bmi:
                         bmi_val = float(profile.bmi)
                         if bmi_val >= 25.0:
-                            f.value_display = f"{bmi_val:.1f} kg/m² · di atas batas normal (≥ 25,0)"
+                            f.value_display = (
+                                f"{bmi_val:.1f} kg/m² · di atas batas normal (≥ 25,0)"
+                            )
                         elif bmi_val < 18.5:
                             f.value_display = f"{bmi_val:.1f} kg/m² · di bawah rentang normal (18,5–22,9)"
                             if "rentang ideal" in f.description:
                                 f.description = "Pada model, nilai IMT ini menurunkan estimasi risiko kardiometabolik. Namun, nilai ini berada di bawah rentang normal (18,5–22,9 kg/m²)."
                         elif 18.5 <= bmi_val <= 22.9:
-                            f.value_display = f"{bmi_val:.1f} kg/m² · rentang ideal Asia (18,5–22,9)"
+                            f.value_display = (
+                                f"{bmi_val:.1f} kg/m² · rentang ideal Asia (18,5–22,9)"
+                            )
                         else:
                             f.value_display = f"{bmi_val:.1f} kg/m² · berat badan berlebih (23,0–24,9)"
                     elif f.feature == "smoking_status":
-                        smk = str(getattr(profile.smoking_status, "value", profile.smoking_status)).lower()
+                        smk = str(
+                            getattr(
+                                profile.smoking_status, "value", profile.smoking_status
+                            )
+                        ).lower()
                         if smk == "never":
                             f.value_display = "Bebas rokok · tidak pernah merokok"
                         elif smk == "former":
@@ -254,12 +285,25 @@ class AssessmentService:
                     elif f.feature == "age":
                         f.value_display = f"{int(profile.age)} tahun"
                     elif f.feature == "family_history":
-                        f.value_display = "Ada riwayat keluarga" if profile.family_history else "Tidak ada riwayat keluarga dilaporkan"
-                    elif f.feature == "blood_sugar" and getattr(profile, "blood_sugar_mg_dl", None) is not None:
+                        f.value_display = (
+                            "Ada riwayat keluarga"
+                            if profile.family_history
+                            else "Tidak ada riwayat keluarga dilaporkan"
+                        )
+                    elif (
+                        f.feature == "blood_sugar"
+                        and getattr(profile, "blood_sugar_mg_dl", None) is not None
+                    ):
                         f.value_display = f"{int(profile.blood_sugar_mg_dl)} mg/dL"
-                    elif f.feature in ("systolic_bp", "diastolic_bp") and getattr(profile, "blood_pressure", None) is not None:
+                    elif (
+                        f.feature in ("systolic_bp", "diastolic_bp")
+                        and getattr(profile, "blood_pressure", None) is not None
+                    ):
                         f.value_display = f"{profile.blood_pressure} mmHg"
-                    elif f.feature == "cholesterol" and getattr(profile, "cholesterol_mg_dl", None) is not None:
+                    elif (
+                        f.feature == "cholesterol"
+                        and getattr(profile, "cholesterol_mg_dl", None) is not None
+                    ):
                         f.value_display = f"{int(profile.cholesterol_mg_dl)} mg/dL"
 
         factors.sort(key=lambda f: f.weight_percentage, reverse=True)
@@ -302,7 +346,11 @@ class AssessmentService:
         try:
             if explain_shap_profile is not None:
                 shap_factors = explain_shap_profile(profile)
-                top_factors_data = shap_factors if shap_factors else risk_engine.extract_top_factors(profile, risks)
+                top_factors_data = (
+                    shap_factors
+                    if shap_factors
+                    else risk_engine.extract_top_factors(profile, risks)
+                )
             else:
                 logger.debug("SHAP not available, using rule-based factors")
                 top_factors_data = risk_engine.extract_top_factors(profile, risks)
@@ -352,7 +400,9 @@ class AssessmentService:
         assessment.recommendations = rec_records
         assessment.health_profile = profile
 
-        total_completed = await assessment_repo.count_completed_by_user_id(session, user_id)
+        total_completed = await assessment_repo.count_completed_by_user_id(
+            session, user_id
+        )
         resp = self._format_assessment_response(
             assessment, top_factors_data, is_baseline=(total_completed <= 1)
         )
@@ -371,7 +421,9 @@ class AssessmentService:
                     "Silakan jalankan asesmen terlebih dahulu."
                 ),
             )
-        total_completed = await assessment_repo.count_completed_by_user_id(session, user_id)
+        total_completed = await assessment_repo.count_completed_by_user_id(
+            session, user_id
+        )
         resp = self._format_assessment_response(
             assessment, is_baseline=(total_completed <= 1)
         )
@@ -389,12 +441,13 @@ class AssessmentService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Data asesmen risiko tidak ditemukan.",
             )
-        total_completed = await assessment_repo.count_completed_by_user_id(session, user_id)
+        total_completed = await assessment_repo.count_completed_by_user_id(
+            session, user_id
+        )
         resp = self._format_assessment_response(
             assessment, is_baseline=(total_completed <= 1)
         )
         return await self._attach_explanation(resp)
-
 
     async def _attach_explanation(
         self, resp: AssessmentSummaryResponse
@@ -402,6 +455,7 @@ class AssessmentService:
         """Enrich assessment response with AI clinical explanation (or fallback)."""
         try:
             from app.services.explanation_service import explain_assessment
+
             risks_dict = [r.model_dump() for r in resp.risks]
             factors_dict = [f.model_dump() for f in resp.top_factors]
             recs_dict = [rec.model_dump() for rec in resp.recommendations]

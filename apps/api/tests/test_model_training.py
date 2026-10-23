@@ -138,7 +138,9 @@ def test_model_risk_engine_estimate_risks_xgboost():
 def test_model_risk_engine_estimate_risks_lightgbm():
     from app.ai.model_training import ModelRiskEngine
 
-    engine = ModelRiskEngine(train_risk_models(n_samples=200, seed=1, use_xgboost=False))
+    engine = ModelRiskEngine(
+        train_risk_models(n_samples=200, seed=1, use_xgboost=False)
+    )
     risks = engine.estimate_risks(_tiny_profile())
     for value in risks.values():
         assert 0.0 <= value <= 1.0
@@ -208,16 +210,16 @@ def test_load_empirical_training_data_nhanes():
 
     loaded = load_empirical_training_data("nhanes")
     if loaded is not None:
-        X, y_dm, y_ht, y_cvd, meta = loaded
-        assert X.shape[1] == 11
-        assert len(y_dm) == len(X)
-        assert len(y_ht) == len(X)
-        assert len(y_cvd) == len(X)
+        features, y_dm, y_ht, y_cvd, meta = loaded
+        assert features.shape[1] == 11
+        assert len(y_dm) == len(features)
+        assert len(y_ht) == len(features)
+        assert len(y_cvd) == len(features)
         assert meta["source"] == "NHANES-2021-2023-v1"
 
 
 def test_train_risk_models_empirical_source(tmp_path):
-    from app.ai.model_training import train_risk_models, load_empirical_training_data
+    from app.ai.model_training import load_empirical_training_data, train_risk_models
 
     if load_empirical_training_data("auto") is not None:
         models = train_risk_models(data_source="auto", save_path=tmp_path)

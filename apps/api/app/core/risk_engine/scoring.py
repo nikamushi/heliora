@@ -7,7 +7,6 @@ Lifestyle Score (docs/Lifestyle-Score.md, AI-005).
 from typing import Any
 
 from app.core.risk_engine._shared import (
-    RiskEngineProtocol,
     HEALTH_IMPROVEMENT_NO_HISTORY,
     HEALTH_IMPROVEMENT_WITH_HISTORY,
     HEALTH_RISK_WEIGHT_CARDIOVASCULAR,
@@ -54,9 +53,15 @@ class ScoreCalculationMixin:
         target_risks = risks or {}
         lifestyle = ScoreCalculationMixin.calculate_lifestyle_score(profile)
         risk_component = 100.0 - (
-            float(target_risks.get("diabetes_risk", 0.0)) * HEALTH_RISK_WEIGHT_DIABETES * 100.0
-            + float(target_risks.get("hypertension_risk", 0.0)) * HEALTH_RISK_WEIGHT_HYPERTENSION * 100.0
-            + float(target_risks.get("cardiovascular_risk", 0.0)) * HEALTH_RISK_WEIGHT_CARDIOVASCULAR * 100.0
+            float(target_risks.get("diabetes_risk", 0.0))
+            * HEALTH_RISK_WEIGHT_DIABETES
+            * 100.0
+            + float(target_risks.get("hypertension_risk", 0.0))
+            * HEALTH_RISK_WEIGHT_HYPERTENSION
+            * 100.0
+            + float(target_risks.get("cardiovascular_risk", 0.0))
+            * HEALTH_RISK_WEIGHT_CARDIOVASCULAR
+            * 100.0
         )
         improvement = (
             HEALTH_IMPROVEMENT_WITH_HISTORY

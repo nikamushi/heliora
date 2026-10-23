@@ -8,7 +8,6 @@ import {
   Headphones as SFHeadphones,
   ChevronRight as SFChevronRight,
   Search as SFMagnifyingglass,
-  Sparkles as SFSparkles,
   BookOpen as SFBookClosed,
   Info as SFInfoCircle,
 } from "lucide-react";

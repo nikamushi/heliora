@@ -13,9 +13,7 @@ from app.core.vitals import normalize_smoking_status, parse_blood_pressure
 class RiskEstimationMixin:
     """Estimates the three chronic disease risk probabilities."""
 
-    def estimate_risks(
-        self: RiskEngineProtocol, profile: Any
-    ) -> dict[str, float]:
+    def estimate_risks(self: RiskEngineProtocol, profile: Any) -> dict[str, float]:
         """Estimate 3 chronic disease probabilities based on biometric and lifestyle factors.
 
         Returns:

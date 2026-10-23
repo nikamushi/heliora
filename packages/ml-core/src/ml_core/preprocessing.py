@@ -180,21 +180,15 @@ def load_nhanes(path: str | Path) -> pd.DataFrame:
     if missing:
         raise ValueError(f"raw CSV missing columns: {sorted(missing)}")
     out = df.copy()
-    out["blood_sugar_missing"] = (
-        out["fasting_glucose_mg_dl"].isna().astype(int)
-    )
+    out["blood_sugar_missing"] = out["fasting_glucose_mg_dl"].isna().astype(int)
     return out
 
 
 def evaluate_dataset(df: pd.DataFrame) -> dict:
     """PRD §11.31 initial dataset evaluation (JSON-serializable)."""
     total = len(df)
-    missing_rate = {
-        col: float(df[col].isna().mean()) for col in df.columns
-    }
-    prevalence = {
-        t: float(df[t].dropna().mean()) for t in TARGETS
-    }
+    missing_rate = {col: float(df[col].isna().mean()) for col in df.columns}
+    prevalence = {t: float(df[t].dropna().mean()) for t in TARGETS}
     out_of_range = {
         "physical_activity_min_per_week_gt_cap": int(
             (df["physical_activity_min_per_week"] > ACTIVITY_CAP).sum()
@@ -204,9 +198,7 @@ def evaluate_dataset(df: pd.DataFrame) -> dict:
         "n_rows_raw": int(total),
         "missing_rate": missing_rate,
         "target_prevalence": prevalence,
-        "target_missing": {
-            t: int(df[t].isna().sum()) for t in TARGETS
-        },
+        "target_missing": {t: int(df[t].isna().sum()) for t in TARGETS},
         "out_of_range": out_of_range,
     }
 
@@ -223,9 +215,9 @@ def clean(df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     n_dropped_targets = n_raw - n_dropped_duplicates - len(out)
 
     n_clipped = int((out["physical_activity_min_per_week"] > ACTIVITY_CAP).sum())
-    out["physical_activity_min_per_week"] = out[
-        "physical_activity_min_per_week"
-    ].clip(upper=ACTIVITY_CAP)
+    out["physical_activity_min_per_week"] = out["physical_activity_min_per_week"].clip(
+        upper=ACTIVITY_CAP
+    )
 
     out = out.rename(
         columns={
@@ -254,15 +246,12 @@ def encode_features(df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     """
     out = df.copy()
     observed = sorted(
-        out.loc[out["smoking_status"].notna(), "smoking_status"]
-        .unique()
-        .tolist()
+        out.loc[out["smoking_status"].notna(), "smoking_status"].unique().tolist()
     )
     unknown = [v for v in observed if v not in SMOKING_CATEGORIES]
     if unknown:
         raise ValueError(
-            "unknown smoking_status values "
-            f"(expected {SMOKING_CATEGORIES}): {unknown}"
+            f"unknown smoking_status values (expected {SMOKING_CATEGORIES}): {unknown}"
         )
     out["smoking_status"] = out["smoking_status"].astype(float)
     info = {
@@ -389,21 +378,20 @@ def build_preprocessor() -> ColumnTransformer:
     )
 
 
-def transform_split(
-    preprocessor: ColumnTransformer, df: pd.DataFrame
-) -> pd.DataFrame:
+def transform_split(preprocessor: ColumnTransformer, df: pd.DataFrame) -> pd.DataFrame:
     """Apply a fitted preprocessor; returns seqn + features + targets."""
     matrix = preprocessor.transform(df[MODEL_INPUT_COLUMNS])
     transformed = pd.DataFrame(
         matrix,
         columns=[*NUMERIC_FEATURES, "smoking_status"],
     )
-    transformed["blood_sugar_missing"] = (
-        df["blood_sugar_missing"].to_numpy()
-    )
+    transformed["blood_sugar_missing"] = df["blood_sugar_missing"].to_numpy()
     features = transformed[FEATURE_NAMES]
     return pd.concat(
-        [df[["seqn"]].reset_index(drop=True), features,
-         df[TARGETS].reset_index(drop=True)],
+        [
+            df[["seqn"]].reset_index(drop=True),
+            features,
+            df[TARGETS].reset_index(drop=True),
+        ],
         axis=1,
     )

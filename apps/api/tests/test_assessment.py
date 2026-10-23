@@ -489,7 +489,9 @@ async def test_routes_assessment_e2e_flow():
                 assert by_id_res.json()["id"] == str(assessment_id)
                 # AC-DASH-02: identical scores across endpoints
                 assert by_id_res.json()["health_score"] == post_data["health_score"]
-                assert by_id_res.json()["lifestyle_score"] == post_data["lifestyle_score"]
+                assert (
+                    by_id_res.json()["lifestyle_score"] == post_data["lifestyle_score"]
+                )
     finally:
         app.dependency_overrides.clear()
 
@@ -581,7 +583,10 @@ def test_high_risk_triggers_safety_guardrail_consultation():
     assert len(recs) > 0
     assert recs[0]["rule_id"] == "REC-SAFETY-01"
     assert recs[0]["category"] == "consultation"
-    assert "konsultasi" in recs[0]["title"].lower() or "tenaga kesehatan" in recs[0]["title"].lower()
+    assert (
+        "konsultasi" in recs[0]["title"].lower()
+        or "tenaga kesehatan" in recs[0]["title"].lower()
+    )
 
 
 def test_every_actionable_recommendation_has_triggering_factor_in_factor_list():
@@ -599,7 +604,9 @@ def test_every_actionable_recommendation_has_triggering_factor_in_factor_list():
     )
     risks = risk_engine.estimate_risks(profile)
     factors = risk_engine.extract_top_factors(profile, risks)
-    recs = risk_engine.generate_recommendations(profile, risks=risks, top_factors=factors)
+    recs = risk_engine.generate_recommendations(
+        profile, risks=risks, top_factors=factors
+    )
 
     factor_features = {f.feature for f in factors}
     rule_feature_map = {
@@ -669,5 +676,3 @@ def test_safety_threshold_aligned_with_higher_band_60():
     assert any(r["rule_id"] == "REC-SAFETY-01" for r in recs_high), (
         "REC-SAFETY-01 must trigger when any risk reaches the higher band (>= 0.60)"
     )
-
-

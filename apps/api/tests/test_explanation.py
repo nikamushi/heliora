@@ -124,7 +124,12 @@ def test_system_prompt_requires_statutory_disclaimer():
 def test_output_schema_has_no_score_fields():
     """LLM must not be able to return (modified) risk scores through output."""
     fields = set(ep.ExplanationOutput.model_fields)
-    assert fields == {"ringkasan", "penjelasan_faktor", "rekomendasi", "kutipan_evidence"}
+    assert fields == {
+        "ringkasan",
+        "penjelasan_faktor",
+        "rekomendasi",
+        "kutipan_evidence",
+    }
     for name in ("risk_score", "estimated_risk_score", "probability", "diagnosis"):
         assert name not in fields
 
@@ -173,7 +178,9 @@ async def test_client_posts_to_generate_content_endpoint():
         )
 
     client = GeminiClient(
-        api_key="key-abc", model="gemini-3.5-flash-lite", transport=httpx.MockTransport(handler)
+        api_key="key-abc",
+        model="gemini-3.5-flash-lite",
+        transport=httpx.MockTransport(handler),
     )
     assert await client.generate_text("sys", "user") == "halo"
 
@@ -298,11 +305,14 @@ def test_hallucinated_citation_rejected():
 
 def test_malformed_output_rejected():
     assert ep.validate_llm_output("bukan json sama sekali", ["evi-03"]) is None
-    assert ep.validate_llm_output(
-        '{"ringkasan": "", "penjelasan_faktor": "x", '
-        '"rekomendasi": "y", "kutipan_evidence": []}',
-        [],
-    ) is None
+    assert (
+        ep.validate_llm_output(
+            '{"ringkasan": "", "penjelasan_faktor": "x", '
+            '"rekomendasi": "y", "kutipan_evidence": []}',
+            [],
+        )
+        is None
+    )
 
 
 def test_fenced_json_with_trailing_disclaimer_accepted():
@@ -427,7 +437,9 @@ async def test_empty_rag_with_hallucinated_evidence_falls_back_without_fake_cita
     assert "Evidence pendukung:" not in result.text
 
 
-async def test_gemini_connection_failure_triggers_fallback_without_error_500(monkeypatch):
+async def test_gemini_connection_failure_triggers_fallback_without_error_500(
+    monkeypatch,
+):
     """If Gemini connection fails (DNS/network/ConnectError), fallback triggers cleanly."""
     monkeypatch.setattr(
         es.retrieval, "search_evidence", lambda *a, **k: _SAMPLE_EVIDENCE
@@ -462,4 +474,3 @@ async def test_simultaneous_rag_and_llm_failure_triggers_fallback(monkeypatch):
     assert result.source == "fallback"
     assert result.evidence_refs == []
     assert ep.STATUTORY_DISCLAIMER in result.text
-

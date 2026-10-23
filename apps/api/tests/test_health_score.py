@@ -139,7 +139,11 @@ def test_health_score_returns_finite_float():
 def test_health_score_deterministic_for_same_input():
     """Same profile and risks always produce the same score."""
     profile = _profile(bmi=Decimal("28.7"), stress_level=8)
-    risks = {"diabetes_risk": 0.31, "hypertension_risk": 0.42, "cardiovascular_risk": 0.17}
+    risks = {
+        "diabetes_risk": 0.31,
+        "hypertension_risk": 0.42,
+        "cardiovascular_risk": 0.17,
+    }
     assert risk_engine.calculate_health_score(profile, risks) == (
         risk_engine.calculate_health_score(profile, dict(risks))
     )
@@ -190,7 +194,11 @@ def test_health_score_matches_documented_decomposition():
         family_history=True,
         stress_level=5,
     )
-    risks = {"diabetes_risk": 0.35, "hypertension_risk": 0.28, "cardiovascular_risk": 0.41}
+    risks = {
+        "diabetes_risk": 0.35,
+        "hypertension_risk": 0.28,
+        "cardiovascular_risk": 0.41,
+    }
     lifestyle = risk_engine.calculate_lifestyle_score(profile)
     risk_comp = 100.0 - (
         risks["diabetes_risk"] * 35.0

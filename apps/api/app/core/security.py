@@ -155,7 +155,9 @@ class SupabaseJWKSVerifier:
         }
 
         # Ensure alg from token is accepted in algorithms list
-        allowed_algs = list(set(settings.SUPABASE_ALLOWED_ALGS) | ({alg} if alg else set()))
+        allowed_algs = list(
+            set(settings.SUPABASE_ALLOWED_ALGS) | ({alg} if alg else set())
+        )
 
         claims = jwt.decode(
             token,
@@ -178,7 +180,10 @@ class SupabaseJWKSVerifier:
             valid_iss = (
                 token_iss == settings.SUPABASE_ISSUER
                 or token_iss == settings.SUPABASE_URL
-                or (settings.SUPABASE_URL and token_iss == f"{settings.SUPABASE_URL.rstrip('/')}/auth/v1")
+                or (
+                    settings.SUPABASE_URL
+                    and token_iss == f"{settings.SUPABASE_URL.rstrip('/')}/auth/v1"
+                )
                 or token_iss == "supabase"
                 or (bool(expected_ref) and expected_ref in token_iss)
             )

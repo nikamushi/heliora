@@ -25,7 +25,9 @@ class _FakeModel:
     def __init__(self, *args, **kwargs):
         self.encode_calls: list[dict] = []
 
-    def encode(self, texts, convert_to_numpy=False, normalize_embeddings=False, **kwargs):
+    def encode(
+        self, texts, convert_to_numpy=False, normalize_embeddings=False, **kwargs
+    ):
         self.encode_calls.append(
             {
                 "texts": list(texts),
@@ -271,7 +273,9 @@ def test_hit_preserves_full_source_metadata(wired):
     assert hit["year"] == 2020
     assert hit["summary"] == "ringkasan dari chunk"
     assert hit["citation"] == "Bull FC, et al. Br J Sports Med 2020;54:1451-1462."
-    assert hit["external_url"] == "https://www.who.int/publications/i/item/9789240015128"
+    assert (
+        hit["external_url"] == "https://www.who.int/publications/i/item/9789240015128"
+    )
     assert hit["rule_id"] == "REC-ACT-01"
     assert hit["similarity_score"] == round(1.0 - 0.2**2 / 2.0, 4)
 

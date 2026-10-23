@@ -1,7 +1,9 @@
 """Unit tests for strongly-typed AttributeProfile dataclass and RiskEngineProtocols."""
 
-import pytest
 from decimal import Decimal
+
+import pytest
+
 from app.core.attribute_profile import AttributeProfile
 from app.core.risk_engine import risk_engine
 from app.core.risk_engine._shared import RiskEngineProtocol

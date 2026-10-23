@@ -3,12 +3,11 @@
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight as SFArrowRight, AlertCircle as SFAlertCircle, BookOpen as SFBookClosed, Info } from "lucide-react";
+import { ArrowRight as SFArrowRight, AlertCircle as SFAlertCircle } from "lucide-react";
 import { apiClient, ApiClientError } from "@/lib/api-client";
 import { useLatestAssessment } from "@/lib/use-latest-assessment";
 import { AssessmentSummaryResponse, ContributingFactor } from "@/types/api";
 import { Button } from "@/components/ui/button";
-import { DisclaimerBanner } from "@/components/disclaimer-banner";
 import { MockDataNotice } from "@/components/mock-data-notice";
 import { DashboardSkeleton } from "@/components/dashboard-skeleton";
 import { RiskBadge } from "@/components/risk-badge";
@@ -35,30 +34,9 @@ function getScoreCategory(score: number) {
   return { label: "Perlu Perhatian", className: "text-rose-700" };
 }
 
-function getRiskBandLabel(score: number) {
-  if (score < 30) return { label: "Lebih rendah", className: "text-emerald-700" };
-  if (score < 60) return { label: "Sedang", className: "text-amber-700" };
-  return { label: "Lebih tinggi", className: "text-rose-700" };
-}
-
 function fmtDisplay(v?: string) {
   if (!v) return v;
   return v.replace(/(\d)\.(\d)/g, "$1,$2");
-}
-
-function getSimulationFocusParam(feature: string): string {
-  switch (feature) {
-    case "sleep_duration":
-      return "sleep";
-    case "physical_activity":
-      return "activity";
-    case "bmi":
-      return "weight";
-    case "smoking_status":
-      return "smoking";
-    default:
-      return "";
-  }
 }
 
 function getRecommendationFocusParam(ruleId?: string): string {
@@ -80,19 +58,6 @@ export default function DashboardPage() {
   );
   const [isTriggering, setIsTriggering] = useState(false);
   const [triggerError, setTriggerError] = useState<ApiClientError | null>(null);
-
-  const formattedDate = useMemo(() => {
-    if (!assessment?.assessed_at) return "pada asesmen ini";
-    try {
-      return new Intl.DateTimeFormat("id-ID", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      }).format(new Date(assessment.assessed_at));
-    } catch {
-      return "pada asesmen ini";
-    }
-  }, [assessment]);
 
   const { lifestyleFactors, healthIndicators, biologicalFactors, maxWeight } = useMemo(() => {
     if (!assessment?.top_factors) {
@@ -153,7 +118,9 @@ export default function DashboardPage() {
   }, [lifestyleFactors]);
 
   const bmiOutOfNormal = useMemo(() => {
-    const bmiFactor = (assessment as any)?.top_factors?.find((f: any) => f.feature === "bmi");
+    const bmiFactor = assessment?.top_factors?.find(
+      (f: ContributingFactor) => f.feature === "bmi"
+    );
     return !!(bmiFactor && String(bmiFactor.value_display || "").includes("di bawah rentang normal"));
   }, [assessment]);
 

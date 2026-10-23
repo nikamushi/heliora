@@ -63,4 +63,3 @@ async def simulate_what_if_scenario(
 ) -> WhatIfSimulationResponse:
     """Run what-if scenario simulation for authenticated user."""
     return await simulation_service.simulate_what_if(db, current_user.id, request)
-

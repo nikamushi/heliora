@@ -6,7 +6,7 @@ Rule-based explanation content for assessments: top attribution factors
 """
 
 from typing import Any
-from app.core.risk_engine._shared import RiskEngineProtocol
+
 from app.core.vitals import normalize_smoking_status, parse_blood_pressure
 from app.schemas.assessment import ContributingFactor
 
@@ -307,14 +307,18 @@ class FactorExtractionMixin:
         contribution: float,
     ) -> ContributingFactor:
         """Format an XAIResult row into a ContributingFactor."""
-        canonical_dir = "positive" if direction in ("positive", "increase") else "negative"
+        canonical_dir = (
+            "positive" if direction in ("positive", "increase") else "negative"
+        )
         labels = {
             "age": "Usia",
             "bmi": "Indeks Massa Tubuh (IMT)",
             "physical_activity": "Aktivitas Fisik",
             "sleep_duration": "Durasi Tidur",
             "smoking_status": (
-                "Kebiasaan Merokok" if canonical_dir == "positive" else "Bebas Asap Rokok"
+                "Kebiasaan Merokok"
+                if canonical_dir == "positive"
+                else "Bebas Asap Rokok"
             ),
             "family_history": "Riwayat Penyakit Keluarga",
             "stress_level": "Tingkat Stres",

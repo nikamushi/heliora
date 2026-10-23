@@ -48,7 +48,9 @@ def get_model_engine() -> ModelRiskEngine:
         _model_engine = ModelRiskEngine()
     return _model_engine
 
+
 # ── Metric computation ──────────────────────────────────────────
+
 
 def _binary_precision_recall_f1(
     y_true: np.ndarray, y_pred_prob: np.ndarray, threshold: float = 0.5
@@ -113,16 +115,25 @@ FROZEN_BASELINE: dict[str, Any] = {
     "thresholds": {"diabetes": 0.3, "hypertension": 0.3, "cardiovascular": 0.3},
     "conditions": {
         "Diabetes Melitus": {
-            "precision": 0.6914, "recall": 0.4211, "f1": 0.5234,
-            "accuracy": 0.898, "roc_auc": 0.9044,
+            "precision": 0.6914,
+            "recall": 0.4211,
+            "f1": 0.5234,
+            "accuracy": 0.898,
+            "roc_auc": 0.9044,
         },
         "Hipertensi": {
-            "precision": 0.8843, "recall": 0.5162, "f1": 0.6519,
-            "accuracy": 0.796, "roc_auc": 0.9059,
+            "precision": 0.8843,
+            "recall": 0.5162,
+            "f1": 0.6519,
+            "accuracy": 0.796,
+            "roc_auc": 0.9059,
         },
         "Penyakit Jantung": {
-            "precision": 0.2632, "recall": 0.1923, "f1": 0.2222,
-            "accuracy": 0.965, "roc_auc": 0.9308,
+            "precision": 0.2632,
+            "recall": 0.1923,
+            "f1": 0.2222,
+            "accuracy": 0.965,
+            "roc_auc": 0.9308,
         },
     },
 }
@@ -136,8 +147,16 @@ FROZEN_BASELINE: dict[str, Any] = {
 WEIGHTING_REVIEW: dict[str, Any] = {
     "decision": "rejected",
     "gate": "AUC tiap kondisi >= baseline-0.02 dan recall CVD naik",
-    "class_weights_tested": {"diabetes": 4.4466, "hypertension": 3.662, "cardiovascular": 9.2459},
-    "auc_delta_vs_baseline": {"diabetes": -0.0222, "hypertension": -0.0103, "cardiovascular": -0.0281},
+    "class_weights_tested": {
+        "diabetes": 4.4466,
+        "hypertension": 3.662,
+        "cardiovascular": 9.2459,
+    },
+    "auc_delta_vs_baseline": {
+        "diabetes": -0.0222,
+        "hypertension": -0.0103,
+        "cardiovascular": -0.0281,
+    },
     "cvd_recall_baseline_tuned": 0.3975,
     "cvd_recall_weighted_tuned": 0.2671,
     "note": (
@@ -149,7 +168,9 @@ WEIGHTING_REVIEW: dict[str, Any] = {
 
 # Tuned operating thresholds (max-F1 sweep, stabil lintas seed 42/7/123).
 TUNED_THRESHOLDS: dict[str, float] = {
-    "diabetes": 0.25, "hypertension": 0.2, "cardiovascular": 0.25,
+    "diabetes": 0.25,
+    "hypertension": 0.2,
+    "cardiovascular": 0.25,
 }
 
 MODEL_NAME = "heliora-risk-engine"
@@ -157,6 +178,7 @@ MODEL_VERSION = "synthetic-xgb-10k-v1"
 
 
 # ── Evaluation data ─────────────────────────────────────────────
+
 
 @dataclass
 class EvaluationSample:
@@ -241,6 +263,7 @@ def analyze_class_balance(labels: dict[str, list[float]]) -> dict[str, dict[str,
 
 # ── Synthetic evaluation dataset ────────────────────────────────
 
+
 def generate_synthetic_evaluation_data(
     n_samples: int = 1000, seed: int = 42
 ) -> list[EvaluationSample]:
@@ -279,8 +302,12 @@ def generate_synthetic_evaluation_data(
                 cholesterol_mg_dl=features.cholesterol_mg_dl,
                 blood_pressure=features.blood_pressure,
                 diabetes_label=float(1 if dm_prob >= ELEVATED_RISK_THRESHOLD else 0),
-                hypertension_label=float(1 if ht_prob >= ELEVATED_RISK_THRESHOLD else 0),
-                cardiovascular_label=float(1 if cvd_prob >= ELEVATED_RISK_THRESHOLD else 0),
+                hypertension_label=float(
+                    1 if ht_prob >= ELEVATED_RISK_THRESHOLD else 0
+                ),
+                cardiovascular_label=float(
+                    1 if cvd_prob >= ELEVATED_RISK_THRESHOLD else 0
+                ),
             )
         )
 
@@ -288,6 +315,7 @@ def generate_synthetic_evaluation_data(
 
 
 # ── Profile builder for risk engine ────────────────────────────
+
 
 def sample_to_profile(sample: EvaluationSample) -> Any:
     """Convert an EvaluationSample to a mock HealthProfile-like object for the risk engine."""
@@ -303,8 +331,12 @@ def sample_to_profile(sample: EvaluationSample) -> Any:
         smoking_status=sample.smoking_status,
         family_history=sample.family_history,
         stress_level=sample.stress_level,
-        blood_sugar_mg_dl=Decimal(str(sample.blood_sugar_mg_dl)) if sample.blood_sugar_mg_dl else None,
-        cholesterol_mg_dl=Decimal(str(sample.cholesterol_mg_dl)) if sample.cholesterol_mg_dl else None,
+        blood_sugar_mg_dl=Decimal(str(sample.blood_sugar_mg_dl))
+        if sample.blood_sugar_mg_dl
+        else None,
+        cholesterol_mg_dl=Decimal(str(sample.cholesterol_mg_dl))
+        if sample.cholesterol_mg_dl
+        else None,
         blood_pressure=sample.blood_pressure,
         bmi=Decimal(str(sample.bmi)),
         created_at=None,
@@ -313,6 +345,7 @@ def sample_to_profile(sample: EvaluationSample) -> Any:
 
 
 # ── Main evaluation function ────────────────────────────────────
+
 
 def evaluate_risk_engine(
     n_samples: int = 1000,
@@ -372,7 +405,11 @@ def evaluate_risk_engine(
 
     # Compute metrics per condition
     conditions: list[MetricsPerCondition] = []
-    for cond_key, cond_name in [("diabetes", "Diabetes Melitus"), ("hypertension", "Hipertensi"), ("cardiovascular", "Penyakit Jantung")]:
+    for cond_key, cond_name in [
+        ("diabetes", "Diabetes Melitus"),
+        ("hypertension", "Hipertensi"),
+        ("cardiovascular", "Penyakit Jantung"),
+    ]:
         y_true = np.array(labels[cond_key])
         y_prob = np.array(predictions[cond_key])
         thr = thresholds[cond_key]
@@ -436,8 +473,7 @@ def _model_card(engine: ModelRiskEngine | None) -> dict[str, Any]:
             f"seed={info.get('seed')})"
         ),
         "feature_version": (
-            f"model_training.FEATURE_NAMES v1 "
-            f"({info.get('n_features')} features)"
+            f"model_training.FEATURE_NAMES v1 ({info.get('n_features')} features)"
         ),
         "training_date": info.get("trained_at"),
         "algorithm": info.get("algorithm"),
@@ -493,9 +529,9 @@ if __name__ == "__main__":  # pragma: no cover - manual CLI entry point
         output_path="evaluation_report.json",
     )
 
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print("HELIORA Risk Engine — Evaluation Report")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
     print(f"Timestamp   : {result.eval_timestamp}")
     print(f"Sample count: {result.sample_count}")
     print(f"Runtime     : {result.runtime_seconds:.3f}s")
@@ -525,4 +561,4 @@ if __name__ == "__main__":  # pragma: no cover - manual CLI entry point
             f"FN={cf.get('fn')} TN={cf.get('tn')}"
         )
     print(f"\nDisclaimer  : {result.disclaimer}")
-    print(f"{'='*60}\n")
+    print(f"{'=' * 60}\n")
