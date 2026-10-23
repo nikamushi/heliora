@@ -1,0 +1,186 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+    tags:
+      - "app-v*"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        required: true
+        type: choice
+        options: [staging, production]
+        default: staging
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-${{ (github.ref_type == 'tag' || inputs.environment == 'production') && 'production' || 'staging' }}
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  build:
+    name: Build and scan images
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image_tag: ${{ steps.meta.outputs.tag }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Resolve image tag
+        id: meta
+        run: echo "tag=sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract API metadata
+        id: meta-api
+        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/heliora-api
+          tags: |
+            type=sha,prefix=sha-
+            type=match,pattern=app-v(.*),group=1
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push API image
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: .
+          file: apps/api/Dockerfile
+          push: true
+          tags: ${{ steps.meta-api.outputs.tags }}
+          labels: ${{ steps.meta-api.outputs.labels }}
+          provenance: mode=max
+          sbom: true
+          cache-from: type=gha,scope=api
+          cache-to: type=gha,mode=max,scope=api
+
+      - name: Extract web metadata
+        id: meta-web
+        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/heliora-web
+          tags: |
+            type=sha,prefix=sha-
+            type=match,pattern=app-v(.*),group=1
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push web image
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: .
+          file: apps/web/Dockerfile
+          push: true
+          tags: ${{ steps.meta-web.outputs.tags }}
+          labels: ${{ steps.meta-web.outputs.labels }}
+          build-args: |
+            NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}
+            NEXT_PUBLIC_SUPABASE_URL=${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+            NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          provenance: mode=max
+          sbom: true
+          cache-from: type=gha,scope=web
+          cache-to: type=gha,mode=max,scope=web
+
+      - name: Scan API image
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ github.repository_owner }}/heliora-api:${{ steps.meta.outputs.tag }}
+          format: table
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+
+      - name: Scan web image
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ github.repository_owner }}/heliora-web:${{ steps.meta.outputs.tag }}
+          format: table
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+
+  deploy:
+    name: Deploy to ${{ github.ref_type == 'tag' && 'production' || 'staging' }}
+    needs: build
+    if: vars.DEPLOY_ENABLED == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: ${{ (github.ref_type == 'tag' || inputs.environment == 'production') && 'production' || 'staging' }}
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1
+        env:
+          IMAGE_PREFIX: ${{ env.REGISTRY }}/${{ github.repository_owner }}
+          IMAGE_TAG: ${{ needs.build.outputs.image_tag }}
+          DEPLOY_PATH: ${{ secrets.VPS_DEPLOY_PATH }}
+          GHCR_USER: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          fingerprint: ${{ secrets.VPS_HOST_FINGERPRINT }}
+          script_stop: true
+          envs: IMAGE_PREFIX,IMAGE_TAG,DEPLOY_PATH,GHCR_USER,GHCR_TOKEN
+          script: |
+            set -euo pipefail
+            : "${DEPLOY_PATH:?DEPLOY_PATH secret is required}"
+            cd "$DEPLOY_PATH"
+
+            PREVIOUS_TAG="$(sed -n 's/^IMAGE_TAG=//p' .env | tail -1)"
+            export PREVIOUS_TAG
+
+            echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
+
+            if grep -q '^IMAGE_TAG=' .env; then
+              sed -i "s|^IMAGE_TAG=.*|IMAGE_TAG=$IMAGE_TAG|" .env
+            else
+              printf '\nIMAGE_TAG=%s\n' "$IMAGE_TAG" >> .env
+            fi
+
+            DOMAIN="$(sed -n 's/^DOMAIN=//p' .env | tail -1)"
+            API_DOMAIN="$(sed -n 's/^API_DOMAIN=//p' .env | tail -1)"
+
+            deploy() {
+              docker compose pull
+              docker compose run --rm --no-deps api alembic upgrade head
+              docker compose up -d --wait --wait-timeout 180
+              curl -fsS "https://${API_DOMAIN}/health" > /dev/null
+              curl -fsS "https://${DOMAIN}/" > /dev/null
+            }
+
+            if deploy; then
+              echo "Deployment of $IMAGE_TAG succeeded."
+            else
+              echo "Deployment failed. Rolling back to ${PREVIOUS_TAG:-latest}." >&2
+              sed -i "s|^IMAGE_TAG=.*|IMAGE_TAG=${PREVIOUS_TAG:-latest}|" .env
+              docker compose up -d --wait --wait-timeout 120 || true
+              exit 1
+            fi
