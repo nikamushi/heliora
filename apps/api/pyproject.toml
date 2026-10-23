@@ -5,7 +5,7 @@ description = "HELIORA — AI-Powered Preventive Health Intelligence Platform AP
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.115.0",
-    "uvicorn[standard]>=0.30.0",
+    "uvicorn[standard]>=0.54.0",
     "sqlalchemy[asyncio]>=2.0.0",
     "asyncpg>=0.30.0",
     "alembic>=1.14.0",
