@@ -1976,6 +1976,7 @@ Tasks:
 - [x] Release signing key stored in GitHub Secrets.
 - [x] Publikasikan GitHub Release perdana aplikasi mobile dengan lampiran binary APK rilis.
 - [x] Test the release APK on a physical device.
+- [x] MOB-008.02: Tag and publish final production mobile release v1.0.0-mobile.
 
 Acceptance Criteria:
 

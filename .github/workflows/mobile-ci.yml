@@ -25,7 +25,7 @@ on:
         description: 'Release tag'
         required: false
         type: string
-        default: 'v0.1.0-mobile'
+        default: 'v1.0.0-mobile'
 
 concurrency:
   group: mobile-${{ github.ref }}
@@ -187,10 +187,14 @@ jobs:
           elif [ -n "${{ inputs.release_tag }}" ]; then
             TAG_NAME="${{ inputs.release_tag }}"
           else
-            TAG_NAME="v0.1.0-mobile"
+            TAG_NAME="v1.0.0-mobile"
           fi
           echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
-          echo "release_title=HELIORA Mobile $TAG_NAME (MVP Initial Release)" >> $GITHUB_OUTPUT
+          if [[ "$TAG_NAME" == *"1.0.0"* ]]; then
+            echo "release_title=HELIORA Mobile $TAG_NAME (Final Production Release)" >> $GITHUB_OUTPUT
+          else
+            echo "release_title=HELIORA Mobile $TAG_NAME (MVP Initial Release)" >> $GITHUB_OUTPUT
+          fi
 
       - name: Publish to GitHub Releases
         uses: softprops/action-gh-release@v2
