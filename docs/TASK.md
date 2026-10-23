@@ -2118,6 +2118,7 @@ Tasks:
 - [x] MOB-013.04: Implement interactive risk detail bottom sheet modal for chronic condition deep-dive.
 - [x] MOB-013.05: Add contextual parameter focus navigation from recommendations to simulation.
 - [x] MOB-013.06: Verify 100% test coverage and ensure zero pill chips / oval badges.
+- [x] MOB-013.07: Align recommendation simulation focus fallback and tripartite factor taxonomy with Web.
 
 Acceptance Criteria:
 

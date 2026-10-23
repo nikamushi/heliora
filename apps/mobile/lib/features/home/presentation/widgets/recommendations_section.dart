@@ -28,14 +28,15 @@ class RecommendationsSection extends StatelessWidget {
     }
   }
 
-  String _deriveSimulationFocus(String? ruleId) {
-    if (ruleId == null) return 'sleep';
+  String? _deriveSimulationFocus(String? ruleId) {
+    if (ruleId == null) return null;
+    if (ruleId == 'REC-NUT-LOWBMI-01') return null;
     final upper = ruleId.toUpperCase();
     if (upper.contains('SLP')) return 'sleep';
     if (upper.contains('ACT')) return 'activity';
     if (upper.contains('NUT') || upper.contains('BMI')) return 'weight';
     if (upper.contains('SMK')) return 'smoking';
-    return 'sleep';
+    return null;
   }
 
   @override
@@ -184,33 +185,35 @@ class RecommendationsSection extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
-              InkWell(
-                onTap: () => onTestInSimulation?.call(focusParam),
-                borderRadius: BorderRadius.circular(HelioraTokens.radiusSm),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'Uji di Simulator',
-                        style: HelioraTokens.caption.copyWith(
-                          color: HelioraTokens.primary,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 12,
+              if (focusParam != null) ...[
+                const SizedBox(width: 12),
+                InkWell(
+                  onTap: () => onTestInSimulation?.call(focusParam),
+                  borderRadius: BorderRadius.circular(HelioraTokens.radiusSm),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Uji di Simulator',
+                          style: HelioraTokens.caption.copyWith(
+                            color: HelioraTokens.primary,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 12,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 4),
-                      const HelioraIcon(
-                        HelioraIcons.arrowRight,
-                        size: 13,
-                        color: HelioraTokens.primary,
-                      ),
-                    ],
+                        const SizedBox(width: 4),
+                        const HelioraIcon(
+                          HelioraIcons.arrowRight,
+                          size: 13,
+                          color: HelioraTokens.primary,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
+              ],
             ],
           ),
         ],

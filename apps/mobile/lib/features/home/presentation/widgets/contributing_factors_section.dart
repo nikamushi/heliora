@@ -14,6 +14,12 @@ class ContributingFactorsSection extends StatelessWidget {
   final List<ContributingFactor> topFactors;
 
   static const _biologicalFeatures = {'age', 'family_history'};
+  static const _healthIndicatorFeatures = {
+    'blood_sugar',
+    'systolic_bp',
+    'diastolic_bp',
+    'cholesterol',
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -22,10 +28,13 @@ class ContributingFactorsSection extends StatelessWidget {
     }
 
     final lifestyle = <ContributingFactor>[];
+    final indicators = <ContributingFactor>[];
     final biological = <ContributingFactor>[];
 
     for (final factor in topFactors) {
-      if (_biologicalFeatures.contains(factor.feature)) {
+      if (_healthIndicatorFeatures.contains(factor.feature)) {
+        indicators.add(factor);
+      } else if (_biologicalFeatures.contains(factor.feature)) {
         biological.add(factor);
       } else {
         lifestyle.add(factor);
@@ -92,7 +101,39 @@ class ContributingFactorsSection extends StatelessWidget {
           ),
         ],
 
-        // Group 2: Biologis
+        // Group 2: Indikator Klinis & Biomarker (Dapat dipantau & dikendalikan)
+        if (indicators.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: HelioraTokens.border, width: 1.0),
+              borderRadius: BorderRadius.circular(16.0),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Indikator klinis & biomarker',
+                  style: HelioraTokens.labelDefault.copyWith(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                    color: HelioraTokens.secondaryForeground,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                for (int i = 0; i < indicators.length; i++) ...[
+                  _buildFactorRow(indicators[i], maxWeight),
+                  if (i < indicators.length - 1)
+                    const Divider(color: Color(0xFFF1F5F9), height: 16),
+                ],
+              ],
+            ),
+          ),
+        ],
+
+        // Group 3: Biologis (latar belakang)
         if (biological.isNotEmpty) ...[
           const SizedBox(height: 12),
           Container(
