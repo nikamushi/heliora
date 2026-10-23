@@ -135,6 +135,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           onStartAssessment: () => context.push(AppRoutes.assessment),
           onReconsent: () => context.push(AppRoutes.consent),
           onOpenSimulation: () => context.go(AppRoutes.simulation),
+          onOpenSimulationWithFocus: (focus) => context.go('${AppRoutes.simulation}?focus=$focus'),
           onOpenProfile: () => context.go(AppRoutes.profile),
         ),
       ),
@@ -222,10 +223,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.simulation,
         name: 'simulation',
-        builder: (context, state) => SimulationScreen(
-          onNavigateHome: () => context.go(AppRoutes.home),
-          onNavigateProfile: () => context.go(AppRoutes.profile),
-        ),
+        builder: (context, state) {
+          final focus = state.uri.queryParameters['focus'];
+          return SimulationScreen(
+            initialFocus: focus,
+            onNavigateHome: () => context.go(AppRoutes.home),
+            onNavigateProfile: () => context.go(AppRoutes.profile),
+          );
+        },
       ),
       GoRoute(
         path: AppRoutes.profile,
