@@ -10,10 +10,14 @@ class RiskCard extends StatelessWidget {
   const RiskCard({
     super.key,
     required this.item,
+    this.onTap,
   });
 
   /// The risk assessment data model.
   final RiskAssessmentItem item;
+
+  /// Optional callback when tapping the card to view condition details.
+  final VoidCallback? onTap;
 
   /// Returns localized condition title.
   String get conditionTitle {
@@ -76,13 +80,8 @@ class RiskCard extends StatelessWidget {
         : '${roundedPercent.toStringAsFixed(1)}%';
     final double progressFraction = (rawPercent / 100.0).clamp(0.0, 1.0);
 
-    return Container(
+    final cardContent = Padding(
       padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: HelioraTokens.border, width: 1.0),
-        borderRadius: BorderRadius.circular(16.0),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -119,6 +118,14 @@ class RiskCard extends StatelessWidget {
                       color: statusColor,
                     ),
                   ),
+                  if (onTap != null) ...[
+                    const SizedBox(width: 4),
+                    const Icon(
+                      Icons.chevron_right,
+                      size: 18,
+                      color: HelioraTokens.secondaryForeground,
+                    ),
+                  ],
                 ],
               ),
             ],
@@ -185,6 +192,19 @@ class RiskCard extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+
+    return Material(
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16.0),
+        side: const BorderSide(color: HelioraTokens.border, width: 1.0),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: cardContent,
       ),
     );
   }
