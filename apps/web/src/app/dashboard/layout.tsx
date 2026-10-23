@@ -27,6 +27,8 @@ import {
 import { motion, AnimatePresence } from "motion/react";
 import { apiClient } from "@/lib/api-client";
 import { UserResponse } from "@/types/api";
+import { LogoEmblem } from "@/components/logo";
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 
 export default function DashboardLayout({
   children,
@@ -35,6 +37,20 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
+  const lastNavTimeRef = React.useRef<number>(0);
+
+  const handleDebouncedNav = (e: React.MouseEvent, targetHref: string) => {
+    const now = Date.now();
+    if (pathname === targetHref) {
+      e.preventDefault();
+      return;
+    }
+    if (now - lastNavTimeRef.current < 400) {
+      e.preventDefault();
+      return;
+    }
+    lastNavTimeRef.current = now;
+  };
   const [user, setUser] = useState<UserResponse | null>(null);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
@@ -185,9 +201,7 @@ export default function DashboardLayout({
     return (
       <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-[#0D5F3F] text-white flex items-center justify-center font-bold text-xl shadow-xs animate-pulse">
-            H
-          </div>
+          <LogoEmblem size={48} className="rounded-2xl shadow-xs animate-pulse" />
           <div className="space-y-1.5">
             <h2 className="text-base font-semibold text-[#111827]">Memeriksa Sesi HELIORA</h2>
             <p className="text-xs text-[#6B7280]">Menyiapkan data kesehatan Anda...</p>
@@ -215,8 +229,11 @@ export default function DashboardLayout({
           >
             <SFLine3Horizontal className="w-6 h-6" />
           </button>
-          <Link href="/dashboard" className="font-bold text-base tracking-tight text-neutral-900">
-            HELIORA
+          <Link href="/dashboard" className="flex items-center gap-2">
+            <LogoEmblem size={24} className="rounded-lg shadow-2xs" />
+            <span className="font-bold text-base tracking-tight text-neutral-900">
+              HELIORA
+            </span>
           </Link>
         </div>
 
@@ -259,7 +276,7 @@ export default function DashboardLayout({
               setIsPersonalMenuOpen(true);
             }}
             className="size-9 rounded-full bg-neutral-200 text-neutral-800 font-semibold flex items-center justify-center text-xs hover:ring-2 hover:ring-brand-900/20 transition-all cursor-pointer"
-            title="Personal & Profil Saya"
+            aria-label="Personal & Profil Saya"
           >
             {userInitials}
           </button>
@@ -607,64 +624,114 @@ export default function DashboardLayout({
       </AnimatePresence>
 
       {/* ── Desktop Primary Sidebar (Sidebar 1: Icon-Only Rail) ── */}
-      <aside className="hidden lg:flex w-16 shrink-0 flex-col items-center bg-brand-900 h-screen sticky top-0 py-4 px-2.5 z-20 select-none">
-        <div className="flex flex-col items-center gap-6 w-full">
-          {/* User Avatar Entry Point (Top) */}
-          <Link
-            href="/dashboard/profile"
-            title={user?.full_name || "Profil Saya"}
-            className={`size-9 rounded-full font-semibold flex items-center justify-center text-xs transition-all ${
-              activePrimaryTab === "personal"
-                ? "bg-white text-brand-900 ring-2 ring-white/40 shadow-xs"
-                : "bg-white/15 text-white hover:bg-white/25 hover:ring-2 hover:ring-white/30"
-            }`}
-          >
-            {userInitials}
-          </Link>
+      <TooltipProvider>
+        <aside className="hidden lg:flex w-16 shrink-0 flex-col items-center bg-brand-900 h-screen sticky top-0 py-4 px-2.5 z-20 select-none">
+          <div className="flex flex-col items-center gap-6 w-full">
+            {/* User Avatar Entry Point (Top) */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link
+                  href="/dashboard/profile"
+                  onClick={(e) => handleDebouncedNav(e, "/dashboard/profile")}
+                  aria-label={user?.full_name || "Profil Saya"}
+                  className={`size-9 rounded-full font-semibold flex items-center justify-center text-xs transition-all ${
+                    activePrimaryTab === "personal"
+                      ? "bg-white text-brand-900 ring-2 ring-white/40 shadow-xs"
+                      : "bg-white/15 text-white hover:bg-white/25 hover:ring-2 hover:ring-white/30"
+                  }`}
+                >
+                  {userInitials}
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent
+                side="right"
+                sideOffset={12}
+                className="border border-neutral-700/60 bg-neutral-900 text-neutral-100 shadow-xl rounded-lg py-1.5 px-3 text-xs font-medium tracking-wide backdrop-blur-md"
+              >
+                {user?.full_name || "Profil Saya"}
+              </TooltipContent>
+            </Tooltip>
 
-          {/* Top-Level Icon Navigation */}
-          <nav className="flex flex-col items-center gap-6 w-full">
-            {/* Destination 1: Ringkasan */}
-            <Link
-              href="/dashboard"
-              title="Ringkasan"
-              className={`size-10 rounded-xl flex items-center justify-center transition-colors ${
-                activePrimaryTab === "ringkasan"
-                  ? "bg-white text-brand-900 shadow-xs"
-                  : "text-white/70 hover:text-white hover:bg-white/10"
-              }`}
-            >
-              <SFHeartTextSquare className="w-5.5 h-5.5" />
-            </Link>
+            {/* Top-Level Icon Navigation */}
+            <nav className="flex flex-col items-center gap-6 w-full">
+              {/* Destination 1: Ringkasan */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link
+                    href="/dashboard"
+                    onClick={(e) => handleDebouncedNav(e, "/dashboard")}
+                    aria-label="Ringkasan"
+                    className={`size-10 rounded-xl flex items-center justify-center transition-colors ${
+                      activePrimaryTab === "ringkasan"
+                        ? "bg-white text-brand-900 shadow-xs"
+                        : "text-white/70 hover:text-white hover:bg-white/10"
+                    }`}
+                  >
+                    <SFHeartTextSquare className="w-5.5 h-5.5" />
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="right"
+                  sideOffset={12}
+                  className="border border-neutral-700/60 bg-neutral-900 text-neutral-100 shadow-xl rounded-lg py-1.5 px-3 text-xs font-medium tracking-wide backdrop-blur-md"
+                >
+                  Ringkasan
+                </TooltipContent>
+              </Tooltip>
 
-            {/* Destination 2: Jelajahi */}
-            <Link
-              href="/dashboard/risk/diabetes"
-              title="Jelajahi"
-              className={`size-10 rounded-xl flex items-center justify-center transition-colors ${
-                activePrimaryTab === "fitur"
-                  ? "bg-white text-brand-900 shadow-xs"
-                  : "text-white/70 hover:text-white hover:bg-white/10"
-              }`}
-            >
-              <SFCompass className="w-5.5 h-5.5" />
-            </Link>
+              {/* Destination 2: Jelajahi */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link
+                    href="/dashboard/risk/diabetes"
+                    onClick={(e) => handleDebouncedNav(e, "/dashboard/risk/diabetes")}
+                    aria-label="Jelajahi"
+                    className={`size-10 rounded-xl flex items-center justify-center transition-colors ${
+                      activePrimaryTab === "fitur"
+                        ? "bg-white text-brand-900 shadow-xs"
+                        : "text-white/70 hover:text-white hover:bg-white/10"
+                    }`}
+                  >
+                    <SFCompass className="w-5.5 h-5.5" />
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="right"
+                  sideOffset={12}
+                  className="border border-neutral-700/60 bg-neutral-900 text-neutral-100 shadow-xl rounded-lg py-1.5 px-3 text-xs font-medium tracking-wide backdrop-blur-md"
+                >
+                  Jelajahi
+                </TooltipContent>
+              </Tooltip>
 
-            {/* Destination 3: Bantuan */}
-            <Link
-              href="/dashboard/help/about"
-              title="Bantuan"
-              className={`size-10 rounded-xl flex items-center justify-center transition-colors ${
-                activePrimaryTab === "bantuan"
-                  ? "bg-white text-brand-900 shadow-xs"
-                  : "text-white/70 hover:text-white hover:bg-white/10"
-              }`}
-            >
-              <SFQuestionMarkCircle className="w-5.5 h-5.5" />
-            </Link>
-          </nav>
-        </div>
-      </aside>
+              {/* Destination 3: Bantuan */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link
+                    href="/dashboard/help/about"
+                    onClick={(e) => handleDebouncedNav(e, "/dashboard/help/about")}
+                    aria-label="Bantuan"
+                    className={`size-10 rounded-xl flex items-center justify-center transition-colors ${
+                      activePrimaryTab === "bantuan"
+                        ? "bg-white text-brand-900 shadow-xs"
+                        : "text-white/70 hover:text-white hover:bg-white/10"
+                    }`}
+                  >
+                    <SFQuestionMarkCircle className="w-5.5 h-5.5" />
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="right"
+                  sideOffset={12}
+                  className="border border-neutral-700/60 bg-neutral-900 text-neutral-100 shadow-xl rounded-lg py-1.5 px-3 text-xs font-medium tracking-wide backdrop-blur-md"
+                >
+                  Bantuan
+                </TooltipContent>
+              </Tooltip>
+            </nav>
+          </div>
+        </aside>
+      </TooltipProvider>
 
       {/* ── Desktop Secondary Sidebar (Sidebar 2: Animated Pop-Out) ── */}
       <AnimatePresence>
@@ -818,6 +885,7 @@ export default function DashboardLayout({
                   <div className="space-y-1">
                     <Link
                       href="/dashboard/profile"
+                      onClick={(e) => handleDebouncedNav(e, "/dashboard/profile")}
                       className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
                         pathname === "/dashboard/profile"
                           ? "bg-white text-neutral-950 font-semibold shadow-2xs"
@@ -829,6 +897,7 @@ export default function DashboardLayout({
                     </Link>
                     <Link
                       href="/dashboard/settings"
+                      onClick={(e) => handleDebouncedNav(e, "/dashboard/settings")}
                       className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
                         pathname?.startsWith("/dashboard/settings")
                           ? "bg-white text-neutral-950 font-semibold shadow-2xs"
@@ -875,34 +944,34 @@ export default function DashboardLayout({
           {pathname?.startsWith("/dashboard/risk") && (
             <nav
               aria-label="Navigasi Kondisi Risiko"
-              className="inline-grid grid-cols-3 p-1.5 bg-neutral-100/90 rounded-full text-xs font-medium gap-1"
+              className="inline-grid grid-cols-3 p-1 bg-neutral-100 rounded-xl text-xs font-medium gap-1"
             >
               <Link
                 href="/dashboard/risk/diabetes"
-                className={`px-3.5 sm:px-4.5 py-1.5 text-center rounded-full transition-all select-none flex items-center justify-center shrink-0 ${
+                className={`px-3 sm:px-4 py-1.5 text-center rounded-lg transition-all select-none flex items-center justify-center shrink-0 ${
                   pathname === "/dashboard/risk/diabetes"
-                    ? "bg-white text-neutral-900 font-bold shadow-xs"
-                    : "text-neutral-500 hover:text-black"
+                    ? "bg-white text-neutral-900 font-semibold shadow-xs"
+                    : "text-neutral-500 hover:text-neutral-900"
                 }`}
               >
                 <span className="truncate">Diabetes</span>
               </Link>
               <Link
                 href="/dashboard/risk/hypertension"
-                className={`px-3.5 sm:px-4.5 py-1.5 text-center rounded-full transition-all select-none flex items-center justify-center shrink-0 ${
+                className={`px-3 sm:px-4 py-1.5 text-center rounded-lg transition-all select-none flex items-center justify-center shrink-0 ${
                   pathname === "/dashboard/risk/hypertension"
-                    ? "bg-white text-neutral-900 font-bold shadow-xs"
-                    : "text-neutral-500 hover:text-black"
+                    ? "bg-white text-neutral-900 font-semibold shadow-xs"
+                    : "text-neutral-500 hover:text-neutral-900"
                 }`}
               >
                 <span className="truncate">Hipertensi</span>
               </Link>
               <Link
                 href="/dashboard/risk/cardiovascular"
-                className={`px-3.5 sm:px-4.5 py-1.5 text-center rounded-full transition-all select-none flex items-center justify-center shrink-0 ${
+                className={`px-3 sm:px-4 py-1.5 text-center rounded-lg transition-all select-none flex items-center justify-center shrink-0 ${
                   pathname === "/dashboard/risk/cardiovascular"
-                    ? "bg-white text-neutral-900 font-bold shadow-xs"
-                    : "text-neutral-500 hover:text-black"
+                    ? "bg-white text-neutral-900 font-semibold shadow-xs"
+                    : "text-neutral-500 hover:text-neutral-900"
                 }`}
               >
                 <span className="truncate">Kardiovaskular</span>

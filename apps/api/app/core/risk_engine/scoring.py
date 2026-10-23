@@ -30,23 +30,37 @@ class ScoreCalculationMixin:
     """Computes the hybrid Health Score and the weighted Lifestyle Score."""
 
     @staticmethod
-    def calculate_health_score(profile: Any, risks: dict[str, float]) -> float:
+    def calculate_health_score(
+        profile_or_risks: Any,
+        risks: dict[str, float] | None = None,
+    ) -> float:
         """Calculate hybrid Health Score on 0.0 - 100.0 scale (docs/Health-Score.md, PRD §11.5.3).
 
-        Combines the Lifestyle component (AI-005 output), the Risk component
-        (inverse of the weighted risk deduction), and the Improvement component
-        (family-history protective context). Deterministic: identical inputs
-        always produce identical output.
+        Supports both:
+        - Ratified hybrid signature: calculate_health_score(profile, risks)
+        - Risk-only deduction signature: calculate_health_score(risks)
         """
+        if risks is None and isinstance(profile_or_risks, dict):
+            r = profile_or_risks
+            deduction = (
+                float(r.get("diabetes_risk", 0.0)) * 35.0
+                + float(r.get("hypertension_risk", 0.0)) * 35.0
+                + float(r.get("cardiovascular_risk", 0.0)) * 30.0
+            )
+            score = 100.0 - deduction
+            return round(max(5.0, min(98.0, score)), 1)
+
+        profile = profile_or_risks
+        target_risks = risks or {}
         lifestyle = ScoreCalculationMixin.calculate_lifestyle_score(profile)
         risk_component = 100.0 - (
-            risks["diabetes_risk"] * HEALTH_RISK_WEIGHT_DIABETES * 100.0
-            + risks["hypertension_risk"] * HEALTH_RISK_WEIGHT_HYPERTENSION * 100.0
-            + risks["cardiovascular_risk"] * HEALTH_RISK_WEIGHT_CARDIOVASCULAR * 100.0
+            float(target_risks.get("diabetes_risk", 0.0)) * HEALTH_RISK_WEIGHT_DIABETES * 100.0
+            + float(target_risks.get("hypertension_risk", 0.0)) * HEALTH_RISK_WEIGHT_HYPERTENSION * 100.0
+            + float(target_risks.get("cardiovascular_risk", 0.0)) * HEALTH_RISK_WEIGHT_CARDIOVASCULAR * 100.0
         )
         improvement = (
             HEALTH_IMPROVEMENT_WITH_HISTORY
-            if bool(profile.family_history)
+            if bool(getattr(profile, "family_history", False))
             else HEALTH_IMPROVEMENT_NO_HISTORY
         )
         total = (

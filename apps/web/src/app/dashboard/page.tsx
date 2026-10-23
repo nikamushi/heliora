@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { DisclaimerBanner } from "@/components/disclaimer-banner";
 import { MockDataNotice } from "@/components/mock-data-notice";
 import { DashboardSkeleton } from "@/components/dashboard-skeleton";
+import { RiskBadge } from "@/components/risk-badge";
 
 const HEALTH_INDICATOR_FEATURES = new Set([
   "blood_sugar",
@@ -413,7 +414,6 @@ export default function DashboardPage() {
                   ? (risk.estimated_risk_score <= 1.0 ? risk.estimated_risk_score * 100 : risk.estimated_risk_score)
                   : (risk.probability !== undefined ? (risk.probability <= 1.0 ? risk.probability * 100 : risk.probability) : 0)
               );
-              const band = getRiskBandLabel(scoreValue);
 
               return (
                 <Link
@@ -429,10 +429,14 @@ export default function DashboardPage() {
                   <div className="flex items-baseline gap-2">
                     <span className="text-3xl font-bold tabular-nums text-neutral-900">{scoreValue}</span>
                     <span className="text-sm text-neutral-500">/ 100</span>
-                    <span className="ml-auto text-xs text-neutral-500 flex items-center gap-1.5">
-                      <span className={`w-1.5 h-1.5 rounded-full ${scoreValue < 30 ? "bg-emerald-600" : scoreValue < 60 ? "bg-amber-600" : "bg-rose-600"}`} />
-                      {band.label}
-                    </span>
+                    <div className="ml-auto flex items-center gap-1.5">
+                      <RiskBadge level={risk.risk_level} labelOverride={risk.risk_label} showTooltip={false} />
+                      {risk.trend && (
+                        <span className="text-xs font-mono text-neutral-500">
+                          · {TREND_LABELS[risk.trend] ?? risk.trend}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   <div className="space-y-1">
@@ -469,6 +473,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Lifestyle */}
+          {lifestyleFactors.length > 0 && (
           <div className="space-y-2">
             <p className="text-xs font-medium text-neutral-500">Dapat diubah</p>
             <div className="rounded-2xl border border-neutral-200 bg-white divide-y divide-neutral-100 px-4">
@@ -498,14 +503,20 @@ export default function DashboardPage() {
                         )}
                       </span>
                     </div>
-                    <div className="h-1 w-full bg-neutral-200 rounded-full overflow-hidden">
-                      <div style={{ width: `${relativeWidthPct}%` }} className="h-full rounded-full bg-neutral-400" />
+                    <div className="h-1.5 w-full bg-neutral-100 rounded-full overflow-hidden">
+                      <div
+                        style={{ width: `${relativeWidthPct}%` }}
+                        className={`h-full rounded-full transition-all duration-300 ${
+                          factor.impact === "decrease" ? "bg-emerald-600" : "bg-amber-600"
+                        }`}
+                      />
                     </div>
                   </div>
                 );
               })}
             </div>
           </div>
+          )}
 
           {/* Health indicators */}
           {healthIndicators.length > 0 && (
@@ -538,8 +549,13 @@ export default function DashboardPage() {
                         )}
                       </span>
                     </div>
-                    <div className="h-1 w-full bg-neutral-200 rounded-full overflow-hidden">
-                      <div style={{ width: `${relativeWidthPct}%` }} className="h-full rounded-full bg-neutral-400" />
+                    <div className="h-1.5 w-full bg-neutral-100 rounded-full overflow-hidden">
+                      <div
+                        style={{ width: `${relativeWidthPct}%` }}
+                        className={`h-full rounded-full transition-all duration-300 ${
+                          factor.impact === "decrease" ? "bg-emerald-600" : "bg-amber-600"
+                        }`}
+                      />
                     </div>
                   </div>
                 );
@@ -549,6 +565,7 @@ export default function DashboardPage() {
           )}
 
           {/* Biological */}
+          {biologicalFactors.length > 0 && (
           <div className="space-y-2">
             <p className="text-xs font-medium text-neutral-500">Tidak dapat diubah</p>
             <div className="rounded-2xl border border-neutral-200 bg-white divide-y divide-neutral-100 px-4">
@@ -567,15 +584,46 @@ export default function DashboardPage() {
                         )}
                       </span>
                     </div>
-                    <div className="h-1 w-full bg-neutral-200 rounded-full overflow-hidden">
-                      <div style={{ width: `${relativeWidthPct}%` }} className="h-full rounded-full bg-neutral-400" />
+                    <div className="h-1.5 w-full bg-neutral-100 rounded-full overflow-hidden">
+                      <div
+                        style={{ width: `${relativeWidthPct}%` }}
+                        className={`h-full rounded-full transition-all duration-300 ${
+                          factor.impact === "decrease" ? "bg-emerald-600" : "bg-amber-600"
+                        }`}
+                      />
                     </div>
                   </div>
                 );
               })}
             </div>
           </div>
+          )}
         </section>
+
+        {/* AI Clinical Analysis */}
+        {assessment.ai_explanation && (
+          <section aria-labelledby="ai-analysis-heading" className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-mono font-bold tracking-widest text-brand-900/60 uppercase mb-1">
+                  Analisis Klinis AI
+                </p>
+                <h2 id="ai-analysis-heading" className="text-lg font-semibold text-neutral-900">
+                  Ringkasan personalisasi & bukti ilmiah
+                </h2>
+              </div>
+              <span className="text-xs font-mono text-neutral-500">
+                {assessment.ai_source === "llm" ? "Gemini 2.5 AI · Grounded" : "Deterministik · Standar Klinis"}
+              </span>
+            </div>
+
+            <div className="rounded-2xl border border-neutral-200/90 bg-white p-6 shadow-xs space-y-4">
+              <div className="text-neutral-700 leading-relaxed whitespace-pre-line text-sm">
+                {assessment.ai_explanation}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Simulator & Projection */}
         <section aria-labelledby="sim-heading" className="space-y-3">
@@ -628,8 +676,7 @@ function ScoreCard({ title, score, href, note }: { title: string; score: number;
         <span className="text-4xl font-bold tabular-nums text-neutral-900">{roundedScore}</span>
         <span className="text-sm text-neutral-500">/ 100</span>
       </div>
-      <span className="text-xs text-neutral-500 flex items-center gap-1.5">
-        <span className={`w-1.5 h-1.5 rounded-full ${roundedScore >= 80 ? "bg-emerald-600" : roundedScore >= 60 ? "bg-neutral-500" : roundedScore >= 40 ? "bg-amber-600" : "bg-rose-600"}`} />
+      <span className={`text-xs font-mono font-semibold ${category.className}`}>
         {category.label}
       </span>
       {note && <p className="text-xs text-neutral-500">{note}</p>}

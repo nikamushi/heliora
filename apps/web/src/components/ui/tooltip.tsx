@@ -58,11 +58,11 @@ function TooltipContent({
 }: TooltipContentProps) {
   return (
     <TooltipPrimitive.Portal>
-      <TooltipPrimitive.Positioner side={side} align={align} sideOffset={sideOffset}>
+      <TooltipPrimitive.Positioner side={side} align={align} sideOffset={sideOffset} className="z-50">
         <TooltipPrimitive.Popup
           data-slot="tooltip-content"
           className={cn(
-            "z-50 max-w-xs rounded-xl border border-brand-900/10 bg-white/95 px-3 py-2 text-xs font-medium text-brand-900 shadow-lg backdrop-blur-md transition-opacity duration-150",
+            "z-50 max-w-xs rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-1.5 text-xs font-medium text-neutral-100 shadow-xl backdrop-blur-md transition-opacity duration-150 animate-in fade-in-0 zoom-in-95",
             className
           )}
           {...props}

@@ -683,7 +683,7 @@ function RecommendationsContent() {
               <button
                 type="button"
                 onClick={() => refetch()}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#0B1E38] text-white text-xs font-semibold hover:bg-[#16335a] transition-colors cursor-pointer shadow-xs"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#0B1E38] text-white text-xs font-semibold hover:bg-[#16335a] transition-colors cursor-pointer shadow-xs"
               >
                 <RefreshCw className="size-3.5" />
                 <span>Coba Lagi</span>
@@ -800,7 +800,7 @@ function RecommendationsContent() {
                   key={opt.id}
                   type="button"
                   onClick={() => setActiveCategory(opt.id)}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all duration-150 cursor-pointer shrink-0 select-none ${
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium transition-all duration-150 cursor-pointer shrink-0 select-none ${
                     isSelected
                       ? "bg-[#0B1E38] text-white shadow-xs"
                       : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200/80 hover:text-neutral-900"
@@ -808,7 +808,7 @@ function RecommendationsContent() {
                 >
                   <span>{opt.label}</span>
                   <span
-                    className={`text-[11px] px-1.5 py-0.2 rounded-full ${
+                    className={`text-[11px] font-mono px-1.5 py-0.5 rounded-md ${
                       isSelected
                         ? "bg-white/20 text-white"
                         : "bg-neutral-200 text-neutral-600"
@@ -898,7 +898,7 @@ function RecommendationsContent() {
           ) : (
             /* Empty State for Empty Category */
             <div className="py-12 px-6 text-center space-y-3">
-              <div className="size-10 rounded-full bg-neutral-100 text-neutral-500 flex items-center justify-center mx-auto">
+              <div className="size-10 rounded-xl bg-neutral-100 text-neutral-500 flex items-center justify-center mx-auto">
                 <Info className="size-5" />
               </div>
               <div className="space-y-1">
@@ -914,7 +914,7 @@ function RecommendationsContent() {
                 <button
                   type="button"
                   onClick={() => setActiveCategory("all")}
-                  className="px-4 py-2 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-xs font-semibold transition-colors cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-xs font-semibold transition-colors cursor-pointer"
                 >
                   Tampilkan Semua Kategori
                 </button>
@@ -978,7 +978,7 @@ function RecommendationsContent() {
                   type="button"
                   onClick={handleCloseModal}
                   aria-label="Tutup"
-                  className="size-8 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-600 hover:text-neutral-900 flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                  className="size-8 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-600 hover:text-neutral-900 flex items-center justify-center transition-colors cursor-pointer shrink-0"
                 >
                   <X className="size-4" />
                 </button>

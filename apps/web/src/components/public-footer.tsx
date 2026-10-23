@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import { LogoEmblem } from "@/components/logo";
 
 export function PublicFooter() {
   const currentYear = new Date().getFullYear();
@@ -10,24 +11,7 @@ export function PublicFooter() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           {/* Brand Identity with Self-Contained SVG */}
           <div className="flex items-center gap-2.5">
-            <svg
-              width="28"
-              height="28"
-              viewBox="0 0 32 32"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="size-7 shrink-0"
-              aria-hidden="true"
-            >
-              <rect width="32" height="32" rx="8" fill="#0F7A4E" />
-              <path
-                d="M7 16H11L13.5 10L18.5 22L21 16H25"
-                stroke="#FFFFFF"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            <LogoEmblem size={28} className="shadow-2xs" />
             <div>
               <span className="font-bold tracking-tight text-neutral-900 text-sm block">
                 HELIORA

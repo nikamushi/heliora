@@ -3,7 +3,8 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Activity, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
+import { LogoEmblem } from "@/components/logo";
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -13,10 +14,8 @@ export function Navbar() {
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex items-center justify-between">
           {/* Logo (Left) */}
-          <Link href="/" className="flex items-center gap-2 group z-50">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-900 text-white shadow-sm transition-transform group-hover:scale-105">
-              <Activity size={20} strokeWidth={2} />
-            </div>
+          <Link href="/" className="flex items-center gap-2.5 group z-50">
+            <LogoEmblem size={36} className="shadow-sm transition-transform group-hover:scale-105" />
             <span className="text-xl font-bold tracking-tight text-brand-900">
               HELIORA
             </span>

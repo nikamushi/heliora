@@ -87,10 +87,9 @@ export default function HelpCenterHubPage() {
         {/* Header Banner */}
         <div className="rounded-3xl border border-neutral-200/80 bg-white p-6 sm:p-8 shadow-xs relative overflow-hidden">
           <div className="relative z-10 max-w-2xl space-y-3">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-50 border border-brand-100 text-brand-900 text-xs font-semibold">
-              <SFSparkles className="w-3.5 h-3.5 text-brand-700" />
-              <span>Pusat Bantuan &amp; Panduan HELIORA</span>
-            </div>
+            <p className="text-xs font-mono font-bold tracking-widest text-brand-900/60 uppercase">
+              Pusat Bantuan &amp; Panduan
+            </p>
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900">
               Bagaimana kami dapat membantu Anda hari ini?
             </h1>
@@ -131,7 +130,7 @@ export default function HelpCenterHubPage() {
                     <div className={`size-12 rounded-2xl border ${item.bg} flex items-center justify-center ${item.color} shadow-2xs`}>
                       <Icon className="w-6 h-6" />
                     </div>
-                    <span className="text-[11px] font-semibold text-neutral-500 bg-neutral-100 px-2.5 py-1 rounded-full">
+                    <span className="text-[11px] font-mono font-medium text-neutral-500 uppercase tracking-wider">
                       {item.badge}
                     </span>
                   </div>

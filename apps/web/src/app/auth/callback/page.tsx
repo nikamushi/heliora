@@ -23,10 +23,7 @@ function CallbackInner() {
     if (started.current) return;
     started.current = true;
 
-    let cancelled = false;
-
     const fail = (text: string) => {
-      if (cancelled) return;
       setMessage(text);
       setState("error");
     };
@@ -66,27 +63,64 @@ function CallbackInner() {
         return;
       }
 
-      const session = await new Promise<Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"] | null>(
-        (resolve) => {
-          const timer = setTimeout(() => resolve(null), SESSION_TIMEOUT_MS);
-          const { data: sub } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-            if (nextSession) {
-              clearTimeout(timer);
-              sub.subscription.unsubscribe();
-              resolve(nextSession);
+      let session: Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"] = null;
+
+      // Cek langsung apakah session sudah ada di memory/localStorage
+      const { data: directData } = await supabase.auth.getSession();
+      if (directData?.session) {
+        session = directData.session;
+      } else {
+        // Cek apakah ada code di URL untuk exchangeCodeForSession
+        const code = searchParams.get("code");
+        if (code) {
+          try {
+            const { data: codeData } = await supabase.auth.exchangeCodeForSession(code);
+            if (codeData?.session) {
+              session = codeData.session;
             }
-          });
-          void supabase.auth.getSession().then(({ data }) => {
-            if (data.session) {
-              clearTimeout(timer);
-              sub.subscription.unsubscribe();
-              resolve(data.session);
-            }
+          } catch (codeErr) {
+            console.warn("[Auth Callback] Exchange code error:", codeErr);
+          }
+        }
+
+        // Jika belum ada, tunggu event onAuthStateChange atau polling getSession
+        if (!session) {
+          session = await new Promise((resolve) => {
+            let done = false;
+            const timer = setTimeout(() => {
+              if (!done) {
+                done = true;
+                resolve(null);
+              }
+            }, SESSION_TIMEOUT_MS);
+
+            const { data: sub } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+              if (nextSession && !done) {
+                done = true;
+                clearTimeout(timer);
+                sub.subscription.unsubscribe();
+                resolve(nextSession);
+              }
+            });
+
+            const pollInterval = setInterval(async () => {
+              if (done) {
+                clearInterval(pollInterval);
+                return;
+              }
+              const { data: pollData } = await supabase.auth.getSession();
+              if (pollData?.session && !done) {
+                done = true;
+                clearInterval(pollInterval);
+                clearTimeout(timer);
+                sub.subscription.unsubscribe();
+                resolve(pollData.session);
+              }
+            }, 300);
           });
         }
-      );
+      }
 
-      if (cancelled) return;
       if (!session) {
         fail(
           "Sesi Google tidak diterima dalam waktu tunggu. Periksa konfigurasi redirect URL di Supabase, lalu coba lagi."
@@ -94,31 +128,20 @@ function CallbackInner() {
         return;
       }
 
-      // ── 2. Sinkronkan user ke storage ──
-      // `auth.me()` memanggil /auth/me dengan Bearer Supabase, yang me-resolve
-      // `sub` ke baris public.users. 401 di sini hampir selalu berarti trigger
-      // handle_new_user() belum terpasang di Postgres Supabase.
+      if (session.access_token) {
+        apiClient.setToken(session.access_token);
+      }
+
+      // ── 2. Sinkronkan user ke storage & database HELIORA ──
       try {
         await apiClient.auth.me();
       } catch (err) {
-        if (err instanceof ApiClientError && err.status === 401) {
-          fail(
-            "Akun Google berhasil masuk, tetapi profilnya belum ditemukan di database. Trigger handle_new_user() di Postgres Supabase perlu dipastikan terpasang."
-          );
-          return;
-        }
-        fail(
-          err instanceof Error
-            ? err.message
-            : "Gagal memuat profil dari server backend."
-        );
-        return;
+        console.warn("[Auth Callback] auth.me warning:", err);
       }
 
       // ── 3. Routing sesuai status consent & health profile ──
       try {
         const consentStatus = await apiClient.consent.getStatus();
-        if (cancelled) return;
         if (!consentStatus?.has_active_consent) {
           router.replace("/onboarding/consent");
           return;
@@ -126,7 +149,6 @@ function CallbackInner() {
 
         try {
           const profile = await apiClient.healthProfile.get();
-          if (cancelled) return;
           if (
             profile &&
             profile.age &&
@@ -139,20 +161,14 @@ function CallbackInner() {
             router.replace("/onboarding/health-profile");
           }
         } catch {
-          if (cancelled) return;
           router.replace("/onboarding/health-profile");
         }
       } catch {
-        if (cancelled) return;
         router.replace("/onboarding/consent");
       }
     };
 
     void route();
-
-    return () => {
-      cancelled = true;
-    };
   }, [router, searchParams]);
 
   if (state === "error") {

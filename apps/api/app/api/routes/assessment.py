@@ -72,3 +72,24 @@ async def get_assessment_by_id(
     return await assessment_service.get_assessment_by_id(
         db, assessment_id, current_user.id
     )
+
+@router.get(
+    "/{assessment_id}/explanation",
+    status_code=status.HTTP_200_OK,
+    summary="Get clinical explanation for assessment session",
+)
+async def get_assessment_explanation(
+    assessment_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Retrieve clinical explanation for an assessment session."""
+    res = await assessment_service.get_assessment_by_id(
+        db, assessment_id, current_user.id
+    )
+    return {
+        "text": res.ai_explanation,
+        "evidence_refs": res.ai_evidence_refs or [],
+        "source": res.ai_source or "fallback",
+    }
+

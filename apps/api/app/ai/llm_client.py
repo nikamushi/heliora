@@ -21,7 +21,7 @@ class GeminiClient:
     def __init__(
         self,
         api_key: str | None = None,
-        model: str = "gemini-3.5-flash-lite",
+        model: str = "gemini-1.5-flash",
         timeout_seconds: float = 10.0,
         transport: httpx.AsyncBaseTransport | None = None,
     ) -> None:
@@ -39,7 +39,7 @@ class GeminiClient:
         payload = {
             "system_instruction": {"parts": [{"text": system_prompt}]},
             "contents": [{"parts": [{"text": user_message}]}],
-            "generationConfig": {"temperature": 0.3, "maxOutputTokens": 1024},
+            "generationConfig": {"temperature": 0.3, "maxOutputTokens": 2048},
         }
         try:
             async with httpx.AsyncClient(

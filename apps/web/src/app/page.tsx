@@ -9,6 +9,7 @@ import { BilateralPatternFlow } from "@/components/BilateralPatternFlow";
 import { LayeredHealthPicture } from "@/components/LayeredHealthPicture";
 import { UnderstandActivityIcons } from "@/components/UnderstandActivityIcons";
 import { ExplainableFactorsVisual } from "@/components/ExplainableFactorsVisual";
+import { LogoEmblem } from "@/components/logo";
 import { SimulationDirectionVisual } from "@/components/SimulationDirectionVisual";
 import { RecommendationsEvidenceVisual } from "@/components/RecommendationsEvidenceVisual";
 import { motion, useScroll, useTransform } from "motion/react";
@@ -570,7 +571,7 @@ export default function LandingPage() {
       </main>
 
       {/* FOOTER */}
-      <PublicFooter />
+<PublicFooter />
     </div>
   );
 }

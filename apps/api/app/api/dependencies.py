@@ -4,12 +4,13 @@ Provides FastAPI dependency functions for database sessions,
 authentication context, and privacy consent gating (Architecture §5.3, §20.3, §21.1).
 """
 
+import logging
 import uuid
 from collections.abc import AsyncGenerator
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError
+from jose import JWTError, jwt
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
@@ -19,6 +20,8 @@ from app.db.models.user import User
 from app.db.session import async_session_factory
 from app.repositories.consent_repo import consent_repo
 from app.repositories.user_repo import user_repo
+
+logger = logging.getLogger(__name__)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_PREFIX}/auth/token")
 
@@ -47,17 +50,54 @@ async def get_current_user(
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
+        try:
+            raw_h = jwt.get_unverified_header(token)
+            logger.debug(f"[AUTH DIAGNOSTIC] Incoming token header: {raw_h}")
+        except Exception as h_err:
+            logger.debug(f"[AUTH DIAGNOSTIC] Failed to read header: {h_err}")
+
         payload = verify_token(token)
         user_id_str: str | None = payload.get("sub")
         if user_id_str is None:
+            logger.warning("[AUTH 401] Token missing 'sub' claim")
             raise credentials_exception
         user_id = uuid.UUID(user_id_str)
-    except (JWTError, ValueError):
+    except (JWTError, ValueError) as exc:
+        logger.warning(f"[AUTH 401] Token verification failed: {exc}")
         raise credentials_exception
 
     user = await user_repo.get_by_id(db, user_id)
     if user is None:
-        raise credentials_exception
+        email = payload.get("email")
+        if email:
+            user = await user_repo.get_by_email(db, email)
+            if user is None:
+                user_meta = payload.get("user_metadata") or {}
+                full_name = (
+                    user_meta.get("full_name")
+                    or user_meta.get("name")
+                    or email.split("@")[0]
+                )
+                try:
+                    user = await user_repo.create(
+                        db,
+                        id=user_id,
+                        email=email,
+                        full_name=full_name,
+                    )
+                    logger.info(
+                        f"[AUTH JIT] Auto-provisioned user {email} (ID: {user_id}) from Supabase token"
+                    )
+                except Exception as prov_err:
+                    logger.error(
+                        f"[AUTH JIT] Failed to auto-provision user {user_id}: {prov_err}"
+                    )
+                    raise credentials_exception
+            else:
+                logger.info(f"[AUTH] Resolved user by email {email} (ID: {user.id})")
+        else:
+            logger.warning(f"[AUTH 401] User ID {user_id} not found in public.users")
+            raise credentials_exception
 
     return user
 
