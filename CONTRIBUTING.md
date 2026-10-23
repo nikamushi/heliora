@@ -249,6 +249,17 @@ How:
 Use the repository PR template at [`.github/pull_request_template.md`](.github/pull_request_template.md).
 
 
+## CI/CD
+
+Pull Requests must pass the **`CI Gate`** required check. The pipeline runs
+path-filtered lint, typecheck, build, and test jobs for web, API, and mobile,
+plus CodeQL and dependency review. Deployment and mobile release run only from
+`main`/tags after the required secrets are configured.
+
+Full pipeline, secrets, and rollback documentation:
+[`docs/CI-CD.md`](docs/CI-CD.md).
+
+
 ## Local Git Hooks
 
 This repository ships a `commit-msg` hook under [`.githooks/`](.githooks/). Enable it once per clone:

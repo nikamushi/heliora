@@ -1,5 +1,7 @@
 # HELIORA
 
+[![CI](https://github.com/nikamushi/heliora/actions/workflows/ci.yml/badge.svg)](https://github.com/nikamushi/heliora/actions/workflows/ci.yml)
+
 AI-Powered Preventive Health Intelligence Platform.
 
 ## Overview
@@ -21,13 +23,14 @@ HELIORA adalah platform MVP kompetisi INSEVENT 2026 (SDG 3: *Good Health and Wel
 - **Mobile (Android):** Flutter, dikunci dengan FVM (Flutter Version Management)
 - **Auth & Database:** Supabase (PostgreSQL, JWKS Bearer auth ES256/RS256, JIT User Provisioning, RLS)
 - **Monorepo & Tooling:** Turborepo, pnpm, uv
+- **CI/CD:** GitHub Actions, GHCR, Docker Compose, Caddy — lihat [`docs/CI-CD.md`](docs/CI-CD.md)
 
 ---
 
 ## Prasyarat Sistem
 
-- **Node.js** >= 20.x & **pnpm** >= 9.x
-- **Python** >= 3.11 (disarankan 3.12) & **uv** package manager
+- **Node.js** 22.x & **pnpm** 11.x
+- **Python** 3.12 & **uv** package manager
 - **Mobile (Opsional):** Flutter versi sesuai `apps/mobile/.fvmrc` (lewat FVM), Android Studio dengan Android SDK, dan JDK 17
 
 Untuk pengembang lokal, aktifkan hook commit monorepo sekali setelah klon:
