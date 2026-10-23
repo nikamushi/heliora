@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/api/generated/export.dart';
 import '../../../theme/icons.dart';
 import '../../../theme/tokens.dart';
+import '../../../core/utils/formatters.dart';
 import '../../assessment/data/assessment_repository.dart';
 import '../../assessment/data/health_profile_repository.dart';
 import '../../auth/presentation/auth_controller.dart';
@@ -36,46 +37,11 @@ class ProfileScreen extends ConsumerStatefulWidget {
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _isRevoking = false;
 
-  String _formatDate(DateTime dt) {
-    const months = [
-      'Januari',
-      'Februari',
-      'Maret',
-      'April',
-      'Mei',
-      'Juni',
-      'Juli',
-      'Agustus',
-      'September',
-      'Oktober',
-      'November',
-      'Desember',
-    ];
-    final local = dt.toLocal();
-    final hour = local.hour.toString().padLeft(2, '0');
-    final minute = local.minute.toString().padLeft(2, '0');
-    return '${local.day} ${months[local.month - 1]} ${local.year}, $hour:$minute WIB';
-  }
+  String _formatDate(DateTime dt) => HelioraFormatters.formatDateFull(dt);
 
-  String _smokingLabel(String? status) {
-    switch (status) {
-      case 'never':
-        return 'Tidak pernah merokok';
-      case 'former':
-        return 'Mantan perokok (sudah berhenti)';
-      case 'current':
-        return 'Perokok aktif saat ini';
-      default:
-        return 'Tidak ditentukan';
-    }
-  }
+  String _smokingLabel(String? status) => HelioraFormatters.formatSmokingStatus(status);
 
-  String _bmiCategory(double bmi) {
-    if (bmi < 18.5) return 'Berat Rendah';
-    if (bmi < 25.0) return 'Normal / Sehat';
-    if (bmi < 30.0) return 'Kelebihan Berat';
-    return 'Obesitas';
-  }
+  String _bmiCategory(double bmi) => HelioraFormatters.formatBmiCategory(bmi);
 
   void _showConsentRequiredForEditDialog() {
     showDialog<void>(
