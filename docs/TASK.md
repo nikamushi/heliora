@@ -2103,6 +2103,40 @@ Acceptance Criteria:
 
 
 
+## MOB-013 — Mobile and Web UI-UX Alignment
+
+**Owner:** Pino & Tumir  
+**Priority:** P0  
+**Sprint:** S10  
+**Status:** DONE
+
+Tasks:
+
+- [x] MOB-013.01: Centralize domain formatters and implement native pull-to-refresh on home screen.
+- [x] MOB-013.02: Implement safety guardrail and actionable clinical recommendations on home screen.
+- [x] MOB-013.03: Render SHAP explainable AI contributing factors with directional impact indicators.
+- [x] MOB-013.04: Implement interactive risk detail bottom sheet modal for chronic condition deep-dive.
+- [x] MOB-013.05: Add contextual parameter focus navigation from recommendations to simulation.
+- [x] MOB-013.06: Verify 100% test coverage and ensure zero pill chips / oval badges.
+- [x] MOB-013.07: Align recommendation simulation focus fallback and tripartite factor taxonomy with Web.
+- [x] MOB-013.08: Implement Terms and Privacy screens with interactive registration links.
+
+Acceptance Criteria:
+
+- Utilitas pemformatan tanggal, status merokok, dan kategori IMT tersentralisasi di lib/core/utils/formatters.dart.
+- HomeScreen memiliki gesture native RefreshIndicator untuk reload data asesmen dan consent.
+- Banner safety guardrail tampil jika terdeteksi risiko tinggi kardiometabolik.
+- Rencana tindakan (rekomendasi) dengan badge level bukti dan tautan uji di simulator tampil di HomeScreen.
+- Faktor penentu risiko (SHAP contributing factors: kebiasaan & biologis) divisualisasikan dengan indikator arah dan bar bobot proporsional (tanpa pill chips).
+- RiskCard interaktif dan membuka bottom sheet modal rincian risiko kondisi kesehatan terkait.
+- Halaman Ketentuan Layanan (/terms) dan Kebijakan Privasi (/privacy) tersedia di aplikasi mobile selaras dengan web, dengan tautan interaktif pada checkbox registrasi dan profil pengguna.
+- Navigasi dari rekomendasi ke simulasi meneruskan parameter fokus (focus) dan menyorot slider terkait.
+- Seluruh pengujian Flutter lulus 100% dan mematuhi larangan pill chips/kapsul mengambang.
+
+---
+
+
+
 ## INT-001 — Authentication Integration
 
 **Owner:** Pino & Tumir + Gilang & Aksal  

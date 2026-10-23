@@ -1,4 +1,6 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_exception.dart';
@@ -15,6 +17,8 @@ class RegisterScreen extends ConsumerStatefulWidget {
     this.isFirstLaunch = false,
     this.onNavigateToLogin,
     this.onRegistrationSuccess,
+    this.onOpenTerms,
+    this.onOpenPrivacy,
   });
 
   /// When true, renders first-launch header without a back button and with "Masuk" action in top app bar.
@@ -25,6 +29,12 @@ class RegisterScreen extends ConsumerStatefulWidget {
 
   /// Callback invoked after successful registration and session creation.
   final VoidCallback? onRegistrationSuccess;
+
+  /// Callback to open Terms of Service screen or modal.
+  final VoidCallback? onOpenTerms;
+
+  /// Callback to open Privacy Policy screen or modal.
+  final VoidCallback? onOpenPrivacy;
 
   @override
   ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
@@ -43,10 +53,35 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   bool _hasAttemptedSubmit = false;
   String? _errorMessage;
   bool _isEmailAlreadyRegistered = false;
+  late final TapGestureRecognizer _termsRecognizer;
+  late final TapGestureRecognizer _privacyRecognizer;
+  late final TapGestureRecognizer _toggleAgreeRecognizer;
 
   @override
   void initState() {
     super.initState();
+    _termsRecognizer = TapGestureRecognizer()
+      ..onTap = () {
+        if (widget.onOpenTerms != null) {
+          widget.onOpenTerms!();
+        } else {
+          context.push('/terms');
+        }
+      };
+    _privacyRecognizer = TapGestureRecognizer()
+      ..onTap = () {
+        if (widget.onOpenPrivacy != null) {
+          widget.onOpenPrivacy!();
+        } else {
+          context.push('/privacy');
+        }
+      };
+    _toggleAgreeRecognizer = TapGestureRecognizer()
+      ..onTap = () {
+        setState(() {
+          _agreedToTerms = !_agreedToTerms;
+        });
+      };
     _passwordController.addListener(_onPasswordChanged);
   }
 
@@ -56,6 +91,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   @override
   void dispose() {
+    _termsRecognizer.dispose();
+    _privacyRecognizer.dispose();
+    _toggleAgreeRecognizer.dispose();
     _passwordController.removeListener(_onPasswordChanged);
     _nameController.dispose();
     _emailController.dispose();
@@ -590,15 +628,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     ),
                     const SizedBox(height: 16),
 
-                    // Checkbox S&K (Figma node 74:510)
-                    GestureDetector(
-                      onTap: () {
-                        setState(() => _agreedToTerms = !_agreedToTerms);
-                      },
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
+                    // Checkbox S&K (Figma node 74:510) with interactive legal links aligned with Web
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        GestureDetector(
+                          key: const Key('register_agreement_checkbox'),
+                          onTap: () {
+                            setState(() => _agreedToTerms = !_agreedToTerms);
+                          },
+                          child: Container(
                             width: 20,
                             height: 20,
                             margin: const EdgeInsets.only(top: 2),
@@ -622,18 +661,49 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                   )
                                 : null,
                           ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              'Saya menyetujui Ketentuan Layanan dan Kebijakan Privasi',
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text.rich(
+                            TextSpan(
                               style: HelioraTokens.bodySmall.copyWith(
                                 color: HelioraTokens.foreground,
-                                height: 1.4,
+                                height: 1.45,
+                                fontSize: 13,
                               ),
+                              children: [
+                                TextSpan(
+                                  text: 'Saya menyetujui ',
+                                  recognizer: _toggleAgreeRecognizer,
+                                ),
+                                TextSpan(
+                                  text: 'Ketentuan Layanan',
+                                  style: const TextStyle(
+                                    color: HelioraTokens.primary,
+                                    fontWeight: FontWeight.w600,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                  recognizer: _termsRecognizer,
+                                ),
+                                TextSpan(
+                                  text: ' dan ',
+                                  recognizer: _toggleAgreeRecognizer,
+                                ),
+                                TextSpan(
+                                  text: 'Kebijakan Privasi',
+                                  style: const TextStyle(
+                                    color: HelioraTokens.primary,
+                                    fontWeight: FontWeight.w600,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                  recognizer: _privacyRecognizer,
+                                ),
+                                const TextSpan(text: '.'),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                     if (_hasAttemptedSubmit && !_agreedToTerms) ...[
                       const SizedBox(height: 12),

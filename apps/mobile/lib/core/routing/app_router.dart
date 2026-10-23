@@ -11,6 +11,8 @@ import '../../features/auth/presentation/register_screen.dart';
 import '../../features/consent/presentation/consent_controller.dart';
 import '../../features/consent/presentation/consent_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
+import '../../features/legal/presentation/privacy_screen.dart';
+import '../../features/legal/presentation/terms_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/simulation/presentation/simulation_screen.dart';
 import '../api/generated/models/health_profile_response.dart';
@@ -31,6 +33,8 @@ abstract class AppRoutes {
   static const assessment = '/assessment';
   static const simulation = '/simulation';
   static const profile = '/profile';
+  static const terms = '/terms';
+  static const privacy = '/privacy';
 }
 
 /// Notifier that triggers GoRouter redirect re-evaluation on state changes.
@@ -58,6 +62,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final isAuthenticated = ref.read(isAuthenticatedProvider);
       final location = state.matchedLocation;
       final isAuthRoute = location == AppRoutes.login || location == AppRoutes.register;
+      final isPublicLegalRoute = location == AppRoutes.terms || location == AppRoutes.privacy;
+
+      if (isPublicLegalRoute) {
+        return null;
+      }
 
       if (!isAuthenticated) {
         final viewMode = ref.read(authViewModeProvider);
@@ -129,12 +138,23 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     },
     routes: [
       GoRoute(
+        path: AppRoutes.terms,
+        name: 'terms',
+        builder: (context, state) => const TermsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.privacy,
+        name: 'privacy',
+        builder: (context, state) => const PrivacyScreen(),
+      ),
+      GoRoute(
         path: AppRoutes.home,
         name: 'home',
         builder: (context, state) => HomeScreen(
           onStartAssessment: () => context.push(AppRoutes.assessment),
           onReconsent: () => context.push(AppRoutes.consent),
           onOpenSimulation: () => context.go(AppRoutes.simulation),
+          onOpenSimulationWithFocus: (focus) => context.go('${AppRoutes.simulation}?focus=$focus'),
           onOpenProfile: () => context.go(AppRoutes.profile),
         ),
       ),
@@ -171,6 +191,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               ref.read(authViewModeProvider.notifier).state = AuthViewMode.login;
               context.go(AppRoutes.login);
             },
+            onOpenTerms: () => context.push(AppRoutes.terms),
+            onOpenPrivacy: () => context.push(AppRoutes.privacy),
             onRegistrationSuccess: () {
               try {
                 ref.read(isFirstLaunchProvider.notifier).markLaunched();
@@ -222,10 +244,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.simulation,
         name: 'simulation',
-        builder: (context, state) => SimulationScreen(
-          onNavigateHome: () => context.go(AppRoutes.home),
-          onNavigateProfile: () => context.go(AppRoutes.profile),
-        ),
+        builder: (context, state) {
+          final focus = state.uri.queryParameters['focus'];
+          return SimulationScreen(
+            initialFocus: focus,
+            onNavigateHome: () => context.go(AppRoutes.home),
+            onNavigateProfile: () => context.go(AppRoutes.profile),
+          );
+        },
       ),
       GoRoute(
         path: AppRoutes.profile,
@@ -241,6 +267,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           onConsentRevoked: () {
             context.go(AppRoutes.home);
           },
+          onOpenTerms: () => context.push(AppRoutes.terms),
+          onOpenPrivacy: () => context.push(AppRoutes.privacy),
         ),
       ),
     ],

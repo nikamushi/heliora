@@ -275,5 +275,27 @@ void main() {
 
       expect(homeNavigated, isTrue);
     });
+
+    testWidgets('renders focus banner when initialFocus is provided', (tester) async {
+      final fakeSimRepo = FakeSimulationRepository();
+      final fakeProfileRepo = FakeHealthProfileRepository();
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            simulationRepositoryProvider.overrideWithValue(fakeSimRepo),
+            healthProfileRepositoryProvider.overrideWithValue(fakeProfileRepo),
+          ],
+          child: const MaterialApp(
+            home: SimulationScreen(
+              initialFocus: 'activity',
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Fokus simulator: rekomendasi activity'), findsOneWidget);
+    });
   });
 }

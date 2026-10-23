@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/api/generated/export.dart';
 import '../../../theme/components.dart';
 import '../../../theme/tokens.dart';
+import '../../../core/utils/formatters.dart';
 import '../../assessment/presentation/widgets/choice_option.dart';
 import '../../home/presentation/widgets/bottom_nav_bar.dart';
 import '../../home/presentation/widgets/statutory_disclaimer_card.dart';
@@ -13,12 +14,16 @@ import 'widgets/lifestyle_slider.dart';
 
 /// Screen for interactive What-If lifestyle scenario simulation (Figma Alur 3 nodes 81:825 & 81:1038).
 /// Allows exploring lifestyle adjustments without modifying baseline profile in the database (BR-SIM-007).
-class SimulationScreen extends ConsumerWidget {
+class SimulationScreen extends ConsumerStatefulWidget {
   const SimulationScreen({
     super.key,
+    this.initialFocus,
     this.onNavigateHome,
     this.onNavigateProfile,
   });
+
+  /// Target focus lifestyle parameter ('sleep', 'activity', 'weight', 'smoking').
+  final String? initialFocus;
 
   /// Navigation callback to Home (tab 0).
   final VoidCallback? onNavigateHome;
@@ -26,21 +31,66 @@ class SimulationScreen extends ConsumerWidget {
   /// Navigation callback to Profile (tab 2).
   final VoidCallback? onNavigateProfile;
 
-  String _smokingLabel(SmokingStatusEnum status) {
-    switch (status) {
-      case SmokingStatusEnum.never:
-        return 'Tidak pernah';
-      case SmokingStatusEnum.former:
-        return 'Mantan perokok';
-      case SmokingStatusEnum.current:
-        return 'Perokok aktif';
-      case SmokingStatusEnum.$unknown:
-        return 'Lainnya';
+  @override
+  ConsumerState<SimulationScreen> createState() => _SimulationScreenState();
+}
+
+class _SimulationScreenState extends ConsumerState<SimulationScreen> {
+  final ScrollController _scrollController = ScrollController();
+  final GlobalKey _sleepKey = GlobalKey();
+  final GlobalKey _activityKey = GlobalKey();
+  final GlobalKey _weightKey = GlobalKey();
+  final GlobalKey _smokingKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialFocus != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollToFocusedField();
+      });
     }
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollToFocusedField() {
+    GlobalKey? targetKey;
+    switch (widget.initialFocus?.toLowerCase()) {
+      case 'sleep':
+        targetKey = _sleepKey;
+        break;
+      case 'activity':
+        targetKey = _activityKey;
+        break;
+      case 'weight':
+      case 'bmi':
+        targetKey = _weightKey;
+        break;
+      case 'smoking':
+        targetKey = _smokingKey;
+        break;
+    }
+
+    if (targetKey?.currentContext != null) {
+      Scrollable.ensureVisible(
+        targetKey!.currentContext!,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+        alignment: 0.1,
+      );
+    }
+  }
+
+  String _smokingLabel(SmokingStatusEnum status) =>
+      HelioraFormatters.formatSmokingStatus(status, full: false);
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(simulationControllerProvider);
     final controller = ref.read(simulationControllerProvider.notifier);
     final isLoading = state.status == SimulationStatus.loading;
@@ -68,7 +118,7 @@ class SimulationScreen extends ConsumerWidget {
                       size: 20,
                       color: HelioraTokens.secondaryForeground,
                     ),
-                    onPressed: onNavigateHome,
+                    onPressed: widget.onNavigateHome,
                   ),
                   const SizedBox(width: 8),
                   Text(
@@ -89,6 +139,7 @@ class SimulationScreen extends ConsumerWidget {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 480),
             child: SingleChildScrollView(
+              controller: _scrollController,
               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -102,6 +153,33 @@ class SimulationScreen extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
+
+                  if (widget.initialFocus != null) ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
+                      decoration: BoxDecoration(
+                        color: HelioraTokens.primary.withValues(alpha: 0.08),
+                        border: Border.all(color: HelioraTokens.primary.withValues(alpha: 0.3), width: 1.0),
+                        borderRadius: BorderRadius.circular(HelioraTokens.radiusXl),
+                      ),
+                      child: Row(
+                        children: [
+                          const HelioraIcon(HelioraIcons.sparkles, size: 16, color: HelioraTokens.primary),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Fokus simulator: rekomendasi ${widget.initialFocus}',
+                              style: HelioraTokens.caption.copyWith(
+                                color: HelioraTokens.primary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
 
                   // Section 1: Ubah Kebiasaan Card (Node 81:832)
                   Container(
@@ -126,6 +204,7 @@ class SimulationScreen extends ConsumerWidget {
 
                         // Slider 1: Durasi Tidur
                         LifestyleSlider(
+                          key: _sleepKey,
                           label: 'Durasi tidur harian',
                           valueDisplay: '${state.simulatedSleepDurationHours.toStringAsFixed(1)} jam',
                           baselineText: 'Baseline: ${state.baselineSleepDurationHours.toStringAsFixed(1)} jam',
@@ -140,6 +219,7 @@ class SimulationScreen extends ConsumerWidget {
 
                         // Slider 2: Aktivitas Fisik
                         LifestyleSlider(
+                          key: _activityKey,
                           label: 'Aktivitas fisik mingguan',
                           valueDisplay: '${state.simulatedPhysicalActivityMin.toInt()} mnt/mg',
                           baselineText: 'Baseline: ${state.baselinePhysicalActivityMin.toInt()} mnt',
@@ -154,6 +234,7 @@ class SimulationScreen extends ConsumerWidget {
 
                         // Slider 3: Berat Badan
                         LifestyleSlider(
+                          key: _weightKey,
                           label: 'Berat badan',
                           valueDisplay: '${state.simulatedWeightKg.toStringAsFixed(1)} kg',
                           baselineText: 'Baseline: ${state.baselineWeightKg.toStringAsFixed(1)} kg',
@@ -167,35 +248,38 @@ class SimulationScreen extends ConsumerWidget {
                         const SizedBox(height: 14),
 
                         // Choice Group: Status Merokok
-                        Text(
-                          'Status merokok',
-                          style: HelioraTokens.labelDefault.copyWith(fontSize: 13),
-                        ),
-                        const SizedBox(height: 8),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            ChoiceOption<SmokingStatusEnum>(
-                              value: SmokingStatusEnum.never,
-                              groupValue: state.simulatedSmokingStatus,
-                              label: 'Tidak pernah merokok',
-                              onChanged: controller.setSmokingStatus,
-                            ),
-                            const SizedBox(height: 8),
-                            ChoiceOption<SmokingStatusEnum>(
-                              value: SmokingStatusEnum.former,
-                              groupValue: state.simulatedSmokingStatus,
-                              label: 'Mantan perokok (sudah berhenti)',
-                              onChanged: controller.setSmokingStatus,
-                            ),
-                            const SizedBox(height: 8),
-                            ChoiceOption<SmokingStatusEnum>(
-                              value: SmokingStatusEnum.current,
-                              groupValue: state.simulatedSmokingStatus,
-                              label: 'Perokok aktif saat ini',
-                              onChanged: controller.setSmokingStatus,
-                            ),
-                          ],
+                        KeyedSubtree(
+                          key: _smokingKey,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Text(
+                                'Status merokok',
+                                style: HelioraTokens.labelDefault.copyWith(fontSize: 13),
+                              ),
+                              const SizedBox(height: 8),
+                              ChoiceOption<SmokingStatusEnum>(
+                                value: SmokingStatusEnum.never,
+                                groupValue: state.simulatedSmokingStatus,
+                                label: 'Tidak pernah merokok',
+                                onChanged: controller.setSmokingStatus,
+                              ),
+                              const SizedBox(height: 8),
+                              ChoiceOption<SmokingStatusEnum>(
+                                value: SmokingStatusEnum.former,
+                                groupValue: state.simulatedSmokingStatus,
+                                label: 'Mantan perokok (sudah berhenti)',
+                                onChanged: controller.setSmokingStatus,
+                              ),
+                              const SizedBox(height: 8),
+                              ChoiceOption<SmokingStatusEnum>(
+                                value: SmokingStatusEnum.current,
+                                groupValue: state.simulatedSmokingStatus,
+                                label: 'Perokok aktif saat ini',
+                                onChanged: controller.setSmokingStatus,
+                              ),
+                            ],
+                          ),
                         ),
                         const SizedBox(height: 6),
                         Text(
@@ -389,9 +473,9 @@ class SimulationScreen extends ConsumerWidget {
         currentIndex: 1,
         onTap: (index) {
           if (index == 0) {
-            onNavigateHome?.call();
+            widget.onNavigateHome?.call();
           } else if (index == 2) {
-            onNavigateProfile?.call();
+            widget.onNavigateProfile?.call();
           }
         },
       ),
