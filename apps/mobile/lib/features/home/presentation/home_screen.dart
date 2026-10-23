@@ -4,11 +4,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/api/generated/export.dart';
 import '../../../theme/components.dart';
 import '../../../theme/tokens.dart';
+import '../../../core/utils/formatters.dart';
 import '../../assessment/data/assessment_repository.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../consent/presentation/consent_controller.dart';
 import 'widgets/bottom_nav_bar.dart';
+import 'widgets/condition_detail_bottom_sheet.dart';
+import 'widgets/contributing_factors_section.dart';
+import 'widgets/recommendations_section.dart';
 import 'widgets/risk_card.dart';
+import 'widgets/safety_guardrail_card.dart';
 import 'widgets/score_card.dart';
 import 'widgets/simulation_banner.dart';
 import 'widgets/statutory_disclaimer_card.dart';
@@ -22,6 +27,7 @@ class HomeScreen extends ConsumerWidget {
     this.onStartAssessment,
     this.onReconsent,
     this.onOpenSimulation,
+    this.onOpenSimulationWithFocus,
     this.onOpenProfile,
   });
 
@@ -34,28 +40,44 @@ class HomeScreen extends ConsumerWidget {
   /// Callback when user opens simulation tab.
   final VoidCallback? onOpenSimulation;
 
+  /// Callback when user opens simulation tab with focused parameter.
+  final ValueChanged<String>? onOpenSimulationWithFocus;
+
   /// Callback when user opens profile tab.
   final VoidCallback? onOpenProfile;
 
-  String _formatDate(String isoString) {
-    final parsed = DateTime.tryParse(isoString);
-    if (parsed == null) return isoString;
+  String _formatDate(String isoString) => HelioraFormatters.formatDateShort(isoString);
 
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'Mei',
-      'Jun',
-      'Jul',
-      'Agu',
-      'Sep',
-      'Okt',
-      'Nov',
-      'Des',
-    ];
-    return '${parsed.day} ${months[parsed.month - 1]} ${parsed.year}';
+  void _handleOpenSimulation(BuildContext context, [String? focus]) {
+    if (focus != null && onOpenSimulationWithFocus != null) {
+      onOpenSimulationWithFocus!(focus);
+    } else {
+      onOpenSimulation?.call();
+    }
+  }
+
+  void _showConditionDetailBottomSheet(BuildContext context, RiskAssessmentItem item) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (bottomSheetContext) => ConditionDetailBottomSheet(
+        item: item,
+        onOpenSimulation: (focus) {
+          _handleOpenSimulation(context, focus);
+        },
+      ),
+    );
+  }
+
+  Future<void> _handleRefresh(WidgetRef ref) async {
+    ref.invalidate(latestAssessmentProvider);
+    ref.invalidate(consentStatusProvider);
+    try {
+      await ref.read(latestAssessmentProvider.future);
+    } catch (_) {
+      // Swallowed to let provider error state render gracefully
+    }
   }
 
   @override
@@ -139,11 +161,11 @@ class HomeScreen extends ConsumerWidget {
               data: (assessment) {
                 // State 2: Empty state if no assessment exists yet (Figma node 79:872)
                 if (assessment == null) {
-                  return _buildEmptyAssessmentState(context);
+                  return _buildEmptyAssessmentState(context, ref);
                 }
 
                 // State 1: Normal state with full assessment data (Figma node 79:629)
-                return _buildNormalAssessmentState(context, assessment);
+                return _buildNormalAssessmentState(context, ref, assessment);
               },
               loading: () => const Center(
                 child: CircularProgressIndicator(
@@ -177,101 +199,134 @@ class HomeScreen extends ConsumerWidget {
   /// State 1: Normal assessment overview with scores, 3 risk cards, and simulation CTA.
   Widget _buildNormalAssessmentState(
     BuildContext context,
+    WidgetRef ref,
     AssessmentSummaryResponse assessment,
   ) {
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 480),
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Last assessment date banner
-              Text(
-                'ASESMEN TERAKHIR: ${_formatDate(assessment.assessedAt).toUpperCase()}',
-                style: HelioraTokens.monoEyebrow.copyWith(
-                  fontSize: 11,
-                  color: HelioraTokens.secondaryForeground,
-                  letterSpacing: 1.2,
-                ),
-              ),
-              const SizedBox(height: 12),
+    final bool hasHighRisk = assessment.risks.any((r) =>
+        r.riskLabel == RiskAssessmentItemRiskLabel.higher ||
+        r.riskLevel == RiskAssessmentItemRiskLevel.high);
 
-              // Scores row: Health Score and Lifestyle Score side by side
-              Row(
-                children: [
-                  Expanded(
-                    child: ScoreCard(
-                      title: 'Health Score',
-                      score: assessment.healthScore,
-                      isHealthScore: true,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ScoreCard(
-                      title: 'Lifestyle Score',
-                      score: assessment.lifestyleScore,
-                      isHealthScore: false,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-
-              // Section Eyebrow: Strictly pure editorial typography, NO PILL CHIPS!
-              Text(
-                'ESTIMASI RISIKO 10 TAHUN',
-                style: HelioraTokens.monoEyebrow.copyWith(
-                  fontSize: 11,
-                  color: HelioraTokens.brand900.withValues(alpha: 0.7),
-                  letterSpacing: 1.5,
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              // 3 Chronic condition risk estimation cards
-              if (assessment.risks.isNotEmpty) ...[
-                for (final risk in assessment.risks) ...[
-                  RiskCard(item: risk),
-                  const SizedBox(height: 12),
-                ],
-              ] else ...[
-                // Honest empty state when risks list is empty (strictly no fake scores)
-                Container(
-                  padding: const EdgeInsets.all(16.0),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(color: HelioraTokens.border, width: 1.0),
-                    borderRadius: BorderRadius.circular(16.0),
-                  ),
-                  child: const Text(
-                    'Belum ada rincian kondisi risiko yang tercatat pada asesmen ini.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: 'Plus Jakarta Sans',
-                      fontSize: 13,
-                      color: HelioraTokens.mutedForeground,
-                    ),
+    return RefreshIndicator(
+      color: HelioraTokens.primary,
+      backgroundColor: Colors.white,
+      onRefresh: () => _handleRefresh(ref),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 480),
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Last assessment date banner
+                Text(
+                  'ASESMEN TERAKHIR: ${_formatDate(assessment.assessedAt).toUpperCase()}',
+                  style: HelioraTokens.monoEyebrow.copyWith(
+                    fontSize: 11,
+                    color: HelioraTokens.secondaryForeground,
+                    letterSpacing: 1.2,
                   ),
                 ),
                 const SizedBox(height: 12),
+
+                // Safety Guardrail: Triggered when high chronic disease risk is detected
+                if (hasHighRisk) ...[
+                  const SafetyGuardrailCard(),
+                  const SizedBox(height: 16),
+                ],
+
+                // Scores row: Health Score and Lifestyle Score side by side
+                Row(
+                  children: [
+                    Expanded(
+                      child: ScoreCard(
+                        title: 'Health Score',
+                        score: assessment.healthScore,
+                        isHealthScore: true,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ScoreCard(
+                        title: 'Lifestyle Score',
+                        score: assessment.lifestyleScore,
+                        isHealthScore: false,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                // Actionable Clinical Recommendations (aligned with Web dashboard)
+                if (assessment.recommendations.isNotEmpty) ...[
+                  RecommendationsSection(
+                    recommendations: assessment.recommendations,
+                    onTestInSimulation: (focus) => _handleOpenSimulation(context, focus),
+                  ),
+                  const SizedBox(height: 24),
+                ],
+
+                // Section Eyebrow: Strictly pure editorial typography, NO PILL CHIPS!
+                Text(
+                  'ESTIMASI RISIKO 10 TAHUN',
+                  style: HelioraTokens.monoEyebrow.copyWith(
+                    fontSize: 11,
+                    color: HelioraTokens.brand900.withValues(alpha: 0.7),
+                    letterSpacing: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // 3 Chronic condition risk estimation cards (Interactive with modal deep-dive)
+                if (assessment.risks.isNotEmpty) ...[
+                  for (final risk in assessment.risks) ...[
+                    RiskCard(
+                      item: risk,
+                      onTap: () => _showConditionDetailBottomSheet(context, risk),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                ] else ...[
+                  // Honest empty state when risks list is empty (strictly no fake scores)
+                  Container(
+                    padding: const EdgeInsets.all(16.0),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(color: HelioraTokens.border, width: 1.0),
+                      borderRadius: BorderRadius.circular(16.0),
+                    ),
+                    child: const Text(
+                      'Belum ada rincian kondisi risiko yang tercatat pada asesmen ini.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Plus Jakarta Sans',
+                        fontSize: 13,
+                        color: HelioraTokens.mutedForeground,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+                const SizedBox(height: 12),
+
+                // Contributing Factors (Explainable AI / SHAP visualization)
+                if (assessment.topFactors.isNotEmpty) ...[
+                  ContributingFactorsSection(topFactors: assessment.topFactors),
+                  const SizedBox(height: 24),
+                ],
+
+                // What-if Simulation banner
+                SimulationBanner(
+                  onTapSimulation: () => _handleOpenSimulation(context),
+                ),
+                const SizedBox(height: 20),
+
+                // Statutory disclaimer card
+                const StatutoryDisclaimerCard(),
+                const SizedBox(height: 20),
               ],
-              const SizedBox(height: 12),
-
-              // What-if Simulation banner
-              SimulationBanner(
-                onTapSimulation: () {
-                  onOpenSimulation?.call();
-                },
-              ),
-              const SizedBox(height: 20),
-
-              // Statutory disclaimer card
-              const StatutoryDisclaimerCard(),
-              const SizedBox(height: 20),
-            ],
+            ),
           ),
         ),
       ),
@@ -279,12 +334,17 @@ class HomeScreen extends ConsumerWidget {
   }
 
   /// State 2: Empty state for user with no prior assessment (Figma node 79:872).
-  Widget _buildEmptyAssessmentState(BuildContext context) {
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 480),
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+  Widget _buildEmptyAssessmentState(BuildContext context, WidgetRef ref) {
+    return RefreshIndicator(
+      color: HelioraTokens.primary,
+      backgroundColor: Colors.white,
+      onRefresh: () => _handleRefresh(ref),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 480),
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -383,7 +443,8 @@ class HomeScreen extends ConsumerWidget {
           ),
         ),
       ),
-    );
+    ),
+  );
   }
 
   /// State 3: Neutral state when data consent is revoked (Figma node 79:964).

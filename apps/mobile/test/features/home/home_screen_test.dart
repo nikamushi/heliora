@@ -10,6 +10,10 @@ import 'package:heliora_mobile/features/home/presentation/widgets/bottom_nav_bar
 import 'package:heliora_mobile/features/home/presentation/widgets/risk_card.dart';
 import 'package:heliora_mobile/features/home/presentation/widgets/score_card.dart';
 import 'package:heliora_mobile/features/home/presentation/widgets/simulation_banner.dart';
+import 'package:heliora_mobile/features/home/presentation/widgets/condition_detail_bottom_sheet.dart';
+import 'package:heliora_mobile/features/home/presentation/widgets/contributing_factors_section.dart';
+import 'package:heliora_mobile/features/home/presentation/widgets/recommendations_section.dart';
+import 'package:heliora_mobile/features/home/presentation/widgets/safety_guardrail_card.dart';
 import 'package:heliora_mobile/features/home/presentation/widgets/statutory_disclaimer_card.dart';
 
 void main() {
@@ -358,6 +362,93 @@ void main() {
       );
       expect(find.text('Muat Ulang'), findsOneWidget);
       expect(find.byType(StatutoryDisclaimerCard), findsOneWidget);
+    });
+
+    testWidgets('renders SafetyGuardrailCard and opens ConditionDetailBottomSheet on RiskCard tap when high risk is present',
+        (tester) async {
+      tester.view.physicalSize = const Size(1080, 1920);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      String? simulationFocusResult;
+
+      const highRiskAssessment = AssessmentSummaryResponse(
+        id: 'test-high-risk-assessment',
+        healthScore: 68,
+        lifestyleScore: 62,
+        risks: [
+          RiskAssessmentItem(
+            condition: RiskAssessmentItemCondition.diabetes,
+            label: 'Diabetes Tipe 2',
+            probability: 0.32,
+            estimatedRiskScore: 32,
+            riskLevel: RiskAssessmentItemRiskLevel.high,
+            riskLabel: RiskAssessmentItemRiskLabel.higher,
+            trend: RiskAssessmentItemTrend.increasing,
+            description: 'Risiko diabetes tinggi.',
+          ),
+        ],
+        topFactors: [
+          ContributingFactor(
+            feature: 'physical_activity',
+            label: 'Aktivitas Fisik',
+            weightPercentage: 30.0,
+            impact: ContributingFactorImpact.decrease,
+            description: 'Aktivitas fisik masih minim.',
+          ),
+        ],
+        recommendations: [
+          RecommendationItem(
+            id: 'rec-1',
+            ruleId: 'REC-ACT-01',
+            title: 'Tingkatkan Aktivitas Fisik',
+            action: 'Minimal 150 menit per minggu.',
+            category: RecommendationItemCategory.activity,
+            source: 'WHO 2024 Guidelines',
+            evidenceLevel: RecommendationItemEvidenceLevel.a,
+          ),
+        ],
+        assessedAt: '2026-10-15T00:00:00Z',
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            consentStatusProvider.overrideWith(
+              (ref) => Future.value(const ConsentStatusResponse(hasActiveConsent: true)),
+            ),
+            latestAssessmentProvider.overrideWith(
+              (ref) => Future.value(highRiskAssessment),
+            ),
+          ],
+          child: MaterialApp(
+            home: HomeScreen(
+              onOpenSimulationWithFocus: (focus) => simulationFocusResult = focus,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Verify SafetyGuardrailCard, Recommendations, Factors, and RefreshIndicator
+      expect(find.byType(SafetyGuardrailCard), findsOneWidget);
+      expect(find.byType(RecommendationsSection), findsOneWidget);
+      expect(find.byType(ContributingFactorsSection), findsOneWidget);
+      expect(find.byType(RefreshIndicator), findsOneWidget);
+
+      // Tap RiskCard to trigger bottom sheet
+      await tester.tap(find.text('Diabetes Tipe 2').first);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ConditionDetailBottomSheet), findsOneWidget);
+      expect(find.text('Uji Skenario di Simulasi'), findsOneWidget);
+
+      // Tap "Uji Skenario di Simulasi" inside bottom sheet
+      await tester.ensureVisible(find.text('Uji Skenario di Simulasi'));
+      await tester.tap(find.text('Uji Skenario di Simulasi'));
+      await tester.pumpAndSettle();
+
+      expect(simulationFocusResult, equals('activity'));
     });
   });
 }
