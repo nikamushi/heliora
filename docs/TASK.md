@@ -2119,6 +2119,7 @@ Tasks:
 - [x] MOB-013.05: Add contextual parameter focus navigation from recommendations to simulation.
 - [x] MOB-013.06: Verify 100% test coverage and ensure zero pill chips / oval badges.
 - [x] MOB-013.07: Align recommendation simulation focus fallback and tripartite factor taxonomy with Web.
+- [x] MOB-013.08: Implement Terms and Privacy screens with interactive registration links.
 
 Acceptance Criteria:
 
@@ -2128,6 +2129,7 @@ Acceptance Criteria:
 - Rencana tindakan (rekomendasi) dengan badge level bukti dan tautan uji di simulator tampil di HomeScreen.
 - Faktor penentu risiko (SHAP contributing factors: kebiasaan & biologis) divisualisasikan dengan indikator arah dan bar bobot proporsional (tanpa pill chips).
 - RiskCard interaktif dan membuka bottom sheet modal rincian risiko kondisi kesehatan terkait.
+- Halaman Ketentuan Layanan (/terms) dan Kebijakan Privasi (/privacy) tersedia di aplikasi mobile selaras dengan web, dengan tautan interaktif pada checkbox registrasi dan profil pengguna.
 - Navigasi dari rekomendasi ke simulasi meneruskan parameter fokus (focus) dan menyorot slider terkait.
 - Seluruh pengujian Flutter lulus 100% dan mematuhi larangan pill chips/kapsul mengambang.
 

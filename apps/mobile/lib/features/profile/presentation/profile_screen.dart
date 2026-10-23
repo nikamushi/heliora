@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/generated/export.dart';
@@ -21,6 +22,8 @@ class ProfileScreen extends ConsumerStatefulWidget {
     this.onEditHealthProfile,
     this.onConsentRevoked,
     this.onReconsent,
+    this.onOpenTerms,
+    this.onOpenPrivacy,
   });
 
   /// Navigation callbacks for 3-tab mobile shell.
@@ -29,6 +32,8 @@ class ProfileScreen extends ConsumerStatefulWidget {
   final VoidCallback? onEditHealthProfile;
   final VoidCallback? onConsentRevoked;
   final VoidCallback? onReconsent;
+  final VoidCallback? onOpenTerms;
+  final VoidCallback? onOpenPrivacy;
 
   @override
   ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
@@ -566,6 +571,55 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               fontWeight: FontWeight.w500,
               color: HelioraTokens.mutedForeground,
             ),
+          ),
+          const SizedBox(height: 12),
+
+          // Legal Links
+          Wrap(
+            spacing: 16,
+            runSpacing: 8,
+            children: [
+              InkWell(
+                onTap: () {
+                  if (widget.onOpenTerms != null) {
+                    widget.onOpenTerms!();
+                  } else {
+                    context.push('/terms');
+                  }
+                },
+                borderRadius: BorderRadius.circular(HelioraTokens.radiusSm),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 2.0),
+                  child: Text(
+                    'Ketentuan Layanan ›',
+                    style: HelioraTokens.caption.copyWith(
+                      color: HelioraTokens.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+              InkWell(
+                onTap: () {
+                  if (widget.onOpenPrivacy != null) {
+                    widget.onOpenPrivacy!();
+                  } else {
+                    context.push('/privacy');
+                  }
+                },
+                borderRadius: BorderRadius.circular(HelioraTokens.radiusSm),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 2.0),
+                  child: Text(
+                    'Kebijakan Privasi ›',
+                    style: HelioraTokens.caption.copyWith(
+                      color: HelioraTokens.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 16),
 

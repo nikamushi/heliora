@@ -27,7 +27,7 @@ void main() {
 
       final router = containerRef.read(appRouterProvider);
       expect(router, isA<GoRouter>());
-      expect(router.configuration.routes.length, 7);
+      expect(router.configuration.routes.length, 9);
     });
 
     test('declares all canonical routes matching PRD-Mobile and ADR-012', () {
@@ -51,6 +51,8 @@ void main() {
         AppRoutes.assessment,
         AppRoutes.simulation,
         AppRoutes.profile,
+        AppRoutes.terms,
+        AppRoutes.privacy,
       ]));
     });
 

@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -9,6 +10,8 @@ void main() {
     bool isFirstLaunch = false,
     VoidCallback? onNavigateToLogin,
     VoidCallback? onRegistrationSuccess,
+    VoidCallback? onOpenTerms,
+    VoidCallback? onOpenPrivacy,
   }) {
     return ProviderScope(
       child: MaterialApp(
@@ -16,6 +19,8 @@ void main() {
           isFirstLaunch: isFirstLaunch,
           onNavigateToLogin: onNavigateToLogin,
           onRegistrationSuccess: onRegistrationSuccess,
+          onOpenTerms: onOpenTerms,
+          onOpenPrivacy: onOpenPrivacy,
         ),
       ),
     );
@@ -37,7 +42,7 @@ void main() {
       expect(find.text('Konfirmasi kata sandi'), findsOneWidget);
       expect(find.text('Kekuatan sandi: Belum diisi'), findsOneWidget);
       expect(
-        find.text('Saya menyetujui Ketentuan Layanan dan Kebijakan Privasi'),
+        find.textContaining('Saya menyetujui'),
         findsOneWidget,
       );
       // First launch mode: no back arrow button
@@ -132,13 +137,59 @@ void main() {
 
       expect(find.byIcon(Icons.check), findsNothing);
 
-      // Tap checkbox text/container
-      final checkbox = find.text('Saya menyetujui Ketentuan Layanan dan Kebijakan Privasi');
+      // Tap checkbox container
+      final checkbox = find.byKey(const Key('register_agreement_checkbox'));
       await tester.ensureVisible(checkbox);
       await tester.tap(checkbox);
       await tester.pumpAndSettle();
 
       expect(find.byIcon(Icons.check), findsOneWidget);
+    });
+
+    testWidgets('triggers onOpenTerms and onOpenPrivacy callbacks when tapped',
+        (tester) async {
+      var termsOpened = false;
+      var privacyOpened = false;
+
+      await tester.pumpWidget(
+        createTestWidget(
+          onOpenTerms: () => termsOpened = true,
+          onOpenPrivacy: () => privacyOpened = true,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final richTextFinder = find.byWidgetPredicate(
+        (widget) =>
+            widget is RichText &&
+            widget.text.toPlainText().contains('Ketentuan Layanan'),
+      );
+      expect(richTextFinder, findsOneWidget);
+
+      final richText = tester.widget<RichText>(richTextFinder);
+
+      TextSpan? findSpan(InlineSpan root, String target) {
+        if (root is TextSpan) {
+          if (root.text == target) return root;
+          if (root.children != null) {
+            for (final child in root.children!) {
+              final result = findSpan(child, target);
+              if (result != null) return result;
+            }
+          }
+        }
+        return null;
+      }
+
+      final termsSpan = findSpan(richText.text, 'Ketentuan Layanan');
+      expect(termsSpan, isNotNull);
+      (termsSpan!.recognizer as TapGestureRecognizer?)?.onTap?.call();
+      expect(termsOpened, isTrue);
+
+      final privacySpan = findSpan(richText.text, 'Kebijakan Privasi');
+      expect(privacySpan, isNotNull);
+      (privacySpan!.recognizer as TapGestureRecognizer?)?.onTap?.call();
+      expect(privacyOpened, isTrue);
     });
   });
 }
