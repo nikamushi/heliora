@@ -1,0 +1,15 @@
+**
+!pyproject.toml
+!uv.lock
+!apps/api/pyproject.toml
+!apps/api/alembic.ini
+!apps/api/alembic/**
+!apps/api/app/**
+!packages/ml-core/pyproject.toml
+!ai/pyproject.toml
+
+**/__pycache__
+**/*.pyc
+**/.pytest_cache
+**/.ruff_cache
+**/tests
