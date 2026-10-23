@@ -8,7 +8,11 @@
     "dev:mobile": "node ./scripts/dev-mobile.mjs",
     "build": "turbo run build",
     "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
     "test": "turbo run test"
+  },
+  "engines": {
+    "node": ">=22"
   },
   "devDependencies": {
     "turbo": "^2.10.12"

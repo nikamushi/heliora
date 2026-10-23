@@ -27,6 +27,7 @@
       "persistent": true
     },
     "lint": {},
+    "typecheck": {},
     "test": {}
   }
 }
