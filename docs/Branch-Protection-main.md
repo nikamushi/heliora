@@ -9,7 +9,7 @@
 
 1. **Wajib Pull Request** — direct push ke `main` ditolak; semua perubahan masuk via PR.
 2. **Required approvals** — minimal 1 approval non-author sebelum merge (naikkan bila tim membesar).
-3. **CI hijau (required status checks)** — status check yang tersedia wajib hijau sebelum merge. Selama pipeline CI (`DEV-001`) belum ada, check yang ada tidak boleh di-skip dan pengecualian dicatat di PR.
+3. **CI hijau (required status checks)** — required check adalah **`CI Gate`** (`.github/workflows/ci.yml`). Gate ini merangkum job Web, API, Mobile, dan Dependency review; job yang di-skip karena path filter tetap dianggap lolos selama tidak ada failure/cancelled.
 4. **Squash merge** — merge ke `main` memakai squash agar riwayat linear dan setiap commit di `main` tetap tertaut ke Task ID.
 5. **Include administrators** — aturan berlaku juga untuk admin (tanpa bypass rutin).
 6. **Linear history / no force-push** — tolak force-push ke `main`.
@@ -27,7 +27,7 @@ Skrip membuat satu ruleset repo-level bernama `protect-main` yang menargetkan br
 gh api repos/nikamushi/heliora/rulesets --jq '.[].name'
 ```
 
-Kondisi saat dokumen ini ditulis: ruleset **belum ada** (`[]`), sesuai keputusan "dokumen + skrip saja".
+Kondisi saat dokumen ini ditulis: ruleset **belum ada** (`[]`), sesuai keputusan "dokumen + skrip saja". Setelah CI `DEV-001` tersedia, required check `CI Gate` sudah tercantum di payload skrip dan tinggal diterapkan oleh maintainer berizin admin.
 
 ## Referensi
 

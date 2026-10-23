@@ -51,7 +51,9 @@ PAYLOAD="$(cat <<'JSON'
       "parameters": {
         "strict_required_status_checks_policy": true,
         "do_not_enforce_on_create": false,
-        "required_status_checks": []
+        "required_status_checks": [
+          { "context": "CI Gate" }
+        ]
       }
     }
   ]
@@ -67,5 +69,4 @@ gh api -X POST "repos/${OWNER}/${REPO}/rulesets" \
 echo "Selesai. Verifikasi dengan:"
 echo "  gh api repos/${OWNER}/${REPO}/rulesets --jq '.[].name'"
 echo ""
-echo "Catatan: sesuaikan 'required_status_checks' dengan nama check CI yang aktif"
-echo "(lihat docs/Branch-Protection-main.md) lalu jalankan ulang/perbarui ruleset."
+echo "Ruleset memakai required check 'CI Gate' (lihat docs/CI-CD.md)."

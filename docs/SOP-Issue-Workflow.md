@@ -66,10 +66,13 @@ Mengikuti `CONTRIBUTING.md` secara penuh; ringkasannya:
 - [ ] Gate lokal lolos dari root monorepo:
   ```bash
   pnpm lint
+  pnpm typecheck
   pnpm test
   pnpm build
   ```
+
   (Perintah tersedia via `turbo run`, lihat `package.json`. Jika workspace tertentu belum punya script tersebut, catat pengecualiannya di PR.)
+  Gate Python dan mobile yang dijalankan CI ada di `docs/CI-CD.md`.
 - [ ] Tidak ada secret/kredensial yang ter-commit (periksa `.env.example`, bukan `.env` asli).
 - [ ] PR dibuka ke `main` dengan format standar (§4), menautkan issue (`Closes #<n>` bila PR menyelesaikan issue).
 
@@ -77,7 +80,7 @@ Mengikuti `CONTRIBUTING.md` secara penuh; ringkasannya:
 
 - [ ] Review selesai: peer-review atau slash command `/code-review` untuk self-review developer (panduan: `docs/Code-Review-Guide.md`).
 - [ ] Semua diskusi review di-resolve.
-- [ ] CI hijau (required status checks pada proteksi `main`; selama CI `DEV-001` belum ada, status check yang tersedia wajib hijau dan pengecualian dicatat di PR).
+- [ ] CI hijau: required status check **`CI Gate`** pada proteksi `main` (lihat `docs/CI-CD.md`).
 
 ### 5.4 `Waiting for Test → Testing`
 
