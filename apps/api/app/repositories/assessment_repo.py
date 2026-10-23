@@ -8,7 +8,7 @@ import uuid
 from decimal import Decimal
 from typing import Any
 
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, selectinload
 
@@ -46,9 +46,7 @@ class AssessmentRepository:
             select(Assessment)
             .where(Assessment.user_id == user_id)
             .options(
-                joinedload(Assessment.risk_result).selectinload(
-                    RiskResult.xai_results
-                ),
+                joinedload(Assessment.risk_result).selectinload(RiskResult.xai_results),
                 selectinload(Assessment.recommendations),
                 joinedload(Assessment.health_profile),
             )
@@ -66,9 +64,7 @@ class AssessmentRepository:
             select(Assessment)
             .where(Assessment.id == assessment_id, Assessment.user_id == user_id)
             .options(
-                joinedload(Assessment.risk_result).selectinload(
-                    RiskResult.xai_results
-                ),
+                joinedload(Assessment.risk_result).selectinload(RiskResult.xai_results),
                 selectinload(Assessment.recommendations),
                 joinedload(Assessment.health_profile),
             )

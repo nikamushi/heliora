@@ -60,8 +60,12 @@ dmypy.json
 .coverage.*
 htmlcov/
 coverage.xml
+junit.xml
 *.cover
 .hypothesis/
+
+# Local release output
+release-output/
 
 # Packaging / build artifacts
 *.egg-info/

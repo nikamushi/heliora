@@ -1,4 +1,5 @@
 """Run evaluation and print results."""
+
 import json
 import logging
 import sys
@@ -19,6 +20,8 @@ print("Eval done. Writing report...")
 print()
 print("=== Results ===")
 for c in result.conditions:
-    print(f"{c.condition}: precision={c.precision}, recall={c.recall}, f1={c.f1}, roc_auc={c.roc_auc}, brier={c.brier_score}")
+    print(
+        f"{c.condition}: precision={c.precision}, recall={c.recall}, f1={c.f1}, roc_auc={c.roc_auc}, brier={c.brier_score}"
+    )
 print(f"Overall accuracy: {result.overall_accuracy}")
 print(f"Runtime: {result.runtime_seconds}s")

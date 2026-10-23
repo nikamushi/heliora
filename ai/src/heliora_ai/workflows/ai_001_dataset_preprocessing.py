@@ -111,13 +111,9 @@ def _manifest(
             "blood_sugar": "train-only median + missing indicator",
             "duplicates": "drop exact seqn duplicates first (0 found)",
             "outliers": (
-                "recorded IQR + hard-bound review; keep "
-                "(only activity capped)"
+                "recorded IQR + hard-bound review; keep (only activity capped)"
             ),
-            "encoding": (
-                "smoking ordinal 0/1/2 validated, no one-hot "
-                "(tree models)"
-            ),
+            "encoding": ("smoking ordinal 0/1/2 validated, no one-hot (tree models)"),
         },
     }
 
@@ -138,9 +134,7 @@ def persist_artifacts(
     val.to_parquet(out / "val.parquet", index=False)
     test.to_parquet(out / "test.parquet", index=False)
     joblib.dump(preprocessor, out / "preprocessor.joblib")
-    (out / "manifest.json").write_text(
-        json.dumps(manifest, indent=2), encoding="utf-8"
-    )
+    (out / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     (out / "dataset_report.json").write_text(
         json.dumps(report, indent=2), encoding="utf-8"
     )
@@ -174,8 +168,7 @@ def run_pipeline(
 
     splits = {"train": train, "val": val, "test": test}
     report["split_prevalence"] = {
-        name: {t: float(s[t].mean()) for t in TARGETS}
-        for name, s in splits.items()
+        name: {t: float(s[t].mean()) for t in TARGETS} for name, s in splits.items()
     }
 
     manifest = _manifest(
@@ -186,9 +179,7 @@ def run_pipeline(
         encoding_info=encoding_info,
         source=_source_label(raw_csv),
     )
-    out = persist_artifacts(
-        train, val, test, preprocessor, manifest, report, out_dir
-    )
+    out = persist_artifacts(train, val, test, preprocessor, manifest, report, out_dir)
     return {
         "train": train,
         "val": val,

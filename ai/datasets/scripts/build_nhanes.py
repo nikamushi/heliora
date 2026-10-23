@@ -9,6 +9,7 @@ Measured values (blood pressure, glucose, HbA1c, cholesterol) are kept as number
 cut-off is applied here.
 Run:  uv run --no-project --with pandas --with numpy python ai/datasets/scripts/build_nhanes.py
 """
+
 import os
 from pathlib import Path
 
@@ -22,7 +23,9 @@ OUT = DATA / "nhanes_2021_2023.csv"
 
 def rd(name):
     df = pd.read_sas(SRC / f"{name}.xpt", format="xport", encoding="utf-8")
-    for c in df.select_dtypes("float").columns:  # SAS stores a numeric zero as a ~5e-79 denormal
+    for c in df.select_dtypes(
+        "float"
+    ).columns:  # SAS stores a numeric zero as a ~5e-79 denormal
         df[c] = df[c].mask((df[c] > 0) & (df[c] < 1e-6), 0.0)
     return df
 
@@ -32,7 +35,10 @@ def yes_no(s):
 
 
 demo = rd("DEMO_L")
-df = demo.loc[demo["RIDAGEYR"] >= 18, ["SEQN", "RIDAGEYR", "RIAGENDR", "WTINT2YR", "WTMEC2YR", "SDMVPSU", "SDMVSTRA"]].copy()
+df = demo.loc[
+    demo["RIDAGEYR"] >= 18,
+    ["SEQN", "RIDAGEYR", "RIAGENDR", "WTINT2YR", "WTMEC2YR", "SDMVPSU", "SDMVSTRA"],
+].copy()
 for name, cols in {
     "BMX_L": ["BMXHT", "BMXWT", "BMXBMI", "BMXWAIST"],
     "BPXO_L": ["BPXOSY1", "BPXOSY2", "BPXOSY3", "BPXODI1", "BPXODI2", "BPXODI3"],
@@ -103,7 +109,9 @@ total[total > 10080] = np.nan
 out["physical_activity_min_per_week"] = total.round(0)
 out["sedentary_min_per_day"] = df["PAD680"].where(df["PAD680"] <= 1380)
 
-out["diabetes_code"] = df["DIQ010"].map({1: 1, 2: 2, 3: 3}).astype("Int8")  # 1 yes, 2 no, 3 borderline
+out["diabetes_code"] = (
+    df["DIQ010"].map({1: 1, 2: 2, 3: 3}).astype("Int8")
+)  # 1 yes, 2 no, 3 borderline
 out["diabetes"] = df["DIQ010"].map({1: 1, 2: 0, 3: 0}).astype("Int8")
 out["hypertension"] = yes_no(df["BPQ020"])
 out["bp_medication"] = yes_no(df["BPQ150"])
@@ -113,7 +121,11 @@ chd = pd.concat([yes_no(df["MCQ160C"]), yes_no(df["MCQ160D"])], axis=1).astype("
 chd_angina = pd.Series(np.nan, index=df.index)
 chd_angina[(chd == 0).all(axis=1)] = 0
 chd_angina[(chd == 1).any(axis=1)] = 1
-out["heart_attack"], out["stroke"], out["chd_angina"] = mi, stroke, chd_angina.astype("Int8")
+out["heart_attack"], out["stroke"], out["chd_angina"] = (
+    mi,
+    stroke,
+    chd_angina.astype("Int8"),
+)
 parts = pd.concat([mi, out["chd_angina"], stroke], axis=1).astype("float")
 cvd = pd.Series(np.nan, index=df.index)
 cvd[(parts == 0).all(axis=1)] = 0
@@ -133,12 +145,17 @@ print("non-null:", {c: int(out[c].notna().sum()) for c in out.columns[1:]})
 
 def wpct(flag, w):
     ok = out[flag].notna() & out[w].notna()
-    return round(100 * (out.loc[ok, w] * out.loc[ok, flag]).sum() / out.loc[ok, w].sum(), 1)
+    return round(
+        100 * (out.loc[ok, w] * out.loc[ok, flag]).sum() / out.loc[ok, w].sum(), 1
+    )
 
 
-print("weighted % (adults):", {
-    "diabetes told": wpct("diabetes", "weight_interview"),
-    "hypertension told": wpct("hypertension", "weight_interview"),
-    "high chol told": wpct("high_cholesterol", "weight_interview"),
-    "cardiovascular": wpct("cardiovascular", "weight_interview"),
-})
+print(
+    "weighted % (adults):",
+    {
+        "diabetes told": wpct("diabetes", "weight_interview"),
+        "hypertension told": wpct("hypertension", "weight_interview"),
+        "high chol told": wpct("high_cholesterol", "weight_interview"),
+        "cardiovascular": wpct("cardiovascular", "weight_interview"),
+    },
+)

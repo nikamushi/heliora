@@ -50,7 +50,9 @@ def sample_features(rng: np.random.Generator) -> SyntheticFeatures:
     sleep = float(rng.uniform(4.0, 10.0))
     smoking_roll = rng.random()
     smoking = (
-        "current" if smoking_roll < 0.25 else ("former" if smoking_roll < 0.45 else "never")
+        "current"
+        if smoking_roll < 0.25
+        else ("former" if smoking_roll < 0.45 else "never")
     )
     family_history = bool(rng.random() < 0.30)
     stress = float(rng.uniform(1, 10)) if rng.random() < 0.7 else None
@@ -112,7 +114,13 @@ def diabetes_probability(features: SyntheticFeatures) -> float:
         0.01,
         min(
             0.95,
-            base + bmi_term + activity_term + famhist_term + smoke_term + sleep_term + bs_term,
+            base
+            + bmi_term
+            + activity_term
+            + famhist_term
+            + smoke_term
+            + sleep_term
+            + bs_term,
         ),
     )
 
@@ -128,7 +136,11 @@ def hypertension_probability(features: SyntheticFeatures) -> float:
     stress_term = (
         0.05
         if features.stress_level is not None and features.stress_level >= 7
-        else (-0.02 if features.stress_level is not None and features.stress_level <= 3 else 0.0)
+        else (
+            -0.02
+            if features.stress_level is not None and features.stress_level <= 3
+            else 0.0
+        )
     )
     smoke_term = (
         0.05
@@ -144,7 +156,8 @@ def hypertension_probability(features: SyntheticFeatures) -> float:
     elif features.systolic_bp < 120 and features.diastolic_bp < 80:
         bp_term = -0.04
     return max(
-        0.01, min(0.95, base + sleep_term + stress_term + smoke_term + bmi_term + bp_term)
+        0.01,
+        min(0.95, base + sleep_term + stress_term + smoke_term + bmi_term + bp_term),
     )
 
 
@@ -174,5 +187,6 @@ def cardiovascular_probability(
     bmi_term = 0.02 if features.bmi < 24 else (-0.05 if features.bmi >= 28 else -0.01)
     ht_term = 0.04 if hypertension_prob > ELEVATED_RISK_THRESHOLD else 0.0
     return max(
-        0.01, min(0.95, base + smoke_term + chol_term + activity_term + bmi_term + ht_term)
+        0.01,
+        min(0.95, base + smoke_term + chol_term + activity_term + bmi_term + ht_term),
     )

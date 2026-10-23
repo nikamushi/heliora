@@ -186,7 +186,8 @@ class WhatIfSimulationResponse(BaseModel):
     """Response containing What-If simulation comparative results."""
 
     applied_parameters: dict[str, str | float] = Field(
-        ..., description="Dictionary of active lifestyle parameters used in this scenario."
+        ...,
+        description="Dictionary of active lifestyle parameters used in this scenario.",
     )
     derived_bmi: float = Field(
         ...,
@@ -198,7 +199,10 @@ class WhatIfSimulationResponse(BaseModel):
         ..., ge=0.0, le=100.0, description="Current baseline overall health score."
     )
     simulated_health_score: float = Field(
-        ..., ge=0.0, le=100.0, description="Overall health score under simulated scenario."
+        ...,
+        ge=0.0,
+        le=100.0,
+        description="Overall health score under simulated scenario.",
     )
     health_score_delta: float = Field(
         ..., description="Change in health score (simulated - baseline)."
@@ -207,7 +211,10 @@ class WhatIfSimulationResponse(BaseModel):
         ..., ge=0.0, le=100.0, description="Current baseline lifestyle habits score."
     )
     simulated_lifestyle_score: float = Field(
-        ..., ge=0.0, le=100.0, description="Lifestyle habits score under simulated scenario."
+        ...,
+        ge=0.0,
+        le=100.0,
+        description="Lifestyle habits score under simulated scenario.",
     )
     lifestyle_score_delta: float = Field(
         ..., description="Change in lifestyle score (simulated - baseline)."
@@ -223,4 +230,3 @@ class WhatIfSimulationResponse(BaseModel):
         default=MANDATORY_MEDICAL_DISCLAIMER,
         description="Mandatory verbatim disclaimer distinguishing simulation from clinical forecast (PRD FR-005).",
     )
-

@@ -207,10 +207,9 @@ async def test_get_current_user_not_found_raises_401():
     user_id = uuid.uuid4()
     mock_db = AsyncMock()
 
-    payload = {
-        "sub": str(user_id),
-        "email": "absentuser@heliora.health",
-    }
+    # No email claim: the JIT provisioning path cannot recover a missing user,
+    # so the request must be rejected with 401.
+    payload = {"sub": str(user_id)}
 
     with (
         patch("app.api.dependencies.verify_token", return_value=payload),

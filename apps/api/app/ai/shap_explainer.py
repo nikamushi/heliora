@@ -66,18 +66,18 @@ class RiskModelWrapper:
         background = np.zeros((n_samples, len(FEATURE_NAMES)))
 
         for i in range(n_samples):
-            background[i, 0] = rng.uniform(20, 80)       # age
-            background[i, 1] = rng.uniform(18, 40)        # bmi
-            background[i, 2] = rng.uniform(0, 300)        # physical_activity
-            background[i, 3] = rng.uniform(4, 10)         # sleep_duration
+            background[i, 0] = rng.uniform(20, 80)  # age
+            background[i, 1] = rng.uniform(18, 40)  # bmi
+            background[i, 2] = rng.uniform(0, 300)  # physical_activity
+            background[i, 3] = rng.uniform(4, 10)  # sleep_duration
             # smoking: 0=never, 1=former, 2=current (encoded numerically)
-            background[i, 4] = rng.choice([0, 1, 2])      # smoking_status
+            background[i, 4] = rng.choice([0, 1, 2])  # smoking_status
             background[i, 5] = float(rng.choice([0, 1]))  # family_history
-            background[i, 6] = rng.uniform(1, 10)         # stress_level
-            background[i, 7] = rng.uniform(70, 160)       # blood_sugar
-            background[i, 8] = rng.uniform(140, 260)      # cholesterol
-            background[i, 9] = rng.uniform(100, 160)      # systolic_bp
-            background[i, 10] = rng.uniform(60, 100)      # diastolic_bp
+            background[i, 6] = rng.uniform(1, 10)  # stress_level
+            background[i, 7] = rng.uniform(70, 160)  # blood_sugar
+            background[i, 8] = rng.uniform(140, 260)  # cholesterol
+            background[i, 9] = rng.uniform(100, 160)  # systolic_bp
+            background[i, 10] = rng.uniform(60, 100)  # diastolic_bp
 
         self._background_data = background
         return background
@@ -163,9 +163,7 @@ class RiskModelWrapper:
         """Get or create the SHAP KernelExplainer."""
         if self._explainer is None:
             background = self._prepare_background_data()
-            self._explainer = shap.KernelExplainer(
-                self._risk_predict, background
-            )
+            self._explainer = shap.KernelExplainer(self._risk_predict, background)
             logger.info(
                 "SHAP KernelExplainer initialized with %d background samples",
                 len(background),
@@ -262,9 +260,15 @@ def explain_health_profile(profile: Any) -> list[dict[str, Any]]:
             if combined_importance[idx] > 1e-6:
                 # Use diabetes column as primary direction indicator
                 # (most clinically actionable for preventive health)
-                raw_shap_dm = float(shap_values[idx, 0]) if shap_values.shape[1] > 0 else 0.0
-                raw_shap_htn = float(shap_values[idx, 1]) if shap_values.shape[1] > 1 else 0.0
-                raw_shap_cvd = float(shap_values[idx, 2]) if shap_values.shape[1] > 2 else 0.0
+                raw_shap_dm = (
+                    float(shap_values[idx, 0]) if shap_values.shape[1] > 0 else 0.0
+                )
+                raw_shap_htn = (
+                    float(shap_values[idx, 1]) if shap_values.shape[1] > 1 else 0.0
+                )
+                raw_shap_cvd = (
+                    float(shap_values[idx, 2]) if shap_values.shape[1] > 2 else 0.0
+                )
 
                 # Overall direction based on net SHAP value across all conditions
                 net_shap = raw_shap_dm + raw_shap_htn + raw_shap_cvd
@@ -281,7 +285,12 @@ def explain_health_profile(profile: Any) -> list[dict[str, Any]]:
                         "label": label,
                         "description": description,
                         "weight_percentage": round(
-                            float(combined_importance[idx] / (np.sum(combined_importance) + 1e-10) * 100), 1
+                            float(
+                                combined_importance[idx]
+                                / (np.sum(combined_importance) + 1e-10)
+                                * 100
+                            ),
+                            1,
                         ),
                         "confidence": 0.85,  # SHAP values from rule-based model
                         "shap_diabetes": round(raw_shap_dm, 4),
@@ -298,9 +307,11 @@ def explain_health_profile(profile: Any) -> list[dict[str, Any]]:
         return factors
 
     # Fallback: empty list if unexpected shape
-    logger.warning("Unexpected SHAP values shape: %s", shap_values.shape if hasattr(shap_values, 'shape') else type(shap_values))
+    logger.warning(
+        "Unexpected SHAP values shape: %s",
+        shap_values.shape if hasattr(shap_values, "shape") else type(shap_values),
+    )
     return []
-
 
 
 def _get_feature_label(feature_name: str) -> str:
@@ -321,9 +332,7 @@ def _get_feature_label(feature_name: str) -> str:
     return labels.get(feature_name, feature_name.replace("_", " ").title())
 
 
-def _get_feature_description(
-    feature_name: str, direction: str, profile: Any
-) -> str:
+def _get_feature_description(feature_name: str, direction: str, profile: Any) -> str:
     """Generate a human-readable description for a feature contribution."""
     descriptions = {
         "age": {
@@ -383,5 +392,7 @@ def _get_feature_description(
                 pass
         return "BMI dalam rentang normal Asia berkontribusi menurunkan estimasi risiko model."
 
-    default_desc = f"Faktor {feature_name.replace('_', ' ')} memengaruhi estimasi risiko."
+    default_desc = (
+        f"Faktor {feature_name.replace('_', ' ')} memengaruhi estimasi risiko."
+    )
     return descriptions.get(feature_name, {}).get(canonical, default_desc)

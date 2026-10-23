@@ -91,7 +91,9 @@ def build_fallback_explanation(
             )
         lines.append("")
     lines.append(ep.STATUTORY_DISCLAIMER)
-    return ExplanationResult(text="\n".join(lines), evidence_refs=refs, source="fallback")
+    return ExplanationResult(
+        text="\n".join(lines), evidence_refs=refs, source="fallback"
+    )
 
 
 def _derive_queries(
@@ -160,7 +162,9 @@ async def explain_assessment(
         raw = await active_client.generate_text(ep.SYSTEM_PROMPT, user_message)
     except Exception as exc:
         if isinstance(exc, LLMUnavailableError):
-            logger.info("LLM unavailable, falling back to deterministic explanation: %s", exc)
+            logger.info(
+                "LLM unavailable, falling back to deterministic explanation: %s", exc
+            )
         else:
             logger.warning(
                 "Unexpected error during LLM generation, falling back to deterministic explanation: %s",

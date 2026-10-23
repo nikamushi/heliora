@@ -43,9 +43,7 @@ def _raw_frame(n_per_stratum: int = 8) -> pd.DataFrame:
                             "seqn": seqn,
                             "age": 30.0 + seqn % 40,
                             "bmi": 22.0 + seqn % 15,
-                            "physical_activity_min_per_week": (
-                                120.0 + (seqn % 7) * 60
-                            ),
+                            "physical_activity_min_per_week": (120.0 + (seqn % 7) * 60),
                             "sleep_duration_hours": 6.0 + seqn % 3,
                             "smoking_status": seqn % 3,
                             "fasting_glucose_mg_dl": 90.0 + seqn % 50,
@@ -64,9 +62,7 @@ def _raw_frame(n_per_stratum: int = 8) -> pd.DataFrame:
 def _loaded_frame(n_per_stratum: int = 8) -> pd.DataFrame:
     """Raw frame with the missing indicator, as load_nhanes would add it."""
     df = _raw_frame(n_per_stratum)
-    df["blood_sugar_missing"] = (
-        df["fasting_glucose_mg_dl"].isna().astype(int)
-    )
+    df["blood_sugar_missing"] = df["fasting_glucose_mg_dl"].isna().astype(int)
     return df
 
 
@@ -78,9 +74,7 @@ def _clean_encoded() -> pd.DataFrame:
 
 def test_feature_contract_matches_model_inputs() -> None:
     """FEATURE_NAMES = 9 model inputs + indicator; no leakage columns."""
-    assert set(MODEL_INPUT_COLUMNS) | {"blood_sugar_missing"} == set(
-        FEATURE_NAMES
-    )
+    assert set(MODEL_INPUT_COLUMNS) | {"blood_sugar_missing"} == set(FEATURE_NAMES)
     assert not set(TARGETS) & set(FEATURE_NAMES)
     assert not set(EXCLUDED_COLUMNS) & set(FEATURE_NAMES)
 
@@ -162,9 +156,7 @@ def test_split_requires_stratifiable_frame() -> None:
     """Thin joint-target strata must raise, not silently leak."""
     df = _clean_encoded()
     stratum = (
-        (df["diabetes"] == 1)
-        & (df["hypertension"] == 0)
-        & (df["cardiovascular"] == 0)
+        (df["diabetes"] == 1) & (df["hypertension"] == 0) & (df["cardiovascular"] == 0)
     )
     thin = pd.concat([df[~stratum], df[stratum].head(1)], ignore_index=True)
     with pytest.raises(ValueError, match="cannot stratify"):
@@ -192,9 +184,7 @@ def test_transform_split_preserves_missing_indicator() -> None:
     """Rows missing blood sugar stay flagged and get the TRAIN median."""
     loaded = _loaded_frame()
     loaded.loc[loaded.index[-1], "fasting_glucose_mg_dl"] = np.nan
-    loaded["blood_sugar_missing"] = (
-        loaded["fasting_glucose_mg_dl"].isna().astype(int)
-    )
+    loaded["blood_sugar_missing"] = loaded["fasting_glucose_mg_dl"].isna().astype(int)
 
     df, _ = clean(loaded)
     df, _ = encode_features(df)
@@ -202,9 +192,7 @@ def test_transform_split_preserves_missing_indicator() -> None:
 
     pre = build_preprocessor()
     pre.fit(train_raw[MODEL_INPUT_COLUMNS])
-    frames = [
-        transform_split(pre, s) for s in (train_raw, val_raw, test_raw)
-    ]
+    frames = [transform_split(pre, s) for s in (train_raw, val_raw, test_raw)]
     all_rows = pd.concat(frames, ignore_index=True)
 
     assert int(all_rows["blood_sugar_missing"].sum()) == 1

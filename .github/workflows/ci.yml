@@ -1,0 +1,275 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      web: ${{ steps.filter.outputs.web }}
+      api: ${{ steps.filter.outputs.api }}
+      mobile: ${{ steps.filter.outputs.mobile }}
+      shared: ${{ steps.filter.outputs.shared }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Filter changed paths
+        id: filter
+        uses: dorny/paths-filter@0e4a8c6effa4802afeda77dc8d303f8176d7dfad # v3
+        with:
+          filters: |
+            shared:
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
+              - 'turbo.json'
+              - 'pyproject.toml'
+              - 'uv.lock'
+              - '.nvmrc'
+              - '.python-version'
+              - '.github/workflows/ci.yml'
+            web:
+              - 'apps/web/**'
+            api:
+              - 'apps/api/**'
+              - 'packages/ml-core/**'
+              - 'ai/**'
+            mobile:
+              - 'apps/mobile/**'
+
+  web:
+    name: Web
+    needs: changes
+    if: needs.changes.outputs.web == 'true' || needs.changes.outputs.shared == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+        with:
+          version: 11.5.2
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm --filter frontend lint --max-warnings=0
+
+      - name: Typecheck
+        run: pnpm --filter frontend typecheck
+
+      - name: Build
+        env:
+          NEXT_PUBLIC_API_URL: https://api.example.invalid
+          NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder-anon-key
+        run: pnpm --filter frontend build
+
+  api:
+    name: API
+    needs: changes
+    if: needs.changes.outputs.api == 'true' || needs.changes.outputs.shared == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: heliora
+          POSTGRES_PASSWORD: heliora
+          POSTGRES_DB: heliora
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U heliora -d heliora"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      APP_ENV: test
+      SECRET_KEY: ci-test-secret
+      DATABASE_URL: postgresql+asyncpg://heliora:heliora@localhost:5432/heliora
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6
+        with:
+          version: "0.13.5"
+          enable-cache: true
+          cache-dependency-glob: |
+            uv.lock
+            **/pyproject.toml
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Verify lockfile
+        run: uv lock --check
+
+      - name: Install dependencies
+        run: uv sync --frozen --all-packages --all-extras --no-extra notebook --all-groups
+
+      - name: Lint
+        run: uv run ruff check apps/api packages/ml-core/src ai/src
+
+      - name: Check formatting
+        run: uv run ruff format --check apps/api packages/ml-core ai
+
+      - name: Validate database migrations
+        working-directory: apps/api
+        run: uv run alembic upgrade head
+
+      - name: API tests
+        working-directory: apps/api
+        run: >
+          uv run pytest tests -q
+          --cov=app
+          --cov-report=term-missing
+          --cov-report=xml:coverage.xml
+          --junitxml=junit.xml
+
+      - name: ML core tests
+        working-directory: packages/ml-core
+        run: uv run pytest tests -q
+
+      - name: AI pipeline tests
+        working-directory: ai
+        run: uv run pytest tests -q
+
+      - name: Upload API test reports
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: api-test-reports
+          path: |
+            apps/api/coverage.xml
+            apps/api/junit.xml
+          if-no-files-found: ignore
+          retention-days: 7
+
+  mobile:
+    name: Mobile
+    needs: changes
+    if: needs.changes.outputs.mobile == 'true' || needs.changes.outputs.shared == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Java 17
+        uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          channel: stable
+          flutter-version-file: apps/mobile/.fvmrc
+          cache: true
+
+      - name: Set up Gradle cache
+        uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4
+
+      - name: Install dependencies
+        working-directory: apps/mobile
+        run: flutter pub get
+
+      # Advisory until the Flutter workspace is reformatted in a dedicated change.
+      - name: Check formatting (advisory)
+        working-directory: apps/mobile
+        continue-on-error: true
+        run: dart format --output=none --set-exit-if-changed lib test
+
+      - name: Analyze
+        working-directory: apps/mobile
+        run: flutter analyze --fatal-infos
+
+      - name: Test
+        working-directory: apps/mobile
+        run: flutter test --coverage
+
+      - name: Verify Android debug build
+        working-directory: apps/mobile
+        run: flutter build apk --debug --no-pub
+
+  dependency-review:
+    name: Dependency review
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Review dependency changes
+        uses: actions/dependency-review-action@2031cfc080254a8a887f58cffee85186f0e49e48 # v4
+        continue-on-error: true
+        with:
+          fail-on-severity: high
+
+  ci-gate:
+    name: CI Gate
+    if: always()
+    needs: [changes, web, api, mobile, dependency-review]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Summarize job results
+        run: |
+          {
+            echo "### CI results"
+            echo ""
+            echo "| Job | Result |"
+            echo "| --- | --- |"
+            echo "| Web | ${{ needs.web.result }} |"
+            echo "| API | ${{ needs.api.result }} |"
+            echo "| Mobile | ${{ needs.mobile.result }} |"
+            echo "| Dependency review | ${{ needs['dependency-review'].result }} |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Fail when a required job failed
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1

@@ -76,13 +76,16 @@ def _get_embedding_model() -> SentenceTransformer:
 def clean_document(text: str) -> str:
     """Basic text cleaning: normalize whitespace, strip, remove excessive newlines."""
     import re
+
     text = text.strip()
-    text = re.sub(r'\s+', ' ', text)
+    text = re.sub(r"\s+", " ", text)
     return text
 
 
 # ── Chunking ─────────────────────────────────────────────────────────────
-def chunk_text(text: str, chunk_size: int = CHUNK_SIZE, overlap: int = CHUNK_OVERLAP) -> list[str]:
+def chunk_text(
+    text: str, chunk_size: int = CHUNK_SIZE, overlap: int = CHUNK_OVERLAP
+) -> list[str]:
     """Split text into overlapping chunks."""
     text = clean_document(text)
     if len(text) <= chunk_size:
@@ -120,26 +123,28 @@ def build_document_chunks(evidence: dict[str, Any]) -> list[dict[str, Any]]:
     chunks = chunk_text(full_text)
     docs = []
     for i, chunk in enumerate(chunks):
-        docs.append({
-            "id": f"{evidence['id']}-chunk-{i}",
-            "text": chunk,
-            "metadata": {
-                "evidence_id": evidence['id'],
-                "rule_id": evidence['rule_id'],
-                "title": evidence['title'],
-                "organization": evidence['organization'],
-                "year": str(evidence['year']),
-                "category": evidence['category'],
-                "category_label": evidence['category_label'],
-                "evidence_level": evidence['evidence_level'],
-                "summary": evidence['summary'],
-                "clinical_section": evidence['clinical_section'],
-                "citation": evidence['citation'],
-                "external_url": evidence['external_url'],
-                "chunk_index": i,
-                "total_chunks": len(chunks),
-            },
-        })
+        docs.append(
+            {
+                "id": f"{evidence['id']}-chunk-{i}",
+                "text": chunk,
+                "metadata": {
+                    "evidence_id": evidence["id"],
+                    "rule_id": evidence["rule_id"],
+                    "title": evidence["title"],
+                    "organization": evidence["organization"],
+                    "year": str(evidence["year"]),
+                    "category": evidence["category"],
+                    "category_label": evidence["category_label"],
+                    "evidence_level": evidence["evidence_level"],
+                    "summary": evidence["summary"],
+                    "clinical_section": evidence["clinical_section"],
+                    "citation": evidence["citation"],
+                    "external_url": evidence["external_url"],
+                    "chunk_index": i,
+                    "total_chunks": len(chunks),
+                },
+            }
+        )
     return docs
 
 
@@ -159,7 +164,9 @@ def reset_knowledge_base() -> int:
         logger.warning("Could not read collection before reset.", exc_info=True)
     try:
         _get_client().delete_collection(COLLECTION_NAME)
-        logger.info("Deleted collection %s (%d docs removed).", COLLECTION_NAME, removed)
+        logger.info(
+            "Deleted collection %s (%d docs removed).", COLLECTION_NAME, removed
+        )
     except Exception:
         logger.warning("Collection %s not present; nothing to delete.", COLLECTION_NAME)
     _collection = None
@@ -180,7 +187,10 @@ def ingest_all_evidence(reset: bool = False) -> int:
     # Check if already ingested
     existing_count = collection.count()
     if existing_count > 0:
-        logger.info("Evidence already ingested (%d docs). Skipping re-ingestion.", existing_count)
+        logger.info(
+            "Evidence already ingested (%d docs). Skipping re-ingestion.",
+            existing_count,
+        )
         return existing_count
 
     all_docs = []
@@ -188,8 +198,11 @@ def ingest_all_evidence(reset: bool = False) -> int:
         chunks = build_document_chunks(evi)
         all_docs.extend(chunks)
 
-    logger.info("Building %d chunks from %d evidence items",
-                len(all_docs), len(CLINICAL_EVIDENCE_REGISTRY))
+    logger.info(
+        "Building %d chunks from %d evidence items",
+        len(all_docs),
+        len(CLINICAL_EVIDENCE_REGISTRY),
+    )
 
     # Generate embeddings
     texts = [doc["text"] for doc in all_docs]
@@ -233,7 +246,9 @@ def main(argv: list[str] | None = None) -> int:
         description="HELIORA RAG knowledge base pipeline (RAG-001).",
     )
     sub = parser.add_subparsers(dest="command", required=True)
-    p_ingest = sub.add_parser("ingest", help="Ingest registry evidence into the vector store.")
+    p_ingest = sub.add_parser(
+        "ingest", help="Ingest registry evidence into the vector store."
+    )
     p_ingest.add_argument(
         "--reset",
         action="store_true",
@@ -250,14 +265,14 @@ def main(argv: list[str] | None = None) -> int:
             logger.info("Starting RAG knowledge base ingestion...")
             count = ingest_all_evidence(reset=args.reset)
             status = get_knowledge_base_status()
-            print(f"\n{'='*60}")
+            print(f"\n{'=' * 60}")
             print("RAG Knowledge Base Ingestion Complete")
-            print(f"{'='*60}")
+            print(f"{'=' * 60}")
             print(f"Documents indexed: {count}")
             print(f"Collection: {status['collection_name']}")
             print(f"Storage: {status['persist_dir']}")
             print(f"Embedding model: {status['embedding_model']}")
-            print(f"{'='*60}\n")
+            print(f"{'=' * 60}\n")
         elif args.command == "status":
             status = get_knowledge_base_status()
             print(f"Collection: {status['collection_name']}")

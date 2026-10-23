@@ -105,9 +105,14 @@ def test_blood_sugar_indicator_and_no_hba1c(pipeline: dict) -> None:
 
 def test_artifacts_and_manifest(pipeline: dict) -> None:
     out: Path = pipeline["out_dir"]
-    for fname in ("train.parquet", "val.parquet", "test.parquet",
-                  "preprocessor.joblib", "manifest.json",
-                  "dataset_report.json"):
+    for fname in (
+        "train.parquet",
+        "val.parquet",
+        "test.parquet",
+        "preprocessor.joblib",
+        "manifest.json",
+        "dataset_report.json",
+    ):
         assert (out / fname).exists(), fname
     manifest = json.loads((out / "manifest.json").read_text())
     assert manifest["version"] == "NHANES-2021-2023-v1"
@@ -115,8 +120,13 @@ def test_artifacts_and_manifest(pipeline: dict) -> None:
     assert manifest["feature_names"] == m.FEATURE_NAMES
     assert manifest["target_names"] == m.TARGETS
     report = json.loads((out / "dataset_report.json").read_text())
-    for key in ("n_rows_raw", "n_rows_clean", "missing_rate",
-                "target_prevalence", "split_prevalence"):
+    for key in (
+        "n_rows_raw",
+        "n_rows_clean",
+        "missing_rate",
+        "target_prevalence",
+        "split_prevalence",
+    ):
         assert key in report, key
 
 
@@ -254,9 +264,16 @@ def test_outlier_review_structure(pipeline: dict) -> None:
     review = pipeline["report"]["outlier_review"]
     assert set(review["columns"]) == set(m.NUMERIC_FEATURES)
     for col, stats in review["columns"].items():
-        for key in ("q1", "q3", "iqr_lower", "iqr_upper",
-                    "n_below_iqr", "n_above_iqr",
-                    "hard_bounds", "n_hard_violations"):
+        for key in (
+            "q1",
+            "q3",
+            "iqr_lower",
+            "iqr_upper",
+            "n_below_iqr",
+            "n_above_iqr",
+            "hard_bounds",
+            "n_hard_violations",
+        ):
             assert key in stats, (col, key)
     assert review["total_hard_violations"] == 0
     assert review["policy"]["action"] == "keep"

@@ -53,7 +53,9 @@ FEATURE_NAMES = [
 SMOKING_CODE = {"never": 0, "former": 1, "current": 2}
 
 
-def generate_training_data(n_samples: int = 10000, seed: int = 42) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+def generate_training_data(
+    n_samples: int = 10000, seed: int = 42
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Generate synthetic labeled training data for risk prediction.
 
     Uses the shared synthetic cohort generator (app.ai.synthetic_data) so
@@ -82,8 +84,12 @@ def generate_training_data(n_samples: int = 10000, seed: int = 42) -> tuple[np.n
             float(SMOKING_CODE[features.smoking_status]),
             float(features.family_history),
             features.stress_level if features.stress_level is not None else 0.0,
-            features.blood_sugar_mg_dl if features.blood_sugar_mg_dl is not None else 90.0,
-            features.cholesterol_mg_dl if features.cholesterol_mg_dl is not None else 180.0,
+            features.blood_sugar_mg_dl
+            if features.blood_sugar_mg_dl is not None
+            else 90.0,
+            features.cholesterol_mg_dl
+            if features.cholesterol_mg_dl is not None
+            else 180.0,
             features.systolic_bp,
             features.diastolic_bp,
         ]
@@ -112,26 +118,35 @@ def load_empirical_training_data(
     import pandas as pd
 
     repo_root = Path(__file__).resolve().parents[4]
-    nhanes_parquet = repo_root / "ai" / "datasets" / "processed" / "NHANES-2021-2023-v1" / "train.parquet"
+    nhanes_parquet = (
+        repo_root
+        / "ai"
+        / "datasets"
+        / "processed"
+        / "NHANES-2021-2023-v1"
+        / "train.parquet"
+    )
     brfss_csv = repo_root / "apps" / "ml" / "data" / "brfss_2023.csv"
 
     if source in ("auto", "nhanes") and nhanes_parquet.exists():
         logger.info("Loading empirical NHANES training data from %s", nhanes_parquet)
         df = pd.read_parquet(nhanes_parquet)
         n = len(df)
-        X = np.column_stack([
-            df["age"].astype(float).values,
-            df["bmi"].astype(float).values,
-            df["physical_activity_min_per_week"].astype(float).values,
-            df["sleep_duration_hours"].astype(float).values,
-            df["smoking_status"].astype(float).values,
-            np.zeros(n, dtype=float),       # family_history neutral baseline
-            np.full(n, 5.0, dtype=float),   # stress_level neutral baseline
-            df["blood_sugar_mg_dl"].astype(float).values,
-            df["cholesterol_mg_dl"].astype(float).values,
-            df["systolic_bp_mean"].astype(float).values,
-            df["diastolic_bp_mean"].astype(float).values,
-        ])
+        features = np.column_stack(
+            [
+                df["age"].astype(float).values,
+                df["bmi"].astype(float).values,
+                df["physical_activity_min_per_week"].astype(float).values,
+                df["sleep_duration_hours"].astype(float).values,
+                df["smoking_status"].astype(float).values,
+                np.zeros(n, dtype=float),  # family_history neutral baseline
+                np.full(n, 5.0, dtype=float),  # stress_level neutral baseline
+                df["blood_sugar_mg_dl"].astype(float).values,
+                df["cholesterol_mg_dl"].astype(float).values,
+                df["systolic_bp_mean"].astype(float).values,
+                df["diastolic_bp_mean"].astype(float).values,
+            ]
+        )
         y_dm = df["diabetes"].astype(int).values
         y_ht = df["hypertension"].astype(int).values
         y_cvd = df["cardiovascular"].astype(int).values
@@ -140,31 +155,35 @@ def load_empirical_training_data(
             "path": str(nhanes_parquet),
             "n_samples": n,
         }
-        return X, y_dm, y_ht, y_cvd, meta
+        return features, y_dm, y_ht, y_cvd, meta
 
     if source in ("auto", "brfss") and brfss_csv.exists():
         logger.info("Loading empirical BRFSS training data from %s", brfss_csv)
         df = pd.read_csv(brfss_csv)
-        df = df.dropna(subset=["age", "bmi", "diabetes", "hypertension", "cardiovascular"])
+        df = df.dropna(
+            subset=["age", "bmi", "diabetes", "hypertension", "cardiovascular"]
+        )
         n = len(df)
         activity = df["physical_activity_min_per_week"].fillna(0.0).astype(float).values
         sleep = df["sleep_duration_hours"].fillna(7.0).astype(float).values
         chol = np.where(df.get("high_cholesterol", 0) == 1, 220.0, 180.0)
         systolic = np.where(df["hypertension"] == 1, 140.0, 120.0)
         diastolic = np.where(df["hypertension"] == 1, 90.0, 80.0)
-        X = np.column_stack([
-            df["age"].astype(float).values,
-            df["bmi"].astype(float).values,
-            activity,
-            sleep,
-            df["smoking_status"].fillna(0).astype(float).values,
-            np.zeros(n, dtype=float),
-            np.full(n, 5.0, dtype=float),
-            np.full(n, 90.0, dtype=float),
-            chol,
-            systolic,
-            diastolic,
-        ])
+        features = np.column_stack(
+            [
+                df["age"].astype(float).values,
+                df["bmi"].astype(float).values,
+                activity,
+                sleep,
+                df["smoking_status"].fillna(0).astype(float).values,
+                np.zeros(n, dtype=float),
+                np.full(n, 5.0, dtype=float),
+                np.full(n, 90.0, dtype=float),
+                chol,
+                systolic,
+                diastolic,
+            ]
+        )
         y_dm = df["diabetes"].astype(int).values
         y_ht = df["hypertension"].astype(int).values
         y_cvd = df["cardiovascular"].astype(int).values
@@ -173,12 +192,13 @@ def load_empirical_training_data(
             "path": str(brfss_csv),
             "n_samples": n,
         }
-        return X, y_dm, y_ht, y_cvd, meta
+        return features, y_dm, y_ht, y_cvd, meta
 
     return None
 
 
 # ── Model training ───────────────────────────────────────────────
+
 
 @dataclass
 class TrainedModels:
@@ -253,7 +273,7 @@ def train_risk_models(
         )
         feature_matrix, y_dm, y_ht, y_cvd = generate_training_data(n_samples, seed)
         actual_samples = n_samples
-        dataset_name = "synthetic" 
+        dataset_name = "synthetic"
 
     train_method = _train_xgboost if use_xgboost else _train_lightgbm
 
@@ -355,6 +375,7 @@ def _train_lightgbm(
 
 # ── Model persistence ────────────────────────────────────────────
 
+
 def _save_models(models: TrainedModels, path: Path) -> None:
     """Save trained models to disk."""
     path.mkdir(parents=True, exist_ok=True)
@@ -389,6 +410,7 @@ def load_models(path: Path) -> TrainedModels:
 
 
 # ── Model-based inference ────────────────────────────────────────
+
 
 def _expected_default_signature() -> dict[str, Any]:
     """Training signature that a reusable default cache must carry."""
@@ -428,7 +450,9 @@ class ModelRiskEngine:
                 cached = load_models(default_path)
                 expected = _expected_default_signature()
                 info = cached.training_info
-                is_synthetic_match = all(info.get(key) == value for key, value in expected.items())
+                is_synthetic_match = all(
+                    info.get(key) == value for key, value in expected.items()
+                )
                 is_empirical_match = (
                     info.get("algorithm") == "xgboost"
                     and info.get("n_features") == len(FEATURE_NAMES)
@@ -436,7 +460,11 @@ class ModelRiskEngine:
                     and info.get("dataset") in ("NHANES-2021-2023-v1", "BRFSS-2023")
                 )
                 if is_synthetic_match or is_empirical_match:
-                    logger.info("Loading cached models from %s (%s)", default_path, info.get("dataset", "synthetic"))
+                    logger.info(
+                        "Loading cached models from %s (%s)",
+                        default_path,
+                        info.get("dataset", "synthetic"),
+                    )
                     return cached
                 logger.warning(
                     "Cached models signature mismatch (config changed), retraining..."
@@ -513,7 +541,10 @@ class ModelRiskEngine:
 
 # ── Model evaluation ─────────────────────────────────────────────
 
-def evaluate_trained_models(models: TrainedModels, n_test: int = 2000, seed: int = 123) -> dict[str, Any]:
+
+def evaluate_trained_models(
+    models: TrainedModels, n_test: int = 2000, seed: int = 123
+) -> dict[str, Any]:
     """Evaluate trained models on holdout test data.
 
     Returns evaluation metrics per condition.

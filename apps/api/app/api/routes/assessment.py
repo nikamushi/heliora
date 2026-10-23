@@ -73,6 +73,7 @@ async def get_assessment_by_id(
         db, assessment_id, current_user.id
     )
 
+
 @router.get(
     "/{assessment_id}/explanation",
     status_code=status.HTTP_200_OK,
@@ -92,4 +93,3 @@ async def get_assessment_explanation(
         "evidence_refs": res.ai_evidence_refs or [],
         "source": res.ai_source or "fallback",
     }
-

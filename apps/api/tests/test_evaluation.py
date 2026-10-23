@@ -117,7 +117,10 @@ def test_binary_metrics_empty_inputs():
 
 
 def test_roc_auc_perfect_separation():
-    assert _roc_auc_from_probs(np.array([0, 0, 1, 1]), np.array([0.1, 0.2, 0.8, 0.9])) == 1.0
+    assert (
+        _roc_auc_from_probs(np.array([0, 0, 1, 1]), np.array([0.1, 0.2, 0.8, 0.9]))
+        == 1.0
+    )
 
 
 def test_roc_auc_single_class_returns_chance():
@@ -130,7 +133,9 @@ def test_roc_auc_ties_count_half():
 
 
 def test_brier_score_known_value():
-    assert _brier_score(np.array([0, 1]), np.array([0.25, 0.75])) == pytest.approx(0.0625)
+    assert _brier_score(np.array([0, 1]), np.array([0.25, 0.75])) == pytest.approx(
+        0.0625
+    )
 
 
 # ── Synthetic data ────────────────────────────────────────────────
@@ -140,7 +145,9 @@ def test_synthetic_data_deterministic_per_seed():
     first = generate_synthetic_evaluation_data(50, seed=7)
     second = generate_synthetic_evaluation_data(50, seed=7)
     assert len(first) == 50
-    assert [(s.diabetes_label, s.hypertension_label, s.cardiovascular_label) for s in first] == [
+    assert [
+        (s.diabetes_label, s.hypertension_label, s.cardiovascular_label) for s in first
+    ] == [
         (s.diabetes_label, s.hypertension_label, s.cardiovascular_label) for s in second
     ]
 
@@ -204,7 +211,9 @@ def test_sample_to_profile_maps_fields():
 
 
 def test_sample_to_profile_missing_labs_become_none():
-    profile = sample_to_profile(_make_sample(blood_sugar_mg_dl=None, cholesterol_mg_dl=None))
+    profile = sample_to_profile(
+        _make_sample(blood_sugar_mg_dl=None, cholesterol_mg_dl=None)
+    )
     assert profile.blood_sugar_mg_dl is None
     assert profile.cholesterol_mg_dl is None
 
@@ -223,7 +232,11 @@ def test_frozen_baseline_contract():
 
 
 def test_tuned_thresholds_contract():
-    assert TUNED_THRESHOLDS == {"diabetes": 0.25, "hypertension": 0.2, "cardiovascular": 0.25}
+    assert TUNED_THRESHOLDS == {
+        "diabetes": 0.25,
+        "hypertension": 0.2,
+        "cardiovascular": 0.25,
+    }
 
 
 def test_weighting_review_decision_rejected():
@@ -312,13 +325,19 @@ def test_evaluate_uses_tuned_thresholds_by_default():
 
 def test_evaluate_respects_custom_thresholds():
     custom = {"diabetes": 0.9, "hypertension": 0.9, "cardiovascular": 0.9}
-    result = evaluate_risk_engine(n_samples=60, seed=3, thresholds=custom, engine=_StubEngine())
+    result = evaluate_risk_engine(
+        n_samples=60, seed=3, thresholds=custom, engine=_StubEngine()
+    )
     assert [c.threshold for c in result.conditions] == [0.9, 0.9, 0.9]
 
 
 def test_evaluate_is_deterministic():
-    first = _serialize_report(evaluate_risk_engine(n_samples=80, seed=5, engine=_StubEngine()))
-    second = _serialize_report(evaluate_risk_engine(n_samples=80, seed=5, engine=_StubEngine()))
+    first = _serialize_report(
+        evaluate_risk_engine(n_samples=80, seed=5, engine=_StubEngine())
+    )
+    second = _serialize_report(
+        evaluate_risk_engine(n_samples=80, seed=5, engine=_StubEngine())
+    )
     for report in (first, second):
         report.pop("eval_timestamp")
         report.pop("runtime_seconds")

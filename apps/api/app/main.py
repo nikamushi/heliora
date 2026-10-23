@@ -85,7 +85,10 @@ async def os_error_handler(request: Request, exc: OSError) -> JSONResponse:
         or "10061" in err_str
     )
     if is_socket_conn_failure:
-        logger.error(f"[DB ERROR 503] Socket connection failure on {request.method} {request.url.path}: {exc}", exc_info=True)
+        logger.error(
+            f"[DB ERROR 503] Socket connection failure on {request.method} {request.url.path}: {exc}",
+            exc_info=True,
+        )
         return JSONResponse(
             status_code=503,
             content={
@@ -94,14 +97,19 @@ async def os_error_handler(request: Request, exc: OSError) -> JSONResponse:
                 )
             },
         )
-    logger.error(f"[SYSTEM ERROR 500] Unhandled OSError on {request.method} {request.url.path}: {exc}", exc_info=True)
+    logger.error(
+        f"[SYSTEM ERROR 500] Unhandled OSError on {request.method} {request.url.path}: {exc}",
+        exc_info=True,
+    )
     return JSONResponse(
         status_code=500,
         content={"detail": "Terjadi kesalahan internal sistem."},
     )
 
 
-@app.exception_handler(__import__("sqlalchemy.exc", fromlist=["SQLAlchemyError"]).SQLAlchemyError)
+@app.exception_handler(
+    __import__("sqlalchemy.exc", fromlist=["SQLAlchemyError"]).SQLAlchemyError
+)
 async def sqlalchemy_error_handler(request: Request, exc: Exception) -> JSONResponse:
     """Handle database operational/connection errors from SQLAlchemy."""
     err_str = str(exc).lower()
@@ -114,7 +122,10 @@ async def sqlalchemy_error_handler(request: Request, exc: Exception) -> JSONResp
         or "1225" in err_str
     )
     if is_conn_failure:
-        logger.error(f"[DB ERROR 503] SQLAlchemy connection error on {request.method} {request.url.path}: {exc}", exc_info=True)
+        logger.error(
+            f"[DB ERROR 503] SQLAlchemy connection error on {request.method} {request.url.path}: {exc}",
+            exc_info=True,
+        )
         return JSONResponse(
             status_code=503,
             content={
@@ -123,7 +134,10 @@ async def sqlalchemy_error_handler(request: Request, exc: Exception) -> JSONResp
                 )
             },
         )
-    logger.error(f"[DB ERROR 500] Database error on {request.method} {request.url.path}: {exc}", exc_info=True)
+    logger.error(
+        f"[DB ERROR 500] Database error on {request.method} {request.url.path}: {exc}",
+        exc_info=True,
+    )
     return JSONResponse(
         status_code=500,
         content={"detail": "Terjadi kesalahan internal sistem."},
@@ -163,6 +177,11 @@ async def health_check() -> HealthCheckResponse:
     return HealthCheckResponse(environment=settings.APP_ENV)
 
 
-@app.get("/health", response_model=HealthCheckResponse, tags=["system"], summary="Health check (root)")
+@app.get(
+    "/health",
+    response_model=HealthCheckResponse,
+    tags=["system"],
+    summary="Health check (root)",
+)
 async def health_check_root() -> HealthCheckResponse:
     return HealthCheckResponse(environment=settings.APP_ENV)

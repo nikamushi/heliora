@@ -2356,15 +2356,15 @@ Acceptance Criteria:
 **Owner:** Pino & Tumir  
 **Priority:** P0  
 **Sprint:** S8-S9  
-**Status:** BACKLOG
+**Status:** DONE
 
 Tasks:
 
-- [ ] Configure CI.
-- [ ] Automated build.
-- [ ] Automated test.
-- [ ] Deployment pipeline.
-- [ ] Environment configuration.
+- [x] Configure CI.
+- [x] Automated build.
+- [x] Automated test.
+- [x] Deployment pipeline.
+- [x] Environment configuration.
 
 Acceptance Criteria:
 

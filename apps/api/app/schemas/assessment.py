@@ -14,7 +14,9 @@ class RiskAssessmentItem(BaseModel):
     probability: float
     estimated_risk_score: float
     risk_level: Literal["low", "moderate", "high"]
-    risk_label: Literal["Lower", "Moderate", "Higher", "Lebih Rendah", "Sedang", "Lebih Tinggi"] = "Lower"
+    risk_label: Literal[
+        "Lower", "Moderate", "Higher", "Lebih Rendah", "Sedang", "Lebih Tinggi"
+    ] = "Lower"
     trend: Literal["stable", "increasing", "decreasing"] = "stable"
     description: str
 
