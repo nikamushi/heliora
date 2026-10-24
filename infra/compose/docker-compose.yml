@@ -27,7 +27,9 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  # Optional full-stack on VPS (frontend normally on Vercel).
   web:
+    profiles: ["full"]
     image: ${IMAGE_PREFIX:-ghcr.io/nikamushi}/heliora-web:${IMAGE_TAG:-latest}
     env_file:
       - .env
@@ -69,8 +71,6 @@ services:
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
-      web:
-        condition: service_healthy
       api:
         condition: service_healthy
     restart: unless-stopped
