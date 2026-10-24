@@ -14,6 +14,10 @@ import { apiClient } from "@/lib/api-client";
 import {
   AUTH_PASSWORD_RESET_EXPIRY_LABEL,
   AUTH_MIN_PASSWORD_LENGTH,
+  clearPasswordRecoveryFlow,
+  hasPasswordRecoveryFlow,
+  mapPasswordUpdateError,
+  markPasswordRecoveryFlow,
 } from "@/lib/auth-config";
 
 type ResetFlowState =
@@ -48,6 +52,7 @@ function ResetPasswordInner() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const submittingLock = useRef(false);
 
   useEffect(() => {
     if (started.current) return;
@@ -56,6 +61,12 @@ function ResetPasswordInner() {
     let cancelled = false;
     let unsubscribe: (() => void) | undefined;
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+    const enterReady = () => {
+      if (cancelled) return;
+      markPasswordRecoveryFlow();
+      setFlowState("ready");
+    };
 
     async function establishRecoverySession() {
       if (searchParams.get("demo") === "success") {
@@ -70,6 +81,7 @@ function ResetPasswordInner() {
       const urlError =
         searchParams.get("error_description") || searchParams.get("error");
       if (urlError) {
+        clearPasswordRecoveryFlow();
         if (!cancelled) setFlowState("invalid_or_expired");
         return;
       }
@@ -82,6 +94,7 @@ function ResetPasswordInner() {
           hashParams.get("error") ||
           hashParams.get("error_code") === "otp_expired"
         ) {
+          clearPasswordRecoveryFlow();
           if (!cancelled) setFlowState("invalid_or_expired");
           return;
         }
@@ -100,9 +113,14 @@ function ResetPasswordInner() {
       }
 
       try {
+        // Hanya terima session jika marker recovery aktif (dari /auth/callback)
+        // atau code recovery baru saja ditukar di halaman ini.
+        // Session login biasa TIDAK boleh membuka form — itu memicu error
+        // "New password should be different from the old password" saat user
+        // tanpa sadar mengisi sandi yang sama dengan sandi aktif.
         const { data: existing } = await supabase.auth.getSession();
-        if (existing.session) {
-          if (!cancelled) setFlowState("ready");
+        if (existing.session && hasPasswordRecoveryFlow()) {
+          enterReady();
           return;
         }
 
@@ -113,22 +131,18 @@ function ResetPasswordInner() {
           if (exchangeError) {
             console.warn("[Reset Password] Exchange code error:", exchangeError);
           } else if (exchanged.session) {
-            if (!cancelled) setFlowState("ready");
+            enterReady();
             return;
           }
         }
 
         const { data: listener } = supabase.auth.onAuthStateChange(
           (event, session) => {
-            if (cancelled) return;
-            if (
-              session &&
-              (event === "PASSWORD_RECOVERY" ||
-                event === "SIGNED_IN" ||
-                event === "INITIAL_SESSION" ||
-                event === "TOKEN_REFRESHED")
-            ) {
-              setFlowState("ready");
+            if (cancelled || !session) return;
+            // Hanya event recovery yang sah; jangan terima SIGNED_IN generik
+            // dari sesi login biasa.
+            if (event === "PASSWORD_RECOVERY") {
+              enterReady();
             }
           }
         );
@@ -138,10 +152,16 @@ function ResetPasswordInner() {
           if (cancelled) return;
           void supabase.auth.getSession().then(({ data }) => {
             if (cancelled) return;
-            setFlowState(data.session ? "ready" : "invalid_or_expired");
+            if (data.session && hasPasswordRecoveryFlow()) {
+              enterReady();
+            } else {
+              clearPasswordRecoveryFlow();
+              setFlowState("invalid_or_expired");
+            }
           });
         }, SESSION_WAIT_MS);
       } catch {
+        clearPasswordRecoveryFlow();
         if (!cancelled) setFlowState("invalid_or_expired");
       }
     }
@@ -171,6 +191,8 @@ function ResetPasswordInner() {
     e.preventDefault();
     setErrorMessage(null);
 
+    if (submittingLock.current || flowState === "submitting") return;
+
     if (!hasMinLength) {
       setErrorMessage(
         `Kata sandi minimal harus ${AUTH_MIN_PASSWORD_LENGTH} karakter.`
@@ -183,6 +205,9 @@ function ResetPasswordInner() {
       return;
     }
 
+    // Kunci sync mencegah double-submit: request kedua setelah sandi sudah
+    // berubah akan gagal dengan "different from the old password".
+    submittingLock.current = true;
     setFlowState("submitting");
 
     try {
@@ -194,14 +219,16 @@ function ResetPasswordInner() {
         await supabase.auth.signOut();
         apiClient.clearToken();
       }
+      clearPasswordRecoveryFlow();
       setFlowState("success");
     } catch (err: unknown) {
+      submittingLock.current = false;
       setFlowState("ready");
-      setErrorMessage(
+      const raw =
         err instanceof Error
           ? err.message
-          : "Gagal memperbarui kata sandi. Silakan coba kembali."
-      );
+          : "Gagal memperbarui kata sandi. Silakan coba kembali.";
+      setErrorMessage(mapPasswordUpdateError(raw));
     }
   };
 

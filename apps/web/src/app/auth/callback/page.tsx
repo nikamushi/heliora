@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { apiClient } from "@/lib/api-client";
 import { getSupabaseClient, isSupabaseConfigured } from "@/lib/supabase-client";
+import { markPasswordRecoveryFlow } from "@/lib/auth-config";
 
 type CallbackState = "working" | "error";
 
@@ -146,6 +147,7 @@ function CallbackInner() {
         if (session.access_token) {
           apiClient.setToken(session.access_token);
         }
+        markPasswordRecoveryFlow();
         router.replace("/reset-password");
         return;
       }
