@@ -128,7 +128,8 @@ jobs:
     if: vars.DEPLOY_ENABLED == 'true' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    environment: ${{ (github.ref_type == 'tag' || inputs.environment == 'production') && 'production' || 'staging' }}
+    # Uses repository secrets (VPS_*). Re-add GitHub Environment gates when a
+    # repo admin creates staging/production environments.
     permissions:
       contents: read
       packages: read
@@ -165,15 +166,14 @@ jobs:
               printf '\nIMAGE_TAG=%s\n' "$IMAGE_TAG" >> .env
             fi
 
-            DOMAIN="$(sed -n 's/^DOMAIN=//p' .env | tail -1)"
             API_DOMAIN="$(sed -n 's/^API_DOMAIN=//p' .env | tail -1)"
 
             deploy() {
               docker compose pull
               docker compose run --rm --no-deps api alembic upgrade head
+              # Default profile is API + Caddy (web is behind profiles: [full]; frontend on Vercel).
               docker compose up -d --wait --wait-timeout 180
               curl -fsS "https://${API_DOMAIN}/health" > /dev/null
-              curl -fsS "https://${DOMAIN}/" > /dev/null
             }
 
             if deploy; then
