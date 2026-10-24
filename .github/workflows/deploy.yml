@@ -128,7 +128,8 @@ jobs:
     if: vars.DEPLOY_ENABLED == 'true' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    environment: ${{ (github.ref_type == 'tag' || inputs.environment == 'production') && 'production' || 'staging' }}
+    # Uses repository secrets (VPS_*). Re-add GitHub Environment gates when a
+    # repo admin creates staging/production environments.
     permissions:
       contents: read
       packages: read
