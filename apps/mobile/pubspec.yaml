@@ -26,10 +26,10 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^6.0.0
   swagger_parser: ^1.45.0
-  build_runner: 2.4.13
-  build_resolvers: 2.4.2
-  source_gen: 1.5.0
-  json_serializable: 6.8.0
+  build_runner: 2.7.2
+  build_resolvers: 3.0.4
+  source_gen: 4.2.4
+  json_serializable: 6.11.2
 
 flutter:
   uses-material-design: true
