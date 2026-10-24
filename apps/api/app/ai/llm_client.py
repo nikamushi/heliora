@@ -4,6 +4,9 @@ Implements PRD FR-030 (generation) and BR-LLM-000 (non-blocking): every
 failure mode maps to LLMUnavailableError so the caller can fall back to a
 deterministic template. The API key travels in the `x-goog-api-key` header
 (never in logs) and is only ever read from the environment.
+
+When GEMINI_PROXY_URL is set (Cloudflare Worker), requests go through the
+proxy so VPS hosts in unsupported Google regions can still call Gemini.
 """
 
 import httpx
@@ -16,7 +19,7 @@ class LLMUnavailableError(Exception):
 
 
 class GeminiClient:
-    """Minimal async client for the Gemini generateContent REST endpoint."""
+    """Minimal async client for Gemini generateContent (direct or via proxy)."""
 
     def __init__(
         self,
@@ -24,14 +27,67 @@ class GeminiClient:
         model: str = "gemini-1.5-flash",
         timeout_seconds: float = 10.0,
         transport: httpx.AsyncBaseTransport | None = None,
+        proxy_url: str | None = None,
+        proxy_secret: str | None = None,
     ) -> None:
         self._api_key = api_key
         self._model = model
         self._timeout_seconds = timeout_seconds
         self._transport = transport
+        self._proxy_url = (proxy_url or "").rstrip("/") or None
+        self._proxy_secret = proxy_secret
+
+    @property
+    def uses_proxy(self) -> bool:
+        return bool(self._proxy_url)
 
     async def generate_text(self, system_prompt: str, user_message: str) -> str:
         """Generate one explanation text. Raises LLMUnavailableError on failure."""
+        if self._proxy_url:
+            return await self._generate_via_proxy(system_prompt, user_message)
+        return await self._generate_direct(system_prompt, user_message)
+
+    async def _generate_via_proxy(self, system_prompt: str, user_message: str) -> str:
+        if not self._proxy_secret:
+            raise LLMUnavailableError("GEMINI_PROXY_SECRET is not configured.")
+
+        url = f"{self._proxy_url}/v1/generate"
+        payload = {
+            "model": self._model,
+            "system_prompt": system_prompt,
+            "user_message": user_message,
+        }
+        try:
+            async with httpx.AsyncClient(
+                timeout=self._timeout_seconds, transport=self._transport
+            ) as client:
+                response = await client.post(
+                    url,
+                    headers={
+                        "Authorization": f"Bearer {self._proxy_secret}",
+                        "Content-Type": "application/json",
+                    },
+                    json=payload,
+                )
+                response.raise_for_status()
+        except (httpx.RequestError, httpx.HTTPStatusError) as exc:
+            raise LLMUnavailableError(f"Gemini proxy request failed: {exc}") from exc
+        except Exception as exc:
+            raise LLMUnavailableError(
+                f"Unexpected Gemini proxy client error: {exc}"
+            ) from exc
+
+        try:
+            text = str(response.json().get("text", "")).strip()
+        except (ValueError, TypeError) as exc:
+            raise LLMUnavailableError(
+                f"Unexpected Gemini proxy response: {exc}"
+            ) from exc
+        if not text:
+            raise LLMUnavailableError("Gemini proxy returned an empty response.")
+        return text
+
+    async def _generate_direct(self, system_prompt: str, user_message: str) -> str:
         if not self._api_key:
             raise LLMUnavailableError("GEMINI_API_KEY is not configured.")
 

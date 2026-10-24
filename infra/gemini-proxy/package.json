@@ -1,0 +1,17 @@
+{
+  "name": "heliora-gemini-proxy",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Cloudflare Worker proxy for Gemini generateContent (unsupported VPS egress regions)",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "secret:gemini": "wrangler secret put GEMINI_API_KEY",
+    "secret:proxy": "wrangler secret put PROXY_SECRET"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20251011.0",
+    "typescript": "^5.9.3",
+    "wrangler": "^4.42.0"
+  }
+}

@@ -1,0 +1,7 @@
+name = "heliora-gemini-proxy"
+main = "src/index.ts"
+compatibility_date = "2026-10-01"
+
+# Secrets (set via `wrangler secret put`):
+#   GEMINI_API_KEY  — Google AI Studio key
+#   PROXY_SECRET    — shared bearer token for Heliora API → Worker

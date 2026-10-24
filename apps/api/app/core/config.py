@@ -73,8 +73,11 @@ class Settings(BaseSettings):
 
     # ── LLM Provider (Gemini — ADR-009, Architecture §41) ────────────
     GEMINI_API_KEY: str | None = None
-    GEMINI_MODEL: str = "gemini-1.5-flash"
+    GEMINI_MODEL: str = "gemini-3.5-flash-lite"
     LLM_TIMEOUT_SECONDS: int = 10
+    # Cloudflare Worker proxy for VPS hosts in unsupported Gemini regions
+    GEMINI_PROXY_URL: str | None = None
+    GEMINI_PROXY_SECRET: str | None = None
 
     # ── Auth (Legacy & FastAPI Native) ───────────────────────────
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 24 hours

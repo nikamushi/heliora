@@ -14,6 +14,8 @@ Covers (TASK.md LLM-001, PRD FR-030/031/032, BR-LLM-000..005, AC-LLM-01/02):
 - Fallback response (no key, timeout, HTTP error, invalid output, empty KB)
 """
 
+import json
+
 import httpx
 import pytest
 
@@ -163,7 +165,9 @@ def test_llm_config_defaults(monkeypatch):
         monkeypatch.delenv(var, raising=False)
     settings = Settings(_env_file=None)
     assert settings.GEMINI_API_KEY is None
-    assert settings.GEMINI_MODEL == "gemini-1.5-flash"
+    assert settings.GEMINI_MODEL == "gemini-3.5-flash-lite"
+    assert settings.GEMINI_PROXY_URL is None
+    assert settings.GEMINI_PROXY_SECRET is None
     assert settings.LLM_TIMEOUT_SECONDS == 10
 
 
@@ -191,6 +195,53 @@ async def test_client_posts_to_generate_content_endpoint():
 
 async def test_client_without_key_raises_unavailable():
     client = GeminiClient(api_key=None)
+    with pytest.raises(LLMUnavailableError):
+        await client.generate_text("sys", "user")
+
+
+async def test_client_proxy_posts_to_generate_endpoint():
+    seen: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(request)
+        return httpx.Response(200, json={"text": "via-proxy"})
+
+    client = GeminiClient(
+        api_key=None,
+        model="gemini-3.5-flash-lite",
+        proxy_url="https://proxy.example.com",
+        proxy_secret="proxy-secret",
+        transport=httpx.MockTransport(handler),
+    )
+    assert await client.generate_text("sys", "user") == "via-proxy"
+    assert client.uses_proxy is True
+
+    req = seen[0]
+    assert str(req.url) == "https://proxy.example.com/v1/generate"
+    assert req.headers.get("Authorization") == "Bearer proxy-secret"
+    body = json.loads(req.content.decode())
+    assert body["model"] == "gemini-3.5-flash-lite"
+    assert body["system_prompt"] == "sys"
+    assert body["user_message"] == "user"
+
+
+async def test_client_proxy_without_secret_raises_unavailable():
+    client = GeminiClient(
+        api_key=None,
+        proxy_url="https://proxy.example.com",
+        proxy_secret=None,
+    )
+    with pytest.raises(LLMUnavailableError):
+        await client.generate_text("sys", "user")
+
+
+async def test_client_proxy_maps_http_error_to_unavailable():
+    client = GeminiClient(
+        api_key=None,
+        proxy_url="https://proxy.example.com",
+        proxy_secret="proxy-secret",
+        transport=_error_transport(502),
+    )
     with pytest.raises(LLMUnavailableError):
         await client.generate_text("sys", "user")
 

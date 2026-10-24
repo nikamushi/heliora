@@ -127,7 +127,10 @@ async def explain_assessment(
 ) -> ExplanationResult:
     """Generate a human-friendly explanation for an assessment result."""
     key = api_key if api_key is not None else settings.GEMINI_API_KEY
-    if not key:
+    proxy_url = settings.GEMINI_PROXY_URL
+    proxy_secret = settings.GEMINI_PROXY_SECRET
+    # Proxy mode: Gemini key lives on the Worker. Direct mode: local key required.
+    if not proxy_url and not key:
         # BR-LLM-000: core flow works without any LLM call or network.
         return build_fallback_explanation(risks, factors, recommendations, [])
 
@@ -157,6 +160,8 @@ async def explain_assessment(
             if timeout_seconds is not None
             else settings.LLM_TIMEOUT_SECONDS
         ),
+        proxy_url=proxy_url,
+        proxy_secret=proxy_secret,
     )
     try:
         raw = await active_client.generate_text(ep.SYSTEM_PROMPT, user_message)

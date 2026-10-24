@@ -219,3 +219,4 @@ brain/
 test_scripts/
 .scratch/
 .vercel
+infra/gemini-proxy/node_modules/
