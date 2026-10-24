@@ -34,9 +34,9 @@ export default function HelpSupportPage() {
   const supportChannels = [
     {
       title: "Email Dukungan Resmi",
-      detail: "support@heliora.health",
+      detail: "autoruns18@gmail.com",
       subtext: "Waktu respon rata-rata < 24 jam kerja",
-      href: "mailto:support@heliora.health",
+      href: "mailto:autoruns18@gmail.com",
       icon: SFEnvelope,
       color: "text-blue-600",
       bg: "bg-blue-50/70 border-blue-100",

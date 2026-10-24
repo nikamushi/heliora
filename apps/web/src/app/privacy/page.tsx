@@ -225,7 +225,7 @@ export default function PrivacyPage() {
                   Kebijakan Privasi ini disusun sebagai bentuk kepatuhan terhadap Undang-Undang Republik Indonesia Nomor 27 Tahun 2022 tentang Pelindungan Data Pribadi (UU PDP).
                 </p>
                 <p className="text-sm sm:text-[15px] leading-relaxed text-neutral-700">
-                  Pengendali Data Pribadi untuk platform ini adalah <strong>PT Heliora Digital Preventif</strong> (alamat lengkap tercantum pada Bagian 11). Kami menetapkan tujuan dan mengawasi jalannya pemrosesan data pribadi Anda. Kami memproses data kesehatan Anda berdasarkan persetujuan eksplisit yang Anda berikan saat mendaftar dan menyelesaikan proses orientasi (<em>onboarding</em>). Kebijakan ini berlaku bagi seluruh pengguna yang mengakses atau mendaftar di situs web dan aplikasi HELIORA.
+                  Pengendali Data Pribadi untuk platform ini adalah <strong>Team Parental Advisory Explicit Content</strong> (alamat lengkap tercantum pada Bagian 11). Kami menetapkan tujuan dan mengawasi jalannya pemrosesan data pribadi Anda. Kami memproses data kesehatan Anda berdasarkan persetujuan eksplisit yang Anda berikan saat mendaftar dan menyelesaikan proses orientasi (<em>onboarding</em>). Kebijakan ini berlaku bagi seluruh pengguna yang mengakses atau mendaftar di situs web dan aplikasi HELIORA.
                 </p>
               </section>
 
@@ -510,7 +510,7 @@ export default function PrivacyPage() {
                     Waktu tanggapan resmi: maksimal 3×24 jam sejak permintaan terverifikasi diterima.
                   </p>
                   <p className="text-xs text-neutral-500 leading-relaxed">
-                    Alamat Pengendali: PT Heliora Digital Preventif, Gedung Menara Rajawali, Lantai 12, Jl. DR. Ide Anak Agung Gde Agung No. 5.1, Kuningan Timur, Setiabudi, Jakarta Selatan, DKI Jakarta 12950, Indonesia.
+                    Alamat Pengendali: Team Parental Advisory Explicit Content, Jl. Ir. H. Juanda No. 15, Sidodadi, Kec. Samarinda Ulu, Kota Samarinda, Kalimantan Timur 75124.
                   </p>
                 </div>
               </section>

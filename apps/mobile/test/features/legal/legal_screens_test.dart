@@ -33,7 +33,7 @@ void main() {
 
       // Statutory emergency disclaimers
       expect(find.textContaining('112 (darurat umum)'), findsOneWidget);
-      expect(find.textContaining('support@heliora.id'), findsAtLeastNWidgets(1));
+      expect(find.textContaining('autoruns18@gmail.com'), findsAtLeastNWidgets(1));
     });
 
     testWidgets('tapping back button navigates back', (tester) async {

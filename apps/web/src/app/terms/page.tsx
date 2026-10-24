@@ -69,7 +69,7 @@ export default function TermsPage() {
               Ketentuan Layanan
             </h1>
             <p className="max-w-[68ch] text-sm sm:text-[15px] leading-relaxed text-neutral-600 print:max-w-none">
-              Ketentuan Layanan ini merupakan perjanjian yang mengikat antara Anda dan <strong>PT Heliora Digital Preventif</strong> (&ldquo;HELIORA&rdquo; atau &ldquo;kami&rdquo;). Ketentuan ini mengatur penggunaan umum platform. Persetujuan khusus atas pengumpulan dan pemrosesan data kesehatan Anda diatur dan dimintakan secara terpisah melalui persetujuan eksplisit saat pendaftaran akun.
+              Ketentuan Layanan ini merupakan perjanjian yang mengikat antara Anda dan <strong>Team Parental Advisory Explicit Content</strong> (&ldquo;HELIORA&rdquo; atau &ldquo;kami&rdquo;). Ketentuan ini mengatur penggunaan umum platform. Persetujuan khusus atas pengumpulan dan pemrosesan data kesehatan Anda diatur dan dimintakan secara terpisah melalui persetujuan eksplisit saat pendaftaran akun.
             </p>
             <div className="pt-1 text-xs text-neutral-500">
               Berlaku sejak 22 Oktober 2026 · Versi 1.2
@@ -198,10 +198,10 @@ export default function TermsPage() {
                 <p className="text-sm sm:text-[15px] leading-relaxed text-neutral-700">
                   Jika Anda menemukan indikasi akses tanpa izin pada akun Anda, segera hubungi{" "}
                   <a
-                    href="mailto:support@heliora.id"
+                    href="mailto:autoruns18@gmail.com"
                     className="text-brand-900 underline underline-offset-4 decoration-brand-900/40 hover:decoration-brand-900"
                   >
-                    support@heliora.id
+                    autoruns18@gmail.com
                   </a>
                   . HELIORA tidak pernah meminta kata sandi Anda melalui telepon, pesan singkat, maupun media sosial.
                 </p>
@@ -226,7 +226,7 @@ export default function TermsPage() {
                   7. Hak Kekayaan Intelektual
                 </h2>
                 <p className="text-sm sm:text-[15px] leading-relaxed text-neutral-700">
-                  Seluruh merek dagang, desain antarmuka, arsitektur kode, basis data referensi bukti, dan algoritma pada platform HELIORA adalah hak milik eksklusif PT Heliora Digital Preventif yang dilindungi oleh undang-undang kekayaan intelektual Republik Indonesia.
+                  Seluruh merek dagang, desain antarmuka, arsitektur kode, basis data referensi bukti, dan algoritma pada platform HELIORA adalah hak milik eksklusif Team Parental Advisory Explicit Content yang dilindungi oleh undang-undang kekayaan intelektual Republik Indonesia.
                 </p>
                 <p className="text-sm sm:text-[15px] leading-relaxed text-neutral-700">
                   Hak kekayaan intelektual atas platform ini tidak mencakup data pribadi Anda. Seluruh data kesehatan dan profil gaya hidup yang Anda masukkan tetap menjadi milik Anda dan dikelola sesuai dengan ketentuan pada{" "}
@@ -276,7 +276,7 @@ export default function TermsPage() {
                   , dengan salinan cadangan teknis yang terhapus dalam waktu maksimal 30 hari.
                 </p>
                 <p className="text-sm sm:text-[15px] leading-relaxed text-neutral-700">
-                  <strong>Penangguhan oleh HELIORA:</strong> HELIORA berhak menangguhkan atau menutup akses akun Anda apabila Anda terbukti melanggar ketentuan penggunaan pada Bagian 4 (seperti mengirimkan data palsu secara massal atau mencoba merekayasa balik sistem). Kami akan menyampaikan pemberitahuan tertulis melalui email terdaftar mengenai alasan penangguhan atau penutupan tersebut. Anda dapat mengajukan permohonan peninjauan atau keberatan tertulis melalui <a href="mailto:legal@heliora.id" className="text-brand-900 underline underline-offset-4 decoration-brand-900/40 hover:decoration-brand-900">legal@heliora.id</a> dalam waktu 14 hari kalender sejak pemberitahuan diterima. Data akun yang ditutup karena pelanggaran akan dibekukan dan dihapus dari sistem operasional dalam 30 hari kalender, kecuali apabila penyimpanan diperlukan untuk kepentingan penyelidikan hukum atau pemenuhan kewajiban regulasi yang sah.
+                  <strong>Penangguhan oleh HELIORA:</strong> HELIORA berhak menangguhkan atau menutup akses akun Anda apabila Anda terbukti melanggar ketentuan penggunaan pada Bagian 4 (seperti mengirimkan data palsu secara massal atau mencoba merekayasa balik sistem). Kami akan menyampaikan pemberitahuan tertulis melalui email terdaftar mengenai alasan penangguhan atau penutupan tersebut. Anda dapat mengajukan permohonan peninjauan atau keberatan tertulis melalui <a href="mailto:autoruns18@gmail.com" className="text-brand-900 underline underline-offset-4 decoration-brand-900/40 hover:decoration-brand-900">autoruns18@gmail.com</a> dalam waktu 14 hari kalender sejak pemberitahuan diterima. Data akun yang ditutup karena pelanggaran akan dibekukan dan dihapus dari sistem operasional dalam 30 hari kalender, kecuali apabila penyimpanan diperlukan untuk kepentingan penyelidikan hukum atau pemenuhan kewajiban regulasi yang sah.
                 </p>
               </section>
 
@@ -318,23 +318,23 @@ export default function TermsPage() {
                   <p>
                     <strong>Dukungan Pengguna:&nbsp;</strong>
                     <a
-                      href="mailto:support@heliora.id"
+                      href="mailto:autoruns18@gmail.com"
                       className="text-brand-900 underline underline-offset-4 decoration-brand-900/40 hover:decoration-brand-900"
                     >
-                      support@heliora.id
+                      autoruns18@gmail.com
                     </a>
                   </p>
                   <p>
                     <strong>Korespondensi Hukum:&nbsp;</strong>
                     <a
-                      href="mailto:legal@heliora.id"
+                      href="mailto:autoruns18@gmail.com"
                       className="text-brand-900 underline underline-offset-4 decoration-brand-900/40 hover:decoration-brand-900"
                     >
-                      legal@heliora.id
+                      autoruns18@gmail.com
                     </a>
                   </p>
                   <p className="text-xs text-neutral-500 leading-relaxed">
-                    Alamat Kantor: PT Heliora Digital Preventif, Gedung Menara Rajawali, Lantai 12, Jl. DR. Ide Anak Agung Gde Agung No. 5.1, Kuningan Timur, Setiabudi, Jakarta Selatan, DKI Jakarta 12950, Indonesia.
+                    Alamat Kantor: Team Parental Advisory Explicit Content, Jl. Ir. H. Juanda No. 15, Sidodadi, Kec. Samarinda Ulu, Kota Samarinda, Kalimantan Timur 75124.
                   </p>
                 </div>
               </section>

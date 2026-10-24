@@ -48,7 +48,7 @@ class AppConfig {
       defaultValue: '',
     ).isNotEmpty
         ? const String.fromEnvironment('API_BASE_URL')
-        : defaultApiUrl;
+        : (kReleaseMode ? 'https://api.heliora.software' : defaultApiUrl);
 
     final supabaseUrl = const String.fromEnvironment(
       'SUPABASE_URL',

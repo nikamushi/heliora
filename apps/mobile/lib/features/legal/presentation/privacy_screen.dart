@@ -175,7 +175,7 @@ class PrivacyScreen extends StatelessWidget {
                     title: 'Dasar Hukum dan Ruang Lingkup',
                     paragraphs: [
                       'Kebijakan Privasi ini disusun sebagai bentuk kepatuhan terhadap Undang-Undang Republik Indonesia Nomor 27 Tahun 2022 tentang Pelindungan Data Pribadi (UU PDP).',
-                      'Pengendali Data Pribadi untuk platform ini adalah PT Heliora Digital Preventif. Kami menetapkan tujuan dan mengawasi pemrosesan data pribadi Anda. Kami memproses data kesehatan Anda berdasarkan persetujuan eksplisit yang Anda berikan saat mendaftar dan menyelesaikan proses orientasi (onboarding).',
+                      'Pengendali Data Pribadi untuk platform ini adalah Team Parental Advisory Explicit Content. Kami menetapkan tujuan dan mengawasi pemrosesan data pribadi Anda. Kami memproses data kesehatan Anda berdasarkan persetujuan eksplisit yang Anda berikan saat mendaftar dan menyelesaikan proses orientasi (onboarding).',
                     ],
                   ),
 
@@ -354,8 +354,9 @@ class PrivacyScreen extends StatelessWidget {
                     paragraphs: [
                       'Jika Anda memiliki pertanyaan mengenai pelaksanaan hak privasi Anda, silakan hubungi:',
                       '• Data Protection Officer (DPO): dpo@heliora.id\n'
-                          '• Layanan Bantuan: support@heliora.id\n'
-                          '• PT Heliora Digital Preventif, Gedung Menara Rajawali, Lantai 12, Jakarta Selatan 12950, Indonesia.',
+                          '• Layanan Bantuan: autoruns18@gmail.com\n'
+                          '• Team Parental Advisory Explicit Content, Jl. Ir. H. Juanda No. 15, Sidodadi, '
+                          'Kec. Samarinda Ulu, Kota Samarinda, Kalimantan Timur 75124.',
                     ],
                   ),
                   const SizedBox(height: 24),

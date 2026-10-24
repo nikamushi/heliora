@@ -78,7 +78,7 @@ class TermsScreen extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     'Ketentuan Layanan ini merupakan perjanjian yang mengikat antara Anda dan '
-                    'PT Heliora Digital Preventif ("HELIORA" atau "kami"). Ketentuan ini mengatur '
+                    'Team Parental Advisory Explicit Content ("HELIORA" atau "kami"). Ketentuan ini mengatur '
                     'penggunaan umum platform. Persetujuan khusus atas pemrosesan data kesehatan Anda '
                     'diatur secara terpisah melalui persetujuan eksplisit.',
                     style: HelioraTokens.bodyDefault.copyWith(
@@ -166,7 +166,7 @@ class TermsScreen extends StatelessWidget {
                       'Anda bertanggung jawab menjaga kerahasiaan kata sandi dan kredensial masuk akun Anda. '
                           'Setiap aktivitas yang dilakukan menggunakan akun Anda berada di bawah tanggung jawab Anda, '
                           'kecuali apabila timbul akibat kegagalan atau kelalaian sistem keamanan teknis kami.',
-                      'Jika Anda menemukan indikasi akses tanpa izin pada akun Anda, segera hubungi support@heliora.id. '
+                      'Jika Anda menemukan indikasi akses tanpa izin pada akun Anda, segera hubungi autoruns18@gmail.com. '
                           'HELIORA tidak pernah meminta kata sandi Anda melalui telepon, pesan singkat, maupun media sosial.',
                     ],
                   ),
@@ -190,7 +190,7 @@ class TermsScreen extends StatelessWidget {
                     title: 'Hak Kekayaan Intelektual',
                     content: [
                       'Seluruh merek dagang, desain antarmuka, arsitektur kode, basis data referensi bukti, dan algoritma '
-                          'pada platform HELIORA adalah hak milik eksklusif PT Heliora Digital Preventif yang dilindungi oleh '
+                          'pada platform HELIORA adalah hak milik eksklusif Team Parental Advisory Explicit Content yang dilindungi oleh '
                           'undang-undang kekayaan intelektual Republik Indonesia.',
                       'Hak kekayaan intelektual atas platform ini tidak mencakup data pribadi Anda. Seluruh data kesehatan dan '
                           'profil gaya hidup yang Anda masukkan tetap menjadi milik Anda dan dikelola sesuai Kebijakan Privasi.',
@@ -255,10 +255,10 @@ class TermsScreen extends StatelessWidget {
                     title: 'Kontak dan Bantuan',
                     content: [
                       'Jika Anda memiliki pertanyaan mengenai Ketentuan Layanan ini, silakan hubungi tim kami:',
-                      '• Dukungan Pengguna: support@heliora.id\n'
-                          '• Korespondensi Hukum: legal@heliora.id\n'
-                          '• Alamat Kantor: PT Heliora Digital Preventif, Gedung Menara Rajawali, Lantai 12, '
-                          'Jl. DR. Ide Anak Agung Gde Agung No. 5.1, Kuningan Timur, Setiabudi, Jakarta Selatan 12950, Indonesia.',
+                      '• Dukungan Pengguna: autoruns18@gmail.com\n'
+                          '• Korespondensi Hukum: autoruns18@gmail.com\n'
+                          '• Alamat Kantor: Team Parental Advisory Explicit Content, Jl. Ir. H. Juanda No. 15, Sidodadi, '
+                          'Kec. Samarinda Ulu, Kota Samarinda, Kalimantan Timur 75124.',
                     ],
                   ),
                   const SizedBox(height: 24),

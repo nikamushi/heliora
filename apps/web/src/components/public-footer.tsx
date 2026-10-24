@@ -61,7 +61,7 @@ export function PublicFooter() {
         </div>
 
         <div className="pt-6 border-t border-neutral-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-[11px] text-neutral-500 print:pt-2 print:border-t-0">
-          <p>© {currentYear} PT Heliora Digital Preventif. Seluruh hak cipta dilindungi.</p>
+          <p>© {currentYear} Team Parental Advisory Explicit Content. Seluruh hak cipta dilindungi.</p>
           <p className="max-w-md text-neutral-500">
             Hasil analisis merupakan estimasi preventif, bukan diagnosis medis klinis.
           </p>
