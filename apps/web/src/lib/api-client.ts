@@ -220,15 +220,44 @@ class ApiClient {
         if (error) {
           throw new ApiClientError(400, error.message);
         }
-        const accessToken = data.session?.access_token;
-        const supabaseUser = data.user ?? (await supabase.auth.getUser()).data.user;
+
+        // Confirm email OFF → session biasanya langsung ada. Jika belum,
+        // sign-in dengan password yang sama agar user langsung masuk.
+        let accessToken = data.session?.access_token ?? null;
+        let supabaseUser = data.user ?? null;
+
+        if (!accessToken) {
+          const { data: signInData, error: signInError } =
+            await supabase.auth.signInWithPassword({
+              email: payload.email,
+              password: payload.password,
+            });
+          if (signInError) {
+            const needsVerify =
+              /confirm|verif|not confirmed|email_not_confirmed/i.test(
+                signInError.message
+              );
+            throw new ApiClientError(
+              401,
+              needsVerify
+                ? "Pendaftaran berhasil. Silakan verifikasi email lalu login."
+                : signInError.message
+            );
+          }
+          accessToken = signInData.session?.access_token ?? null;
+          supabaseUser = signInData.user ?? supabaseUser;
+        }
+
+        if (!supabaseUser) {
+          supabaseUser = (await supabase.auth.getUser()).data.user;
+        }
         if (!accessToken || !supabaseUser) {
-          // Email confirmation aktif: tidak ada session — arahkan user untuk login setelah verifikasi.
           throw new ApiClientError(
             401,
-            "Pendaftaran berhasil. Silakan verifikasi email lalu login."
+            "Pendaftaran berhasil, tetapi sesi gagal dibuat. Silakan login."
           );
         }
+
         const user = this.mapSupabaseUser(supabaseUser);
         this.setToken(accessToken);
         this.setStoredUser(user);

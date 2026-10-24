@@ -22,29 +22,52 @@ CREATE TABLE IF NOT EXISTS public.users (
 
 CREATE INDEX IF NOT EXISTS ix_users_email ON public.users (email);
 
--- Trigger: Sinkronisasi otomatis saat ada user registrasi via Supabase Auth (Email / Google OAuth)
+-- Trigger: Sinkronisasi otomatis saat ada user registrasi via Supabase Auth (Email / Google OAuth).
+-- INSERT only — UPDATE on auth.users during OAuth identity linking must not re-fire this
+-- (otherwise GoTrue surfaces "Error creating identity").
 CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+    v_full_name text;
+    v_email text;
 BEGIN
+    v_email := NULLIF(TRIM(NEW.email), '');
+    IF v_email IS NULL THEN
+        v_email := NEW.id::text || '@users.noreply.heliora.software';
+    END IF;
+
+    v_full_name := COALESCE(
+        NULLIF(TRIM(NEW.raw_user_meta_data->>'full_name'), ''),
+        NULLIF(TRIM(NEW.raw_user_meta_data->>'name'), ''),
+        split_part(v_email, '@', 1),
+        'User'
+    );
+
     INSERT INTO public.users (id, email, full_name, created_at, updated_at)
-    VALUES (
-        NEW.id,
-        NEW.email,
-        COALESCE(NEW.raw_user_meta_data->>'full_name', split_part(NEW.email, '@', 1)),
-        NOW(),
-        NOW()
-    )
+    VALUES (NEW.id, v_email, v_full_name, NOW(), NOW())
     ON CONFLICT (id) DO UPDATE
     SET email = EXCLUDED.email,
-        full_name = EXCLUDED.full_name,
+        full_name = COALESCE(EXCLUDED.full_name, public.users.full_name),
         updated_at = NOW();
+
+    RETURN NEW;
+EXCEPTION WHEN unique_violation THEN
+    -- Email already exists on another public.users row: do not block OAuth.
+    UPDATE public.users
+       SET full_name = COALESCE(v_full_name, full_name),
+           updated_at = NOW()
+     WHERE lower(email) = lower(v_email);
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
-    AFTER INSERT OR UPDATE ON auth.users
+    AFTER INSERT ON auth.users
     FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 -- ==============================================================================

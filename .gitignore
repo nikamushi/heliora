@@ -218,3 +218,4 @@ brain/
 *testing*
 test_scripts/
 .scratch/
+.vercel
