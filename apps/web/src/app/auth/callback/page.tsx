@@ -29,53 +29,61 @@ function CallbackInner() {
     };
 
     const route = async () => {
-      // ── 0. Alihkan aliran pemulihan kata sandi (Password Recovery) ke /reset-password ──
       const type = searchParams.get("type");
       const nextParam = searchParams.get("next");
       const hash = typeof window !== "undefined" ? window.location.hash : "";
-      if (
+      const isPasswordRecovery =
         type === "recovery" ||
         nextParam === "/reset-password" ||
         nextParam === "/dashboard/settings" ||
-        hash.includes("type=recovery")
-      ) {
-        router.replace(`/reset-password${window.location.search}${hash}`);
-        return;
-      }
+        hash.includes("type=recovery");
 
-      // ── 1. Tunggu session Supabase selesai dibangun dari callback Google ──
+      // ── 1. Bangun session dari code/hash (Google OAuth & password recovery) ──
       if (!isSupabaseConfigured()) {
         fail(
-          "Login Google belum dikonfigurasi. Isi NEXT_PUBLIC_SUPABASE_URL dan NEXT_PUBLIC_SUPABASE_ANON_KEY."
+          isPasswordRecovery
+            ? "Pemulihan kata sandi belum dikonfigurasi. Isi NEXT_PUBLIC_SUPABASE_URL dan NEXT_PUBLIC_SUPABASE_ANON_KEY."
+            : "Login Google belum dikonfigurasi. Isi NEXT_PUBLIC_SUPABASE_URL dan NEXT_PUBLIC_SUPABASE_ANON_KEY."
         );
         return;
       }
 
       const supabase = getSupabaseClient();
       if (!supabase) {
-        fail("Login Google belum dikonfigurasi pada sisi browser.");
+        fail(
+          isPasswordRecovery
+            ? "Pemulihan kata sandi belum dikonfigurasi pada sisi browser."
+            : "Login Google belum dikonfigurasi pada sisi browser."
+        );
         return;
       }
 
       const providerError = searchParams.get("error_description");
       if (providerError) {
+        if (isPasswordRecovery) {
+          router.replace(
+            `/reset-password?error=${encodeURIComponent(providerError)}`
+          );
+          return;
+        }
         fail(`Autentikasi Google dibatalkan: ${providerError}`);
         return;
       }
 
       let session: Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"] = null;
 
-      // Cek langsung apakah session sudah ada di memory/localStorage
       const { data: directData } = await supabase.auth.getSession();
       if (directData?.session) {
         session = directData.session;
       } else {
-        // Cek apakah ada code di URL untuk exchangeCodeForSession
         const code = searchParams.get("code");
         if (code) {
           try {
-            const { data: codeData } = await supabase.auth.exchangeCodeForSession(code);
-            if (codeData?.session) {
+            const { data: codeData, error: exchangeError } =
+              await supabase.auth.exchangeCodeForSession(code);
+            if (exchangeError) {
+              console.warn("[Auth Callback] Exchange code error:", exchangeError);
+            } else if (codeData?.session) {
               session = codeData.session;
             }
           } catch (codeErr) {
@@ -83,7 +91,6 @@ function CallbackInner() {
           }
         }
 
-        // Jika belum ada, tunggu event onAuthStateChange atau polling getSession
         if (!session) {
           session = await new Promise((resolve) => {
             let done = false;
@@ -94,14 +101,23 @@ function CallbackInner() {
               }
             }, SESSION_TIMEOUT_MS);
 
-            const { data: sub } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-              if (nextSession && !done) {
-                done = true;
-                clearTimeout(timer);
-                sub.subscription.unsubscribe();
-                resolve(nextSession);
+            const { data: sub } = supabase.auth.onAuthStateChange(
+              (event, nextSession) => {
+                if (
+                  !done &&
+                  nextSession &&
+                  (event === "PASSWORD_RECOVERY" ||
+                    event === "SIGNED_IN" ||
+                    event === "TOKEN_REFRESHED" ||
+                    event === "INITIAL_SESSION")
+                ) {
+                  done = true;
+                  clearTimeout(timer);
+                  sub.subscription.unsubscribe();
+                  resolve(nextSession);
+                }
               }
-            });
+            );
 
             const pollInterval = setInterval(async () => {
               if (done) {
@@ -119,6 +135,19 @@ function CallbackInner() {
             }, 300);
           });
         }
+      }
+
+      // Recovery: session wajib ada sebelum form atur kata sandi baru
+      if (isPasswordRecovery) {
+        if (!session) {
+          router.replace("/reset-password?error=invalid_or_expired");
+          return;
+        }
+        if (session.access_token) {
+          apiClient.setToken(session.access_token);
+        }
+        router.replace("/reset-password");
+        return;
       }
 
       if (!session) {

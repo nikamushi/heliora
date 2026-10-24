@@ -338,11 +338,13 @@ class ApiClient {
     ): Promise<void> => {
       const supabase = getSupabaseClient();
       if (supabase) {
+        // Lewat /auth/callback agar PKCE code ditukar jadi recovery session
+        // sebelum user masuk form /reset-password.
         const targetUrl =
           redirectTo ||
           (typeof window !== "undefined"
-            ? `${window.location.origin}/reset-password`
-            : "/reset-password");
+            ? `${window.location.origin}/auth/callback?next=/reset-password`
+            : "/auth/callback?next=/reset-password");
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
           redirectTo: targetUrl,
         });

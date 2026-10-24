@@ -119,7 +119,7 @@ function SettingsInner() {
       const supabase = getSupabaseClient();
       if (supabase) {
         const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
-          redirectTo: `${window.location.origin}/reset-password`,
+          redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
         });
         if (error) {
           if (
