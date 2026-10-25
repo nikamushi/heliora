@@ -18,7 +18,7 @@ ml-core = { workspace = true }
 [project.optional-dependencies]
 dev = [
     "pytest>=8.0.0",
-    "ruff>=0.6.0",
+    "ruff>=0.17.2",
     "jupytext>=1.16.0",
 ]
 notebook = [
