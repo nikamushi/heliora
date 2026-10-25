@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "HELIORA — AI-Powered Preventive Health Intelligence Platform API"
 requires-python = ">=3.12"
 dependencies = [
-    "fastapi>=0.153.0",
+    "fastapi>=0.161.0",
     "uvicorn[standard]>=0.54.0",
     "sqlalchemy[asyncio]>=2.1.5",
     "asyncpg>=0.30.0",
