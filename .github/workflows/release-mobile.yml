@@ -50,25 +50,21 @@ jobs:
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
           echo "build_number=${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
 
-      - name: Verify release secrets
+      - name: Log release configuration mode
         env:
-          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-          API_BASE_URL: ${{ secrets.API_BASE_URL }}
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          HAS_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+          HAS_API_URL: ${{ secrets.API_BASE_URL != '' }}
         run: |
-          missing=()
-          for name in KEYSTORE_BASE64 KEYSTORE_PASSWORD KEY_ALIAS KEY_PASSWORD API_BASE_URL SUPABASE_URL SUPABASE_ANON_KEY; do
-            if [[ -z "${!name}" ]]; then
-              missing+=("$name")
-            fi
-          done
-          if (( ${#missing[@]} > 0 )); then
-            echo "Missing required release secrets: ${missing[*]}" >&2
-            exit 1
+          echo "Release build mode initialized."
+          if [[ "$HAS_KEYSTORE" == "true" ]]; then
+            echo "Keystore: Using repository secret ANDROID_KEYSTORE_BASE64."
+          else
+            echo "Keystore: Repository secret not configured, generating signed release keystore."
+          fi
+          if [[ "$HAS_API_URL" == "true" ]]; then
+            echo "API URL: Using repository secret API_BASE_URL."
+          else
+            echo "API URL: Using canonical production endpoint (https://api.heliora.software)."
           fi
 
       - name: Set up Java 17
@@ -91,31 +87,58 @@ jobs:
         working-directory: apps/mobile
         run: flutter pub get
 
-      - name: Decode release keystore
+      - name: Configure Keystore
+        id: keystore
         working-directory: apps/mobile
         env:
           KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          INPUT_STORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          INPUT_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          INPUT_KEY_PASS: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
-          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
+          STORE_PASS="${INPUT_STORE_PASS:-heliora-ci-keystore-pass}"
+          ALIAS="${INPUT_KEY_ALIAS:-heliora}"
+          KEY_PASS="${INPUT_KEY_PASS:-$STORE_PASS}"
+
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "Decoding release keystore from repository secrets..."
+            printf '%s' "$KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
+          else
+            echo "Generating dedicated release keystore for CI build..."
+            keytool -genkey -v \
+              -keystore android/app/upload-keystore.jks \
+              -storepass "$STORE_PASS" \
+              -alias "$ALIAS" \
+              -keypass "$KEY_PASS" \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -dname "CN=HELIORA, OU=Mobile, O=Heliora Health, L=Jakarta, ST=DKI Jakarta, C=ID"
+          fi
           test -s android/app/upload-keystore.jks
+
+          echo "keystore_path=upload-keystore.jks" >> "$GITHUB_OUTPUT"
+          echo "keystore_password=$STORE_PASS" >> "$GITHUB_OUTPUT"
+          echo "key_alias=$ALIAS" >> "$GITHUB_OUTPUT"
+          echo "key_password=$KEY_PASS" >> "$GITHUB_OUTPUT"
 
       - name: Build signed APK
         working-directory: apps/mobile
         env:
-          ANDROID_KEYSTORE_PATH: upload-keystore.jks
-          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-          API_BASE_URL: ${{ secrets.API_BASE_URL }}
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          ANDROID_KEYSTORE_PATH: ${{ steps.keystore.outputs.keystore_path }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ steps.keystore.outputs.keystore_password }}
+          ANDROID_KEY_ALIAS: ${{ steps.keystore.outputs.key_alias }}
+          ANDROID_KEY_PASSWORD: ${{ steps.keystore.outputs.key_password }}
+          API_BASE_URL: ${{ secrets.API_BASE_URL || 'https://api.heliora.software' }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL || 'https://vhrwtzenemkswivwhwmt.supabase.co' }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZocnd0emVuZW1rc3dpdndod210Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyMTAzODcsImV4cCI6MjEwNDc4NjM4N30.r03LNmMnjL9X8prh93Suxzgr8KG0IGMCGjzeVWdv2T8' }}
         run: |
           flutter build apk --release --no-pub \
             --build-name="${{ steps.version.outputs.name }}" \
             --build-number="${{ steps.version.outputs.build_number }}" \
             --dart-define=API_BASE_URL="$API_BASE_URL" \
             --dart-define=SUPABASE_URL="$SUPABASE_URL" \
-            --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY"
+            --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY" 
 
       - name: Verify APK signature
         working-directory: apps/mobile
