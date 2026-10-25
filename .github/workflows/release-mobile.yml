@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - "mobile-v*"
+      - "v*-mobile"
   workflow_dispatch:
     inputs:
       tag:
@@ -37,11 +38,15 @@ jobs:
         id: version
         run: |
           TAG="${{ inputs.tag || github.ref_name }}"
-          if [[ ! "$TAG" =~ ^mobile-v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "Tag must match mobile-vX.Y.Z (got: $TAG)" >&2
+          if [[ "$TAG" =~ ^mobile-v([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+            VERSION="${BASH_REMATCH[1]}"
+          elif [[ "$TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)-mobile$ ]]; then
+            VERSION="${BASH_REMATCH[1]}"
+          else
+            echo "Tag must match mobile-vX.Y.Z or vX.Y.Z-mobile (got: $TAG)" >&2
             exit 1
           fi
-          echo "name=${TAG#mobile-v}" >> "$GITHUB_OUTPUT"
+          echo "name=$VERSION" >> "$GITHUB_OUTPUT"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
           echo "build_number=${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
 
@@ -132,6 +137,9 @@ jobs:
           APK="heliora-mobile-${{ steps.version.outputs.name }}.apk"
           cp build/app/outputs/flutter-apk/app-release.apk "../../release-output/$APK"
           (cd ../../release-output && sha256sum "$APK" > "$APK.sha256")
+          if [ -f RELEASE_NOTES.md ]; then
+            cp RELEASE_NOTES.md ../../release-output/RELEASE_NOTES.md
+          fi
           ls -l ../../release-output
 
       - name: Upload release artifact
@@ -161,7 +169,8 @@ jobs:
         uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
           tag_name: ${{ needs.build.outputs.tag }}
-          name: HELIORA Mobile ${{ needs.build.outputs.tag }}
+          name: HELIORA Mobile v${{ needs.build.outputs.version }}
+          body_path: release-files/RELEASE_NOTES.md
           generate_release_notes: true
           draft: false
           prerelease: false

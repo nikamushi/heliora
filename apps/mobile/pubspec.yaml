@@ -3,7 +3,7 @@ description: "HELIORA mobile app (Android)"
 publish_to: 'none'
 
 # versionName+versionCode for Android. Override with --build-name and --build-number.
-version: 0.1.0+1
+version: 1.0.1+1
 
 environment:
   sdk: ^3.11.5
