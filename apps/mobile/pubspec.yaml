@@ -12,7 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
   supabase_flutter: ^2.8.3
-  flutter_secure_storage: ^9.2.4
+  flutter_secure_storage: ^11.2.0
   dio: ^5.7.0
   flutter_riverpod: ^2.6.1
   json_annotation: ^4.9.0
