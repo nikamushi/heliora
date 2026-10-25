@@ -155,8 +155,6 @@ jobs:
           port: ${{ secrets.VPS_PORT || 22 }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          fingerprint: ${{ secrets.VPS_HOST_FINGERPRINT }}
-          script_stop: true
           envs: IMAGE_PREFIX,IMAGE_TAG,DEPLOY_PATH,GHCR_USER,GHCR_TOKEN
           script: |
             set -euo pipefail

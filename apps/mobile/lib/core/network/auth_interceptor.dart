@@ -13,7 +13,12 @@ class AuthInterceptor extends Interceptor {
 
   static Future<String?> _defaultTokenProvider() async {
     try {
-      final session = Supabase.instance.client.auth.currentSession;
+      final auth = Supabase.instance.client.auth;
+      var session = auth.currentSession;
+      if (session != null && session.isExpired) {
+        final refreshResponse = await auth.refreshSession();
+        session = refreshResponse.session;
+      }
       return session?.accessToken;
     } catch (_) {
       return null;
