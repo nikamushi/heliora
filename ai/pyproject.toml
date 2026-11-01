@@ -17,7 +17,7 @@ ml-core = { workspace = true }
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=8.0.0",
+    "pytest>=9.2.0",
     "ruff>=0.6.0",
     "jupytext>=1.16.0",
 ]
